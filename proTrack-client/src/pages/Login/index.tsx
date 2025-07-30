@@ -4,8 +4,11 @@ import { Button } from "../../components/button";
 import { Input } from "../../components/input";
 import { Checkbox } from "../../components/ui/checkbox";
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "./../../../services/api";
 
 export function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const navigate = useNavigate();
 
@@ -13,8 +16,15 @@ export function Login() {
     setMostrarSenha(!mostrarSenha);
   };
 
-  const handleEntrar = () => {
-    navigate("/confirmacaoemail");
+  const handleClickLogin = async () => {
+    try {
+      const emailDigitado = "gabriel@example.com"; // pegando do input
+      const senhaDigitada = "123456"; // pegando do input
+      const result = await loginUser(emailDigitado, senhaDigitada);
+      console.log("Login sucesso:", result);
+    } catch (error) {
+      console.error("Erro no login", error);
+    }
   };
 
   return (
@@ -31,7 +41,7 @@ export function Login() {
             <strong className="text-3xl bg-gradient-to-r from-[var(--blue-500)] to-[var(--purple-300)] bg-clip-text text-transparent">
               Pro Track
             </strong>
-            <span className="text-[#var(--zinc-300)] font-semibold">
+            <span className="text-[var(--zinc-300)] font-semibold">
               Otimize sua empresa com nosso sistema de gestão: eficiência,
               controle e crescimento garantidos!
             </span>
@@ -48,8 +58,18 @@ export function Login() {
               Insira suas credenciais para acessar sua conta.
             </span>
           </div>
-          <Input TextLabel="Usuario" type="text" />
-          <Input TextLabel="Senha" type={mostrarSenha ? "text" : "password"} />
+          <Input
+            TextLabel="Email"
+            type="text"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Input
+            TextLabel="Senha"
+            type={mostrarSenha ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
           <div className="flex justify-between">
             <label className="inline-flex items-center space-x-2 cursor-pointer">
               <Checkbox
@@ -57,7 +77,9 @@ export function Login() {
                 checked={mostrarSenha}
                 onCheckedChange={handleCheckboxChange}
               />
-              <span className="text-[#16164D] font-semibold">Mostar senha</span>
+              <span className="text-[#16164D] font-semibold">
+                Mostrar senha
+              </span>
             </label>
             <span
               className="text-[#3571FD] font-semibold cursor-pointer"
@@ -66,7 +88,7 @@ export function Login() {
               Esqueceu a senha?
             </span>
           </div>
-          <Button action={handleEntrar} Text="Entrar" />
+          <Button action={handleClickLogin} Text="Entrar" />
         </div>
       </div>
     </div>
