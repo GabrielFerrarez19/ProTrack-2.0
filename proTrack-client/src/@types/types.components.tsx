@@ -7,5 +7,5 @@ export interface TypeInput {
 
 export interface TypeButton {
   Text: string;
-  action: () => void;
+  type: "submit" | "button" | "reset";
 }
