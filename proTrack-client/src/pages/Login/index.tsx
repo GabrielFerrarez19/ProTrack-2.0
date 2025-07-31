@@ -18,10 +18,11 @@ export function Login() {
 
   const handleClickLogin = async () => {
     try {
-      const emailDigitado = "gabriel@example.com"; // pegando do input
-      const senhaDigitada = "123456"; // pegando do input
+      const emailDigitado = email; // pegando do input
+      const senhaDigitada = password; // pegando do input
       const result = await loginUser(emailDigitado, senhaDigitada);
       console.log("Login sucesso:", result);
+      navigate("/status");
     } catch (error) {
       console.error("Erro no login", error);
     }
@@ -58,37 +59,44 @@ export function Login() {
               Insira suas credenciais para acessar sua conta.
             </span>
           </div>
-          <Input
-            TextLabel="Email"
-            type="text"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Input
-            TextLabel="Senha"
-            type={mostrarSenha ? "text" : "password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <div className="flex justify-between">
-            <label className="inline-flex items-center space-x-2 cursor-pointer">
-              <Checkbox
-                className="border-2 rounded-sm"
-                checked={mostrarSenha}
-                onCheckedChange={handleCheckboxChange}
-              />
-              <span className="text-[#16164D] font-semibold">
-                Mostrar senha
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleClickLogin();
+            }}
+          >
+            <Input
+              TextLabel="Email"
+              type="text"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <Input
+              TextLabel="Senha"
+              type={mostrarSenha ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <div className="flex justify-between">
+              <label className="inline-flex items-center space-x-2 cursor-pointer">
+                <Checkbox
+                  className="border-2 rounded-sm"
+                  checked={mostrarSenha}
+                  onCheckedChange={handleCheckboxChange}
+                />
+                <span className="text-[#16164D] font-semibold">
+                  Mostrar senha
+                </span>
+              </label>
+              <span
+                className="text-[#3571FD] font-semibold cursor-pointer"
+                onClick={() => navigate("/redefinirsenha")}
+              >
+                Esqueceu a senha?
               </span>
-            </label>
-            <span
-              className="text-[#3571FD] font-semibold cursor-pointer"
-              onClick={() => navigate("/redefinirsenha")}
-            >
-              Esqueceu a senha?
-            </span>
-          </div>
-          <Button action={handleClickLogin} Text="Entrar" />
+            </div>
+            <Button type="submit" Text="Entrar" />
+          </form>
         </div>
       </div>
     </div>
