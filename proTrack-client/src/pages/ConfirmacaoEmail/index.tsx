@@ -1,3 +1,4 @@
+import { useState } from "react";
 import img from "../../assets/mesh-gradient.svg";
 import { Button } from "../../components/button";
 import { Input } from "../../components/input";
@@ -6,8 +7,20 @@ import { useNavigate } from "react-router-dom";
 export function ConfirmacaoEmail() {
   const navigate = useNavigate();
 
+  const [email1, setEmail1] = useState();
+
+  const [email2, setEmail2] = useState();
+
   const handleEntrar = () => {
-    navigate("/recuperarsenha");
+    setEmail1(email1);
+
+    setEmail2(email2);
+
+    if (email1 === email2) {
+      navigate("/redefinirsenha");
+    } else {
+      console.log("Email não são iguais");
+    }
   };
   return (
     <div
@@ -24,9 +37,9 @@ export function ConfirmacaoEmail() {
               Insira o e-mail cadastrado para receber link de recuperação!
             </span>
           </div>
-          <Input TextLabel="E-mail" type="text" />
-          <Input TextLabel="Confirmar e-mail" type="text" />
-          <Button action={handleEntrar} Text="Entrar"></Button>
+          <Input TextLabel="E-mail" type="text" value={email1} />
+          <Input TextLabel="Confirmar e-mail" type="text" value={email2} />
+          <Button onClick={handleEntrar} Text="Enviar" type="submit"></Button>
         </div>
       </div>
     </div>
