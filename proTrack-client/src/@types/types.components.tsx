@@ -8,4 +8,5 @@ export interface TypeInput {
 export interface TypeButton {
   Text: string;
   type: "submit" | "button" | "reset";
+  onClick?: () => void;
 }

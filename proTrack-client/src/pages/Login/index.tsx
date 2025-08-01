@@ -88,9 +88,10 @@ export function Login() {
                   Mostrar senha
                 </span>
               </label>
+
               <span
                 className="text-[#3571FD] font-semibold cursor-pointer"
-                onClick={() => navigate("/redefinirsenha")}
+                onClick={() => navigate("/confirmacaoemail")}
               >
                 Esqueceu a senha?
               </span>
