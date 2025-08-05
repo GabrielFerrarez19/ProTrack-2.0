@@ -1,5 +1,5 @@
 import { Header } from "../../components/header";
-import ProductForm from "./components/ProductForm";
+import { ProductForm } from "./components/ProductForm";
 
 export function CadUsers() {
   return (
