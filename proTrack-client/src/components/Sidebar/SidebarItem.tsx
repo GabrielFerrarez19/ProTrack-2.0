@@ -30,7 +30,7 @@ export function SidebarItem({
       </span>
       {alert && (
         <div
-          className={`absolute right-2 w-2 h-2 rounded bg-indigo-400 ${
+          className={`absolute right-2 w-2 h-auto rounded bg-indigo-400 ${
             expanded ? "" : "top-2"
           }`}
         />
@@ -54,7 +54,7 @@ export function SidebarItem({
     return (
       <li
         className={`
-          relative flex items-center py-2 px-3 my-1
+          relative flex items-center w-auto h-10 py-2 px-3 my-1
           font-medium rounded-md cursor-pointer
           transition-colors group
           ${

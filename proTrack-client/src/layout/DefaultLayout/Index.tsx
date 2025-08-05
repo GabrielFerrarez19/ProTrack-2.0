@@ -1,11 +1,12 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "../../components/Sidebar/Sidebar";
 import {
-  Monitor,
   Users,
   ShoppingCart,
   TrendingUp,
   Calculator,
+  ChartPie,
+  UserPlus,
 } from "lucide-react";
 import { SidebarItem } from "../../components/Sidebar/SidebarItem";
 
@@ -17,16 +18,22 @@ export function DefaultLayout() {
     <div className="flex h-screen">
       <Sidebar>
         <SidebarItem
-          icon={<Monitor size={20} />}
-          text="Dashboard"
+          icon={<ChartPie size={20} />}
+          text="Status"
           router="/status"
           active={currentPath === "/status"}
         />
         <SidebarItem
-          icon={<Users size={20} />}
-          text="Usuários"
+          icon={<UserPlus size={20} />}
+          text="Cadastro de usuarios"
           router="/cadastrousuarios"
           active={currentPath === "/cadastrousuarios"}
+        />
+        <SidebarItem
+          icon={<Users size={20} />}
+          text="Usuários"
+          router="/usuarios"
+          active={currentPath === "/usuarios"}
         />
         <SidebarItem
           icon={<ShoppingCart size={20} />}
