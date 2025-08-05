@@ -4,7 +4,7 @@ import { ConfirmacaoEmail } from "./pages/ConfirmacaoEmail";
 import { Status } from "./pages/Status";
 import { RedefinirSenha } from "./pages/RedefirirSenha";
 import { DefaultLayout } from "./layout/DefaultLayout/Index";
-import { CadUsers } from "./pages/CadUsers";
+import { CadUsers } from "./pages/CadProduct";
 
 export function Router() {
   return (
