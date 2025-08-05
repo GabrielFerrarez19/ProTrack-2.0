@@ -10,3 +10,8 @@ export interface TypeButton {
   type: "submit" | "button" | "reset";
   onClick?: () => void;
 }
+
+export interface TypeHeader {
+  text: string;
+  title: string;
+}

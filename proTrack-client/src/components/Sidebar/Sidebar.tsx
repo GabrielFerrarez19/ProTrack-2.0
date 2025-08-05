@@ -49,8 +49,10 @@ export function Sidebar({ children }: SidebarProps) {
             `}
           >
             <div className="leading-4">
-              <h4 className="font-semibold">John Doe</h4>
-              <span className="text-xs text-gray-600">johndoe@gmail.com</span>
+              <h4 className="font-semibold">Gabriel Ferrarez</h4>
+              <span className="text-xs text-gray-600">
+                gabrielferrarez@gmail.com
+              </span>
             </div>
             <MoreVertical size={20} />
           </div>
