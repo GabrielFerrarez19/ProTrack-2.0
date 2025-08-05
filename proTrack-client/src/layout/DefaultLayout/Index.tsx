@@ -6,7 +6,8 @@ import {
   TrendingUp,
   Calculator,
   ChartPie,
-  UserPlus,
+  PackagePlus,
+  PackageSearch,
 } from "lucide-react";
 import { SidebarItem } from "../../components/Sidebar/SidebarItem";
 
@@ -24,10 +25,16 @@ export function DefaultLayout() {
           active={currentPath === "/status"}
         />
         <SidebarItem
-          icon={<UserPlus size={20} />}
-          text="Cadastro de usuarios"
-          router="/cadastrousuarios"
-          active={currentPath === "/cadastrousuarios"}
+          icon={<PackagePlus size={20} />}
+          text="Cadastro de produtos"
+          router="/cadastroprodutos"
+          active={currentPath === "/cadastroprodutos"}
+        />
+        <SidebarItem
+          icon={<PackageSearch size={20} />}
+          text="Produtos"
+          router="/produtos"
+          active={currentPath === "/produtos"}
         />
         <SidebarItem
           icon={<Users size={20} />}
