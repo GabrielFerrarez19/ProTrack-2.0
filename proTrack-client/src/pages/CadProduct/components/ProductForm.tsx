@@ -67,8 +67,8 @@ export function ProductForm() {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto shadow-elegant border-0 bg-card">
-      <CardHeader className="bg-gradient-primary text-primary-foreground rounded-t-lg">
+    <Card className="w-full max-w-4xl mx-auto shadow-elegant border-2 bg-card border-[var(--bluePast-500)] p-0">
+      <CardHeader className=" flex bg-[var(--bluePast-500)] h-20 text-primary-foreground rounded-t-lg items-center">
         <CardTitle className="flex items-center gap-2 text-2xl">
           <Package className="w-6 h-6" />
           Cadastro de Produtos
