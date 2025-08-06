@@ -1,44 +1,76 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "../../../components/ui/card";
-import { fetchTotalEstoque } from "../../../services/api";
+import { fetchTotalClientes, fetchTotalEstoque } from "../../../services/api";
 
 export function CardsStatus() {
   const [totalEstoque, setTotalEstoque] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState<string | null>(null);
+  const [loadingEstoque, setLoadingEstoque] = useState(true);
+  const [erroEstoque, setErroEstoque] = useState<string | null>(null);
 
+  const [totalClientes, setTotalClientes] = useState<number>(0);
+  const [loadingClientes, setLoadingClientes] = useState(true);
+  const [erroClientes, setErroClientes] = useState<string | null>(null);
+
+  // useEffect para buscar total de estoque
   useEffect(() => {
     const fetchEstoque = async () => {
       try {
         const data = await fetchTotalEstoque();
         setTotalEstoque(data.totalEstoque);
+        setErroEstoque(null);
       } catch (err) {
         console.error("Erro ao buscar estoque:", err);
-        setErro("Erro ao buscar estoque");
+        setErroEstoque("Erro ao buscar estoque");
       } finally {
-        setLoading(false);
+        setLoadingEstoque(false);
       }
     };
 
     fetchEstoque();
   }, []);
 
+  // useEffect para buscar total de clientes
+  useEffect(() => {
+    const fetchClientes = async () => {
+      try {
+        const data = await fetchTotalClientes();
+        setTotalClientes(data.totalClientes);
+        setErroClientes(null);
+      } catch (err) {
+        console.error("Erro ao buscar clientes:", err);
+        setErroClientes("Erro ao buscar clientes");
+      } finally {
+        setLoadingClientes(false);
+      }
+    };
+
+    fetchClientes();
+  }, []);
+
   const statsData = [
     {
       title: "Vendas",
-      value: "0", // valor fixo por enquanto
+      value: "0",
       color: "text-red-500",
       bgColor: "bg-red-50",
     },
     {
       title: "Clientes",
-      value: "0", // valor fixo por enquanto
+      value: loadingClientes
+        ? "..."
+        : erroClientes
+        ? "Erro"
+        : totalClientes.toString(),
       color: "text-blue-500",
       bgColor: "bg-blue-50",
     },
     {
       title: "Estoque",
-      value: loading ? "..." : erro ? "Erro" : totalEstoque.toString(),
+      value: loadingEstoque
+        ? "..."
+        : erroEstoque
+        ? "Erro"
+        : totalEstoque.toString(),
       color: "text-green-500",
       bgColor: "bg-green-50",
     },

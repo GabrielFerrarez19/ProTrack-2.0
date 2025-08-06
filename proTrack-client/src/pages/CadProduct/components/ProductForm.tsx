@@ -59,7 +59,7 @@ export function ProductForm() {
         preco_venda: data.precoVenda,
       });
 
-      console.log("Produto cadastrado com sucesso!");
+      alert("Produto cadastrado com sucesso!");
       reset(); // limpa o formulário
     } catch (err) {
       console.error("Erro ao cadastrar produto:", err);
@@ -76,105 +76,110 @@ export function ProductForm() {
       </CardHeader>
       <CardContent className="p-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Nome do Produto */}
-            <div className="space-y-2">
-              <Label htmlFor="nome">Nome do Produto *</Label>
-              <Input
-                id="nome"
-                {...register("nome", { required: true })}
-                placeholder="Ex: Camiseta Polo Azul"
-                className="h-11 bg-input border-border"
-              />
-              {errors.nome && (
-                <span className="text-red-500 text-sm">Nome é obrigatório</span>
-              )}
-            </div>
+          <div className="grid grid-cols-1 md:grid-rows-1 gap-6">
+            <div className="grid grid-cols-3 gap-6">
+              {/* Nome do Produto */}
+              <div className="space-y-2">
+                <Label htmlFor="nome">Nome do Produto *</Label>
+                <Input
+                  id="nome"
+                  {...register("nome", { required: true })}
+                  placeholder="Ex: Camiseta Polo Azul"
+                  className="h-11 bg-input border-border"
+                />
+                {errors.nome && (
+                  <span className="text-red-500 text-sm">
+                    Nome é obrigatório
+                  </span>
+                )}
+              </div>
 
-            {/* Categoria */}
-            <div className="space-y-2">
-              <Label htmlFor="categoria">Categoria *</Label>
-              <Select onValueChange={(val) => setValue("categoria", val)}>
-                <SelectTrigger className="h-11 bg-input border-border">
-                  <SelectValue placeholder="Selecione uma categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categorias.map((categoria) => (
-                    <SelectItem key={categoria} value={categoria}>
-                      {categoria}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              {/* Código de Barras */}
+              <div className="space-y-2">
+                <Label htmlFor="codigoBarras">Código de Barras *</Label>
+                <Input
+                  id="codigoBarras"
+                  {...register("codigoBarras", { required: true })}
+                  placeholder="1234567890123"
+                  className="h-11 bg-input border-border"
+                />
+              </div>
 
-            {/* Código de Barras */}
-            <div className="space-y-2">
-              <Label htmlFor="codigoBarras">Código de Barras *</Label>
-              <Input
-                id="codigoBarras"
-                {...register("codigoBarras", { required: true })}
-                placeholder="1234567890123"
-                className="h-11 bg-input border-border"
-              />
-            </div>
+              {/* Quantidade */}
+              <div className="space-y-2">
+                <Label htmlFor="quantidade">Quantidade</Label>
+                <Input
+                  id="quantidade"
+                  type="number"
+                  {...register("quantidade", { valueAsNumber: true })}
+                  placeholder="0"
+                  min="0"
+                  className="h-11 bg-input border-border"
+                />
+              </div>
 
-            {/* Tamanho */}
-            <div className="space-y-2">
-              <Label htmlFor="tamanho">Tamanho</Label>
-              <Select onValueChange={(val) => setValue("tamanho", val)}>
-                <SelectTrigger className="h-11 bg-input border-border">
-                  <SelectValue placeholder="Selecione o tamanho" />
-                </SelectTrigger>
-                <SelectContent>
-                  {tamanhos.map((tamanho) => (
-                    <SelectItem key={tamanho} value={tamanho}>
-                      {tamanho}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              {/* Tamanho */}
+              <div className="space-y-2 w-auto">
+                <Label htmlFor="tamanho">Tamanho</Label>
+                <Select onValueChange={(val) => setValue("tamanho", val)}>
+                  <SelectTrigger className="h-11 bg-input border-border">
+                    <SelectValue placeholder="Selecione o tamanho" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tamanhos.map((tamanho) => (
+                      <SelectItem key={tamanho} value={tamanho}>
+                        {tamanho}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {/* Quantidade */}
-            <div className="space-y-2">
-              <Label htmlFor="quantidade">Quantidade</Label>
-              <Input
-                id="quantidade"
-                type="number"
-                {...register("quantidade", { valueAsNumber: true })}
-                placeholder="0"
-                min="0"
-                className="h-11 bg-input border-border"
-              />
+              {/* Categoria */}
+              <div className="space-y-2">
+                <Label htmlFor="categoria">Categoria *</Label>
+                <Select onValueChange={(val) => setValue("categoria", val)}>
+                  <SelectTrigger className="h-11 bg-input border-border">
+                    <SelectValue placeholder="Selecione uma categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categorias.map((categoria) => (
+                      <SelectItem key={categoria} value={categoria}>
+                        {categoria}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+            <div className="grid grid-cols-2 gap-6">
+              {/* Preço de Custo */}
+              <div className="space-y-2">
+                <Label htmlFor="precoCusto">Preço de Custo (R$)</Label>
+                <Input
+                  id="precoCusto"
+                  type="number"
+                  step="0.01"
+                  {...register("precoCusto", { valueAsNumber: true })}
+                  placeholder="0,00"
+                  min="0"
+                  className="h-11 bg-input border-border"
+                />
+              </div>
 
-            {/* Preço de Custo */}
-            <div className="space-y-2">
-              <Label htmlFor="precoCusto">Preço de Custo (R$)</Label>
-              <Input
-                id="precoCusto"
-                type="number"
-                step="0.01"
-                {...register("precoCusto", { valueAsNumber: true })}
-                placeholder="0,00"
-                min="0"
-                className="h-11 bg-input border-border"
-              />
-            </div>
-
-            {/* Preço de Venda */}
-            <div className="space-y-2">
-              <Label htmlFor="precoVenda">Preço de Venda (R$)</Label>
-              <Input
-                id="precoVenda"
-                type="number"
-                step="0.01"
-                {...register("precoVenda", { valueAsNumber: true })}
-                placeholder="0,00"
-                min="0"
-                className="h-11 bg-input border-border"
-              />
+              {/* Preço de Venda */}
+              <div className="space-y-2">
+                <Label htmlFor="precoVenda">Preço de Venda (R$)</Label>
+                <Input
+                  id="precoVenda"
+                  type="number"
+                  step="0.01"
+                  {...register("precoVenda", { valueAsNumber: true })}
+                  placeholder="0,00"
+                  min="0"
+                  className="h-11 bg-input border-border"
+                />
+              </div>
             </div>
           </div>
 
