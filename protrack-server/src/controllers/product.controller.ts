@@ -63,3 +63,16 @@ export const getTotalEstoque = (req: Request, res: Response) => {
     res.status(200).json({ totalEstoque: total });
   });
 };
+
+export const getAllProdutos = (req: Request, res: Response) => {
+  const sql = "SELECT * FROM produtos";
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Erro ao buscar os produtos:", err);
+      return res.status(500).json({ error: "Erro interno do servidor" });
+    }
+
+    res.status(200).json(results);
+  });
+};

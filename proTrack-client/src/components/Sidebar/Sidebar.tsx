@@ -11,7 +11,7 @@ export function Sidebar({ children }: SidebarProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <aside className="h-screen">
+    <aside className="h-screen sidebar relative z-1">
       <nav className="h-full flex flex-col bg-white border-r shadow-sm">
         {/* Header */}
         <div className="p-4 pb-2 flex justify-between items-center">

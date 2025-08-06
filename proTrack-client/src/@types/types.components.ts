@@ -45,3 +45,13 @@ export interface ClienteFormData {
   bairro?: string;
   cidade?: string;
 }
+export interface Product {
+  nome: string;
+  descricao?: string;
+  categoria?: string;
+  codigo_barras?: string;
+  quantidade?: number;
+  tamanho?: string;
+  preco_custo: number;
+  preco_venda: number;
+}

@@ -6,6 +6,7 @@ import { RedefinirSenha } from "./pages/RedefirirSenha";
 import { DefaultLayout } from "./layout/DefaultLayout/Index";
 import { CadProduct } from "./pages/CadProduct";
 import { CacUsers } from "./pages/CadClient";
+import Estoque from "./pages/Estoque";
 
 export function Router() {
   return (
@@ -17,6 +18,7 @@ export function Router() {
         <Route path="/status" element={<Status />} />
         <Route path="/cadastroprodutos" element={<CadProduct />} />
         <Route path="/cadastrodeclientes" element={<CacUsers />} />
+        <Route path="/produtos" element={<Estoque />} />
       </Route>
     </Routes>
   );
