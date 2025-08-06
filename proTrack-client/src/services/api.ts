@@ -40,6 +40,18 @@ export const fetchTotalEstoque = async (): Promise<EstoqueResponse> => {
   }
 };
 
+export const fetchAllProdutos = async (): Promise<Produto[]> => {
+  try {
+    const response = await axios.get<Produto[]>(
+      "http://localhost:8085/product/produtos/todos"
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao buscar produtos:", error);
+    throw error;
+  }
+};
+
 export const cadastrarCliente = async (cliente: Cliente) => {
   try {
     const response = await axios.post(

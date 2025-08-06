@@ -35,3 +35,13 @@ export interface Cliente {
 export interface TotalClientesResponse {
   totalClientes: number;
 }
+
+export interface ProdutoTodos {
+  id: number;
+  nome: string;
+  codigoBarras: string;
+  categoria: string;
+  tamanho: string;
+  preco: number;
+  quantidade: number;
+}
