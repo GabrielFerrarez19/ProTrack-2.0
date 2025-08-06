@@ -1,5 +1,10 @@
-import axios from "axios";
-import type { EstoqueResponse, Produto } from "../@types/types.api";
+import axios, { AxiosError } from "axios";
+import type {
+  Cliente,
+  EstoqueResponse,
+  Produto,
+  TotalClientesResponse,
+} from "../@types/types.api";
 
 export const loginUser = async (email: string, password: string) => {
   const response = await axios.post("http://localhost:8085/login", {
@@ -16,8 +21,10 @@ export const cadastrarProduto = async (produto: Produto) => {
       produto
     );
     return response.data;
-  } catch (error: any) {
-    throw error.response?.data || { error: "Erro desconhecido" };
+  } catch (error: unknown) {
+    const axiosError = error as AxiosError;
+
+    throw axiosError.response?.data || { error: "Erro desconhecido" };
   }
 };
 
@@ -29,6 +36,32 @@ export const fetchTotalEstoque = async (): Promise<EstoqueResponse> => {
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar total em estoque:", error);
+    throw error;
+  }
+};
+
+export const cadastrarCliente = async (cliente: Cliente) => {
+  try {
+    const response = await axios.post(
+      "http://localhost:8085/clients/clientes",
+      cliente
+    );
+    return response.data;
+  } catch (error: unknown) {
+    const axiosError = error as AxiosError;
+
+    throw axiosError.response?.data || { error: "Erro desconhecido" };
+  }
+};
+
+export const fetchTotalClientes = async (): Promise<TotalClientesResponse> => {
+  try {
+    const response = await axios.get<TotalClientesResponse>(
+      "http://localhost:8085/clients/clientes/total"
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao buscar total de clientes:", error);
     throw error;
   }
 };

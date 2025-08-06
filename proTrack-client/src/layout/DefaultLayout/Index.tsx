@@ -1,13 +1,14 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "../../components/Sidebar/Sidebar";
 import {
-  Users,
   ShoppingCart,
   TrendingUp,
   Calculator,
   ChartPie,
   PackagePlus,
   PackageSearch,
+  UserPlus,
+  UserSearch,
 } from "lucide-react";
 import { SidebarItem } from "../../components/Sidebar/SidebarItem";
 
@@ -37,10 +38,16 @@ export function DefaultLayout() {
           active={currentPath === "/produtos"}
         />
         <SidebarItem
-          icon={<Users size={20} />}
-          text="Usuários"
-          router="/usuarios"
-          active={currentPath === "/usuarios"}
+          icon={<UserPlus size={20} />}
+          text="Cadastro de clientes"
+          router="/cadastrodeclientes"
+          active={currentPath === "/cadastrodeclientes"}
+        />
+        <SidebarItem
+          icon={<UserSearch size={20} />}
+          text="Clientes"
+          router="/clientes"
+          active={currentPath === "/clientes"}
         />
         <SidebarItem
           icon={<ShoppingCart size={20} />}
