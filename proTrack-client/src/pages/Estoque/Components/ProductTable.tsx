@@ -7,9 +7,17 @@ import {
   TableHeader,
   TableRow,
 } from "../../../components/ui/table";
+import { Badge } from "../../../components/ui/badge";
 
 interface ProductTableProps {
   products: Product[];
+}
+
+function getQuantityColor(quantity?: number) {
+  if (!quantity) return "bg-gray-100 text-gray-500"; // quando quantidade undefined ou zero
+  if (quantity >= 10) return "bg-green-100 text-green-800 hover:bg-green-200";
+  if (quantity >= 5) return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
+  return "bg-red-100 text-red-800 hover:bg-red-200";
 }
 
 export function ProductTable({ products }: ProductTableProps) {
@@ -28,6 +36,12 @@ export function ProductTable({ products }: ProductTableProps) {
             <TableHead className="text-gray-700 font-semibold">
               Tamanho
             </TableHead>
+            <TableHead className="text-gray-700 font-semibold">
+              Preço Venda
+            </TableHead>
+            <TableHead className="text-gray-700 font-semibold">
+              Quantidade
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -40,6 +54,16 @@ export function ProductTable({ products }: ProductTableProps) {
               <TableCell>{product.codigo_barras ?? "—"}</TableCell>
               <TableCell>{product.categoria ?? "—"}</TableCell>
               <TableCell>{product.tamanho ?? "—"}</TableCell>
+              <TableCell>
+                {typeof product.preco_venda === "number"
+                  ? `R$ ${product.preco_venda.toFixed(2).replace(".", ",")}`
+                  : "—"}
+              </TableCell>
+              <TableCell>
+                <Badge className={getQuantityColor(product.quantidade)}>
+                  {product.quantidade ?? 0}
+                </Badge>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
