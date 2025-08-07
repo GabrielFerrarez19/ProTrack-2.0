@@ -31,3 +31,34 @@ export function formatarDataNascimento(data: string): string {
 
   return `${dia}/${mes}/${ano}`;
 }
+
+// Função para formatar a data para o formato YYYY-MM-DD (útil para inputs type="date")
+export function formatarDataParaInput(data: string): string {
+  if (!data) return "";
+
+  // Se a data já está no formato YYYY-MM-DD, retorna como está
+  if (data.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return data;
+  }
+
+  // Se a data está no formato DD/MM/YYYY, converte para YYYY-MM-DD
+  if (data.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+    const [dia, mes, ano] = data.split("/");
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  // Se é uma data válida, tenta converter
+  try {
+    const date = new Date(data);
+    if (!isNaN(date.getTime())) {
+      const ano = date.getFullYear();
+      const mes = String(date.getMonth() + 1).padStart(2, "0");
+      const dia = String(date.getDate()).padStart(2, "0");
+      return `${ano}-${mes}-${dia}`;
+    }
+  } catch (error) {
+    console.error("Erro ao formatar data:", error);
+  }
+
+  return "";
+}

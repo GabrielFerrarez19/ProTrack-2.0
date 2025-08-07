@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Cliente } from "../../../@types/types.components";
 import {
   Table,
@@ -7,6 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from "../../../components/ui/table";
+import { Dialog } from "../../../components/ui/dialog";
+import { DialogAlterCliente } from "./DialogAlterCliente";
 import { formatarDataNascimento } from "../../../utils/functions";
 
 interface ClientTableProps {
@@ -14,27 +17,49 @@ interface ClientTableProps {
 }
 
 export function ClientTable({ clientes }: ClientTableProps) {
+  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+  const [open, setOpen] = useState(false);
+
   return (
-    <div className="overflow-auto border border-border rounded-lg">
+    <div className="rounded-lg overflow-hidden border border-border">
       <Table>
         <TableHeader>
           <TableRow className="bg-teal-100 hover:bg-teal-100">
-            <TableHead>Nome</TableHead>
-            <TableHead>Data de Nascimento</TableHead>
-            <TableHead>CPF</TableHead>
-            <TableHead>WhatsApp</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>CEP</TableHead>
-            <TableHead>Endereço</TableHead>
-            <TableHead>Número</TableHead>
-            <TableHead>Bairro</TableHead>
-            <TableHead>Cidade</TableHead>
+            <TableHead className="text-gray-700 font-semibold">Nome</TableHead>
+            <TableHead className="text-gray-700 font-semibold">
+              Data de Nascimento
+            </TableHead>
+            <TableHead className="text-gray-700 font-semibold">CPF</TableHead>
+            <TableHead className="text-gray-700 font-semibold">
+              WhatsApp
+            </TableHead>
+            <TableHead className="text-gray-700 font-semibold">Email</TableHead>
+            <TableHead className="text-gray-700 font-semibold">CEP</TableHead>
+            <TableHead className="text-gray-700 font-semibold">
+              Endereço
+            </TableHead>
+            <TableHead className="text-gray-700 font-semibold">
+              Número
+            </TableHead>
+            <TableHead className="text-gray-700 font-semibold">
+              Bairro
+            </TableHead>
+            <TableHead className="text-gray-700 font-semibold">
+              Cidade
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {clientes.map((cliente, index) => (
-            <TableRow key={cliente.cpf ?? index} className="hover:bg-muted/50">
-              <TableCell>{cliente.nome}</TableCell>
+            <TableRow
+              key={cliente.cpf ?? index}
+              className="hover:bg-gray-200 cursor-pointer"
+              onClick={() => {
+                setSelectedCliente(cliente);
+                setOpen(true);
+              }}
+            >
+              <TableCell className="font-medium">{cliente.nome}</TableCell>
               <TableCell>
                 {cliente.dataNascimento
                   ? formatarDataNascimento(cliente.dataNascimento)
@@ -52,6 +77,20 @@ export function ClientTable({ clientes }: ClientTableProps) {
           ))}
         </TableBody>
       </Table>
+
+      <Dialog
+        open={open}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setOpen(false);
+            setSelectedCliente(null);
+          }
+        }}
+      >
+        {selectedCliente && (
+          <DialogAlterCliente setOpen={setOpen} cliente={selectedCliente} />
+        )}
+      </Dialog>
     </div>
   );
 }

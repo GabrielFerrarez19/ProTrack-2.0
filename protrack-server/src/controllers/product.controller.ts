@@ -49,6 +49,24 @@ export const createProduct = (req: Request, res: Response) => {
   });
 };
 
+export const updateProduct = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const dadosAtualizados = req.body;
+
+  try {
+    // exemplo de atualização
+    const produto = await db.query(
+      "UPDATE produtos SET nome = ?, ... WHERE id = ?",
+      [dadosAtualizados.nome, id]
+    );
+
+    res.status(200).json({ mensagem: "Produto atualizado com sucesso" });
+  } catch (error) {
+    console.error("Erro ao atualizar produto:", error);
+    res.status(500).json({ erro: "Erro interno do servidor" });
+  }
+};
+
 export const getTotalEstoque = (req: Request, res: Response) => {
   const sql = "SELECT SUM(quantidade) AS totalEstoque FROM produtos";
 
