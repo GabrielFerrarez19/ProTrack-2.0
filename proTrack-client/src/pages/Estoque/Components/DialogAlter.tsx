@@ -19,7 +19,7 @@ import {
   SelectItem,
 } from "../../../components/ui/select";
 
-import { cadastrarProduto } from "../../../services/api";
+import { atualizarProduto } from "../../../services/api";
 import type {
   ProductFormData,
   Product,
@@ -74,7 +74,7 @@ export function DialogAlter({ setOpen, product }: DialogAlterProps) {
 
   const onSubmit = async (data: ProductFormData) => {
     try {
-      await cadastrarProduto({
+      await atualizarProduto(product.id, {
         nome: data.nome,
         descricao: data.descricao,
         categoria: data.categoria,
@@ -85,11 +85,11 @@ export function DialogAlter({ setOpen, product }: DialogAlterProps) {
         preco_venda: data.precoVenda,
       });
 
-      alert("Produto cadastrado com sucesso!");
+      alert("Produto alterado com sucesso!");
       reset();
       setOpen(false);
     } catch (err) {
-      console.error("Erro ao cadastrar produto:", err);
+      console.error("Erro ao alterar produto:", err);
     }
   };
 
@@ -106,7 +106,7 @@ export function DialogAlter({ setOpen, product }: DialogAlterProps) {
       }}
     >
       <DialogHeader>
-        <DialogTitle>Cadastro de Produto</DialogTitle>
+        <DialogTitle>Dados do Produto</DialogTitle>
       </DialogHeader>
 
       <CardContent className="p-8">
@@ -114,7 +114,7 @@ export function DialogAlter({ setOpen, product }: DialogAlterProps) {
           <div className="grid grid-cols-1 md:grid-rows-1 gap-6">
             <div className="grid grid-cols-3 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="nome">Nome do Produto *</Label>
+                <Label htmlFor="nome">Nome do Produto * </Label>
                 <Input
                   id="nome"
                   {...register("nome", { required: true })}

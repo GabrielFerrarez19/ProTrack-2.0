@@ -29,6 +29,26 @@ export const cadastrarProduto = async (produto: Produto) => {
   }
 };
 
+export const atualizarProduto = async (id: number, produto: Produto) => {
+  try {
+    const response = await axios.put(
+      `http://localhost:8085/product/alterarprodutos/${id}`,
+      produto
+    );
+    return response.data;
+  } catch (error: unknown) {
+    const axiosError = error as AxiosError;
+
+    if (axiosError.response) {
+      console.error("Erro na resposta da API:", axiosError.response.data);
+      throw axiosError.response.data;
+    } else {
+      console.error("Erro desconhecido:", axiosError.message);
+      throw { error: "Erro desconhecido" };
+    }
+  }
+};
+
 export const fetchTotalEstoque = async (): Promise<EstoqueResponse> => {
   try {
     const response = await axios.get<EstoqueResponse>(
