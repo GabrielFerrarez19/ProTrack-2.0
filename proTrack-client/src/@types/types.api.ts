@@ -45,3 +45,7 @@ export interface ProdutoTodos {
   preco: number;
   quantidade: number;
 }
+
+export interface ClientesResponse {
+  clientes: Cliente[];
+}

@@ -55,3 +55,15 @@ VALUES
 ('Chinelo Slide', 'Chinelo estilo slide', 'Calçados', '789123456014', 40, '39', 18.00, 39.90),
 ('Camisa Polo', 'Camisa polo masculina', 'Vestuário', '789123456015', 32, 'G', 28.00, 59.90);
 
+INSERT INTO clientes (nome, data_nascimento, cpf, rg, estado_civil, sexo, telefone_whatsapp, telefone_celular, telefone_residencial, email, cep, endereco, numero, complemento, bairro, cidade)
+VALUES 
+('Ana Beatriz Silva', '1990-05-12', '123.456.789-00', 'MG-12.345.678', 'Solteira', 'Feminino', '31999998888', '31988887777', '31333334444', 'ana.silva@email.com', '30140-110', 'Rua das Flores', '123', 'Apto 202', 'Savassi', 'Belo Horizonte'),
+('Carlos Eduardo Lima', '1985-11-23', '987.654.321-00', 'SP-98.765.432', 'Casado', 'Masculino', '11999995555', '11988886666', '11333332222', 'carlos.lima@email.com', '04567-000', 'Av. Paulista', '456', '', 'Bela Vista', 'São Paulo'),
+('Fernanda Souza', '1993-07-08', '321.654.987-00', 'RJ-32.165.498', 'Solteira', 'Feminino', '21999994444', '21888883333', '21333331111', 'fernanda.souza@email.com', '22041-001', 'Rua Barata Ribeiro', '789', 'Cobertura', 'Copacabana', 'Rio de Janeiro'),
+('João Pedro Martins', '1978-03-15', '456.789.123-00', 'RS-45.678.912', 'Divorciado', 'Masculino', '51999993333', '51888882222', '51333330000', 'joao.martins@email.com', '90010-000', 'Rua dos Andradas', '321', '', 'Centro', 'Porto Alegre'),
+('Mariana Costa', '2000-09-30', '789.123.456-00', 'BA-78.912.345', 'Solteira', 'Feminino', '71999992222', '71888881111', '71333339999', 'mariana.costa@email.com', '40100-000', 'Av. Sete de Setembro', '654', 'Casa', 'Campo Grande', 'Salvador'),
+('Lucas Almeida', '1995-01-20', '159.753.486-00', 'PR-15.975.348', 'Casado', 'Masculino', '41999991111', '41888880000', '41333338888', 'lucas.almeida@email.com', '80010-000', 'Rua XV de Novembro', '987', '', 'Centro', 'Curitiba'),
+('Patrícia Ramos', '1988-06-05', '258.369.147-00', 'PE-25.836.914', 'Viúva', 'Feminino', '81999990000', '81888887777', '81333336666', 'patricia.ramos@email.com', '50010-000', 'Rua da Aurora', '741', 'Apto 101', 'Boa Vista', 'Recife'),
+('Rafael Torres', '1992-12-18', '369.258.147-00', 'CE-36.925.814', 'Solteiro', 'Masculino', '85999998877', '85888886666', '85333335555', 'rafael.torres@email.com', '60010-000', 'Av. Beira Mar', '852', '', 'Meireles', 'Fortaleza'),
+('Juliana Mendes', '1983-04-27', '741.852.963-00', 'DF-74.185.296', 'Casada', 'Feminino', '61999997766', '61888885555', '61333334444', 'juliana.mendes@email.com', '70040-010', 'SQS 308 Bloco A', '101', 'Apto 301', 'Asa Sul', 'Brasília'),
+('Thiago Oliveira', '1998-08-14', '852.963.741-00', 'GO-85.296.374', 'Solteiro', 'Masculino', '62999996655', '62888884444', '62333333333', 'thiago.oliveira@email.com', '74000-000', 'Rua 9', '369', '', 'Setor Oeste', 'Goiânia');
