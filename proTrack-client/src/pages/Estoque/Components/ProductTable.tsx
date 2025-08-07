@@ -8,6 +8,9 @@ import {
   TableRow,
 } from "../../../components/ui/table";
 import { Badge } from "../../../components/ui/badge";
+import { useState } from "react";
+import { Dialog } from "../../../components/ui/dialog";
+import { DialogAlter } from "./DialogAlter";
 
 interface ProductTableProps {
   products: Product[];
@@ -21,6 +24,9 @@ function getQuantityColor(quantity?: number) {
 }
 
 export function ProductTable({ products }: ProductTableProps) {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [open, setOpen] = useState(false);
+
   return (
     <div className="rounded-lg overflow-hidden border border-border">
       <Table>
@@ -48,7 +54,11 @@ export function ProductTable({ products }: ProductTableProps) {
           {products.map((product, index) => (
             <TableRow
               key={product.codigo_barras ?? index}
-              className="hover:bg-muted/50"
+              className="hover:bg-gray-200 cursor-pointer"
+              onClick={() => {
+                setSelectedProduct(product);
+                setOpen(true);
+              }}
             >
               <TableCell className="font-medium">{product.nome}</TableCell>
               <TableCell>{product.codigo_barras ?? "—"}</TableCell>
@@ -68,6 +78,23 @@ export function ProductTable({ products }: ProductTableProps) {
           ))}
         </TableBody>
       </Table>
+
+      <Dialog
+        open={open}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setOpen(false);
+            setSelectedProduct(null);
+          }
+        }}
+      >
+        {selectedProduct && (
+          <DialogAlter
+            setOpen={setOpen}
+            product={selectedProduct} // se quiser passar os dados para o diálogo
+          />
+        )}
+      </Dialog>
     </div>
   );
 }
