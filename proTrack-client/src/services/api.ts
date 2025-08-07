@@ -29,23 +29,24 @@ export const cadastrarProduto = async (produto: Produto) => {
   }
 };
 
-export const atualizarProduto = async (id: number, produto: Produto) => {
+export const atualizarProduto = async (produto: Produto) => {
   try {
+    if (!produto.id) {
+      throw { error: "ID do produto é obrigatório para atualização" };
+    }
+
+    const id = produto.id;
+
     const response = await axios.put(
-      `http://localhost:8085/product/alterarprodutos/${id}`,
+      `http://localhost:8085/product/produtos/${id}`,
       produto
     );
+
     return response.data;
   } catch (error: unknown) {
     const axiosError = error as AxiosError;
 
-    if (axiosError.response) {
-      console.error("Erro na resposta da API:", axiosError.response.data);
-      throw axiosError.response.data;
-    } else {
-      console.error("Erro desconhecido:", axiosError.message);
-      throw { error: "Erro desconhecido" };
-    }
+    throw axiosError.response?.data || { error: "Erro desconhecido" };
   }
 };
 

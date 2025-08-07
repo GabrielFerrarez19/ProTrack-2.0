@@ -19,11 +19,11 @@ import {
   SelectItem,
 } from "../../../components/ui/select";
 
-import { atualizarProduto } from "../../../services/api";
 import type {
   ProductFormData,
   Product,
 } from "../../../@types/types.components";
+import { atualizarProduto } from "../../../services/api"; // ajuste o caminho se necessário
 
 const categorias = [
   "Roupas",
@@ -43,20 +43,19 @@ interface DialogAlterProps {
   product: Product;
 }
 
-export function DialogAlter({ setOpen, product }: DialogAlterProps) {
+export function DialogAlter({ product, setOpen }: DialogAlterProps) {
   const {
     register,
-    handleSubmit,
     reset,
     setValue,
     watch,
+    handleSubmit,
     formState: { errors },
   } = useForm<ProductFormData>();
 
   const precoCusto = watch("precoCusto");
   const precoVenda = watch("precoVenda");
 
-  // Popula o formulário com os dados do produto quando ele mudar
   useEffect(() => {
     if (product) {
       reset({
@@ -74,7 +73,8 @@ export function DialogAlter({ setOpen, product }: DialogAlterProps) {
 
   const onSubmit = async (data: ProductFormData) => {
     try {
-      await atualizarProduto(product.id, {
+      const updatedProduct: Product = {
+        id: product.id,
         nome: data.nome,
         descricao: data.descricao,
         categoria: data.categoria,
@@ -83,13 +83,15 @@ export function DialogAlter({ setOpen, product }: DialogAlterProps) {
         tamanho: data.tamanho,
         preco_custo: data.precoCusto,
         preco_venda: data.precoVenda,
-      });
+      };
 
-      alert("Produto alterado com sucesso!");
-      reset();
+      await atualizarProduto(updatedProduct);
       setOpen(false);
-    } catch (err) {
-      console.error("Erro ao alterar produto:", err);
+    } catch (error: unknown) {
+      console.error("Erro ao atualizar produto:", error);
+      alert(
+        error instanceof Error ? error.message : "Erro ao atualizar produto"
+      );
     }
   };
 
@@ -188,6 +190,7 @@ export function DialogAlter({ setOpen, product }: DialogAlterProps) {
                 </Select>
               </div>
             </div>
+
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="precoCusto">Preço de Custo (R$)</Label>

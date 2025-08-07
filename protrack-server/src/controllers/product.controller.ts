@@ -49,22 +49,64 @@ export const createProduct = (req: Request, res: Response) => {
   });
 };
 
-export const updateProduct = async (req: Request, res: Response) => {
+export const updateProduct = (req: Request, res: Response) => {
   const { id } = req.params;
-  const dadosAtualizados = req.body;
+  const {
+    nome,
+    descricao,
+    categoria,
+    codigo_barras,
+    quantidade,
+    tamanho,
+    preco_custo,
+    preco_venda,
+  } = req.body;
 
-  try {
-    // exemplo de atualização
-    const produto = await db.query(
-      "UPDATE produtos SET nome = ?, ... WHERE id = ?",
-      [dadosAtualizados.nome, id]
-    );
-
-    res.status(200).json({ mensagem: "Produto atualizado com sucesso" });
-  } catch (error) {
-    console.error("Erro ao atualizar produto:", error);
-    res.status(500).json({ erro: "Erro interno do servidor" });
+  if (!id || !nome || preco_custo === undefined || preco_venda === undefined) {
+    return res.status(400).json({
+      error: "ID, nome, preço de custo e preço de venda são obrigatórios",
+    });
   }
+
+  const sql = `
+    UPDATE produtos SET 
+      nome = ?, 
+      descricao = ?, 
+      categoria = ?, 
+      codigo_barras = ?, 
+      quantidade = ?, 
+      tamanho = ?, 
+      preco_custo = ?, 
+      preco_venda = ?
+    WHERE id = ?
+  `;
+
+  const values = [
+    nome,
+    descricao || null,
+    categoria || null,
+    codigo_barras || null,
+    quantidade || 0,
+    tamanho || null,
+    preco_custo,
+    preco_venda,
+    id,
+  ];
+
+  db.query(sql, values, (err: any, results: any) => {
+    if (err) {
+      console.error("Erro ao atualizar produto:", err);
+      return res.status(500).json({ error: "Erro interno do servidor" });
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ error: "Produto não encontrado" });
+    }
+
+    res.status(200).json({
+      message: "Produto atualizado com sucesso",
+    });
+  });
 };
 
 export const getTotalEstoque = (req: Request, res: Response) => {

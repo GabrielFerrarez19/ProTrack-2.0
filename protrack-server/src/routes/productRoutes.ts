@@ -11,8 +11,8 @@ const router = Router();
 console.log("Rotas de produto carregadas!");
 
 router.post("/produtos", createProduct);
-router.put("/alterarprodutos/:id", updateProduct);
 router.get("/produtos/estoque-total", getTotalEstoque);
 router.get("/produtos/todos", getAllProdutos);
+router.put("/product/:id", updateProduct);
 
 export default router;
