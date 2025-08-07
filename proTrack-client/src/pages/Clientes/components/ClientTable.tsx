@@ -23,12 +23,10 @@ export function ClientTable({ clientes }: ClientTableProps) {
             <TableHead>Data de Nascimento</TableHead>
             <TableHead>CPF</TableHead>
             <TableHead>WhatsApp</TableHead>
-            <TableHead>Celular</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>CEP</TableHead>
             <TableHead>Endereço</TableHead>
             <TableHead>Número</TableHead>
-            <TableHead>Complemento</TableHead>
             <TableHead>Bairro</TableHead>
             <TableHead>Cidade</TableHead>
           </TableRow>
@@ -44,12 +42,10 @@ export function ClientTable({ clientes }: ClientTableProps) {
               </TableCell>
               <TableCell>{cliente.cpf}</TableCell>
               <TableCell>{cliente.telefoneWhatsapp ?? "—"}</TableCell>
-              <TableCell>{cliente.telefoneCelular ?? "—"}</TableCell>
               <TableCell>{cliente.email}</TableCell>
               <TableCell>{cliente.cep ?? "—"}</TableCell>
               <TableCell>{cliente.endereco ?? "—"}</TableCell>
               <TableCell>{cliente.numero ?? "—"}</TableCell>
-              <TableCell>{cliente.complemento ?? "—"}</TableCell>
               <TableCell>{cliente.bairro ?? "—"}</TableCell>
               <TableCell>{cliente.cidade ?? "—"}</TableCell>
             </TableRow>

@@ -66,6 +66,7 @@ export interface Cliente {
 }
 
 export interface Product {
+  id: number;
   nome: string;
   descricao?: string;
   categoria?: string;
