@@ -84,3 +84,16 @@ export const getTotalClientes = (req: Request, res: Response) => {
     res.status(200).json({ totalClientes: total });
   });
 };
+
+export const getAllClientes = (req: Request, res: Response) => {
+  const sql = "SELECT * FROM clientes";
+
+  db.query(sql, (err: any, results: any) => {
+    if (err) {
+      console.error("Erro ao buscar clientes cadastrados:", err);
+      return res.status(500).json({ error: "Erro interno do servidor" });
+    }
+
+    res.status(200).json({ clientes: results });
+  });
+};

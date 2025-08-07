@@ -1,6 +1,7 @@
 import axios, { AxiosError } from "axios";
 import type {
   Cliente,
+  ClientesResponse,
   EstoqueResponse,
   Produto,
   TotalClientesResponse,
@@ -74,6 +75,18 @@ export const fetchTotalClientes = async (): Promise<TotalClientesResponse> => {
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar total de clientes:", error);
+    throw error;
+  }
+};
+
+export const fetchAllClientes = async (): Promise<ClientesResponse> => {
+  try {
+    const response = await axios.get<ClientesResponse>(
+      "http://localhost:8085/clients/clientes/todos"
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao buscar clientes cadastrados:", error);
     throw error;
   }
 };
