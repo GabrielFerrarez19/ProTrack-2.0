@@ -24,7 +24,6 @@ export function ClientTable({ clientes }: ClientTableProps) {
             <TableHead>CPF</TableHead>
             <TableHead>WhatsApp</TableHead>
             <TableHead>Celular</TableHead>
-            <TableHead>Residencial</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>CEP</TableHead>
             <TableHead>Endereço</TableHead>
@@ -46,7 +45,6 @@ export function ClientTable({ clientes }: ClientTableProps) {
               <TableCell>{cliente.cpf}</TableCell>
               <TableCell>{cliente.telefoneWhatsapp ?? "—"}</TableCell>
               <TableCell>{cliente.telefoneCelular ?? "—"}</TableCell>
-              <TableCell>{cliente.telefoneResidencial ?? "—"}</TableCell>
               <TableCell>{cliente.email}</TableCell>
               <TableCell>{cliente.cep ?? "—"}</TableCell>
               <TableCell>{cliente.endereco ?? "—"}</TableCell>
