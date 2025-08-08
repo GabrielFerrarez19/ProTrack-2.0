@@ -41,9 +41,14 @@ const tamanhos = ["PP", "P", "M", "G", "GG", "XG", "Único"];
 interface DialogAlterProps {
   setOpen: (value: boolean) => void;
   product: Product;
+  onProductUpdated?: () => void; // Nova prop para callback
 }
 
-export function DialogAlter({ product, setOpen }: DialogAlterProps) {
+export function DialogAlter({
+  product,
+  setOpen,
+  onProductUpdated,
+}: DialogAlterProps) {
   const {
     register,
     reset,
@@ -87,6 +92,10 @@ export function DialogAlter({ product, setOpen }: DialogAlterProps) {
 
       await atualizarProduto(updatedProduct);
       setOpen(false);
+      // Chama o callback para atualizar os dados da tabela
+      if (onProductUpdated) {
+        onProductUpdated();
+      }
     } catch (error: unknown) {
       console.error("Erro ao atualizar produto:", error);
       alert(

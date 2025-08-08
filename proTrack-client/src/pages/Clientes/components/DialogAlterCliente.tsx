@@ -28,11 +28,13 @@ import { formatarDataParaInput } from "../../../utils/functions";
 interface DialogAlterClienteProps {
   setOpen: (value: boolean) => void;
   cliente: Cliente;
+  onClienteUpdated?: () => void; // Nova prop para callback
 }
 
 export function DialogAlterCliente({
   setOpen,
   cliente,
+  onClienteUpdated,
 }: DialogAlterClienteProps) {
   const {
     register,
@@ -91,6 +93,10 @@ export function DialogAlterCliente({
       alert("Cliente alterado com sucesso!");
       reset();
       setOpen(false);
+      // Chama o callback para atualizar os dados da tabela
+      if (onClienteUpdated) {
+        onClienteUpdated();
+      }
     } catch (err) {
       console.error("Erro ao alterar cliente:", err);
     }

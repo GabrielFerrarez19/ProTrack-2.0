@@ -14,6 +14,7 @@ import { DialogAlter } from "./DialogAlter";
 
 interface ProductTableProps {
   products: Product[];
+  onProductUpdated?: () => void; // Nova prop para callback de atualização
 }
 
 function getQuantityColor(quantity?: number) {
@@ -23,9 +24,23 @@ function getQuantityColor(quantity?: number) {
   return "bg-red-100 text-red-800 hover:bg-red-200";
 }
 
-export function ProductTable({ products }: ProductTableProps) {
+export function ProductTable({
+  products,
+  onProductUpdated,
+}: ProductTableProps) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [open, setOpen] = useState(false);
+
+  const handleDialogClose = (isOpen: boolean) => {
+    if (!isOpen) {
+      setOpen(false);
+      setSelectedProduct(null);
+      // Chama o callback para atualizar os dados da tabela
+      if (onProductUpdated) {
+        onProductUpdated();
+      }
+    }
+  };
 
   return (
     <div className="rounded-lg overflow-hidden border border-border">
@@ -79,19 +94,12 @@ export function ProductTable({ products }: ProductTableProps) {
         </TableBody>
       </Table>
 
-      <Dialog
-        open={open}
-        onOpenChange={(isOpen) => {
-          if (!isOpen) {
-            setOpen(false);
-            setSelectedProduct(null);
-          }
-        }}
-      >
+      <Dialog open={open} onOpenChange={handleDialogClose}>
         {selectedProduct && (
           <DialogAlter
             setOpen={setOpen}
-            product={selectedProduct} // se quiser passar os dados para o diálogo
+            product={selectedProduct}
+            onProductUpdated={onProductUpdated}
           />
         )}
       </Dialog>

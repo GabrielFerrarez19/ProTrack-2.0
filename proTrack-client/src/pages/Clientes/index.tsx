@@ -13,23 +13,23 @@ export function Cliente() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadClientes() {
-      try {
-        setLoading(true);
-        const data = await fetchAllClientes();
+  const loadClientes = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchAllClientes();
 
-        const clientesNormalizados = data.clientes.map(normalizeCliente);
+      const clientesNormalizados = data.clientes.map(normalizeCliente);
 
-        setClientes(clientesNormalizados);
-        console.log(clientesNormalizados);
-      } catch {
-        setError("Erro ao carregar clientes");
-      } finally {
-        setLoading(false);
-      }
+      setClientes(clientesNormalizados);
+      console.log(clientesNormalizados);
+    } catch {
+      setError("Erro ao carregar clientes");
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     loadClientes();
   }, []);
 
@@ -58,7 +58,10 @@ export function Cliente() {
         text="Aqui você pode visualizar todos os clientes cadastrados no sistema."
       />
       <SearchBar searchTerm={searchTerm} onChange={setSearchTerm} />
-      <ClientTable clientes={filteredClientes} />
+      <ClientTable
+        clientes={filteredClientes}
+        onClienteUpdated={loadClientes}
+      />
     </div>
   );
 }
