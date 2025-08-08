@@ -13,6 +13,6 @@ console.log("Rotas de produto carregadas!");
 router.post("/produtos", createProduct);
 router.get("/produtos/estoque-total", getTotalEstoque);
 router.get("/produtos/todos", getAllProdutos);
-router.put("/product/:id", updateProduct);
+router.put("/produtos/:id", updateProduct);
 
 export default router;

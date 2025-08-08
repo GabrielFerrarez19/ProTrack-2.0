@@ -14,11 +14,23 @@ import { formatarDataNascimento } from "../../../utils/functions";
 
 interface ClientTableProps {
   clientes: Cliente[];
+  onClienteUpdated?: () => void; // Nova prop para callback de atualização
 }
 
-export function ClientTable({ clientes }: ClientTableProps) {
+export function ClientTable({ clientes, onClienteUpdated }: ClientTableProps) {
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
   const [open, setOpen] = useState(false);
+
+  const handleDialogClose = (isOpen: boolean) => {
+    if (!isOpen) {
+      setOpen(false);
+      setSelectedCliente(null);
+      // Chama o callback para atualizar os dados da tabela
+      if (onClienteUpdated) {
+        onClienteUpdated();
+      }
+    }
+  };
 
   return (
     <div className="rounded-lg overflow-hidden border border-border">
@@ -78,17 +90,13 @@ export function ClientTable({ clientes }: ClientTableProps) {
         </TableBody>
       </Table>
 
-      <Dialog
-        open={open}
-        onOpenChange={(isOpen) => {
-          if (!isOpen) {
-            setOpen(false);
-            setSelectedCliente(null);
-          }
-        }}
-      >
+      <Dialog open={open} onOpenChange={handleDialogClose}>
         {selectedCliente && (
-          <DialogAlterCliente setOpen={setOpen} cliente={selectedCliente} />
+          <DialogAlterCliente
+            setOpen={setOpen}
+            cliente={selectedCliente}
+            onClienteUpdated={onClienteUpdated}
+          />
         )}
       </Dialog>
     </div>

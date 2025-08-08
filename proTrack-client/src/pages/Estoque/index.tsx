@@ -11,18 +11,19 @@ const Estoque = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadProducts() {
-      try {
-        setLoading(true);
-        const data = await fetchAllProdutos();
-        setProducts(data);
-      } catch {
-        setError("Erro ao carregar produtos");
-      } finally {
-        setLoading(false);
-      }
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchAllProdutos();
+      setProducts(data);
+    } catch {
+      setError("Erro ao carregar produtos");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadProducts();
   }, []);
 
@@ -45,7 +46,10 @@ const Estoque = () => {
         text="Aqui você pode cadastrar novos produtos no seu estoque"
       />
       <SearchBar searchTerm={searchTerm} onChange={setSearchTerm} />
-      <ProductTable products={filteredProducts} />
+      <ProductTable
+        products={filteredProducts}
+        onProductUpdated={loadProducts}
+      />
     </div>
   );
 };
