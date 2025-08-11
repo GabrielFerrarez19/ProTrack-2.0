@@ -28,6 +28,7 @@ export interface ProductFormData {
 }
 
 export interface ClienteFormData {
+  id: number;
   nome: string;
   dataNascimento: string;
   cpf: string;
@@ -47,6 +48,7 @@ export interface ClienteFormData {
 }
 
 export interface Cliente {
+  id: number;
   nome: string;
   dataNascimento: string;
   cpf: string;

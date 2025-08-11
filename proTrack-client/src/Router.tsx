@@ -8,6 +8,7 @@ import { CadProduct } from "./pages/CadProduct";
 import { CacUsers } from "./pages/CadClient";
 import Estoque from "./pages/Estoque";
 import { Cliente } from "./pages/Clientes";
+import { Vendas } from "./pages/Vendas";
 
 export function Router() {
   return (
@@ -21,6 +22,7 @@ export function Router() {
         <Route path="/cadastrodeclientes" element={<CacUsers />} />
         <Route path="/produtos" element={<Estoque />} />
         <Route path="/clientes" element={<Cliente />} />
+        <Route path="/venda" element={<Vendas />} />
       </Route>
     </Routes>
   );

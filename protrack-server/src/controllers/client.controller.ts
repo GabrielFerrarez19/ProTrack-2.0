@@ -97,3 +97,96 @@ export const getAllClientes = (req: Request, res: Response) => {
     res.status(200).json({ clientes: results });
   });
 };
+
+export const updateCliente = (req: Request, res: Response) => {
+  const { id } = req.params;
+  const {
+    nome,
+    dataNascimento, // aqui você pode renomear para data_nascimento
+    cpf,
+    rg,
+    estadoCivil,
+    sexo,
+    telefoneWhatsapp,
+    telefoneCelular,
+    telefoneResidencial,
+    email,
+    cep,
+    endereco,
+    numero,
+    complemento,
+    bairro,
+    cidade,
+  } = req.body;
+
+  // Validação dos campos obrigatórios
+  if (!id || !nome || !dataNascimento || !cpf || !email) {
+    return res.status(400).json({
+      error: "ID, nome, data de nascimento, CPF e email são obrigatórios",
+    });
+  }
+
+  const sql = `
+    UPDATE clientes SET 
+      nome = ?, 
+      data_nascimento = ?, 
+      cpf = ?, 
+      rg = ?, 
+      estado_civil = ?, 
+      sexo = ?, 
+      telefone_celular = ?, 
+      telefone_whatsapp = ?, 
+      telefone_residencial = ?, 
+      email = ?, 
+      cep = ?, 
+      endereco = ?, 
+      numero = ?, 
+      complemento = ?, 
+      bairro = ?, 
+      cidade = ?
+    WHERE id = ?
+  `;
+
+  const values = [
+    nome,
+    dataNascimento, // aqui o valor deve estar no formato correto YYYY-MM-DD
+    cpf,
+    rg || null,
+    estadoCivil || null,
+    sexo || null,
+    telefoneCelular || null,
+    telefoneWhatsapp || null,
+    telefoneResidencial || null,
+    email,
+    cep || null,
+    endereco || null,
+    numero || null,
+    complemento || null,
+    bairro || null,
+    cidade || null,
+    id,
+  ];
+
+  db.query(sql, values, (err: any, results: any) => {
+    if (err) {
+      console.error(
+        "Erro ao atualizar cliente:",
+        err.sqlMessage || err.message
+      );
+      return res
+        .status(500)
+        .json({
+          error: "Erro interno do servidor",
+          details: err.sqlMessage || err.message,
+        });
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ error: "Cliente não encontrado" });
+    }
+
+    res.status(200).json({
+      message: "Cliente atualizado com sucesso",
+    });
+  });
+};
