@@ -18,6 +18,7 @@ import { ProdutoRow } from "./ProdutoRow";
 
 import type { Control, FieldArrayWithId } from "react-hook-form";
 import type { VendaForm } from "../../../schemas/schemaVendas";
+import type { Produto } from "../../../@types/types.api";
 
 type ProdutosTableProps = {
   fields: FieldArrayWithId<VendaForm, "produtos", "id">[];
@@ -25,7 +26,7 @@ type ProdutosTableProps = {
   remove: (index: number) => void;
   control: Control<VendaForm>;
   atualizarPrecoProduto: (index: number, produtoId: string) => void;
-  // produtosState removido
+  produtos: Produto[];
 };
 
 export function ProdutosTable({
@@ -34,6 +35,7 @@ export function ProdutosTable({
   remove,
   control,
   atualizarPrecoProduto,
+  produtos,
 }: ProdutosTableProps) {
   function handleAdicionarProduto() {
     append({
@@ -75,6 +77,7 @@ export function ProdutosTable({
                   remove={remove}
                   control={control}
                   atualizarPrecoProduto={atualizarPrecoProduto}
+                  produtos={produtos}
                 />
               ))}
             </TableBody>

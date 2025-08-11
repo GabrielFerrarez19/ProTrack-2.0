@@ -42,7 +42,7 @@ const Estoque = () => {
   return (
     <div className="p-6 space-y-6">
       <Header
-        title="Bem vindo a página cadastro de clientes!"
+        title="Bem vindo a página produtos!"
         text="Aqui você pode cadastrar novos produtos no seu estoque"
       />
       <SearchBar searchTerm={searchTerm} onChange={setSearchTerm} />

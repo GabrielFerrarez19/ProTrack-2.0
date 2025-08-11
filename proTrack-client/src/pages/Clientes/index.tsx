@@ -56,7 +56,7 @@ export function Cliente() {
   return (
     <div className="p-6 space-y-6">
       <Header
-        title="Bem-vindo à página de cadastro de clientes!"
+        title="Bem-vindo à página clientes!"
         text="Aqui você pode visualizar todos os clientes cadastrados no sistema."
       />
       <SearchBar searchTerm={searchTerm} onChange={setSearchTerm} />
