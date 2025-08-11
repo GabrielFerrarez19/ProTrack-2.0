@@ -2,6 +2,7 @@ import type { Cliente } from "../@types/types.components";
 
 export function normalizeCliente(cliente: any): Cliente {
   return {
+    id: cliente.id,
     nome: cliente.nome,
     dataNascimento: cliente.data_nascimento,
     cpf: cliente.cpf,

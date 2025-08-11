@@ -20,6 +20,8 @@ export function Cliente() {
 
       const clientesNormalizados = data.clientes.map(normalizeCliente);
 
+      console.log(clientesNormalizados);
+
       setClientes(clientesNormalizados);
       console.log(clientesNormalizados);
     } catch {

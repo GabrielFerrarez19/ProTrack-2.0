@@ -6,6 +6,7 @@ import type {
   Produto,
   TotalClientesResponse,
 } from "../@types/types.api";
+import type { ClienteFormData } from "../@types/types.components";
 
 export const loginUser = async (email: string, password: string) => {
   const response = await axios.post("http://localhost:8085/login", {
@@ -109,5 +110,26 @@ export const fetchAllClientes = async (): Promise<ClientesResponse> => {
   } catch (error) {
     console.error("Erro ao buscar clientes cadastrados:", error);
     throw error;
+  }
+};
+
+export const atualizarCliente = async (
+  id: number,
+  cliente: ClienteFormData
+) => {
+  try {
+    if (!id) {
+      throw { error: "ID do cliente é obrigatório para atualização" };
+    }
+
+    const response = await axios.put(
+      `http://localhost:8085/clients/altera/${id}`, // rota corrigida
+      cliente
+    );
+
+    return response.data;
+  } catch (error: unknown) {
+    const axiosError = error as AxiosError;
+    throw axiosError.response?.data || { error: "Erro desconhecido" };
   }
 };

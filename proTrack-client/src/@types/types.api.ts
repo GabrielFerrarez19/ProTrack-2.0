@@ -15,6 +15,7 @@ export type EstoqueResponse = {
 };
 
 export interface Cliente {
+  id: number;
   nome: string;
   dataNascimento: string;
   cpf: string;

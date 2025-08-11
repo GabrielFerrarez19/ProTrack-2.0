@@ -32,6 +32,8 @@ export function ClientTable({ clientes, onClienteUpdated }: ClientTableProps) {
     }
   };
 
+  console.log(selectedCliente?.id);
+
   return (
     <div className="rounded-lg overflow-hidden border border-border">
       <Table>

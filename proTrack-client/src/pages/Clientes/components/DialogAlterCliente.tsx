@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-
 import {
   DialogContent,
   DialogHeader,
@@ -18,7 +17,7 @@ import {
   SelectItem,
 } from "../../../components/ui/select";
 
-import { cadastrarCliente } from "../../../services/api";
+import { atualizarCliente } from "../../../services/api";
 import type {
   ClienteFormData,
   Cliente,
@@ -28,7 +27,7 @@ import { formatarDataParaInput } from "../../../utils/functions";
 interface DialogAlterClienteProps {
   setOpen: (value: boolean) => void;
   cliente: Cliente;
-  onClienteUpdated?: () => void; // Nova prop para callback
+  onClienteUpdated?: () => void;
 }
 
 export function DialogAlterCliente({
@@ -45,10 +44,11 @@ export function DialogAlterCliente({
     formState: { errors },
   } = useForm<ClienteFormData>();
 
-  // Popula o formulário com os dados do cliente quando ele mudar
+  // Preenche o formulário com dados do cliente
   useEffect(() => {
     if (cliente) {
       reset({
+        id: cliente.id,
         nome: cliente.nome,
         dataNascimento: formatarDataParaInput(cliente.dataNascimento),
         cpf: cliente.cpf,
@@ -69,36 +69,32 @@ export function DialogAlterCliente({
     }
   }, [cliente, reset]);
 
+  // Envio do formulário
   const onSubmit = async (data: ClienteFormData) => {
-    try {
-      await cadastrarCliente({
-        nome: data.nome,
-        dataNascimento: data.dataNascimento,
-        cpf: data.cpf,
-        rg: data.rg,
-        estadoCivil: data.estadoCivil,
-        sexo: data.sexo,
-        telefoneCelular: data.telefoneCelular,
-        telefoneWhatsapp: data.telefoneWhatsapp,
-        telefoneResidencial: data.telefoneResidencial,
-        email: data.email,
-        cep: data.cep,
-        endereco: data.endereco,
-        numero: data.numero,
-        complemento: data.complemento,
-        bairro: data.bairro,
-        cidade: data.cidade,
-      });
+    if (!cliente.id) {
+      alert("ID do cliente ausente!");
+      return;
+    }
 
+    console.log("id_cliente", cliente.id);
+
+    try {
+      console.log("Dados enviados para atualização:", data, "ID:", cliente.id);
+      await atualizarCliente(cliente.id, data);
       alert("Cliente alterado com sucesso!");
       reset();
       setOpen(false);
-      // Chama o callback para atualizar os dados da tabela
-      if (onClienteUpdated) {
-        onClienteUpdated();
+      if (onClienteUpdated) onClienteUpdated();
+    } catch (error: unknown) {
+      console.error("Erro ao alterar cliente:", error);
+
+      // Checa se 'error' é um objeto com a propriedade 'error'
+      if (typeof error === "object" && error !== null && "error" in error) {
+        // Aqui o TS entende que error é do tipo { error: unknown }
+        alert((error as { error: string }).error);
+      } else {
+        alert("Erro ao alterar cliente");
       }
-    } catch (err) {
-      console.error("Erro ao alterar cliente:", err);
     }
   };
 
@@ -115,12 +111,12 @@ export function DialogAlterCliente({
       }}
     >
       <DialogHeader>
-        <DialogTitle>Dados do Cliente</DialogTitle>
+        <DialogTitle>Alterar Dados do Cliente</DialogTitle>
       </DialogHeader>
 
       <CardContent className="p-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          {/* 🔹 Seção 1: Dados Pessoais */}
+          {/* Dados Pessoais */}
           <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <legend className="text-lg font-medium text-muted-foreground mb-2 col-span-full">
               Dados Pessoais
@@ -214,7 +210,7 @@ export function DialogAlterCliente({
             </div>
           </fieldset>
 
-          {/* 🔹 Seção 2: Contato */}
+          {/* Contato */}
           <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <legend className="text-lg font-medium text-muted-foreground mb-2 col-span-full">
               Contato
@@ -267,7 +263,7 @@ export function DialogAlterCliente({
             </div>
           </fieldset>
 
-          {/* 🔹 Seção 3: Endereço */}
+          {/* Endereço */}
           <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <legend className="text-lg font-medium text-muted-foreground mb-2 col-span-full">
               Endereço
@@ -334,7 +330,7 @@ export function DialogAlterCliente({
             </div>
           </fieldset>
 
-          {/* 🔹 Botões */}
+          {/* Botões */}
           <div className="flex gap-4 pt-4">
             <Button
               type="submit"
