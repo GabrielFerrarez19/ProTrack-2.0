@@ -1,3 +1,4 @@
+import { useClientes } from "../../../hooks/useClientes"; // ajuste o caminho
 import {
   FormField,
   FormItem,
@@ -5,21 +6,14 @@ import {
   FormMessage,
   FormControl,
 } from "../../../components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../components/ui/select";
 import { Input } from "../../../components/ui/input";
-import { clientes } from "../../../schemas/schemaVendas";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../../../components/ui/card";
+import { ClienteSelect } from "./clienteSelect";
 
 import type { Control } from "react-hook-form";
 import type { VendaForm } from "../../../schemas/schemaVendas";
@@ -29,50 +23,40 @@ type InformacoesVendaProps = {
 };
 
 export function InformacoesVenda({ control }: InformacoesVendaProps) {
+  const { clientes, loading, error } = useClientes();
+
+  if (loading) return <div>Carregando clientes...</div>;
+  if (error) return <div>{error}</div>;
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Informações da Venda</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <FormField
-          control={control}
-          name="clienteId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cliente</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um cliente" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {clientes.map((cliente) => (
-                    <SelectItem key={cliente.id} value={cliente.id}>
-                      {cliente.nome} - {cliente.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <CardContent className="">
+        <div className="w-76 space-y-4">
+          <ClienteSelect
+            control={control}
+            name="clienteId"
+            clientes={clientes}
+            label="Cliente"
+            placeholder="Selecione um cliente"
+          />
 
-        <FormField
-          control={control}
-          name="dataVenda"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Data da Venda</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={control}
+            name="dataVenda"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Data da Venda</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} readOnly />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </CardContent>
     </Card>
   );

@@ -7,19 +7,14 @@ import {
   FormMessage,
 } from "../../../components/ui/form";
 import { Input } from "../../../components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../components/ui/select";
 import { Trash2 } from "lucide-react";
-import { produtos } from "../../../schemas/schemaVendas";
 import { TableCell, TableRow } from "../../../components/ui/table";
 
 import type { Control, FieldArrayWithId } from "react-hook-form";
 import type { VendaForm } from "../../../schemas/schemaVendas";
+
+import { ProdutoSelect } from "./ProdutoSelect"; // importe o ProdutoSelect criado
+import type { Produto } from "../../../@types/types.api";
 
 type ProdutoRowProps = {
   index: number;
@@ -27,6 +22,7 @@ type ProdutoRowProps = {
   remove: (index: number) => void;
   control: Control<VendaForm>;
   atualizarPrecoProduto: (index: number, produtoId: string) => void;
+  produtos: Produto[];
 };
 
 export function ProdutoRow({
@@ -35,8 +31,8 @@ export function ProdutoRow({
   remove,
   control,
   atualizarPrecoProduto,
+  produtos,
 }: ProdutoRowProps) {
-  // Observar o estado atual do produto no formulário para esse índice
   const produtoAtual = useWatch({
     control,
     name: `produtos.${index}`,
@@ -49,35 +45,13 @@ export function ProdutoRow({
   return (
     <TableRow key={field.id}>
       <TableCell>
-        <FormField
+        <ProdutoSelect
           control={control}
-          name={`produtos.${index}.produtoId`}
-          render={({ field }) => (
-            <FormItem>
-              <Select
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  atualizarPrecoProduto(index, value);
-                }}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o produto" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {produtos.map((produto) => (
-                    <SelectItem key={produto.id} value={produto.id}>
-                      {produto.nome} - R$ {produto.preco.toFixed(2)} (Est:{" "}
-                      {produto.estoque})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
+          name={`produtos.${index}.produtoId` as keyof VendaForm}
+          produtos={produtos}
+          index={index} // passe o índice
+          atualizarPrecoProduto={atualizarPrecoProduto} // função que recebe (index, produtoId)
+          placeholder="Selecione um produto"
         />
       </TableCell>
 

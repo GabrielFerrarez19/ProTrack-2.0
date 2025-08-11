@@ -1,17 +1,12 @@
 import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ShoppingCart } from "lucide-react";
 import { Button } from "../../components/ui/button";
-// import { Form } from "../../components/ui/form"; // removi, para evitar conflito
-
-import {
-  vendaSchema,
-  type VendaForm,
-  produtos,
-} from "../../schemas/schemaVendas";
+import { vendaSchema, type VendaForm } from "../../schemas/schemaVendas";
 import { InformacoesVenda } from "./components/InformacoesVenda";
 import { ResumoVenda } from "./components/ResumoVenda";
 import { ProdutosTable } from "./components/ProdutosTable";
+import { Header } from "../../components/header";
+import { useProdutos } from "../../hooks/useProdutos";
 
 export function Vendas() {
   const methods = useForm<VendaForm>({
@@ -30,10 +25,15 @@ export function Vendas() {
 
   const watchedProdutos = methods.watch("produtos");
 
+  const { produtos } = useProdutos();
+
   const atualizarPrecoProduto = (index: number, produtoId: string) => {
-    const produto = produtos.find((p) => p.id === produtoId);
+    const produto = produtos.find((p) => String(p.id) === produtoId);
     if (produto) {
-      methods.setValue(`produtos.${index}.precoUnitario`, produto.preco);
+      methods.setValue(
+        `produtos.${index}.precoUnitario`,
+        produto.preco_venda ?? 0
+      );
     } else {
       methods.setValue(`produtos.${index}.precoUnitario`, 0);
     }
@@ -45,11 +45,11 @@ export function Vendas() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-3">
-        <ShoppingCart className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold">Cadastro de Vendas</h1>
-      </div>
+    <div className="p-6 space-y-6">
+      <Header
+        title="Bem vindo a página Venda!"
+        text="Aqui você pode registar suas vendas"
+      />
 
       {/* Envolver com FormProvider para contexto do react-hook-form */}
       <FormProvider {...methods}>
@@ -65,6 +65,7 @@ export function Vendas() {
             remove={remove}
             control={methods.control}
             atualizarPrecoProduto={atualizarPrecoProduto}
+            produtos={produtos}
           />
 
           <div className="flex justify-end space-x-4">
