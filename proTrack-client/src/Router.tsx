@@ -14,9 +14,9 @@ export function Router() {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
+      <Route path="/confirmacaoemail" element={<ConfirmacaoEmail />} />
+      <Route path="/redefinirsenha" element={<RedefinirSenha />} />
       <Route path="/" element={<DefaultLayout />}>
-        <Route path="/confirmacaoemail" element={<ConfirmacaoEmail />} />
-        <Route path="/redefinirsenha" element={<RedefinirSenha />} />
         <Route path="/status" element={<Status />} />
         <Route path="/cadastroprodutos" element={<CadProduct />} />
         <Route path="/cadastrodeclientes" element={<CacUsers />} />
