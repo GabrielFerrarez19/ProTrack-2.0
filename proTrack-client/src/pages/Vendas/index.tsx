@@ -7,6 +7,9 @@ import { ResumoVenda } from "./components/ResumoVenda";
 import { ProdutosTable } from "./components/ProdutosTable";
 import { Header } from "../../components/header";
 import { useProdutos } from "../../hooks/useProdutos";
+import { useState } from "react";
+import { criarVenda } from "../../services/api";
+import type { VendaData } from "../../@types/types.api";
 
 export function Vendas() {
   const methods = useForm<VendaForm>({
@@ -14,6 +17,9 @@ export function Vendas() {
     defaultValues: {
       clienteId: "",
       dataVenda: new Date().toISOString().split("T")[0],
+      desconto: 0,
+      total: 0,
+      totalComDesconto: 0,
       produtos: [],
     },
   });
@@ -27,6 +33,9 @@ export function Vendas() {
 
   const { produtos } = useProdutos();
 
+  const [totalGeral, setTotalGeral] = useState(0);
+  const [totalComDesconto, setTotalComDesconto] = useState(0);
+
   const atualizarPrecoProduto = (index: number, produtoId: string) => {
     const produto = produtos.find((p) => String(p.id) === produtoId);
     if (produto) {
@@ -39,9 +48,38 @@ export function Vendas() {
     }
   };
 
-  const onSubmit = (data: VendaForm) => {
+  const onSubmit = async (data: VendaForm) => {
+    data.totalComDesconto = totalComDesconto;
+    data.total = totalGeral;
+
     console.log("Dados da venda:", data);
-    methods.reset();
+
+    try {
+      // Converter para o tipo esperado na API
+      const vendaParaEnviar: VendaData = {
+        clienteId: data.clienteId,
+        dataVenda: data.dataVenda,
+        desconto: data.desconto,
+        total: data.total,
+        totalComDesconto: data.totalComDesconto,
+        produtos: data.produtos.map((p) => ({
+          produtoId: p.produtoId,
+          quantidade: p.quantidade,
+          precoUnitario: p.precoUnitario,
+          desconto: p.desconto ?? 0,
+        })),
+      };
+
+      const resposta = await criarVenda(vendaParaEnviar);
+      console.log("Venda cadastrada com sucesso:", resposta);
+      alert("Produto cadastrado com sucesso");
+      methods.reset();
+      setTotalGeral(0);
+      setTotalComDesconto(0);
+    } catch (error) {
+      console.error("Erro ao cadastrar venda:", error);
+      // Aqui você pode mostrar uma mensagem de erro para o usuário
+    }
   };
 
   return (
@@ -51,12 +89,17 @@ export function Vendas() {
         text="Aqui você pode registar suas vendas"
       />
 
-      {/* Envolver com FormProvider para contexto do react-hook-form */}
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InformacoesVenda control={methods.control} />
-            <ResumoVenda produtos={watchedProdutos} />
+            <ResumoVenda
+              produtos={watchedProdutos}
+              onChangeResumo={({ totalPreco, valorComDesconto }) => {
+                setTotalGeral(totalPreco);
+                setTotalComDesconto(valorComDesconto);
+              }}
+            />
           </div>
 
           <ProdutosTable
@@ -72,7 +115,11 @@ export function Vendas() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => methods.reset()}
+              onClick={() => {
+                methods.reset();
+                setTotalGeral(0);
+                setTotalComDesconto(0);
+              }}
             >
               Cancelar
             </Button>
