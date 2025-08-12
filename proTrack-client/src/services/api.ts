@@ -10,17 +10,20 @@ import type {
 import type { ClienteFormData } from "../@types/types.components";
 
 export const loginUser = async (email: string, password: string) => {
-  const response = await axios.post("http://localhost:8085/login", {
-    email,
-    password,
-  });
+  const response = await axios.post(
+    "https://pro-track-2-0-r1ug.vercel.app/login",
+    {
+      email,
+      password,
+    }
+  );
   return response.data;
 };
 
 export const cadastrarProduto = async (produto: Produto) => {
   try {
     const response = await axios.post(
-      "http://localhost:8085/product/produtos",
+      "https://pro-track-2-0-r1ug.vercel.app/product/produtos",
       produto
     );
     return response.data;
@@ -40,7 +43,7 @@ export const atualizarProduto = async (produto: Produto) => {
     const id = produto.id;
 
     const response = await axios.put(
-      `http://localhost:8085/product/produtos/${id}`,
+      `https://pro-track-2-0-r1ug.vercel.app/product/produtos/${id}`,
       produto
     );
 
@@ -55,7 +58,7 @@ export const atualizarProduto = async (produto: Produto) => {
 export const fetchTotalEstoque = async (): Promise<EstoqueResponse> => {
   try {
     const response = await axios.get<EstoqueResponse>(
-      "http://localhost:8085/product/produtos/estoque-total"
+      "https://pro-track-2-0-r1ug.vercel.app/product/produtos/estoque-total"
     );
     return response.data;
   } catch (error) {
@@ -67,7 +70,7 @@ export const fetchTotalEstoque = async (): Promise<EstoqueResponse> => {
 export const fetchAllProdutos = async (): Promise<Produto[]> => {
   try {
     const response = await axios.get<Produto[]>(
-      "http://localhost:8085/product/produtos/todos"
+      "https://pro-track-2-0-r1ug.vercel.app/product/produtos/todos"
     );
     return response.data;
   } catch (error) {
@@ -79,7 +82,7 @@ export const fetchAllProdutos = async (): Promise<Produto[]> => {
 export const cadastrarCliente = async (cliente: Cliente) => {
   try {
     const response = await axios.post(
-      "http://localhost:8085/clients/clientes",
+      "https://pro-track-2-0-r1ug.vercel.app/clients/clientes",
       cliente
     );
     return response.data;
@@ -93,7 +96,7 @@ export const cadastrarCliente = async (cliente: Cliente) => {
 export const fetchTotalClientes = async (): Promise<TotalClientesResponse> => {
   try {
     const response = await axios.get<TotalClientesResponse>(
-      "http://localhost:8085/clients/clientes/total"
+      "https://pro-track-2-0-r1ug.vercel.app/clients/clientes/total"
     );
     return response.data;
   } catch (error) {
@@ -105,7 +108,7 @@ export const fetchTotalClientes = async (): Promise<TotalClientesResponse> => {
 export const fetchAllClientes = async (): Promise<ClientesResponse> => {
   try {
     const response = await axios.get<ClientesResponse>(
-      "http://localhost:8085/clients/clientes/todos"
+      "https://pro-track-2-0-r1ug.vercel.app/clients/clientes/todos"
     );
     return response.data;
   } catch (error) {
@@ -124,7 +127,7 @@ export const atualizarCliente = async (
     }
 
     const response = await axios.put(
-      `http://localhost:8085/clients/altera/${id}`, // rota corrigida
+      `https://pro-track-2-0-r1ug.vercel.app/clients/altera/${id}`, // rota corrigida
       cliente
     );
 
@@ -138,7 +141,7 @@ export const atualizarCliente = async (
 export async function criarVenda(data: VendaData) {
   try {
     const response = await axios.post(
-      "http://localhost:8085/vendas/cadvendas",
+      "https://pro-track-2-0-r1ug.vercel.app/vendas/cadvendas",
       data
     );
     return response.data;
