@@ -67,3 +67,26 @@ VALUES
 ('Rafael Torres', '1992-12-18', '369.258.147-00', 'CE-36.925.814', 'Solteiro', 'Masculino', '85999998877', '85888886666', '85333335555', 'rafael.torres@email.com', '60010-000', 'Av. Beira Mar', '852', '', 'Meireles', 'Fortaleza'),
 ('Juliana Mendes', '1983-04-27', '741.852.963-00', 'DF-74.185.296', 'Casada', 'Feminino', '61999997766', '61888885555', '61333334444', 'juliana.mendes@email.com', '70040-010', 'SQS 308 Bloco A', '101', 'Apto 301', 'Asa Sul', 'Brasília'),
 ('Thiago Oliveira', '1998-08-14', '852.963.741-00', 'GO-85.296.374', 'Solteiro', 'Masculino', '62999996655', '62888884444', '62333333333', 'thiago.oliveira@email.com', '74000-000', 'Rua 9', '369', '', 'Setor Oeste', 'Goiânia');
+
+
+CREATE TABLE vendas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  cliente_id INT NOT NULL,
+  data_venda DATE NOT NULL,
+  desconto DECIMAL(5, 2) DEFAULT 0, -- desconto total percentual da venda
+  total DECIMAL(10, 2) NOT NULL, -- total antes do desconto
+  total_com_desconto DECIMAL(10, 2) NOT NULL, -- total após desconto
+  data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+);
+
+CREATE TABLE itens_venda (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  venda_id INT NOT NULL,
+  produto_id INT NOT NULL,
+  quantidade INT NOT NULL,
+  preco_unitario DECIMAL(10, 2) NOT NULL,
+  desconto DECIMAL(5, 2) DEFAULT 0, -- desconto percentual no item
+  FOREIGN KEY (venda_id) REFERENCES vendas(id),
+  FOREIGN KEY (produto_id) REFERENCES produtos(id)
+);
