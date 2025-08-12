@@ -51,3 +51,19 @@ export interface ProdutoTodos {
 export interface ClientesResponse {
   clientes: Cliente[];
 }
+
+export interface ProdutoVenda {
+  produtoId: string;
+  quantidade: number;
+  precoUnitario: number;
+  desconto?: number;
+}
+
+export interface VendaData {
+  clienteId: string;
+  dataVenda: string;
+  desconto: number;
+  total: number;
+  totalComDesconto: number;
+  produtos: ProdutoVenda[];
+}
