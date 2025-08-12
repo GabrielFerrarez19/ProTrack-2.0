@@ -5,6 +5,7 @@ import type {
   EstoqueResponse,
   Produto,
   TotalClientesResponse,
+  VendaData,
 } from "../@types/types.api";
 import type { ClienteFormData } from "../@types/types.components";
 
@@ -133,3 +134,16 @@ export const atualizarCliente = async (
     throw axiosError.response?.data || { error: "Erro desconhecido" };
   }
 };
+
+export async function criarVenda(data: VendaData) {
+  try {
+    const response = await axios.post(
+      "http://localhost:8085/vendas/cadvendas",
+      data
+    );
+    return response.data;
+  } catch (error) {
+    // Você pode tratar o erro aqui ou repassar
+    throw error;
+  }
+}
