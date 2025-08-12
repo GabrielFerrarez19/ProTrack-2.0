@@ -33,7 +33,7 @@ export function InformacoesVenda({ control }: InformacoesVendaProps) {
       <CardHeader>
         <CardTitle>Informações da Venda</CardTitle>
       </CardHeader>
-      <CardContent className="">
+      <CardContent>
         <div className="w-76 space-y-4">
           <ClienteSelect
             control={control}
