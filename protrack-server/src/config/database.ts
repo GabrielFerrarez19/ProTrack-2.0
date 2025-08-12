@@ -5,5 +5,5 @@ export const db = mysql.createPool({
   user: "root",
   password: "BOwuyhBlulgOsPBiNVszpLGGmPQceMaH",
   port: 44969,
-  database: "protrack", // ALTERADO de railway para protrack
+  database: "protrack", // igual ao final da URL
 });
