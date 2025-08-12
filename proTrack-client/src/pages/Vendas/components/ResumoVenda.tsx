@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
+import { useFormContext, Controller } from "react-hook-form";
+import { Input } from "../../../components/ui/input";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../../../components/ui/card";
-import { Input } from "../../../components/ui/input";
+import type { VendaForm } from "../../../schemas/schemaVendas";
 
 type Produto = {
   produtoId: string;
@@ -13,8 +15,17 @@ type Produto = {
   precoUnitario: number;
 };
 
-export function ResumoVenda({ produtos }: { produtos: Produto[] }) {
-  const [desconto, setDesconto] = useState(0); // desconto em %
+type ResumoVendaProps = {
+  produtos: Produto[];
+  onChangeResumo?: (totais: {
+    totalPreco: number;
+    valorComDesconto: number;
+  }) => void;
+};
+
+export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
+  const { control, watch } = useFormContext<VendaForm>();
+  const desconto = watch("desconto") ?? 0;
 
   const totalItens = produtos.length;
   const totalQuantidade = produtos.reduce((acc, p) => acc + p.quantidade, 0);
@@ -25,13 +36,11 @@ export function ResumoVenda({ produtos }: { produtos: Produto[] }) {
 
   const valorComDesconto = totalPreco * (1 - desconto / 100);
 
-  // Limitar desconto entre 0 e 100
-  const handleDescontoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = Number(e.target.value);
-    if (val < 0) val = 0;
-    else if (val > 100) val = 100;
-    setDesconto(val);
-  };
+  React.useEffect(() => {
+    if (onChangeResumo) {
+      onChangeResumo({ totalPreco, valorComDesconto });
+    }
+  }, [totalPreco, valorComDesconto, onChangeResumo]);
 
   return (
     <Card>
@@ -54,14 +63,25 @@ export function ResumoVenda({ produtos }: { produtos: Produto[] }) {
           <label className="text-sm text-muted-foreground" htmlFor="desconto">
             Desconto (%):
           </label>
-          <Input
-            id="desconto"
-            type="number"
-            min={0}
-            max={100}
-            value={desconto}
-            onChange={handleDescontoChange}
-            className="w-20"
+          <Controller
+            control={control}
+            name="desconto"
+            defaultValue={0}
+            render={({ field }) => (
+              <Input
+                {...field}
+                type="number"
+                min={0}
+                max={100}
+                className="w-20"
+                onChange={(e) =>
+                  field.onChange(
+                    e.target.value === "" ? undefined : Number(e.target.value)
+                  )
+                }
+                value={field.value ?? ""}
+              />
+            )}
           />
         </div>
 
