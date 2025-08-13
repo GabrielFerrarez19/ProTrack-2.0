@@ -5,6 +5,7 @@ import type {
   EstoqueResponse,
   Produto,
   TotalClientesResponse,
+  TotalVendasResponse,
   VendaData,
 } from "../@types/types.api";
 import type { ClienteFormData } from "../@types/types.components";
@@ -147,3 +148,15 @@ export async function criarVenda(data: VendaData) {
     throw error;
   }
 }
+
+export const fetchTotalVendas = async (): Promise<TotalVendasResponse> => {
+  try {
+    const response = await axios.get<TotalVendasResponse>(
+      "http://localhost:8085/vendas/totalvendas"
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao buscar total de vendas:", error);
+    throw error;
+  }
+};

@@ -1,17 +1,26 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "../../../components/ui/card";
-import { fetchTotalClientes, fetchTotalEstoque } from "../../../services/api";
+import {
+  fetchTotalClientes,
+  fetchTotalEstoque,
+  fetchTotalVendas,
+} from "../../../services/api";
 
 export function CardsStatus() {
-  const [totalEstoque, setTotalEstoque] = useState<number>(0);
+  // Estados
+  const [totalEstoque, setTotalEstoque] = useState(0);
   const [loadingEstoque, setLoadingEstoque] = useState(true);
   const [erroEstoque, setErroEstoque] = useState<string | null>(null);
 
-  const [totalClientes, setTotalClientes] = useState<number>(0);
+  const [totalClientes, setTotalClientes] = useState(0);
   const [loadingClientes, setLoadingClientes] = useState(true);
   const [erroClientes, setErroClientes] = useState<string | null>(null);
 
-  // useEffect para buscar total de estoque
+  const [totalVendas, setTotalVendas] = useState(0);
+  const [loadingVendas, setLoadingVendas] = useState(true);
+  const [erroVendas, setErroVendas] = useState<string | null>(null);
+
+  // Estoque
   useEffect(() => {
     const fetchEstoque = async () => {
       try {
@@ -25,11 +34,10 @@ export function CardsStatus() {
         setLoadingEstoque(false);
       }
     };
-
     fetchEstoque();
   }, []);
 
-  // useEffect para buscar total de clientes
+  // Clientes
   useEffect(() => {
     const fetchClientes = async () => {
       try {
@@ -43,14 +51,37 @@ export function CardsStatus() {
         setLoadingClientes(false);
       }
     };
-
     fetchClientes();
+  }, []);
+
+  // Vendas
+  useEffect(() => {
+    const fetchVendas = async () => {
+      try {
+        const data = await fetchTotalVendas();
+        setTotalVendas(data.totalVendas);
+        console.log(data.totalVendas);
+        console.log("test");
+
+        setErroVendas(null);
+      } catch (err) {
+        console.error("Erro ao buscar vendas:", err); // corrigido
+        setErroVendas("Erro ao buscar vendas"); // corrigido
+      } finally {
+        setLoadingVendas(false);
+      }
+    };
+    fetchVendas();
   }, []);
 
   const statsData = [
     {
       title: "Vendas",
-      value: "0",
+      value: loadingVendas
+        ? "..."
+        : erroVendas
+        ? "Erro"
+        : totalVendas.toString(),
       color: "text-red-500",
       bgColor: "bg-red-50",
     },
