@@ -15,17 +15,14 @@ const Estoque = () => {
     try {
       setLoading(true);
       const data = await fetchAllProdutos();
-
-      // Filtra só produtos com id definido
-      const filteredData = data.filter((p): p is Product => p.id !== undefined);
-
-      setProducts(filteredData);
+      setProducts(data as Product[]);
     } catch {
       setError("Erro ao carregar produtos");
     } finally {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     loadProducts();
   }, []);
