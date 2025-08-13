@@ -108,3 +108,24 @@ export interface ItemVenda {
   preco_unitario: number; // Preço unitário do produto
   desconto?: number; // Desconto aplicado no item (em %)
 }
+
+export interface ItemVendaForm {
+  produto_id: number;
+  produto_nome: string;
+  quantidade: number;
+  preco_unitario: number;
+  desconto: number;
+}
+
+export interface VendaForm {
+  data_venda: string;
+  desconto: number;
+  itens: ItemVendaForm[];
+}
+
+export interface ProdutoApi {
+  id: number;
+  nome: string;
+  codigo_barras?: string;
+  preco_venda?: number;
+}

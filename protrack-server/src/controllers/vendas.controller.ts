@@ -129,3 +129,83 @@ export const getAllVendas = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Erro interno do servidor" });
   }
 };
+
+export const atualizarVenda = async (req: Request, res: Response) => {
+  const vendaId = Number(req.params.id);
+  const { clienteId, dataVenda, desconto, total, totalComDesconto, produtos } =
+    req.body;
+
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    // Prepara os campos que podem ser atualizados
+    const updateFields: string[] = [];
+    const updateValues: any[] = [];
+
+    if (clienteId != null) {
+      updateFields.push("cliente_id = ?");
+      updateValues.push(clienteId);
+    }
+    if (dataVenda) {
+      updateFields.push("data_venda = ?");
+      updateValues.push(dataVenda); // deve estar em YYYY-MM-DD
+    }
+    if (desconto != null) {
+      updateFields.push("desconto = ?");
+      updateValues.push(Number(desconto));
+    }
+    if (total != null) {
+      updateFields.push("total = ?");
+      updateValues.push(Number(total));
+    }
+    if (totalComDesconto != null) {
+      updateFields.push("total_com_desconto = ?");
+      updateValues.push(Number(totalComDesconto));
+    }
+
+    if (updateFields.length > 0) {
+      const sql = `UPDATE vendas SET ${updateFields.join(", ")} WHERE id = ?`;
+      updateValues.push(vendaId);
+      await connection.query(sql, updateValues);
+    }
+
+    // Atualiza itens somente se vierem no body
+    if (Array.isArray(produtos) && produtos.length > 0) {
+      // Remove itens antigos
+      await connection.query(`DELETE FROM itens_venda WHERE venda_id = ?`, [
+        vendaId,
+      ]);
+
+      // Insere novos itens
+      for (const item of produtos) {
+        const {
+          produtoId,
+          quantidade,
+          precoUnitario,
+          desconto: itemDesconto = 0,
+        } = item;
+
+        if (!produtoId || quantidade == null || precoUnitario == null) {
+          throw new Error("Item inválido: " + JSON.stringify(item));
+        }
+
+        await connection.query(
+          `INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario, desconto)
+           VALUES (?, ?, ?, ?, ?)`,
+          [vendaId, produtoId, quantidade, precoUnitario, Number(itemDesconto)]
+        );
+      }
+    }
+
+    await connection.commit();
+    res.json({ message: "Venda atualizada com sucesso" });
+  } catch (error: any) {
+    await connection.rollback();
+    console.error("Erro ao atualizar venda:", error);
+    res.status(500).json({ error: error.message, stack: error.stack });
+  } finally {
+    connection.release();
+  }
+};

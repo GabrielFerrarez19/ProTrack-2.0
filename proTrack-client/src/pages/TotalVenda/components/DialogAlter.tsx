@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+// DialogAlterVenda.tsx
 import {
   DialogContent,
   DialogHeader,
@@ -6,10 +6,6 @@ import {
 } from "../../../components/ui/dialog";
 import { CardContent } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import type {
-  VendaResponse,
-  ItemVenda,
-} from "../../../@types/types.components";
 import { Input } from "../../../components/ui/input";
 import {
   Table,
@@ -19,9 +15,24 @@ import {
   TableHeader,
   TableRow,
 } from "../../../components/ui/table";
+import { atualizarVenda } from "../../../services/api";
+import { ProdutoSelect } from "./ProdutoSelect";
+import { useProdutos } from "../../../hooks/useProdutos";
+import { useForm, FormProvider, useFieldArray } from "react-hook-form";
+import type {
+  VendaForm,
+  ItemVendaForm,
+} from "../../../@types/types.components";
 
 interface DialogAlterVendaProps {
-  venda: VendaResponse;
+  venda: {
+    id: number;
+    cliente_id: number;
+    cliente_nome: string;
+    desconto?: number;
+    data_venda: string;
+    itens: ItemVendaForm[];
+  };
   setOpen: (value: boolean) => void;
   onVendaUpdated?: () => void;
 }
@@ -31,180 +42,207 @@ export function DialogAlterVenda({
   setOpen,
   onVendaUpdated,
 }: DialogAlterVendaProps) {
-  const [clienteNome, setClienteNome] = useState(venda.cliente_nome);
-  const [dataVenda, setDataVenda] = useState(venda.data_venda);
-  const [desconto, setDesconto] = useState(venda.desconto ?? 0);
-  const [itens, setItens] = useState<ItemVenda[]>(venda.itens ?? []);
+  const { produtos } = useProdutos();
 
-  // Calcula total e total com desconto
+  const methods = useForm<VendaForm>({
+    defaultValues: {
+      data_venda: venda.data_venda.split("T")[0],
+      desconto: venda.desconto ?? 0,
+      itens: venda.itens.map((item) => ({
+        produto_id: item.produto_id,
+        produto_nome: item.produto_nome,
+        quantidade: item.quantidade,
+        preco_unitario: item.preco_unitario,
+        desconto: item.desconto,
+      })),
+    },
+  });
+
+  const { control, handleSubmit, watch, setValue } = methods;
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "itens",
+  });
+
+  const itens = watch("itens");
+  const desconto = watch("desconto");
+
   const total = itens.reduce(
     (acc, item) => acc + item.quantidade * item.preco_unitario,
     0
   );
   const totalComDesconto = total - (total * desconto) / 100;
 
-  useEffect(() => {
-    console.log("Venda selecionada:", venda);
-  }, [venda]);
-
-  const handleItemChange = (
-    id: number,
-    field: keyof Pick<ItemVenda, "quantidade" | "preco_unitario" | "desconto">,
-    value: number
-  ) => {
-    setItens((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
-    );
+  const atualizarPrecoProduto = (index: number, produtoId: string) => {
+    const prod = produtos.find((p) => p.id === Number(produtoId));
+    if (prod) {
+      // Garante que id e preco_unitario nunca sejam undefined
+      setValue(`itens.${index}.produto_id`, prod.id ?? 0);
+      setValue(`itens.${index}.preco_unitario`, prod.preco_venda ?? 0);
+      setValue(`itens.${index}.produto_nome`, prod.nome ?? "");
+    }
   };
 
-  const handleSave = () => {
-    // Aqui você pode chamar a API para atualizar a venda e os itens
-    console.log("Salvando venda...", {
-      clienteNome,
-      dataVenda,
-      desconto,
-      itens,
-    });
+  const onSubmit = async (formData: VendaForm) => {
+    const produtosApi = formData.itens.map((item) => ({
+      produtoId: item.produto_id,
+      quantidade: item.quantidade,
+      precoUnitario: item.preco_unitario,
+      desconto: item.desconto ?? 0,
+    }));
 
-    // Fecha o modal e atualiza a tabela principal
-    setOpen(false);
-    if (onVendaUpdated) onVendaUpdated();
+    try {
+      await atualizarVenda(venda.id, {
+        clienteId: venda.cliente_id,
+        dataVenda: formData.data_venda,
+        desconto: formData.desconto,
+        total,
+        totalComDesconto,
+        produtos: produtosApi,
+      });
+
+      if (onVendaUpdated) onVendaUpdated();
+      setOpen(false);
+      alert("Venda atualizada com sucesso!");
+    } catch (error) {
+      console.error("Erro ao atualizar venda:", error);
+      alert("Erro ao atualizar venda");
+    }
   };
 
   return (
-    <DialogContent
-      style={{
-        width: "800px",
-        maxWidth: "none",
-        height: "70vh",
-        overflowY: "auto",
-      }}
-    >
-      <DialogHeader>
-        <DialogTitle>Editar Venda #{venda.id}</DialogTitle>
-      </DialogHeader>
+    <FormProvider {...methods}>
+      <DialogContent
+        style={{
+          width: "900px",
+          maxWidth: "none",
+          height: "70vh",
+          overflowY: "auto",
+        }}
+      >
+        <DialogHeader>
+          <DialogTitle>Editar Venda #{venda.id}</DialogTitle>
+        </DialogHeader>
 
-      <CardContent className="p-6 space-y-4">
-        <div>
-          <strong>Cliente:</strong>
-          <Input
-            value={clienteNome}
-            onChange={(e) => setClienteNome(e.target.value)}
-          />
-        </div>
-        <div>
-          <strong>Data da Venda:</strong>
-          <Input
-            type="date"
-            value={dataVenda.split("T")[0]}
-            onChange={(e) => setDataVenda(e.target.value)}
-          />
-        </div>
-        <div>
-          <strong>Desconto (%):</strong>
-          <Input
-            type="number"
-            value={desconto}
-            onChange={(e) => setDesconto(Number(e.target.value))}
-          />
-        </div>
-        <div>
-          <strong>Total:</strong> R${total.toFixed(2).replace(".", ",")}
-        </div>
-        <div>
-          <strong>Total com Desconto:</strong> R$
-          {totalComDesconto.toFixed(2).replace(".", ",")}
-        </div>
+        <CardContent className="p-6 space-y-4">
+          <div>
+            <strong>Cliente:</strong>
+            <Input value={venda.cliente_nome} disabled />
+          </div>
 
-        <div className="pt-4">
-          <strong>Itens:</strong>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Produto</TableHead>
-                <TableHead>Quantidade</TableHead>
-                <TableHead>Preço Unitário</TableHead>
-                <TableHead>Desconto (%)</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {itens.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>{item.produto_nome}</TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={item.quantidade}
-                      onChange={(e) =>
-                        handleItemChange(
-                          item.id,
-                          "quantidade",
-                          Number(e.target.value)
-                        )
-                      }
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={item.preco_unitario}
-                      onChange={(e) =>
-                        handleItemChange(
-                          item.id,
-                          "preco_unitario",
-                          Number(e.target.value)
-                        )
-                      }
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={item.desconto}
-                      onChange={(e) =>
-                        handleItemChange(
-                          item.id,
-                          "desconto",
-                          Number(e.target.value)
-                        )
-                      }
-                    />
-                  </TableCell>
+          <div>
+            <strong>Data da Venda:</strong>
+            <Input type="date" {...methods.register("data_venda")} />
+          </div>
+
+          <div>
+            <strong>Desconto (%):</strong>
+            <Input type="number" {...methods.register("desconto")} />
+          </div>
+
+          <div>
+            <strong>Total:</strong> R${total.toFixed(2).replace(".", ",")}
+          </div>
+          <div>
+            <strong>Total com Desconto:</strong> R$
+            {totalComDesconto.toFixed(2).replace(".", ",")}
+          </div>
+
+          <div className="pt-4">
+            <div className="flex justify-between items-center mb-2">
+              <strong>Itens:</strong>
+              <Button
+                onClick={() =>
+                  append({
+                    produto_id: 0,
+                    produto_nome: "",
+                    quantidade: 1,
+                    preco_unitario: 0,
+                    desconto: 0,
+                  })
+                }
+              >
+                Adicionar Produto
+              </Button>
+            </div>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Produto</TableHead>
+                  <TableHead>Quantidade</TableHead>
+                  <TableHead>Preço Unitário</TableHead>
+                  <TableHead>Desconto (%)</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
 
-        <div className="pt-4 flex gap-2">
-          <Button
-            onClick={handleSave}
-            className="
-    bg-green-500 
-    text-primary-foreground 
-    font-medium 
-    px-8 
-    h-11 
-    shadow-soft 
-    cursor-pointer 
-    transition-colors 
-    duration-300 
-    ease-in-out
-    hover:bg-green-600
-    hover:shadow-md
-  "
-          >
-            Salvar
-          </Button>
-          <Button
-            className="cursor-pointer"
-            variant="secondary"
-            onClick={() => setOpen(false)}
-          >
-            Fechar
-          </Button>
-        </div>
-      </CardContent>
-    </DialogContent>
+              <TableBody>
+                {fields.map((item, index) => (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      <ProdutoSelect
+                        control={control}
+                        name={`itens.${index}.produto_id`}
+                        produtos={produtos}
+                        index={index}
+                        atualizarPrecoProduto={atualizarPrecoProduto}
+                      />
+                    </TableCell>
+
+                    <TableCell>
+                      <Input
+                        type="number"
+                        {...methods.register(`itens.${index}.quantidade`)}
+                      />
+                    </TableCell>
+
+                    <TableCell>
+                      <Input
+                        type="number"
+                        {...methods.register(`itens.${index}.preco_unitario`)}
+                      />
+                    </TableCell>
+
+                    <TableCell>
+                      <Input
+                        type="number"
+                        {...methods.register(`itens.${index}.desconto`)}
+                      />
+                    </TableCell>
+
+                    <TableCell>
+                      <Button
+                        variant="destructive"
+                        onClick={() => remove(index)}
+                      >
+                        Remover
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="pt-4 flex gap-2">
+            <Button
+              onClick={handleSubmit(onSubmit)}
+              className="bg-green-500 text-primary-foreground font-medium px-8 h-11 shadow-soft cursor-pointer transition-colors duration-300 ease-in-out hover:bg-green-600 hover:shadow-md"
+            >
+              Salvar
+            </Button>
+
+            <Button
+              className="cursor-pointer"
+              variant="secondary"
+              onClick={() => setOpen(false)}
+            >
+              Fechar
+            </Button>
+          </div>
+        </CardContent>
+      </DialogContent>
+    </FormProvider>
   );
 }
