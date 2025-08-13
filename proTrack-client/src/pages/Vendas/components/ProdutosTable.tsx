@@ -50,7 +50,12 @@ export function ProdutosTable({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Produtos da Venda</CardTitle>
-        <Button type="button" onClick={handleAdicionarProduto} size="sm">
+        <Button
+          type="button"
+          onClick={handleAdicionarProduto}
+          size="sm"
+          className="cursor-pointer bg-gradient-to-r from-[#628DFD] to-[#6F31FF] hover:from-[#7A9BFD] hover:to-[#B597F9]"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Adicionar Produto
         </Button>

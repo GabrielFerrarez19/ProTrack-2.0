@@ -58,9 +58,9 @@ export function DefaultLayout() {
         />
         <SidebarItem
           icon={<ShoppingCart size={20} />}
-          text="Vendas"
-          router="/vendas"
-          active={currentPath === "/vendas"}
+          text="Total vendas"
+          router="/totalVendas"
+          active={currentPath === "/totalVendas"}
         />
         <SidebarItem
           icon={<TrendingUp size={20} />}

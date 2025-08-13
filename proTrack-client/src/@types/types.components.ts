@@ -78,3 +78,33 @@ export interface Product {
   preco_custo: number;
   preco_venda: number;
 }
+
+export interface VendaResponse {
+  id: number;
+  cliente_id: number;
+  cliente_nome: string;
+  data_venda: string; // formato YYYY-MM-DD vindo do MySQL
+  desconto: number;
+  total: number;
+  total_com_desconto: number;
+  data_cadastro: string; // formato DATETIME vindo do MySQL
+  itens: {
+    id: number;
+    venda_id: number;
+    produto_id: number;
+    produto_nome: string;
+    quantidade: number;
+    preco_unitario: number;
+    desconto: number;
+  }[];
+}
+
+export interface ItemVenda {
+  id: number; // ID do item na venda
+  venda_id: number; // ID da venda à qual o item pertence
+  produto_id: number; // ID do produto
+  produto_nome: string; // Nome do produto
+  quantidade: number; // Quantidade vendida
+  preco_unitario: number; // Preço unitário do produto
+  desconto?: number; // Desconto aplicado no item (em %)
+}
