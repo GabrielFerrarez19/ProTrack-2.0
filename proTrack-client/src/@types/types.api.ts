@@ -71,3 +71,23 @@ export interface VendaData {
 export interface TotalVendasResponse {
   totalVendas: number;
 }
+
+export interface VendaResponse {
+  id: number;
+  cliente_id: number;
+  cliente_nome: string;
+  data_venda: string; // formato YYYY-MM-DD vindo do MySQL
+  desconto: number;
+  total: number;
+  total_com_desconto: number;
+  data_cadastro: string; // formato DATETIME vindo do MySQL
+  itens: {
+    id: number;
+    venda_id: number;
+    produto_id: number;
+    produto_nome: string;
+    quantidade: number;
+    preco_unitario: number;
+    desconto: number;
+  }[];
+}

@@ -120,10 +120,16 @@ export function Vendas() {
                 setTotalGeral(0);
                 setTotalComDesconto(0);
               }}
+              className="cursor-pointer"
             >
               Cancelar
             </Button>
-            <Button type="submit">Cadastrar Venda</Button>
+            <Button
+              type="submit"
+              className="bg-green-600 hover:bg-green-500 cursor-pointer"
+            >
+              Cadastrar Venda
+            </Button>
           </div>
         </form>
       </FormProvider>
