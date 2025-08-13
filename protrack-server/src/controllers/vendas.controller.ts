@@ -53,3 +53,14 @@ export async function criarVenda(req: Request, res: Response) {
     connection.release();
   }
 }
+
+export const getTotalVendas = async (req: Request, res: Response) => {
+  try {
+    const [rows] = await db.query("SELECT COUNT(*) AS totalVendas FROM vendas");
+    const total = (rows as any)[0]?.totalVendas || 0;
+    res.status(200).json({ totalVendas: total });
+  } catch (error) {
+    console.error("Erro ao buscar total de vendas:", error);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
+};

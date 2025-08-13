@@ -15,7 +15,7 @@ const Estoque = () => {
     try {
       setLoading(true);
       const data = await fetchAllProdutos();
-      setProducts(data);
+      setProducts(data as Product[]);
     } catch {
       setError("Erro ao carregar produtos");
     } finally {

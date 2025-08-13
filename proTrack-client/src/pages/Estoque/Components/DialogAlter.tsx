@@ -93,6 +93,7 @@ export function DialogAlter({
       await atualizarProduto(updatedProduct);
       setOpen(false);
       // Chama o callback para atualizar os dados da tabela
+      alert("Cliente alterado com sucesso!");
       if (onProductUpdated) {
         onProductUpdated();
       }

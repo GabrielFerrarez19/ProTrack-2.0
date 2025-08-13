@@ -67,3 +67,7 @@ export interface VendaData {
   totalComDesconto: number;
   produtos: ProdutoVenda[];
 }
+
+export interface TotalVendasResponse {
+  totalVendas: number;
+}
