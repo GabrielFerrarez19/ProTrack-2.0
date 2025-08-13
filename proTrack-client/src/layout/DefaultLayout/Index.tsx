@@ -9,6 +9,7 @@ import {
   PackageSearch,
   UserPlus,
   UserSearch,
+  Store,
 } from "lucide-react";
 import { SidebarItem } from "../../components/Sidebar/SidebarItem";
 
@@ -50,10 +51,16 @@ export function DefaultLayout() {
           active={currentPath === "/clientes"}
         />
         <SidebarItem
-          icon={<ShoppingCart size={20} />}
+          icon={<Store size={20} />}
           text="Venda"
           router="/venda"
           active={currentPath === "/venda"}
+        />
+        <SidebarItem
+          icon={<ShoppingCart size={20} />}
+          text="Total vendas"
+          router="/totalVendas"
+          active={currentPath === "/totalVendas"}
         />
         <SidebarItem
           icon={<TrendingUp size={20} />}

@@ -93,6 +93,7 @@ export function DialogAlter({
       await atualizarProduto(updatedProduct);
       setOpen(false);
       // Chama o callback para atualizar os dados da tabela
+      alert("Cliente alterado com sucesso!");
       if (onProductUpdated) {
         onProductUpdated();
       }
@@ -252,7 +253,20 @@ export function DialogAlter({
           <div className="flex gap-4 pt-4">
             <Button
               type="submit"
-              className="bg-green-500 cursor-pointer hover:bg-gradient-secondary text-primary-foreground font-medium px-8 h-11 shadow-soft"
+              className="
+    bg-green-500 
+    text-primary-foreground 
+    font-medium 
+    px-8 
+    h-11 
+    shadow-soft 
+    cursor-pointer 
+    transition-colors 
+    duration-300 
+    ease-in-out
+    hover:bg-green-600
+    hover:shadow-md
+  "
             >
               Alterar produto
             </Button>
