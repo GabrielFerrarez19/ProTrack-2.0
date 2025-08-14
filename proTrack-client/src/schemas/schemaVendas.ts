@@ -6,6 +6,7 @@ export const vendaSchema = z.object({
   desconto: z.number(),
   total: z.number().optional(),
   totalComDesconto: z.number().optional(),
+  status: z.enum(["Pendente", "pago", "cancelado"]).optional(), // novo campo
   produtos: z.array(
     z.object({
       produtoId: z.string(),

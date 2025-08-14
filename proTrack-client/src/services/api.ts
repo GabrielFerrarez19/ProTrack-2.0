@@ -6,6 +6,7 @@ import type {
   Produto,
   TotalClientesResponse,
   TotalVendasResponse,
+  VendaAtualizacao,
   VendaData,
   VendaResponse,
 } from "../@types/types.api";
@@ -173,24 +174,6 @@ export const fetchAllVendas = async (): Promise<VendaResponse[]> => {
     throw error;
   }
 };
-
-// Tipagem dos itens da venda
-interface ItemVenda {
-  produtoId: number;
-  quantidade: number;
-  precoUnitario: number;
-  desconto?: number; // opcional, padrão 0
-}
-
-// Tipagem do corpo da venda
-interface VendaAtualizacao {
-  clienteId?: number;
-  dataVenda?: string; // formato 'YYYY-MM-DD'
-  desconto?: number;
-  total?: number;
-  totalComDesconto?: number;
-  produtos?: ItemVenda[];
-}
 
 export const atualizarVenda = async (id: number, venda: VendaAtualizacao) => {
   try {

@@ -87,6 +87,7 @@ export interface VendaResponse {
   desconto: number;
   total: number;
   total_com_desconto: number;
+  status: "pendente" | "pago" | "cancelado"; // novo campo
   data_cadastro: string; // formato DATETIME vindo do MySQL
   itens: {
     id: number;
@@ -120,6 +121,7 @@ export interface ItemVendaForm {
 export interface VendaForm {
   data_venda: string;
   desconto: number;
+  status: "pendente" | "pago" | "cancelado"; // novo campo
   itens: ItemVendaForm[];
 }
 
