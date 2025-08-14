@@ -11,6 +11,7 @@ import {
 import { Badge } from "../../../components/ui/badge";
 import { Dialog } from "../../../components/ui/dialog";
 import { DialogAlterVenda } from "./DialogAlter";
+import { formatStatus } from "../../../utils/functions";
 
 // Cores fixas para cada coluna
 const totalColor = "bg-blue-100 text-blue-800";
@@ -57,11 +58,15 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
             </TableHead>
             <TableHead className="text-gray-700 font-semibold">Data</TableHead>
             <TableHead className="text-gray-700 font-semibold">Total</TableHead>
+
             <TableHead className="text-gray-700 font-semibold">
               Desconto
             </TableHead>
             <TableHead className="text-gray-700 font-semibold">
               Total c/ Desconto
+            </TableHead>
+            <TableHead className="text-gray-700 font-semibold">
+              Status
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -97,6 +102,11 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
                 <TableCell>
                   <Badge className={totalComDescontoColor}>
                     R$ {formatCurrency(Number(venda.total_com_desconto ?? 0))}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge className={formatStatus(venda.status).color}>
+                    {formatStatus(venda.status).text}
                   </Badge>
                 </TableCell>
               </TableRow>

@@ -63,3 +63,26 @@ export function formatarDataParaInput(data: string): string {
 
   return "";
 }
+
+// Função que retorna a cor de acordo com o status
+export function formatStatus(status: "pendente" | "pago" | "cancelado") {
+  let color = "";
+  switch (status) {
+    case "pendente":
+      color = "bg-yellow-100 text-yellow-800";
+      break;
+    case "pago":
+      color = "bg-green-100 text-green-800";
+      break;
+    case "cancelado":
+      color = "bg-red-100 text-red-800";
+      break;
+    default:
+      color = "bg-gray-100 text-gray-800";
+  }
+
+  // Coloca a primeira letra em maiúscula
+  const formattedText = status.charAt(0).toUpperCase() + status.slice(1);
+
+  return { color, text: formattedText };
+}

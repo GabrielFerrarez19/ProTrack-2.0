@@ -20,6 +20,7 @@ export function Vendas() {
       desconto: 0,
       total: 0,
       totalComDesconto: 0,
+      status: "Pendente", // valor padrão
       produtos: [],
     },
   });
@@ -30,9 +31,7 @@ export function Vendas() {
   });
 
   const watchedProdutos = methods.watch("produtos");
-
   const { produtos } = useProdutos();
-
   const [totalGeral, setTotalGeral] = useState(0);
   const [totalComDesconto, setTotalComDesconto] = useState(0);
 
@@ -55,13 +54,13 @@ export function Vendas() {
     console.log("Dados da venda:", data);
 
     try {
-      // Converter para o tipo esperado na API
       const vendaParaEnviar: VendaData = {
         clienteId: data.clienteId,
         dataVenda: data.dataVenda,
         desconto: data.desconto,
         total: data.total,
         totalComDesconto: data.totalComDesconto,
+        status: "pendente", // envia sempre como pendente
         produtos: data.produtos.map((p) => ({
           produtoId: p.produtoId,
           quantidade: p.quantidade,
@@ -73,12 +72,19 @@ export function Vendas() {
       const resposta = await criarVenda(vendaParaEnviar);
       console.log("Venda cadastrada com sucesso:", resposta);
       alert("Produto cadastrado com sucesso");
-      methods.reset();
+      methods.reset({
+        clienteId: "",
+        dataVenda: new Date().toISOString().split("T")[0],
+        desconto: 0,
+        total: 0,
+        totalComDesconto: 0,
+        status: "Pendente", // reset também mantém o padrão
+        produtos: [],
+      });
       setTotalGeral(0);
       setTotalComDesconto(0);
     } catch (error) {
       console.error("Erro ao cadastrar venda:", error);
-      // Aqui você pode mostrar uma mensagem de erro para o usuário
     }
   };
 
@@ -116,7 +122,15 @@ export function Vendas() {
               type="button"
               variant="outline"
               onClick={() => {
-                methods.reset();
+                methods.reset({
+                  clienteId: "",
+                  dataVenda: new Date().toISOString().split("T")[0],
+                  desconto: 0,
+                  total: 0,
+                  totalComDesconto: 0,
+                  status: "Pendente",
+                  produtos: [],
+                });
                 setTotalGeral(0);
                 setTotalComDesconto(0);
               }}

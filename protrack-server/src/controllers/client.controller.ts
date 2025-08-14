@@ -1,192 +1,78 @@
 import { Request, Response } from "express";
-import { db } from "../db/connection";
+import {
+  ClienteData,
+  createClienteDb,
+  updateClienteDb,
+  getTotalClientesDb,
+  getAllClientesDb,
+} from "../services/client.service";
 
-export const createCliente = (req: Request, res: Response) => {
-  const {
-    nome,
-    dataNascimento,
-    cpf,
-    rg,
-    estadoCivil,
-    sexo,
-    telefoneWhatsapp,
-    telefoneCelular,
-    telefoneResidencial,
-    email,
-    cep,
-    endereco,
-    numero,
-    complemento,
-    bairro,
-    cidade,
-  } = req.body;
+export const createCliente = async (req: Request, res: Response) => {
+  const cliente: ClienteData = req.body;
 
-  // Validação mínima dos campos obrigatórios
-  if (!nome || !dataNascimento || !cpf || !email) {
+  if (
+    !cliente.nome ||
+    !cliente.dataNascimento ||
+    !cliente.cpf ||
+    !cliente.email
+  ) {
     return res.status(400).json({
       error: "Nome, data de nascimento, CPF e e-mail são obrigatórios.",
     });
   }
 
-  const sql = `
-    INSERT INTO clientes (
-      nome, data_nascimento, cpf, rg, estado_civil, sexo,
-      telefone_whatsapp, telefone_celular, telefone_residencial,
-      email, cep, endereco, numero, complemento, bairro, cidade
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-
-  const values = [
-    nome,
-    dataNascimento,
-    cpf,
-    rg || null,
-    estadoCivil || null,
-    sexo || null,
-    telefoneWhatsapp || null,
-    telefoneCelular || null,
-    telefoneResidencial || null,
-    email,
-    cep || null,
-    endereco || null,
-    numero || null,
-    complemento || null,
-    bairro || null,
-    cidade || null,
-  ];
-
-  db.query(sql, values, (err, results) => {
-    if (err) {
-      console.error("Erro ao inserir cliente:", err);
-      return res
-        .status(500)
-        .json({ error: "Erro interno ao cadastrar cliente" });
-    }
-
-    res.status(201).json({
-      message: "Cliente cadastrado com sucesso!",
-      id: results.insertId,
-    });
-  });
+  try {
+    const id = await createClienteDb(cliente);
+    res.status(201).json({ message: "Cliente cadastrado com sucesso!", id });
+  } catch (err: any) {
+    console.error("Erro ao criar cliente:", err);
+    res.status(500).json({ error: "Erro interno ao cadastrar cliente" });
+  }
 };
 
-export const getTotalClientes = (req: Request, res: Response) => {
-  const sql = "SELECT COUNT(*) AS totalClientes FROM clientes";
+export const updateCliente = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const cliente: ClienteData = req.body;
 
-  db.query(sql, (err: any, results: any) => {
-    if (err) {
-      console.error("Erro ao buscar o total de clientes cadastrados:", err);
-      return res.status(500).json({ error: "Erro interno do servidor" });
-    }
-
-    const total = results[0].totalClientes || 0;
-
-    res.status(200).json({ totalClientes: total });
-  });
-};
-
-export const getAllClientes = (req: Request, res: Response) => {
-  const sql = "SELECT * FROM clientes";
-
-  db.query(sql, (err: any, results: any) => {
-    if (err) {
-      console.error("Erro ao buscar clientes cadastrados:", err);
-      return res.status(500).json({ error: "Erro interno do servidor" });
-    }
-
-    res.status(200).json({ clientes: results });
-  });
-};
-
-export const updateCliente = (req: Request, res: Response) => {
-  const { id } = req.params;
-  const {
-    nome,
-    dataNascimento, // aqui você pode renomear para data_nascimento
-    cpf,
-    rg,
-    estadoCivil,
-    sexo,
-    telefoneWhatsapp,
-    telefoneCelular,
-    telefoneResidencial,
-    email,
-    cep,
-    endereco,
-    numero,
-    complemento,
-    bairro,
-    cidade,
-  } = req.body;
-
-  // Validação dos campos obrigatórios
-  if (!id || !nome || !dataNascimento || !cpf || !email) {
+  if (
+    !id ||
+    !cliente.nome ||
+    !cliente.dataNascimento ||
+    !cliente.cpf ||
+    !cliente.email
+  ) {
     return res.status(400).json({
-      error: "ID, nome, data de nascimento, CPF e email são obrigatórios",
+      error: "ID, nome, data de nascimento, CPF e e-mail são obrigatórios.",
     });
   }
 
-  const sql = `
-    UPDATE clientes SET 
-      nome = ?, 
-      data_nascimento = ?, 
-      cpf = ?, 
-      rg = ?, 
-      estado_civil = ?, 
-      sexo = ?, 
-      telefone_celular = ?, 
-      telefone_whatsapp = ?, 
-      telefone_residencial = ?, 
-      email = ?, 
-      cep = ?, 
-      endereco = ?, 
-      numero = ?, 
-      complemento = ?, 
-      bairro = ?, 
-      cidade = ?
-    WHERE id = ?
-  `;
+  try {
+    await updateClienteDb(id, cliente);
+    res.status(200).json({ message: "Cliente atualizado com sucesso" });
+  } catch (err: any) {
+    if (err.message === "Cliente não encontrado")
+      return res.status(404).json({ error: err.message });
+    console.error("Erro ao atualizar cliente:", err);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
+};
 
-  const values = [
-    nome,
-    dataNascimento, // aqui o valor deve estar no formato correto YYYY-MM-DD
-    cpf,
-    rg || null,
-    estadoCivil || null,
-    sexo || null,
-    telefoneCelular || null,
-    telefoneWhatsapp || null,
-    telefoneResidencial || null,
-    email,
-    cep || null,
-    endereco || null,
-    numero || null,
-    complemento || null,
-    bairro || null,
-    cidade || null,
-    id,
-  ];
+export const getTotalClientes = async (req: Request, res: Response) => {
+  try {
+    const total = await getTotalClientesDb();
+    res.status(200).json({ totalClientes: total });
+  } catch (err) {
+    console.error("Erro ao buscar total de clientes:", err);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
+};
 
-  db.query(sql, values, (err: any, results: any) => {
-    if (err) {
-      console.error(
-        "Erro ao atualizar cliente:",
-        err.sqlMessage || err.message
-      );
-      return res
-        .status(500)
-        .json({
-          error: "Erro interno do servidor",
-          details: err.sqlMessage || err.message,
-        });
-    }
-
-    if (results.affectedRows === 0) {
-      return res.status(404).json({ error: "Cliente não encontrado" });
-    }
-
-    res.status(200).json({
-      message: "Cliente atualizado com sucesso",
-    });
-  });
+export const getAllClientes = async (req: Request, res: Response) => {
+  try {
+    const clientes = await getAllClientesDb();
+    res.status(200).json({ clientes });
+  } catch (err) {
+    console.error("Erro ao buscar clientes:", err);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
 };

@@ -64,6 +64,7 @@ export interface VendaData {
   dataVenda: string;
   desconto: number;
   total: number;
+  status: string;
   totalComDesconto: number;
   produtos: ProdutoVenda[];
 }
@@ -80,6 +81,7 @@ export interface VendaResponse {
   desconto: number;
   total: number;
   total_com_desconto: number;
+  status: "pendente" | "pago" | "cancelado"; // novo campo
   data_cadastro: string; // formato DATETIME vindo do MySQL
   itens: {
     id: number;
@@ -90,4 +92,23 @@ export interface VendaResponse {
     preco_unitario: number;
     desconto: number;
   }[];
+}
+
+// Tipagem dos itens da venda
+export interface ItemVenda {
+  produtoId: number;
+  quantidade: number;
+  precoUnitario: number;
+  desconto?: number; // opcional, padrão 0
+}
+
+// Tipagem do corpo da venda (atualização)
+export interface VendaAtualizacao {
+  clienteId?: number;
+  dataVenda?: string; // formato 'YYYY-MM-DD'
+  desconto?: number;
+  total?: number;
+  totalComDesconto?: number;
+  status?: "pendente" | "pago" | "cancelado"; // novo campo
+  produtos?: ItemVenda[];
 }

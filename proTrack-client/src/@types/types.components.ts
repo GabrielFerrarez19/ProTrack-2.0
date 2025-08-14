@@ -87,6 +87,7 @@ export interface VendaResponse {
   desconto: number;
   total: number;
   total_com_desconto: number;
+  status: "pendente" | "pago" | "cancelado"; // novo campo
   data_cadastro: string; // formato DATETIME vindo do MySQL
   itens: {
     id: number;
@@ -107,4 +108,26 @@ export interface ItemVenda {
   quantidade: number; // Quantidade vendida
   preco_unitario: number; // Preço unitário do produto
   desconto?: number; // Desconto aplicado no item (em %)
+}
+
+export interface ItemVendaForm {
+  produto_id: number;
+  produto_nome: string;
+  quantidade: number;
+  preco_unitario: number;
+  desconto: number;
+}
+
+export interface VendaForm {
+  data_venda: string;
+  desconto: number;
+  status: "pendente" | "pago" | "cancelado"; // novo campo
+  itens: ItemVendaForm[];
+}
+
+export interface ProdutoApi {
+  id: number;
+  nome: string;
+  codigo_barras?: string;
+  preco_venda?: number;
 }

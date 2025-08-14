@@ -1,138 +1,76 @@
 import { Request, Response } from "express";
-import { db } from "../db/connection";
+import {
+  ProdutoData,
+  createProductDb,
+  updateProductDb,
+  getTotalEstoqueDb,
+  getAllProdutosDb,
+} from "../services/product.service";
 
-export const createProduct = (req: Request, res: Response) => {
-  const {
-    nome,
-    descricao,
-    categoria,
-    codigo_barras,
-    quantidade,
-    tamanho,
-    preco_custo,
-    preco_venda,
-  } = req.body;
+export const createProduct = async (req: Request, res: Response) => {
+  const produto: ProdutoData = req.body;
 
-  if (!nome || preco_custo === undefined || preco_venda === undefined) {
+  if (
+    !produto.nome ||
+    produto.preco_custo === undefined ||
+    produto.preco_venda === undefined
+  ) {
     return res.status(400).json({
       error: "Nome, preço de custo e preço de venda são obrigatórios",
     });
   }
 
-  const sql = `
-    INSERT INTO produtos 
-    (nome, descricao, categoria, codigo_barras, quantidade, tamanho, preco_custo, preco_venda)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-
-  const values = [
-    nome,
-    descricao || null,
-    categoria || null,
-    codigo_barras || null,
-    quantidade || 0,
-    tamanho || null,
-    preco_custo,
-    preco_venda,
-  ];
-
-  db.query(sql, values, (err: any, results: any) => {
-    if (err) {
-      console.error("Erro ao inserir produto:", err);
-      return res.status(500).json({ error: "Erro interno do servidor" });
-    }
-
-    res.status(201).json({
-      message: "Produto criado com sucesso",
-      id: results.insertId,
-    });
-  });
+  try {
+    const id = await createProductDb(produto);
+    res.status(201).json({ message: "Produto criado com sucesso", id });
+  } catch (err: any) {
+    console.error("Erro ao criar produto:", err);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
 };
 
-export const updateProduct = (req: Request, res: Response) => {
-  const { id } = req.params;
-  const {
-    nome,
-    descricao,
-    categoria,
-    codigo_barras,
-    quantidade,
-    tamanho,
-    preco_custo,
-    preco_venda,
-  } = req.body;
+export const updateProduct = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const produto: ProdutoData = req.body;
 
-  if (!id || !nome || preco_custo === undefined || preco_venda === undefined) {
+  if (
+    !id ||
+    !produto.nome ||
+    produto.preco_custo === undefined ||
+    produto.preco_venda === undefined
+  ) {
     return res.status(400).json({
       error: "ID, nome, preço de custo e preço de venda são obrigatórios",
     });
   }
 
-  const sql = `
-    UPDATE produtos SET 
-      nome = ?, 
-      descricao = ?, 
-      categoria = ?, 
-      codigo_barras = ?, 
-      quantidade = ?, 
-      tamanho = ?, 
-      preco_custo = ?, 
-      preco_venda = ?
-    WHERE id = ?
-  `;
-
-  const values = [
-    nome,
-    descricao || null,
-    categoria || null,
-    codigo_barras || null,
-    quantidade || 0,
-    tamanho || null,
-    preco_custo,
-    preco_venda,
-    id,
-  ];
-
-  db.query(sql, values, (err: any, results: any) => {
-    if (err) {
-      console.error("Erro ao atualizar produto:", err);
-      return res.status(500).json({ error: "Erro interno do servidor" });
-    }
-
-    if (results.affectedRows === 0) {
-      return res.status(404).json({ error: "Produto não encontrado" });
-    }
-
-    res.status(200).json({
-      message: "Produto atualizado com sucesso",
-    });
-  });
+  try {
+    await updateProductDb(id, produto);
+    res.status(200).json({ message: "Produto atualizado com sucesso" });
+  } catch (err: any) {
+    if (err.message === "Produto não encontrado")
+      return res.status(404).json({ error: err.message });
+    console.error("Erro ao atualizar produto:", err);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
 };
 
-export const getTotalEstoque = (req: Request, res: Response) => {
-  const sql = "SELECT SUM(quantidade) AS totalEstoque FROM produtos";
-
-  db.query(sql, (err: any, results: any) => {
-    if (err) {
-      console.error("Erro ao buscar o total de itens no estoque:", err);
-      return res.status(500).json({ error: "Erro interno do servidor" });
-    }
-
-    const total = results[0].totalEstoque || 0;
-
+export const getTotalEstoque = async (req: Request, res: Response) => {
+  try {
+    const total = await getTotalEstoqueDb();
     res.status(200).json({ totalEstoque: total });
-  });
+  } catch (err) {
+    console.error("Erro ao buscar total do estoque:", err);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
 };
 
-export const getAllProdutos = (req: Request, res: Response) => {
-  const sql = "SELECT * FROM produtos";
-
-  db.query(sql, (err, results) => {
-    if (err) {
-      console.error("Erro ao buscar os produtos:", err);
-      return res.status(500).json({ error: "Erro interno do servidor" });
-    }
-
-    res.status(200).json(results);
-  });
+export const getAllProdutos = async (req: Request, res: Response) => {
+  try {
+    const produtos = await getAllProdutosDb();
+    res.status(200).json(produtos);
+  } catch (err) {
+    console.error("Erro ao buscar produtos:", err);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
 };
