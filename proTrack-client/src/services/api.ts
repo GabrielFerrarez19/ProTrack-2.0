@@ -12,181 +12,95 @@ import type {
 } from "../@types/types.api";
 import type { ClienteFormData } from "../@types/types.components";
 
+// Instância Axios central
+const api = axios.create({
+  baseURL: "http://localhost:8085",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  timeout: 5000,
+});
+
+// Interceptor global de erros (opcional)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const err = error as AxiosError;
+    return Promise.reject(err.response?.data || { error: "Erro desconhecido" });
+  }
+);
+
 export const loginUser = async (email: string, password: string) => {
-  const response = await axios.post("http://localhost:8085/login", {
-    email,
-    password,
-  });
+  const response = await api.post("/login", { email, password });
   return response.data;
 };
 
 export const cadastrarProduto = async (produto: Produto) => {
-  try {
-    const response = await axios.post(
-      "http://localhost:8085/product/produtos",
-      produto
-    );
-    return response.data;
-  } catch (error: unknown) {
-    const axiosError = error as AxiosError;
-
-    throw axiosError.response?.data || { error: "Erro desconhecido" };
-  }
+  const response = await api.post("/product/produtos", produto);
+  return response.data;
 };
 
 export const atualizarProduto = async (produto: Produto) => {
-  try {
-    if (!produto.id) {
-      throw { error: "ID do produto é obrigatório para atualização" };
-    }
-
-    const id = produto.id;
-
-    const response = await axios.put(
-      `http://localhost:8085/product/produtos/${id}`,
-      produto
-    );
-
-    return response.data;
-  } catch (error: unknown) {
-    const axiosError = error as AxiosError;
-
-    throw axiosError.response?.data || { error: "Erro desconhecido" };
-  }
+  if (!produto.id)
+    throw { error: "ID do produto é obrigatório para atualização" };
+  const response = await api.put(`/product/produtos/${produto.id}`, produto);
+  return response.data;
 };
 
 export const fetchTotalEstoque = async (): Promise<EstoqueResponse> => {
-  try {
-    const response = await axios.get<EstoqueResponse>(
-      "http://localhost:8085/product/produtos/estoque-total"
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Erro ao buscar total em estoque:", error);
-    throw error;
-  }
+  const response = await api.get<EstoqueResponse>(
+    "/product/produtos/estoque-total"
+  );
+  return response.data;
 };
 
 export const fetchAllProdutos = async (): Promise<Produto[]> => {
-  try {
-    const response = await axios.get<Produto[]>(
-      "http://localhost:8085/product/produtos/todos"
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Erro ao buscar produtos:", error);
-    throw error;
-  }
+  const response = await api.get<Produto[]>("/product/produtos/todos");
+  return response.data;
 };
 
 export const cadastrarCliente = async (cliente: Cliente) => {
-  try {
-    const response = await axios.post(
-      "http://localhost:8085/clients/clientes",
-      cliente
-    );
-    return response.data;
-  } catch (error: unknown) {
-    const axiosError = error as AxiosError;
-
-    throw axiosError.response?.data || { error: "Erro desconhecido" };
-  }
+  const response = await api.post("/clients/clientes", cliente);
+  return response.data;
 };
 
 export const fetchTotalClientes = async (): Promise<TotalClientesResponse> => {
-  try {
-    const response = await axios.get<TotalClientesResponse>(
-      "http://localhost:8085/clients/clientes/total"
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Erro ao buscar total de clientes:", error);
-    throw error;
-  }
+  const response = await api.get<TotalClientesResponse>(
+    "/clients/clientes/total"
+  );
+  return response.data;
 };
 
 export const fetchAllClientes = async (): Promise<ClientesResponse> => {
-  try {
-    const response = await axios.get<ClientesResponse>(
-      "http://localhost:8085/clients/clientes/todos"
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Erro ao buscar clientes cadastrados:", error);
-    throw error;
-  }
+  const response = await api.get<ClientesResponse>("/clients/clientes/todos");
+  return response.data;
 };
 
 export const atualizarCliente = async (
   id: number,
   cliente: ClienteFormData
 ) => {
-  try {
-    if (!id) {
-      throw { error: "ID do cliente é obrigatório para atualização" };
-    }
-
-    const response = await axios.put(
-      `http://localhost:8085/clients/altera/${id}`, // rota corrigida
-      cliente
-    );
-
-    return response.data;
-  } catch (error: unknown) {
-    const axiosError = error as AxiosError;
-    throw axiosError.response?.data || { error: "Erro desconhecido" };
-  }
+  if (!id) throw { error: "ID do cliente é obrigatório para atualização" };
+  const response = await api.put(`/clients/altera/${id}`, cliente);
+  return response.data;
 };
 
 export async function criarVenda(data: VendaData) {
-  try {
-    const response = await axios.post(
-      "http://localhost:8085/vendas/cadvendas",
-      data
-    );
-    return response.data;
-  } catch (error) {
-    // Você pode tratar o erro aqui ou repassar
-    throw error;
-  }
+  const response = await api.post("/vendas/cadvendas", data);
+  return response.data;
 }
 
 export const fetchTotalVendas = async (): Promise<TotalVendasResponse> => {
-  try {
-    const response = await axios.get<TotalVendasResponse>(
-      "http://localhost:8085/vendas/totalvendas"
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Erro ao buscar total de vendas:", error);
-    throw error;
-  }
+  const response = await api.get<TotalVendasResponse>("/vendas/totalvendas");
+  return response.data;
 };
 
 export const fetchAllVendas = async (): Promise<VendaResponse[]> => {
-  try {
-    const response = await axios.get<VendaResponse[]>(
-      "http://localhost:8085/vendas/todas"
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Erro ao buscar vendas cadastradas:", error);
-    throw error;
-  }
+  const response = await api.get<VendaResponse[]>("/vendas/todas");
+  return response.data;
 };
 
 export const atualizarVenda = async (id: number, venda: VendaAtualizacao) => {
-  try {
-    const response = await axios.put(
-      `http://localhost:8085/vendas/altera/${id}`,
-      venda
-    );
-    return response.data;
-  } catch (error: any) {
-    console.error(
-      "Erro ao atualizar venda:",
-      error.response?.data || error.message
-    );
-    throw error;
-  }
+  const response = await api.put(`/vendas/altera/${id}`, venda);
+  return response.data;
 };
