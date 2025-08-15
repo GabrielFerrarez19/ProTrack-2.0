@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import type {
   Cliente,
   ClientesResponse,
@@ -11,15 +11,7 @@ import type {
   VendaResponse,
 } from "../@types/types.api";
 import type { ClienteFormData } from "../@types/types.components";
-
-// Instância Axios central
-const api = axios.create({
-  baseURL: "http://localhost:8085",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  timeout: 5000,
-});
+import { api } from "./apiClient";
 
 // Interceptor global de erros (opcional)
 api.interceptors.response.use(
