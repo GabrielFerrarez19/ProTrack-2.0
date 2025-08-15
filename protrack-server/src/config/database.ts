@@ -4,9 +4,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  port: Number(process.env.DB_PORT),
-  database: process.env.DB_DATABASE,
+  host: "127.0.0.1", // ou '18.191.70.76' se for remoto
+  user: "protrack_user",
+  password: "senha_segura_aqui",
+  database: "protrack",
+  port: 3306, // verifique seu porto do MySQL
 });
