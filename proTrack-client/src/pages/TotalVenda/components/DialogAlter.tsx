@@ -1,4 +1,3 @@
-// DialogAlterVenda.tsx
 import {
   DialogContent,
   DialogHeader,
@@ -23,13 +22,6 @@ import type {
   VendaForm,
   ItemVendaForm,
 } from "../../../@types/types.components";
-import { Select } from "@radix-ui/react-select";
-import {
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../components/ui/select";
 
 interface DialogAlterVendaProps {
   venda: {
@@ -37,7 +29,6 @@ interface DialogAlterVendaProps {
     cliente_id: number;
     cliente_nome: string;
     desconto?: number;
-    status: "pendente" | "pago" | "cancelado";
     data_venda: string;
     itens: ItemVendaForm[];
   };
@@ -56,7 +47,6 @@ export function DialogAlterVenda({
     defaultValues: {
       data_venda: venda.data_venda.split("T")[0],
       desconto: venda.desconto ?? 0,
-      status: venda.status, // valor inicial do status
       itens: venda.itens.map((item) => ({
         produto_id: item.produto_id,
         produto_nome: item.produto_nome,
@@ -68,10 +58,7 @@ export function DialogAlterVenda({
   });
 
   const { control, handleSubmit, watch, setValue } = methods;
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "itens",
-  });
+  const { fields, append, remove } = useFieldArray({ control, name: "itens" });
 
   const itens = watch("itens");
   const desconto = watch("desconto");
@@ -84,29 +71,28 @@ export function DialogAlterVenda({
 
   const atualizarPrecoProduto = (index: number, produtoId: string) => {
     const prod = produtos.find((p) => p.id === Number(produtoId));
-    if (prod) {
-      setValue(`itens.${index}.produto_id`, prod.id ?? 0);
-      setValue(`itens.${index}.preco_unitario`, prod.preco_venda ?? 0);
-      setValue(`itens.${index}.produto_nome`, prod.nome ?? "");
-    }
+    if (!prod) return;
+
+    setValue(`itens.${index}.produto_id`, prod.id ?? 0);
+    setValue(`itens.${index}.preco_unitario`, prod.preco_venda ?? 0);
+    setValue(`itens.${index}.produto_nome`, prod.nome);
   };
 
   const onSubmit = async (formData: VendaForm) => {
-    const produtosApi = formData.itens.map((item) => ({
-      produtoId: item.produto_id,
-      quantidade: item.quantidade,
-      precoUnitario: item.preco_unitario,
-      desconto: item.desconto ?? 0,
-    }));
-
     try {
+      const produtosApi = formData.itens.map((item) => ({
+        produtoId: item.produto_id,
+        quantidade: item.quantidade,
+        precoUnitario: item.preco_unitario,
+        desconto: item.desconto ?? 0,
+      }));
+
       await atualizarVenda(venda.id, {
         clienteId: venda.cliente_id,
         dataVenda: formData.data_venda,
         desconto: formData.desconto,
         total,
         totalComDesconto,
-        status: formData.status, // envia o status selecionado
         produtos: produtosApi,
       });
 
@@ -156,26 +142,7 @@ export function DialogAlterVenda({
             <strong>Total com Desconto:</strong> R$
             {totalComDesconto.toFixed(2).replace(".", ",")}
           </div>
-          <div>
-            <strong>Status:</strong>
-            <Select
-              value={methods.watch("status")}
-              onValueChange={(value) =>
-                methods.setValue(
-                  "status",
-                  value as "pendente" | "pago" | "cancelado"
-                )
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pago">Pago</SelectItem>
-                <SelectItem value="cancelado">Cancelado</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+
           <div className="pt-4">
             <div className="flex justify-between items-center mb-2">
               <strong>Itens:</strong>
@@ -204,7 +171,6 @@ export function DialogAlterVenda({
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
-
               <TableBody>
                 {fields.map((item, index) => (
                   <TableRow key={item.id}>
