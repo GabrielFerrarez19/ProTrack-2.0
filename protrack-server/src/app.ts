@@ -13,7 +13,8 @@ app.use("/", routes); // todas as rotas vão por aqui
 
 const PORT = process.env.PORT || 8085;
 
-app.listen(PORT, () => {
+// ✅ Escutando em todas as interfaces (inclusive IP público da EC2)
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
 
