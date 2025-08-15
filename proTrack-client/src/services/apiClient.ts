@@ -2,7 +2,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: "http://18.191.70.76:8085",
+  baseURL: "/api", // <-- relativo, vai passar pelo Nginx
   timeout: 5000,
   headers: {
     "Content-Type": "application/json",
