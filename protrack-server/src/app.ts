@@ -1,23 +1,21 @@
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
-import routes from "./routes";
 
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use("/", routes); // todas as rotas vão por aqui
-
-const PORT = process.env.PORT || 8085;
-
-// ✅ Escutando em todas as interfaces (inclusive IP público da EC2)
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+// Rotas (exemplo)
+app.get("/", (req, res) => {
+  res.send("API rodando com sucesso 🚀");
 });
 
-process.on("uncaughtException", (err) => {
-  console.error("Erro não tratado:", err);
+// Porta configurável via ambiente
+const PORT = Number(process.env.PORT) || 8085;
+
+// Escutando externamente
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Servidor rodando na porta ${PORT} 🚀`);
 });
