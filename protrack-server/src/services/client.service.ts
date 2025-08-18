@@ -133,3 +133,32 @@ export const getAllClientesDb = async (): Promise<any[]> => {
     });
   });
 };
+
+export const getVendasByClienteId = async (
+  idCliente: number
+): Promise<any[]> => {
+  console.log("Buscando vendas para cliente:", idCliente);
+
+  const sql = `
+    SELECT v.id,
+           v.data_venda,
+           v.total,
+           v.total_com_desconto,
+           (v.total - v.total_com_desconto) AS desconto,
+           c.nome AS cliente_nome
+    FROM vendas v
+    INNER JOIN clientes c ON v.cliente_id = c.id
+    WHERE v.cliente_id = ?;
+  `;
+
+  return new Promise((resolve, reject) => {
+    db.query(sql, [idCliente], (err: any, results: any) => {
+      if (err) {
+        console.error("Erro na query:", err.sqlMessage || err);
+        return reject(err);
+      }
+      console.log("Resultados encontrados:", results); // Mostra o objeto completo
+      resolve(results);
+    });
+  });
+};

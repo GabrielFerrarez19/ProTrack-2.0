@@ -11,20 +11,12 @@ import {
 import { Badge } from "../../../components/ui/badge";
 import { Dialog } from "../../../components/ui/dialog";
 import { DialogAlterVenda } from "./DialogAlter";
-import { formatStatus } from "../../../utils/functions";
+import { formatCurrency, formatStatus } from "../../../utils/functions";
 
 // Cores fixas para cada coluna
 const totalColor = "bg-blue-100 text-blue-800";
 const descontoColor = "bg-yellow-100 text-yellow-800";
 const totalComDescontoColor = "bg-green-100 text-green-800";
-
-// Formata número em Real brasileiro com separador de milhares
-function formatCurrency(value: number) {
-  return value.toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
 
 interface VendasTableProps {
   vendas: VendaResponse[];
