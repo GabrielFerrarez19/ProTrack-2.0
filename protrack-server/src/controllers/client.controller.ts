@@ -5,6 +5,7 @@ import {
   updateClienteDb,
   getTotalClientesDb,
   getAllClientesDb,
+  getVendasByClienteId,
 } from "../services/client.service";
 
 export const createCliente = async (req: Request, res: Response) => {
@@ -74,5 +75,21 @@ export const getAllClientes = async (req: Request, res: Response) => {
   } catch (err) {
     console.error("Erro ao buscar clientes:", err);
     res.status(500).json({ error: "Erro interno do servidor" });
+  }
+};
+
+export const getVendasCliente = async (req: Request, res: Response) => {
+  try {
+    const idCliente = Number(req.params.id);
+    if (isNaN(idCliente)) {
+      return res.status(400).json({ error: "ID de cliente inválido." });
+    }
+    const vendas = await getVendasByClienteId(idCliente);
+    res.json(vendas);
+  } catch (error) {
+    console.error("Erro ao buscar vendas do cliente:", error);
+    res
+      .status(500)
+      .json({ error: "Erro interno ao buscar vendas do cliente." });
   }
 };

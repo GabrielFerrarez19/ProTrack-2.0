@@ -66,6 +66,9 @@ CREATE TABLE clientes (
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE clientes
+ADD COLUMN valor_a_pagar DECIMAL(10,2) DEFAULT 0;
+
 INSERT INTO clientes (nome, data_nascimento, cpf, rg, estado_civil, sexo, telefone_whatsapp, telefone_celular, telefone_residencial, email, cep, endereco, numero, complemento, bairro, cidade)
 VALUES 
 ('Ana Beatriz Silva', '1990-05-12', '123.456.789-00', 'MG-12.345.678', 'Solteira', 'Feminino', '31999998888', '31988887777', '31333334444', 'ana.silva@email.com', '30140-110', 'Rua das Flores', '123', 'Apto 202', 'Savassi', 'Belo Horizonte'),
