@@ -86,3 +86,11 @@ export function formatStatus(status: "pendente" | "pago" | "cancelado") {
 
   return { color, text: formattedText };
 }
+
+// Formata número em Real brasileiro com separador de milhares
+export function formatCurrency(value: number) {
+  return value.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}

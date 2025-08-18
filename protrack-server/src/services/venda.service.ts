@@ -132,12 +132,12 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
   try {
     await connection.beginTransaction();
 
-    // Inserir a venda
+    // 1. Inserir a venda
     const [vendaResult] = await connection.execute<ResultSetHeader>(
       `
-          INSERT INTO vendas (cliente_id, data_venda, desconto, total, total_com_desconto, status)
-          VALUES (?, ?, ?, ?, ?, ?)
-        `,
+        INSERT INTO vendas (cliente_id, data_venda, desconto, total, total_com_desconto, status)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `,
       [
         dados.clienteId,
         dados.dataVenda,
@@ -150,7 +150,7 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
 
     const vendaId = vendaResult.insertId;
 
-    // Inserir itens da venda
+    // 2. Inserir itens da venda
     const itensValues = dados.produtos.map((item) => [
       vendaId,
       item.produtoId,
@@ -161,10 +161,30 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
 
     await connection.query(
       `
-          INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario, desconto)
-          VALUES ?
-        `,
+        INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario, desconto)
+        VALUES ?
+      `,
       [itensValues]
+    );
+
+    // 3. Atualizar o valor_a_pagar do cliente
+    // Soma dos itens com desconto
+    const totalItens = dados.produtos.reduce((acc, item) => {
+      const precoComDesconto =
+        Number(item.precoUnitario) *
+        item.quantidade *
+        (1 - (item.desconto ?? 0) / 100);
+      return acc + precoComDesconto;
+    }, 0);
+
+    // Atualiza o campo valor_a_pagar no cliente
+    await connection.query(
+      `
+        UPDATE clientes
+        SET valor_a_pagar = IFNULL(valor_a_pagar, 0) + ?
+        WHERE id = ?
+      `,
+      [totalItens, dados.clienteId]
     );
 
     await connection.commit();

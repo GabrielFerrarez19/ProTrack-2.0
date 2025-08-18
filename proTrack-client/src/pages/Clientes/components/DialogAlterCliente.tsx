@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   DialogContent,
@@ -17,12 +17,26 @@ import {
   SelectItem,
 } from "../../../components/ui/select";
 
-import { atualizarCliente } from "../../../services/api";
+import { atualizarCliente, fetchAllVendasById } from "../../../services/api";
 import type {
   ClienteFormData,
   Cliente,
+  VendaResponse,
 } from "../../../@types/types.components";
-import { formatarDataParaInput } from "../../../utils/functions";
+import {
+  formatarDataParaInput,
+  formatCurrency,
+} from "../../../utils/functions";
+import { Landmark } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../../components/ui/table";
+import { ResumoVendas } from "./ResumoVendas";
 
 interface DialogAlterClienteProps {
   setOpen: (value: boolean) => void;
@@ -43,6 +57,9 @@ export function DialogAlterCliente({
     watch,
     formState: { errors },
   } = useForm<ClienteFormData>();
+  const [vendasPorCliente, setVendasPorCliente] = useState<
+    Record<number, VendaResponse[]>
+  >({});
 
   // Preenche o formulário com dados do cliente
   useEffect(() => {
@@ -98,6 +115,22 @@ export function DialogAlterCliente({
     }
   };
 
+  useEffect(() => {
+    const loadVendas = async () => {
+      try {
+        const vendas = await fetchAllVendasById(cliente.id);
+        setVendasPorCliente({ [cliente.id]: vendas });
+      } catch (err) {
+        console.error(`Erro ao buscar vendas do cliente ${cliente.id}`, err);
+        setVendasPorCliente({ [cliente.id]: [] });
+      }
+    };
+
+    if (cliente?.id) {
+      loadVendas();
+    }
+  }, [cliente]);
+
   const sexoSelecionado = watch("sexo");
   const estadoCivilSelecionado = watch("estadoCivil");
 
@@ -111,8 +144,63 @@ export function DialogAlterCliente({
       }}
     >
       <DialogHeader>
-        <DialogTitle>Alterar Dados do Cliente</DialogTitle>
+        <DialogTitle className="flex flex-col gap-3">
+          Alterar Dados do Cliente
+        </DialogTitle>
       </DialogHeader>
+
+      <CardContent className="p-8">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-teal-100 hover:bg-teal-100">
+              <TableHead className="text-gray-700 font-semibold">
+                ID Venda
+              </TableHead>
+              <TableHead className="text-gray-700 font-semibold">
+                Data
+              </TableHead>
+              <TableHead className="text-gray-700 font-semibold">
+                Total
+              </TableHead>
+              <TableHead className="text-gray-700 font-semibold">
+                Desconto
+              </TableHead>
+              <TableHead className="text-gray-700 font-semibold">
+                Total c/ Desconto
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {(vendasPorCliente[cliente.id] ?? []).map((venda) => {
+              const desconto =
+                Number(venda.total ?? 0) -
+                Number(venda.total_com_desconto ?? 0);
+
+              return (
+                <TableRow
+                  key={venda.id}
+                  className="hover:bg-gray-200 cursor-pointer"
+                  onClick={() => setOpen(true)}
+                >
+                  <TableCell className="font-medium">{venda.id}</TableCell>
+                  <TableCell>
+                    {new Date(venda.data_venda).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    R$ {formatCurrency(Number(venda.total ?? 0))}
+                  </TableCell>
+                  <TableCell>R$ {formatCurrency(desconto)}</TableCell>
+                  <TableCell>
+                    R$ {formatCurrency(Number(venda.total_com_desconto ?? 0))}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+        <ResumoVendas vendas={vendasPorCliente[cliente.id] ?? []} />
+      </CardContent>
 
       <CardContent className="p-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -351,13 +439,8 @@ export function DialogAlterCliente({
             >
               Alterar Cliente
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => reset()}
-              className="border-border hover:bg-muted h-11 px-8"
-            >
-              Limpar
+            <Button className="h-11 border-border bg-blue-700 text-white cursor-pointer hover:bg-blue-600">
+              <Landmark />
             </Button>
           </div>
         </form>
