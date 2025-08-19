@@ -19,6 +19,7 @@ export function normalizeCliente(cliente: any): Cliente {
     complemento: cliente.complemento,
     bairro: cliente.bairro,
     cidade: cliente.cidade,
+    valorAPagar: cliente.valor_a_pagar ?? 0,
   };
 }
 
@@ -85,4 +86,12 @@ export function formatStatus(status: "pendente" | "pago" | "cancelado") {
   const formattedText = status.charAt(0).toUpperCase() + status.slice(1);
 
   return { color, text: formattedText };
+}
+
+// Formata número em Real brasileiro com separador de milhares
+export function formatCurrency(value: number) {
+  return value.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }

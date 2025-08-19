@@ -1,7 +1,7 @@
 // services/apiClient.ts
 import axios from "axios";
 
-export const apiClient = axios.create({
+export const api = axios.create({
   baseURL: "http://localhost:8085",
   timeout: 5000, // timeout em ms
   headers: {
@@ -10,7 +10,7 @@ export const apiClient = axios.create({
 });
 
 // Interceptor de erro global (opcional)
-apiClient.interceptors.response.use(
+api.interceptors.response.use(
   (response) => response,
   (error) => {
     console.error("Erro na requisição:", error.response?.data || error.message);

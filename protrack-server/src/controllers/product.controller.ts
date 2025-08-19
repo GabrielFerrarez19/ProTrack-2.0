@@ -70,7 +70,7 @@ export const getAllProdutos = async (req: Request, res: Response) => {
     const produtos = await getAllProdutosDb();
     res.status(200).json(produtos);
   } catch (err) {
-    console.error("Erro ao buscar produtos:", err);
-    res.status(500).json({ error: "Erro interno do servidor" });
+    console.error("Erro ao buscar produtos:", err); // já tem, mas vamos confirmar que imprime
+    res.status(500).json({ error: (err as Error).message }); // mostra a mensagem real
   }
 };

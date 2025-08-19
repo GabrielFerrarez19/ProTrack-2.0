@@ -3,6 +3,7 @@ import {
   createCliente,
   getAllClientes,
   getTotalClientes,
+  getVendasCliente,
   updateCliente,
 } from "../controllers/client.controller";
 
@@ -12,5 +13,6 @@ router.post("/clientes", createCliente);
 router.get("/clientes/total", getTotalClientes);
 router.get("/clientes/todos", getAllClientes);
 router.put("/altera/:id", updateCliente);
+router.get("/buscaVendas/:id", getVendasCliente);
 
 export default router;
