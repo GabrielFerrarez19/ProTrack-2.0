@@ -17,6 +17,7 @@ export interface ClienteData {
   complemento?: string;
   bairro?: string;
   cidade?: string;
+  valorAPagar?: number; // ← adicionado
 }
 
 export const createClienteDb = async (
@@ -78,7 +79,8 @@ export const updateClienteDb = async (
       numero = ?, 
       complemento = ?, 
       bairro = ?, 
-      cidade = ?
+      cidade = ?,
+      valor_a_pagar = ?  -- adicionando atualização do valor_a_pagar
     WHERE id = ?
   `;
 
@@ -99,6 +101,7 @@ export const updateClienteDb = async (
     cliente.complemento || null,
     cliente.bairro || null,
     cliente.cidade || null,
+    cliente.valorAPagar ?? 0, // valor_a_pagar atualizado
     id,
   ];
 

@@ -1,34 +1,32 @@
-import { useState, useEffect } from "react";
-import type { VendaResponse } from "../../../@types/types.components";
-import { Input } from "../../../components/ui/input";
+import { useEffect, useState } from "react";
 import { Label } from "../../../components/ui/label";
+import { Input } from "../../../components/ui/input";
 
 interface ResumoVendasProps {
-  vendas: VendaResponse[];
+  valorAPagar: number; // valor vindo do banco
+  valorPago: number;
+  setValorPago: (valor: number) => void;
+  setTotalRestantePai: (valor: number) => void; // callback para o pai
 }
 
-export const ResumoVendas = ({ vendas }: ResumoVendasProps) => {
-  const [valorPago, setValorPago] = useState<number>(0);
-  const [totalVendas, setTotalVendas] = useState<number>(0);
+export const ResumoVendas = ({
+  valorAPagar,
+  valorPago,
+  setValorPago,
+  setTotalRestantePai,
+}: ResumoVendasProps) => {
   const [totalRestante, setTotalRestante] = useState<number>(0);
 
   useEffect(() => {
-    const total = vendas.reduce(
-      (acc, venda) => acc + Number(venda.total_com_desconto ?? 0),
-      0
-    );
-    setTotalVendas(total);
-    setTotalRestante(total - valorPago);
-  }, [vendas]);
-
-  useEffect(() => {
-    setTotalRestante(totalVendas - valorPago);
-  }, [valorPago, totalVendas]);
+    const restante = valorAPagar - valorPago;
+    setTotalRestante(restante);
+    setTotalRestantePai(restante); // envia para o pai
+  }, [valorAPagar, valorPago, setTotalRestantePai]);
 
   return (
     <div className="mt-10">
       <div className="mb-4 font-semibold">
-        Total das Vendas: R$ {totalVendas.toFixed(2)}
+        Valor a Pagar: R$ {valorAPagar.toFixed(2)}
       </div>
 
       <div className="flex gap-6 items-end">
