@@ -19,6 +19,7 @@ export function normalizeCliente(cliente: any): Cliente {
     complemento: cliente.complemento,
     bairro: cliente.bairro,
     cidade: cliente.cidade,
+    valorAPagar: cliente.valor_a_pagar ?? 0,
   };
 }
 

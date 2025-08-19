@@ -18,9 +18,11 @@ export function Cliente() {
       setLoading(true);
       const data = await fetchAllClientes();
 
+      console.log("Puro", data);
+
       const clientesNormalizados = data.clientes.map(normalizeCliente);
 
-      console.log(clientesNormalizados);
+      console.log("Normalizados", clientesNormalizados);
 
       setClientes(clientesNormalizados);
       console.log(clientesNormalizados);
