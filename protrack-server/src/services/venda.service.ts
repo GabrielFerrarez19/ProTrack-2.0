@@ -10,7 +10,7 @@ export const atualizarVendaDb = async (
   const updateFields: string[] = [];
   const updateValues: any[] = [];
 
-  // Atualizar campos da venda
+  // Atualizar dados básicos da venda
   if (dados.clienteId != null) {
     updateFields.push("cliente_id = ?");
     updateValues.push(dados.clienteId);
@@ -18,18 +18,6 @@ export const atualizarVendaDb = async (
   if (dados.dataVenda) {
     updateFields.push("data_venda = ?");
     updateValues.push(dados.dataVenda);
-  }
-  if (dados.desconto != null) {
-    updateFields.push("desconto = ?");
-    updateValues.push(Number(dados.desconto));
-  }
-  if (dados.total != null) {
-    updateFields.push("total = ?");
-    updateValues.push(Number(dados.total));
-  }
-  if (dados.totalComDesconto != null) {
-    updateFields.push("total_com_desconto = ?");
-    updateValues.push(Number(dados.totalComDesconto));
   }
   if (dados.status) {
     updateFields.push("status = ?");
@@ -42,6 +30,21 @@ export const atualizarVendaDb = async (
     await connection.query(sql, updateValues);
   }
 
+  let novoTotal = 0;
+  let totalComDesconto = 0;
+  let clienteIdAtual: number | null = null;
+
+  // Buscar o cliente da venda (caso não venha no payload)
+  if (!dados.clienteId) {
+    const [rows] = await connection.query(
+      `SELECT cliente_id FROM vendas WHERE id = ?`,
+      [vendaId]
+    );
+    clienteIdAtual = (rows as any[])[0]?.cliente_id || null;
+  } else {
+    clienteIdAtual = dados.clienteId;
+  }
+
   if (Array.isArray(dados.produtos) && dados.produtos.length > 0) {
     // Buscar itens antigos
     const [itensAntigos] = await connection.query(
@@ -50,14 +53,19 @@ export const atualizarVendaDb = async (
     );
 
     // Restaurar estoque dos itens antigos
-    for (const item of itensAntigos) {
+    for (const item of itensAntigos as any[]) {
       await connection.query(
         `UPDATE produtos SET quantidade = quantidade + ? WHERE id = ?`,
         [item.quantidade, item.produto_id]
       );
     }
 
-    // Verificar estoque dos novos itens
+    // Deletar itens antigos
+    await connection.query(`DELETE FROM itens_venda WHERE venda_id = ?`, [
+      vendaId,
+    ]);
+
+    // Verificar estoque dos novos itens antes de inserir
     for (const item of dados.produtos) {
       const [rows] = await connection.query(
         `SELECT quantidade FROM produtos WHERE id = ?`,
@@ -73,14 +81,12 @@ export const atualizarVendaDb = async (
       }
     }
 
-    // Deletar itens antigos
-    await connection.query(`DELETE FROM itens_venda WHERE venda_id = ?`, [
-      vendaId,
-    ]);
-
     // Inserir novos itens e atualizar estoque
     for (const item of dados.produtos) {
       const { produtoId, quantidade, precoUnitario, desconto = 0 } = item;
+
+      const subtotal = quantidade * precoUnitario - desconto;
+      novoTotal += subtotal;
 
       await connection.query(
         `INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario, desconto)
@@ -88,11 +94,47 @@ export const atualizarVendaDb = async (
         [vendaId, produtoId, quantidade, precoUnitario, Number(desconto)]
       );
 
+      // Aqui sim desconta do estoque
       await connection.query(
         `UPDATE produtos SET quantidade = quantidade - ? WHERE id = ?`,
         [quantidade, produtoId]
       );
     }
+  } else {
+    // Caso não mande produtos, apenas pega o total atual
+    const [venda] = await connection.query(
+      `SELECT total, total_com_desconto FROM vendas WHERE id = ?`,
+      [vendaId]
+    );
+    novoTotal = (venda as any[])[0]?.total || 0;
+    totalComDesconto = (venda as any[])[0]?.total_com_desconto || 0;
+  }
+
+  // Aplicar desconto geral, se houver
+  totalComDesconto = novoTotal;
+  if (dados.desconto && Number(dados.desconto) > 0) {
+    totalComDesconto = novoTotal - Number(dados.desconto);
+  }
+
+  // Atualizar tabela vendas com os novos valores
+  await connection.query(
+    `UPDATE vendas SET total = ?, total_com_desconto = ? WHERE id = ?`,
+    [novoTotal, totalComDesconto, vendaId]
+  );
+
+  // Atualizar valor a pagar do cliente
+  if (clienteIdAtual) {
+    const [soma] = await connection.query(
+      `SELECT SUM(total_com_desconto) as total_a_pagar FROM vendas WHERE cliente_id = ?`,
+      [clienteIdAtual]
+    );
+
+    const valorAPagar = (soma as any[])[0]?.total_a_pagar || 0;
+
+    await connection.query(
+      `UPDATE clientes SET valor_a_pagar = ? WHERE id = ?`,
+      [valorAPagar, clienteIdAtual]
+    );
   }
 };
 
