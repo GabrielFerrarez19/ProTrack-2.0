@@ -1,17 +1,17 @@
 // types/venda.ts
-export interface ProdutoItem {
+export interface ProdutoVenda {
   produtoId: number;
   quantidade: number;
   precoUnitario: number;
-  desconto?: number;
+  desconto?: number; // em %
 }
 
 export interface CriarVendaData {
   clienteId: number;
-  dataVenda: string;
-  desconto?: number;
+  dataVenda: string | Date;
+  desconto?: number; // desconto da venda em %
   total: number;
   totalComDesconto: number;
   status?: string;
-  produtos: ProdutoItem[];
+  produtos: ProdutoVenda[];
 }

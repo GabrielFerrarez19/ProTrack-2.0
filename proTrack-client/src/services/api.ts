@@ -72,6 +72,8 @@ export const atualizarCliente = async (
   id: number,
   cliente: ClienteFormData
 ) => {
+  console.log("enviado para api", cliente);
+
   if (!id) throw { error: "ID do cliente é obrigatório para atualização" };
   const response = await api.put(`/clients/altera/${id}`, cliente);
   return response.data;
