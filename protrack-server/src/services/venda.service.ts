@@ -10,6 +10,7 @@ export const atualizarVendaDb = async (
   const updateFields: string[] = [];
   const updateValues: any[] = [];
 
+  // Atualizar dados básicos da venda
   if (dados.clienteId != null) {
     updateFields.push("cliente_id = ?");
     updateValues.push(dados.clienteId);
@@ -17,18 +18,6 @@ export const atualizarVendaDb = async (
   if (dados.dataVenda) {
     updateFields.push("data_venda = ?");
     updateValues.push(dados.dataVenda);
-  }
-  if (dados.desconto != null) {
-    updateFields.push("desconto = ?");
-    updateValues.push(Number(dados.desconto));
-  }
-  if (dados.total != null) {
-    updateFields.push("total = ?");
-    updateValues.push(Number(dados.total));
-  }
-  if (dados.totalComDesconto != null) {
-    updateFields.push("total_com_desconto = ?");
-    updateValues.push(Number(dados.totalComDesconto));
   }
   if (dados.status) {
     updateFields.push("status = ?");
@@ -41,18 +30,111 @@ export const atualizarVendaDb = async (
     await connection.query(sql, updateValues);
   }
 
+  let novoTotal = 0;
+  let totalComDesconto = 0;
+  let clienteIdAtual: number | null = null;
+
+  // Buscar o cliente da venda (caso não venha no payload)
+  if (!dados.clienteId) {
+    const [rows] = await connection.query(
+      `SELECT cliente_id FROM vendas WHERE id = ?`,
+      [vendaId]
+    );
+    clienteIdAtual = (rows as any[])[0]?.cliente_id || null;
+  } else {
+    clienteIdAtual = dados.clienteId;
+  }
+
   if (Array.isArray(dados.produtos) && dados.produtos.length > 0) {
+    // Buscar itens antigos
+    const [itensAntigos] = await connection.query(
+      `SELECT produto_id, quantidade FROM itens_venda WHERE venda_id = ?`,
+      [vendaId]
+    );
+
+    // Restaurar estoque dos itens antigos
+    for (const item of itensAntigos as any[]) {
+      await connection.query(
+        `UPDATE produtos SET quantidade = quantidade + ? WHERE id = ?`,
+        [item.quantidade, item.produto_id]
+      );
+    }
+
+    // Deletar itens antigos
     await connection.query(`DELETE FROM itens_venda WHERE venda_id = ?`, [
       vendaId,
     ]);
+
+    // Verificar estoque dos novos itens antes de inserir
+    for (const item of dados.produtos) {
+      const [rows] = await connection.query(
+        `SELECT quantidade FROM produtos WHERE id = ?`,
+        [item.produtoId]
+      );
+      const produto = (rows as any[])[0];
+      if (
+        !produto ||
+        produto.quantidade < item.quantidade ||
+        item.quantidade <= 0
+      ) {
+        throw new Error(`Produto ${item.produtoId} sem estoque suficiente.`);
+      }
+    }
+
+    // Inserir novos itens e atualizar estoque
     for (const item of dados.produtos) {
       const { produtoId, quantidade, precoUnitario, desconto = 0 } = item;
+
+      const subtotal = quantidade * precoUnitario - desconto;
+      novoTotal += subtotal;
+
       await connection.query(
         `INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario, desconto)
-           VALUES (?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?)`,
         [vendaId, produtoId, quantidade, precoUnitario, Number(desconto)]
       );
+
+      // Aqui sim desconta do estoque
+      await connection.query(
+        `UPDATE produtos SET quantidade = quantidade - ? WHERE id = ?`,
+        [quantidade, produtoId]
+      );
     }
+  } else {
+    // Caso não mande produtos, apenas pega o total atual
+    const [venda] = await connection.query(
+      `SELECT total, total_com_desconto FROM vendas WHERE id = ?`,
+      [vendaId]
+    );
+    novoTotal = (venda as any[])[0]?.total || 0;
+    totalComDesconto = (venda as any[])[0]?.total_com_desconto || 0;
+  }
+
+  // Aplicar desconto geral, se houver
+  totalComDesconto = novoTotal;
+  if (dados.desconto && Number(dados.desconto) > 0) {
+    totalComDesconto = novoTotal - Number(dados.desconto);
+  }
+
+  // Atualizar tabela vendas com os novos valores
+  await connection.query(
+    `UPDATE vendas SET total = ?, total_com_desconto = ? WHERE id = ?`,
+    [novoTotal, totalComDesconto, vendaId]
+  );
+
+  // Atualizar valor a pagar do cliente
+  if (clienteIdAtual) {
+    const [soma] = await connection.query(
+      `SELECT SUM(total_com_desconto) as total_a_pagar FROM vendas WHERE cliente_id = ?`,
+      [clienteIdAtual]
+    );
+
+    const valorAPagar = (soma as any[])[0]?.total_a_pagar || 0;
+
+    await connection.query(
+      `UPDATE clientes SET valor_a_pagar = ? WHERE id = ?`,
+      [valorAPagar, clienteIdAtual]
+    );
   }
 };
 
@@ -128,16 +210,36 @@ export const getTotalVendasDb = async (): Promise<number> => {
 };
 
 export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
+  if (!dados.produtos || dados.produtos.length === 0) {
+    throw new Error("A venda precisa ter ao menos um produto.");
+  }
+
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
 
-    // Inserir a venda
+    // Verificar estoque antes de inserir a venda
+    for (const item of dados.produtos) {
+      const [rows] = await connection.query(
+        `SELECT quantidade FROM produtos WHERE id = ?`,
+        [item.produtoId]
+      );
+      const produto = (rows as any[])[0];
+      if (
+        !produto ||
+        produto.quantidade < item.quantidade ||
+        item.quantidade <= 0
+      ) {
+        throw new Error(`Produto ${item.produtoId} sem estoque suficiente.`);
+      }
+    }
+
+    // 1. Inserir a venda
     const [vendaResult] = await connection.execute<ResultSetHeader>(
       `
-          INSERT INTO vendas (cliente_id, data_venda, desconto, total, total_com_desconto, status)
-          VALUES (?, ?, ?, ?, ?, ?)
-        `,
+      INSERT INTO vendas (cliente_id, data_venda, desconto, total, total_com_desconto, status)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `,
       [
         dados.clienteId,
         dados.dataVenda,
@@ -150,21 +252,38 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
 
     const vendaId = vendaResult.insertId;
 
-    // Inserir itens da venda
-    const itensValues = dados.produtos.map((item) => [
-      vendaId,
-      item.produtoId,
-      item.quantidade,
-      item.precoUnitario,
-      item.desconto ?? 0,
-    ]);
+    // 2. Inserir itens da venda e atualizar estoque
+    for (const item of dados.produtos) {
+      await connection.query(
+        `INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario, desconto)
+         VALUES (?, ?, ?, ?, ?)`,
+        [
+          vendaId,
+          item.produtoId,
+          item.quantidade,
+          item.precoUnitario,
+          item.desconto ?? 0,
+        ]
+      );
+
+      await connection.query(
+        `UPDATE produtos SET quantidade = quantidade - ? WHERE id = ?`,
+        [item.quantidade, item.produtoId]
+      );
+    }
+
+    // 3. Atualizar o valor_a_pagar do cliente
+    const totalItens = dados.produtos.reduce((acc, item) => {
+      const precoComDesconto =
+        item.precoUnitario * item.quantidade * (1 - (item.desconto ?? 0) / 100);
+      return acc + precoComDesconto;
+    }, 0);
 
     await connection.query(
-      `
-          INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario, desconto)
-          VALUES ?
-        `,
-      [itensValues]
+      `UPDATE clientes
+       SET valor_a_pagar = IFNULL(valor_a_pagar, 0) + ?
+       WHERE id = ?`,
+      [totalItens, dados.clienteId]
     );
 
     await connection.commit();

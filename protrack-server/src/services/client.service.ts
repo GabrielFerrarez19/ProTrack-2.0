@@ -17,6 +17,7 @@ export interface ClienteData {
   complemento?: string;
   bairro?: string;
   cidade?: string;
+  valorAPagar?: number; // ← adicionado
 }
 
 export const createClienteDb = async (
@@ -78,7 +79,8 @@ export const updateClienteDb = async (
       numero = ?, 
       complemento = ?, 
       bairro = ?, 
-      cidade = ?
+      cidade = ?,
+      valor_a_pagar = ?  -- adicionando atualização do valor_a_pagar
     WHERE id = ?
   `;
 
@@ -99,6 +101,7 @@ export const updateClienteDb = async (
     cliente.complemento || null,
     cliente.bairro || null,
     cliente.cidade || null,
+    cliente.valorAPagar ?? 0, // valor_a_pagar atualizado
     id,
   ];
 
@@ -129,6 +132,35 @@ export const getAllClientesDb = async (): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     db.query(sql, (err: any, results: any) => {
       if (err) return reject(err);
+      resolve(results);
+    });
+  });
+};
+
+export const getVendasByClienteId = async (
+  idCliente: number
+): Promise<any[]> => {
+  console.log("Buscando vendas para cliente:", idCliente);
+
+  const sql = `
+    SELECT v.id,
+           v.data_venda,
+           v.total,
+           v.total_com_desconto,
+           (v.total - v.total_com_desconto) AS desconto,
+           c.nome AS cliente_nome
+    FROM vendas v
+    INNER JOIN clientes c ON v.cliente_id = c.id
+    WHERE v.cliente_id = ?;
+  `;
+
+  return new Promise((resolve, reject) => {
+    db.query(sql, [idCliente], (err: any, results: any) => {
+      if (err) {
+        console.error("Erro na query:", err.sqlMessage || err);
+        return reject(err);
+      }
+      console.log("Resultados encontrados:", results); // Mostra o objeto completo
       resolve(results);
     });
   });

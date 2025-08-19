@@ -1,22 +1,32 @@
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
 import routes from "./routes";
 
 const app = express();
 
-app.use(cors());
+// Configura CORS para permitir requisições do frontend Vite
+app.use(
+  cors({
+    origin: "http://localhost:5174",
+    credentials: true,
+  })
+);
+
+// Middleware para JSON
 app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
-app.use("/", routes); // todas as rotas vão por aqui
+// Todas as rotas
+app.use("/", routes);
 
-const PORT = process.env.PORT || 8085;
+// Porta fixa
+const PORT = 8085;
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
 
+// Captura erros não tratados
 process.on("uncaughtException", (err) => {
   console.error("Erro não tratado:", err);
 });

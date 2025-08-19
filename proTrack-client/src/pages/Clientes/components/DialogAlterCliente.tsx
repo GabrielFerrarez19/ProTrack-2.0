@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   DialogContent,
@@ -17,12 +17,26 @@ import {
   SelectItem,
 } from "../../../components/ui/select";
 
-import { atualizarCliente } from "../../../services/api";
+import { atualizarCliente, fetchAllVendasById } from "../../../services/api";
 import type {
   ClienteFormData,
   Cliente,
+  VendaResponse,
 } from "../../../@types/types.components";
-import { formatarDataParaInput } from "../../../utils/functions";
+import {
+  formatarDataParaInput,
+  formatCurrency,
+} from "../../../utils/functions";
+import { Landmark } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../../components/ui/table";
+import { ResumoVendas } from "./ResumoVendas";
 
 interface DialogAlterClienteProps {
   setOpen: (value: boolean) => void;
@@ -43,6 +57,10 @@ export function DialogAlterCliente({
     watch,
     formState: { errors },
   } = useForm<ClienteFormData>();
+
+  const [vendasPorCliente, setVendasPorCliente] = useState<
+    Record<number, VendaResponse[]>
+  >({});
 
   // Preenche o formulário com dados do cliente
   useEffect(() => {
@@ -66,8 +84,44 @@ export function DialogAlterCliente({
         bairro: cliente.bairro || "",
         cidade: cliente.cidade || "",
       });
+      setValorAPagar(cliente.valorAPagar ?? 0); // inicializa valor a pagar
     }
   }, [cliente, reset]);
+
+  // Carrega vendas do cliente
+  useEffect(() => {
+    const loadVendas = async () => {
+      if (!cliente?.id) return;
+      try {
+        const vendas = await fetchAllVendasById(cliente.id);
+        setVendasPorCliente({ [cliente.id]: vendas });
+      } catch (err) {
+        console.error(`Erro ao buscar vendas do cliente ${cliente.id}`, err);
+        setVendasPorCliente({ [cliente.id]: [] });
+      }
+    };
+    loadVendas();
+  }, [cliente]);
+
+  const sexoSelecionado = watch("sexo");
+  const estadoCivilSelecionado = watch("estadoCivil");
+  const [valorPago, setValorPago] = useState<number>(0);
+  const [valorAPagar, setValorAPagar] = useState<number>(0);
+  const [totalRestante, setTotalRestante] = useState<number>(0); // novo estado
+
+  const [tabelaAberta, setTabelaAberta] = useState<boolean>(false);
+
+  const toggleTabela = () => {
+    setTabelaAberta(!tabelaAberta);
+  };
+
+  useEffect(() => {
+    if (cliente) {
+      setValorAPagar(cliente.valorAPagar ?? 0); // pega do cliente
+    }
+  }, [cliente]);
+
+  console.log("valor a pagar", cliente.valorAPagar);
 
   // Envio do formulário
   const onSubmit = async (data: ClienteFormData) => {
@@ -76,30 +130,24 @@ export function DialogAlterCliente({
       return;
     }
 
-    console.log("id_cliente", cliente.id);
-
     try {
-      console.log("Dados enviados para atualização:", data, "ID:", cliente.id);
-      await atualizarCliente(cliente.id, data);
+      await atualizarCliente(cliente.id, {
+        ...data,
+        valorAPagar: totalRestante, // envia valor a pagar atualizado
+      });
       alert("Cliente alterado com sucesso!");
       reset();
       setOpen(false);
       if (onClienteUpdated) onClienteUpdated();
     } catch (error: unknown) {
       console.error("Erro ao alterar cliente:", error);
-
-      // Checa se 'error' é um objeto com a propriedade 'error'
       if (typeof error === "object" && error !== null && "error" in error) {
-        // Aqui o TS entende que error é do tipo { error: unknown }
         alert((error as { error: string }).error);
       } else {
         alert("Erro ao alterar cliente");
       }
     }
   };
-
-  const sexoSelecionado = watch("sexo");
-  const estadoCivilSelecionado = watch("estadoCivil");
 
   return (
     <DialogContent
@@ -111,9 +159,69 @@ export function DialogAlterCliente({
       }}
     >
       <DialogHeader>
-        <DialogTitle>Alterar Dados do Cliente</DialogTitle>
+        <DialogTitle className="flex flex-col gap-3">
+          Alterar Dados do Cliente
+        </DialogTitle>
       </DialogHeader>
 
+      <CardContent className="p-8">
+        {/* Tabela de Vendas */}
+        <legend className="text-lg font-medium text-muted-foreground mb-2 col-span-full">
+          Dados vendas
+        </legend>
+        <Table>
+          <TableHeader>
+            <TableRow
+              className="bg-teal-100 hover:bg-teal-100 cursor-pointer"
+              onClick={toggleTabela}
+            >
+              <TableHead>ID Venda</TableHead>
+              <TableHead>Data</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead>Desconto</TableHead>
+              <TableHead>Total c/ Desconto</TableHead>
+            </TableRow>
+          </TableHeader>
+
+          {tabelaAberta && (
+            <TableBody>
+              {(vendasPorCliente[cliente.id] ?? []).map((venda) => {
+                const desconto =
+                  Number(venda.total ?? 0) -
+                  Number(venda.total_com_desconto ?? 0);
+                return (
+                  <TableRow
+                    key={venda.id}
+                    className="hover:bg-gray-200 cursor-pointer"
+                  >
+                    <TableCell>{venda.id}</TableCell>
+                    <TableCell>
+                      {new Date(venda.data_venda).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      R$ {formatCurrency(Number(venda.total ?? 0))}
+                    </TableCell>
+                    <TableCell>R$ {formatCurrency(desconto)}</TableCell>
+                    <TableCell>
+                      R$ {formatCurrency(Number(venda.total_com_desconto ?? 0))}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          )}
+        </Table>
+
+        {/* Resumo de Vendas */}
+        <ResumoVendas
+          valorAPagar={valorAPagar}
+          valorPago={valorPago}
+          setValorPago={setValorPago}
+          setTotalRestantePai={setTotalRestante} // pega o total restante
+        />
+      </CardContent>
+
+      {/* Formulário de Cliente */}
       <CardContent className="p-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* Dados Pessoais */}
@@ -124,12 +232,7 @@ export function DialogAlterCliente({
 
             <div className="space-y-2 col-span-full">
               <Label htmlFor="nome">Nome completo *</Label>
-              <Input
-                id="nome"
-                {...register("nome", { required: true })}
-                placeholder="Ex: João da Silva"
-                className="h-11 bg-input border-border"
-              />
+              <Input id="nome" {...register("nome", { required: true })} />
               {errors.nome && (
                 <span className="text-red-500 text-sm">Nome é obrigatório</span>
               )}
@@ -141,12 +244,9 @@ export function DialogAlterCliente({
                 id="dataNascimento"
                 type="date"
                 {...register("dataNascimento", { required: true })}
-                className="h-11 bg-input border-border"
               />
               {errors.dataNascimento && (
-                <span className="text-red-500 text-sm">
-                  Data de nascimento é obrigatória
-                </span>
+                <span className="text-red-500 text-sm">Data é obrigatória</span>
               )}
             </div>
 
@@ -157,7 +257,7 @@ export function DialogAlterCliente({
                   value={sexoSelecionado}
                   onValueChange={(val) => setValue("sexo", val)}
                 >
-                  <SelectTrigger className="h-11 bg-input border-border">
+                  <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
@@ -167,13 +267,14 @@ export function DialogAlterCliente({
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="estadoCivil">Estado civil</Label>
                 <Select
                   value={estadoCivilSelecionado}
                   onValueChange={(val) => setValue("estadoCivil", val)}
                 >
-                  <SelectTrigger className="h-11 bg-input border-border">
+                  <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
@@ -188,12 +289,7 @@ export function DialogAlterCliente({
 
             <div className="space-y-2">
               <Label htmlFor="cpf">CPF *</Label>
-              <Input
-                id="cpf"
-                {...register("cpf", { required: true })}
-                placeholder="000.000.000-00"
-                className="h-11 bg-input border-border"
-              />
+              <Input id="cpf" {...register("cpf", { required: true })} />
               {errors.cpf && (
                 <span className="text-red-500 text-sm">CPF é obrigatório</span>
               )}
@@ -201,12 +297,7 @@ export function DialogAlterCliente({
 
             <div className="space-y-2">
               <Label htmlFor="rg">RG</Label>
-              <Input
-                id="rg"
-                {...register("rg")}
-                placeholder="12.345.678-9"
-                className="h-11 bg-input border-border"
-              />
+              <Input id="rg" {...register("rg")} />
             </div>
           </fieldset>
 
@@ -222,8 +313,6 @@ export function DialogAlterCliente({
                 id="email"
                 type="email"
                 {...register("email", { required: true })}
-                placeholder="joao@email.com"
-                className="h-11 bg-input border-border"
               />
               {errors.email && (
                 <span className="text-red-500 text-sm">
@@ -234,22 +323,12 @@ export function DialogAlterCliente({
 
             <div className="space-y-2">
               <Label htmlFor="telefoneCelular">Telefone celular</Label>
-              <Input
-                id="telefoneCelular"
-                {...register("telefoneCelular")}
-                placeholder="(11) 91234-5678"
-                className="h-11 bg-input border-border"
-              />
+              <Input id="telefoneCelular" {...register("telefoneCelular")} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="telefoneWhatsapp">Telefone WhatsApp</Label>
-              <Input
-                id="telefoneWhatsapp"
-                {...register("telefoneWhatsapp")}
-                placeholder="(11) 97654-3210"
-                className="h-11 bg-input border-border"
-              />
+              <Input id="telefoneWhatsapp" {...register("telefoneWhatsapp")} />
             </div>
 
             <div className="space-y-2">
@@ -257,8 +336,6 @@ export function DialogAlterCliente({
               <Input
                 id="telefoneResidencial"
                 {...register("telefoneResidencial")}
-                placeholder="(11) 3456-7890"
-                className="h-11 bg-input border-border"
               />
             </div>
           </fieldset>
@@ -271,62 +348,32 @@ export function DialogAlterCliente({
 
             <div className="space-y-2">
               <Label htmlFor="cep">CEP</Label>
-              <Input
-                id="cep"
-                {...register("cep")}
-                placeholder="00000-000"
-                className="h-11 bg-input border-border"
-              />
+              <Input id="cep" {...register("cep")} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="endereco">Endereço</Label>
-              <Input
-                id="endereco"
-                {...register("endereco")}
-                placeholder="Rua Exemplo"
-                className="h-11 bg-input border-border"
-              />
+              <Input id="endereco" {...register("endereco")} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="numero">Número</Label>
-              <Input
-                id="numero"
-                {...register("numero")}
-                placeholder="123"
-                className="h-11 bg-input border-border"
-              />
+              <Input id="numero" {...register("numero")} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="complemento">Complemento</Label>
-              <Input
-                id="complemento"
-                {...register("complemento")}
-                placeholder="Casa / Apto / Bloco"
-                className="h-11 bg-input border-border"
-              />
+              <Input id="complemento" {...register("complemento")} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="bairro">Bairro</Label>
-              <Input
-                id="bairro"
-                {...register("bairro")}
-                placeholder="Centro"
-                className="h-11 bg-input border-border"
-              />
+              <Input id="bairro" {...register("bairro")} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="cidade">Cidade</Label>
-              <Input
-                id="cidade"
-                {...register("cidade")}
-                placeholder="São Paulo"
-                className="h-11 bg-input border-border"
-              />
+              <Input id="cidade" {...register("cidade")} />
             </div>
           </fieldset>
 
@@ -334,30 +381,12 @@ export function DialogAlterCliente({
           <div className="flex gap-4 pt-4">
             <Button
               type="submit"
-              className="
-    bg-green-500 
-    text-primary-foreground 
-    font-medium 
-    px-8 
-    h-11 
-    shadow-soft 
-    cursor-pointer 
-    transition-colors 
-    duration-300 
-    ease-in-out
-    hover:bg-green-600
-    hover:shadow-md
-  "
+              className="bg-green-500 text-white h-11 px-8 hover:bg-green-600"
             >
               Alterar Cliente
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => reset()}
-              className="border-border hover:bg-muted h-11 px-8"
-            >
-              Limpar
+            <Button className="h-11 border-border bg-blue-700 text-white hover:bg-blue-600">
+              <Landmark />
             </Button>
           </div>
         </form>
