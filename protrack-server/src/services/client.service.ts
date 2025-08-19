@@ -148,6 +148,7 @@ export const getVendasByClienteId = async (
            v.total,
            v.total_com_desconto,
            (v.total - v.total_com_desconto) AS desconto,
+           v.status,
            c.nome AS cliente_nome
     FROM vendas v
     INNER JOIN clientes c ON v.cliente_id = c.id
@@ -160,7 +161,7 @@ export const getVendasByClienteId = async (
         console.error("Erro na query:", err.sqlMessage || err);
         return reject(err);
       }
-      console.log("Resultados encontrados:", results); // Mostra o objeto completo
+      console.log("Resultados encontrados:", results);
       resolve(results);
     });
   });

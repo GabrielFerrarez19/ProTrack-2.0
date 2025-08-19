@@ -33,26 +33,25 @@ export const atualizarVendaDb = async (
   let novoTotal = 0;
   let totalComDesconto = 0;
   let clienteIdAtual: number | null = null;
+  let statusAnterior = "";
 
-  // Buscar o cliente da venda (caso não venha no payload)
-  if (!dados.clienteId) {
-    const [rows] = await connection.query(
-      `SELECT cliente_id FROM vendas WHERE id = ?`,
-      [vendaId]
-    );
-    clienteIdAtual = (rows as any[])[0]?.cliente_id || null;
-  } else {
-    clienteIdAtual = dados.clienteId;
-  }
+  // Buscar dados da venda atual
+  const [vendaAtualRows] = await connection.query(
+    `SELECT cliente_id, status, total_com_desconto FROM vendas WHERE id = ?`,
+    [vendaId]
+  );
+  const vendaAtual = (vendaAtualRows as any[])[0];
+  clienteIdAtual = dados.clienteId || vendaAtual?.cliente_id;
+  statusAnterior = vendaAtual?.status || "";
+  const totalAnteriorComDesconto = vendaAtual?.total_com_desconto || 0;
 
   if (Array.isArray(dados.produtos) && dados.produtos.length > 0) {
-    // Buscar itens antigos
+    // Restaurar estoque dos itens antigos
     const [itensAntigos] = await connection.query(
       `SELECT produto_id, quantidade FROM itens_venda WHERE venda_id = ?`,
       [vendaId]
     );
 
-    // Restaurar estoque dos itens antigos
     for (const item of itensAntigos as any[]) {
       await connection.query(
         `UPDATE produtos SET quantidade = quantidade + ? WHERE id = ?`,
@@ -84,7 +83,6 @@ export const atualizarVendaDb = async (
     // Inserir novos itens e atualizar estoque
     for (const item of dados.produtos) {
       const { produtoId, quantidade, precoUnitario, desconto = 0 } = item;
-
       const subtotal = quantidade * precoUnitario - desconto;
       novoTotal += subtotal;
 
@@ -94,20 +92,14 @@ export const atualizarVendaDb = async (
         [vendaId, produtoId, quantidade, precoUnitario, Number(desconto)]
       );
 
-      // Aqui sim desconta do estoque
       await connection.query(
         `UPDATE produtos SET quantidade = quantidade - ? WHERE id = ?`,
         [quantidade, produtoId]
       );
     }
   } else {
-    // Caso não mande produtos, apenas pega o total atual
-    const [venda] = await connection.query(
-      `SELECT total, total_com_desconto FROM vendas WHERE id = ?`,
-      [vendaId]
-    );
-    novoTotal = (venda as any[])[0]?.total || 0;
-    totalComDesconto = (venda as any[])[0]?.total_com_desconto || 0;
+    novoTotal = vendaAtual?.total || 0;
+    totalComDesconto = totalAnteriorComDesconto;
   }
 
   // Aplicar desconto geral, se houver
@@ -124,17 +116,27 @@ export const atualizarVendaDb = async (
 
   // Atualizar valor a pagar do cliente
   if (clienteIdAtual) {
-    const [soma] = await connection.query(
-      `SELECT SUM(total_com_desconto) as total_a_pagar FROM vendas WHERE cliente_id = ?`,
-      [clienteIdAtual]
-    );
+    // Se o status mudou para "Pago", subtrair do total a pagar
+    if (dados.status === "Pago" && statusAnterior !== "Pago") {
+      await connection.query(
+        `UPDATE clientes SET valor_a_pagar = valor_a_pagar - ? WHERE id = ?`,
+        [totalComDesconto, clienteIdAtual]
+      );
+    } else if (dados.status !== "Pago") {
+      // Somar todas as vendas que ainda não estão pagas
+      const [soma] = await connection.query(
+        `SELECT SUM(total_com_desconto) as total_a_pagar 
+         FROM vendas 
+         WHERE cliente_id = ? AND status != 'Pago'`,
+        [clienteIdAtual]
+      );
+      const valorAPagar = (soma as any[])[0]?.total_a_pagar || 0;
 
-    const valorAPagar = (soma as any[])[0]?.total_a_pagar || 0;
-
-    await connection.query(
-      `UPDATE clientes SET valor_a_pagar = ? WHERE id = ?`,
-      [valorAPagar, clienteIdAtual]
-    );
+      await connection.query(
+        `UPDATE clientes SET valor_a_pagar = ? WHERE id = ?`,
+        [valorAPagar, clienteIdAtual]
+      );
+    }
   }
 };
 

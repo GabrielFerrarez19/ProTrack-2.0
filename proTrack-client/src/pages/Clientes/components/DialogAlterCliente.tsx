@@ -26,6 +26,7 @@ import type {
 import {
   formatarDataParaInput,
   formatCurrency,
+  formatStatus,
 } from "../../../utils/functions";
 import { Landmark } from "lucide-react";
 import {
@@ -37,6 +38,7 @@ import {
   TableRow,
 } from "../../../components/ui/table";
 import { ResumoVendas } from "./ResumoVendas";
+import { Badge } from "../../../components/ui/badge";
 
 interface DialogAlterClienteProps {
   setOpen: (value: boolean) => void;
@@ -95,6 +97,7 @@ export function DialogAlterCliente({
       try {
         const vendas = await fetchAllVendasById(cliente.id);
         setVendasPorCliente({ [cliente.id]: vendas });
+        console.log("vendas", vendas);
       } catch (err) {
         console.error(`Erro ao buscar vendas do cliente ${cliente.id}`, err);
         setVendasPorCliente({ [cliente.id]: [] });
@@ -149,6 +152,8 @@ export function DialogAlterCliente({
     }
   };
 
+  console.log();
+
   return (
     <DialogContent
       style={{
@@ -180,6 +185,7 @@ export function DialogAlterCliente({
               <TableHead>Total</TableHead>
               <TableHead>Desconto</TableHead>
               <TableHead>Total c/ Desconto</TableHead>
+              <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -204,6 +210,11 @@ export function DialogAlterCliente({
                     <TableCell>R$ {formatCurrency(desconto)}</TableCell>
                     <TableCell>
                       R$ {formatCurrency(Number(venda.total_com_desconto ?? 0))}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={formatStatus(venda.status).color}>
+                        {formatStatus(venda.status).text}
+                      </Badge>
                     </TableCell>
                   </TableRow>
                 );
