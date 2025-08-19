@@ -10,6 +10,7 @@ export const atualizarVendaDb = async (
   const updateFields: string[] = [];
   const updateValues: any[] = [];
 
+  // Atualizar campos da venda
   if (dados.clienteId != null) {
     updateFields.push("cliente_id = ?");
     updateValues.push(dados.clienteId);
@@ -42,15 +43,54 @@ export const atualizarVendaDb = async (
   }
 
   if (Array.isArray(dados.produtos) && dados.produtos.length > 0) {
+    // Buscar itens antigos
+    const [itensAntigos] = await connection.query(
+      `SELECT produto_id, quantidade FROM itens_venda WHERE venda_id = ?`,
+      [vendaId]
+    );
+
+    // Restaurar estoque dos itens antigos
+    for (const item of itensAntigos) {
+      await connection.query(
+        `UPDATE produtos SET quantidade = quantidade + ? WHERE id = ?`,
+        [item.quantidade, item.produto_id]
+      );
+    }
+
+    // Verificar estoque dos novos itens
+    for (const item of dados.produtos) {
+      const [rows] = await connection.query(
+        `SELECT quantidade FROM produtos WHERE id = ?`,
+        [item.produtoId]
+      );
+      const produto = (rows as any[])[0];
+      if (
+        !produto ||
+        produto.quantidade < item.quantidade ||
+        item.quantidade <= 0
+      ) {
+        throw new Error(`Produto ${item.produtoId} sem estoque suficiente.`);
+      }
+    }
+
+    // Deletar itens antigos
     await connection.query(`DELETE FROM itens_venda WHERE venda_id = ?`, [
       vendaId,
     ]);
+
+    // Inserir novos itens e atualizar estoque
     for (const item of dados.produtos) {
       const { produtoId, quantidade, precoUnitario, desconto = 0 } = item;
+
       await connection.query(
         `INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario, desconto)
-           VALUES (?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?)`,
         [vendaId, produtoId, quantidade, precoUnitario, Number(desconto)]
+      );
+
+      await connection.query(
+        `UPDATE produtos SET quantidade = quantidade - ? WHERE id = ?`,
+        [quantidade, produtoId]
       );
     }
   }
@@ -136,6 +176,22 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
   try {
     await connection.beginTransaction();
 
+    // Verificar estoque antes de inserir a venda
+    for (const item of dados.produtos) {
+      const [rows] = await connection.query(
+        `SELECT quantidade FROM produtos WHERE id = ?`,
+        [item.produtoId]
+      );
+      const produto = (rows as any[])[0];
+      if (
+        !produto ||
+        produto.quantidade < item.quantidade ||
+        item.quantidade <= 0
+      ) {
+        throw new Error(`Produto ${item.produtoId} sem estoque suficiente.`);
+      }
+    }
+
     // 1. Inserir a venda
     const [vendaResult] = await connection.execute<ResultSetHeader>(
       `
@@ -154,22 +210,25 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
 
     const vendaId = vendaResult.insertId;
 
-    // 2. Inserir itens da venda
-    const itensValues = dados.produtos.map((item) => [
-      vendaId,
-      item.produtoId,
-      item.quantidade,
-      item.precoUnitario,
-      item.desconto ?? 0,
-    ]);
+    // 2. Inserir itens da venda e atualizar estoque
+    for (const item of dados.produtos) {
+      await connection.query(
+        `INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario, desconto)
+         VALUES (?, ?, ?, ?, ?)`,
+        [
+          vendaId,
+          item.produtoId,
+          item.quantidade,
+          item.precoUnitario,
+          item.desconto ?? 0,
+        ]
+      );
 
-    await connection.query(
-      `
-      INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario, desconto)
-      VALUES ?
-    `,
-      [itensValues]
-    );
+      await connection.query(
+        `UPDATE produtos SET quantidade = quantidade - ? WHERE id = ?`,
+        [item.quantidade, item.produtoId]
+      );
+    }
 
     // 3. Atualizar o valor_a_pagar do cliente
     const totalItens = dados.produtos.reduce((acc, item) => {
@@ -179,11 +238,9 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
     }, 0);
 
     await connection.query(
-      `
-      UPDATE clientes
-      SET valor_a_pagar = IFNULL(valor_a_pagar, 0) + ?
-      WHERE id = ?
-    `,
+      `UPDATE clientes
+       SET valor_a_pagar = IFNULL(valor_a_pagar, 0) + ?
+       WHERE id = ?`,
       [totalItens, dados.clienteId]
     );
 
