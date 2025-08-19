@@ -45,6 +45,7 @@ export interface ClienteFormData {
   complemento?: string;
   bairro?: string;
   cidade?: string;
+  valorAPagar?: number;
 }
 
 export interface Cliente {
@@ -65,6 +66,7 @@ export interface Cliente {
   complemento?: string;
   bairro?: string;
   cidade?: string;
+  valorAPagar?: number;
 }
 
 export interface Product {

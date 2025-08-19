@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import type {
   Cliente,
   ClientesResponse,
@@ -11,15 +11,7 @@ import type {
   VendaResponse,
 } from "../@types/types.api";
 import type { ClienteFormData } from "../@types/types.components";
-
-// Instância Axios central
-const api = axios.create({
-  baseURL: "http://localhost:8085",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  timeout: 5000,
-});
+import { api } from "./apiClient";
 
 // Interceptor global de erros (opcional)
 api.interceptors.response.use(
@@ -102,5 +94,12 @@ export const fetchAllVendas = async (): Promise<VendaResponse[]> => {
 
 export const atualizarVenda = async (id: number, venda: VendaAtualizacao) => {
   const response = await api.put(`/vendas/altera/${id}`, venda);
+  return response.data;
+};
+
+export const fetchAllVendasById = async (
+  id: number
+): Promise<VendaResponse[]> => {
+  const response = await api.get<VendaResponse[]>(`/clients/buscaVendas/${id}`);
   return response.data;
 };
