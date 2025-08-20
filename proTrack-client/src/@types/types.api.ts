@@ -109,6 +109,6 @@ export interface VendaAtualizacao {
   desconto?: number;
   total?: number;
   totalComDesconto?: number;
-  status?: "pendente" | "pago" | "cancelado"; // novo campo
+  status?: "pendente" | "pago" | "cancelado" | "aprazo"; // novo campo
   produtos?: ItemVenda[];
 }

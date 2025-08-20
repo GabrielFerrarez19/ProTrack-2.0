@@ -163,7 +163,7 @@ export function DialogAlterVenda({
               onValueChange={(value) =>
                 methods.setValue(
                   "status",
-                  value as "pendente" | "pago" | "cancelado"
+                  value as "pendente" | "pago" | "cancelado" | "aprazo"
                 )
               }
             >
@@ -173,6 +173,7 @@ export function DialogAlterVenda({
               <SelectContent>
                 <SelectItem value="pago">Pago</SelectItem>
                 <SelectItem value="cancelado">Cancelado</SelectItem>
+                <SelectItem value="aprazo">A prazo</SelectItem>
               </SelectContent>
             </Select>
           </div>

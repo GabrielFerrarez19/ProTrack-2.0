@@ -37,7 +37,7 @@ export const atualizarVendaDb = async (
 
   // Buscar dados da venda atual
   const [vendaAtualRows] = await connection.query(
-    `SELECT cliente_id, status, total_com_desconto FROM vendas WHERE id = ?`,
+    `SELECT cliente_id, status, total_com_desconto, total FROM vendas WHERE id = ?`,
     [vendaId]
   );
   const vendaAtual = (vendaAtualRows as any[])[0];
@@ -45,6 +45,7 @@ export const atualizarVendaDb = async (
   statusAnterior = vendaAtual?.status || "";
   const totalAnteriorComDesconto = vendaAtual?.total_com_desconto || 0;
 
+  // Se houver produtos para atualizar
   if (Array.isArray(dados.produtos) && dados.produtos.length > 0) {
     // Restaurar estoque dos itens antigos
     const [itensAntigos] = await connection.query(
@@ -116,18 +117,21 @@ export const atualizarVendaDb = async (
 
   // Atualizar valor a pagar do cliente
   if (clienteIdAtual) {
-    // Se o status mudou para "Pago", subtrair do total a pagar
-    if (dados.status === "Pago" && statusAnterior !== "Pago") {
+    if (
+      (dados.status === "Pago" && statusAnterior !== "Pago") ||
+      (dados.status === "Cancelado" && statusAnterior !== "Cancelado")
+    ) {
+      // Subtrai do valor a pagar se status mudar para Pago ou Cancelado
       await connection.query(
         `UPDATE clientes SET valor_a_pagar = valor_a_pagar - ? WHERE id = ?`,
         [totalComDesconto, clienteIdAtual]
       );
-    } else if (dados.status !== "Pago") {
-      // Somar todas as vendas que ainda não estão pagas
+    } else {
+      // Recalcula valor a pagar considerando apenas vendas não Pagas e não Canceladas
       const [soma] = await connection.query(
         `SELECT SUM(total_com_desconto) as total_a_pagar 
          FROM vendas 
-         WHERE cliente_id = ? AND status != 'Pago'`,
+         WHERE cliente_id = ? AND status NOT IN ('Pago', 'Cancelado')`,
         [clienteIdAtual]
       );
       const valorAPagar = (soma as any[])[0]?.total_a_pagar || 0;

@@ -3,7 +3,7 @@ import { Label } from "../../../components/ui/label";
 import { Input } from "../../../components/ui/input";
 
 interface ResumoVendasProps {
-  valorAPagar: number; // valor vindo do banco
+  valorAPagar: number | string | null; // valor vindo do banco
   valorPago: number;
   setValorPago: (valor: number) => void;
   setTotalRestantePai: (valor: number) => void; // callback para o pai
@@ -17,8 +17,15 @@ export const ResumoVendas = ({
 }: ResumoVendasProps) => {
   const [totalRestante, setTotalRestante] = useState<number>(0);
 
+  // Função para garantir número e formatar
+  const formatarDinheiro = (
+    valor: number | string | null | undefined
+  ): string => {
+    return (Number(valor) || 0).toFixed(2);
+  };
+
   useEffect(() => {
-    const restante = valorAPagar - valorPago;
+    const restante = (Number(valorAPagar) || 0) - (Number(valorPago) || 0);
     setTotalRestante(restante);
     setTotalRestantePai(restante); // envia para o pai
   }, [valorAPagar, valorPago, setTotalRestantePai]);
@@ -26,7 +33,7 @@ export const ResumoVendas = ({
   return (
     <div className="mt-10">
       <div className="mb-4 font-semibold">
-        Valor a Pagar: R$ {valorAPagar.toFixed(2)}
+        Valor a Pagar: R$ {formatarDinheiro(valorAPagar)}
       </div>
 
       <div className="flex gap-6 items-end">
@@ -46,7 +53,7 @@ export const ResumoVendas = ({
         <div className="flex-1">
           <Label className="pb-3">Total Restante</Label>
           <div className="h-9 flex items-center px-3 border border-gray-300 rounded bg-gray-100 font-semibold">
-            R$ {totalRestante.toFixed(2)}
+            R$ {formatarDinheiro(totalRestante)}
           </div>
         </div>
       </div>
