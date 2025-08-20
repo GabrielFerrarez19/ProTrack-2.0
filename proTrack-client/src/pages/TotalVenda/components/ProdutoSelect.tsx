@@ -41,7 +41,7 @@ export function ProdutoSelect({
         const options: OptionType[] = produtos.map((p) => ({
           value: String(p.id),
           label: `${p.nome} - Cod: ${p.codigo_barras ?? "-"} - R$ ${
-            p.preco_venda?.toFixed(2) ?? "0.00"
+            p.preco_venda != null ? Number(p.preco_venda).toFixed(2) : "0.00"
           }`,
         }));
 
