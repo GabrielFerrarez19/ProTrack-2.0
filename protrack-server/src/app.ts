@@ -12,18 +12,18 @@ app.use(
   })
 );
 
-// Middleware para JSON
+// Middleware para JSON e URL Encoded
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Todas as rotas
 app.use("/", routes);
 
-// Porta fixa
-const PORT = 8085;
+// Porta (env ou fallback 8085)
+const PORT = Number(process.env.PORT) || 8085;
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
 
 // Captura erros não tratados

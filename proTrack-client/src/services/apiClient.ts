@@ -2,8 +2,8 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: "http://localhost:8085",
-  timeout: 5000, // timeout em ms
+  baseURL: "/api", // <-- relativo, vai passar pelo Nginx
+  timeout: 5000,
   headers: {
     "Content-Type": "application/json",
   },

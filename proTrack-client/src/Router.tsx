@@ -14,10 +14,13 @@ import { TotalVendas } from "./pages/TotalVenda";
 export function Router() {
   return (
     <Routes>
+      {/* Rotas públicas */}
       <Route path="/" element={<Login />} />
       <Route path="/confirmacaoemail" element={<ConfirmacaoEmail />} />
       <Route path="/redefinirsenha" element={<RedefinirSenha />} />
-      <Route path="/" element={<DefaultLayout />}>
+
+      {/* Rotas privadas com layout */}
+      <Route element={<DefaultLayout />}>
         <Route path="/status" element={<Status />} />
         <Route path="/cadastroprodutos" element={<CadProduct />} />
         <Route path="/cadastrodeclientes" element={<CacUsers />} />
