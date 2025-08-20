@@ -1,4 +1,4 @@
-import { db } from "../db/connection";
+import { db } from "../config/database";
 
 export interface ClienteData {
   nome: string;
@@ -17,7 +17,7 @@ export interface ClienteData {
   complemento?: string;
   bairro?: string;
   cidade?: string;
-  valorAPagar?: number; // ← adicionado
+  valorAPagar?: number;
 }
 
 export const createClienteDb = async (
@@ -50,12 +50,8 @@ export const createClienteDb = async (
     cliente.cidade || null,
   ];
 
-  return new Promise((resolve, reject) => {
-    db.query(sql, values, (err: any, results: any) => {
-      if (err) return reject(err);
-      resolve(results.insertId);
-    });
-  });
+  const [result]: any = await db.query(sql, values);
+  return result.insertId;
 };
 
 export const updateClienteDb = async (
@@ -80,7 +76,7 @@ export const updateClienteDb = async (
       complemento = ?, 
       bairro = ?, 
       cidade = ?,
-      valor_a_pagar = ?  -- adicionando atualização do valor_a_pagar
+      valor_a_pagar = ?
     WHERE id = ?
   `;
 
@@ -101,47 +97,34 @@ export const updateClienteDb = async (
     cliente.complemento || null,
     cliente.bairro || null,
     cliente.cidade || null,
-    cliente.valorAPagar ?? 0, // valor_a_pagar atualizado
+    cliente.valorAPagar ?? 0,
     id,
   ];
 
-  return new Promise((resolve, reject) => {
-    db.query(sql, values, (err: any, results: any) => {
-      if (err) return reject(err);
-      if (results.affectedRows === 0)
-        return reject(new Error("Cliente não encontrado"));
-      resolve();
-    });
-  });
+  const [result]: any = await db.query(sql, values);
+
+  if (result.affectedRows === 0) {
+    throw new Error("Cliente não encontrado");
+  }
 };
 
 export const getTotalClientesDb = async (): Promise<number> => {
   const sql = "SELECT COUNT(*) AS totalClientes FROM clientes";
+  const [rows]: any = await db.query(sql);
 
-  return new Promise((resolve, reject) => {
-    db.query(sql, (err: any, results: any) => {
-      if (err) return reject(err);
-      resolve(results[0].totalClientes || 0);
-    });
-  });
+  return rows[0].totalClientes || 0;
 };
 
 export const getAllClientesDb = async (): Promise<any[]> => {
   const sql = "SELECT * FROM clientes";
+  const [rows]: any = await db.query(sql);
 
-  return new Promise((resolve, reject) => {
-    db.query(sql, (err: any, results: any) => {
-      if (err) return reject(err);
-      resolve(results);
-    });
-  });
+  return rows;
 };
 
 export const getVendasByClienteId = async (
   idCliente: number
 ): Promise<any[]> => {
-  console.log("Buscando vendas para cliente:", idCliente);
-
   const sql = `
     SELECT v.id,
            v.data_venda,
@@ -155,14 +138,6 @@ export const getVendasByClienteId = async (
     WHERE v.cliente_id = ?;
   `;
 
-  return new Promise((resolve, reject) => {
-    db.query(sql, [idCliente], (err: any, results: any) => {
-      if (err) {
-        console.error("Erro na query:", err.sqlMessage || err);
-        return reject(err);
-      }
-      console.log("Resultados encontrados:", results);
-      resolve(results);
-    });
-  });
+  const [rows]: any = await db.query(sql, [idCliente]);
+  return rows;
 };
