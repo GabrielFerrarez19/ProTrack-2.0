@@ -1,4 +1,4 @@
-import { db } from "../db/connection";
+import { db } from "../config/database";
 
 export interface ProdutoData {
   nome: string;
@@ -31,12 +31,8 @@ export const createProductDb = async (
     produto.preco_venda,
   ];
 
-  return new Promise((resolve, reject) => {
-    db.query(sql, values, (err: any, results: any) => {
-      if (err) return reject(err);
-      resolve(results.insertId);
-    });
-  });
+  const [result]: any = await db.query(sql, values);
+  return result.insertId;
 };
 
 export const updateProductDb = async (
@@ -68,34 +64,23 @@ export const updateProductDb = async (
     id,
   ];
 
-  return new Promise((resolve, reject) => {
-    db.query(sql, values, (err: any, results: any) => {
-      if (err) return reject(err);
-      if (results.affectedRows === 0)
-        return reject(new Error("Produto não encontrado"));
-      resolve();
-    });
-  });
+  const [result]: any = await db.query(sql, values);
+
+  if (result.affectedRows === 0) {
+    throw new Error("Produto não encontrado");
+  }
 };
 
 export const getTotalEstoqueDb = async (): Promise<number> => {
   const sql = "SELECT SUM(quantidade) AS totalEstoque FROM produtos";
+  const [rows]: any = await db.query(sql);
 
-  return new Promise((resolve, reject) => {
-    db.query(sql, (err: any, results: any) => {
-      if (err) return reject(err);
-      resolve(results[0].totalEstoque || 0);
-    });
-  });
+  return rows[0].totalEstoque || 0;
 };
 
 export const getAllProdutosDb = async (): Promise<any[]> => {
   const sql = "SELECT * FROM produtos";
+  const [rows]: any = await db.query(sql);
 
-  return new Promise((resolve, reject) => {
-    db.query(sql, (err: any, results: any) => {
-      if (err) return reject(err);
-      resolve(results);
-    });
-  });
+  return rows;
 };
