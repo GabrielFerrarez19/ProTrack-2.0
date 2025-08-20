@@ -65,27 +65,36 @@ export function formatarDataParaInput(data: string): string {
   return "";
 }
 
-// Função que retorna a cor de acordo com o status
-export function formatStatus(status: "pendente" | "pago" | "cancelado") {
+// Função que retorna a cor e o texto formatado de acordo com o status
+export function formatStatus(
+  status: "pendente" | "pago" | "cancelado" | "aprazo"
+) {
   let color = "";
-  switch (status) {
+  let text = "";
+
+  switch (status.toLowerCase()) {
     case "pendente":
       color = "bg-yellow-100 text-yellow-800";
+      text = "Pendente";
       break;
     case "pago":
       color = "bg-green-100 text-green-800";
+      text = "Pago";
       break;
     case "cancelado":
       color = "bg-red-100 text-red-800";
+      text = "Cancelado";
+      break;
+    case "aprazo":
+      color = "bg-blue-100 text-blue-800";
+      text = "À prazo";
       break;
     default:
       color = "bg-gray-100 text-gray-800";
+      text = status.charAt(0).toUpperCase() + status.slice(1);
   }
 
-  // Coloca a primeira letra em maiúscula
-  const formattedText = status.charAt(0).toUpperCase() + status.slice(1);
-
-  return { color, text: formattedText };
+  return { color, text };
 }
 
 // Formata número em Real brasileiro com separador de milhares

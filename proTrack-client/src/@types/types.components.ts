@@ -123,7 +123,7 @@ export interface ItemVendaForm {
 export interface VendaForm {
   data_venda: string;
   desconto: number;
-  status: "pendente" | "pago" | "cancelado"; // novo campo
+  status: "pendente" | "pago" | "cancelado" | "aprazo"; // novo campo
   itens: ItemVendaForm[];
 }
 

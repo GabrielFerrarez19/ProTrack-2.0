@@ -11,7 +11,6 @@ CREATE TABLE users (
 INSERT INTO users (id, name, email, password, created_at)
 VALUES (8, 'Gabriel Ferrarez', 'gabriel@example.com', '123456', '2025-07-30 17:50:52');
 
-
 CREATE TABLE produtos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
@@ -82,7 +81,6 @@ VALUES
 ('Juliana Mendes', '1983-04-27', '741.852.963-00', 'DF-74.185.296', 'Casada', 'Feminino', '61999997766', '61888885555', '61333334444', 'juliana.mendes@email.com', '70040-010', 'SQS 308 Bloco A', '101', 'Apto 301', 'Asa Sul', 'Brasília'),
 ('Thiago Oliveira', '1998-08-14', '852.963.741-00', 'GO-85.296.374', 'Solteiro', 'Masculino', '62999996655', '62888884444', '62333333333', 'thiago.oliveira@email.com', '74000-000', 'Rua 9', '369', '', 'Setor Oeste', 'Goiânia');
 
-
 CREATE TABLE vendas (
   id INT AUTO_INCREMENT PRIMARY KEY,
   cliente_id INT NOT NULL,
@@ -93,6 +91,9 @@ CREATE TABLE vendas (
   data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (cliente_id) REFERENCES clientes(id)
 );
+
+ALTER TABLE vendas
+MODIFY COLUMN status ENUM('pendente', 'pago', 'cancelado', 'aprazo') DEFAULT 'pendente';
 
 CREATE TABLE itens_venda (
   id INT AUTO_INCREMENT PRIMARY KEY,
