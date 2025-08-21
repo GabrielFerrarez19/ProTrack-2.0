@@ -3,6 +3,7 @@ import {
   atualizarVenda,
   criarVenda,
   getAllVendas,
+  getFormasPagamentoController,
   getTotalVendas,
   getVendasDashboardController,
 } from "../controllers/vendas.controller";
@@ -14,5 +15,6 @@ router.get("/totalvendas", getTotalVendas);
 router.get("/todas", getAllVendas);
 router.put("/altera/:id", atualizarVenda);
 router.get("/resumoDeVendas", getVendasDashboardController);
+router.get("/formasPagamentos", getFormasPagamentoController);
 
 export default router;

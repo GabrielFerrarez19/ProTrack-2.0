@@ -1,6 +1,10 @@
 import { ResultSetHeader } from "mysql2";
 import { db } from "../config/database";
-import { CriarVendaData, VendasDashboard } from "../@types/types.controller";
+import {
+  CriarVendaData,
+  FormaPagamentoCount,
+  VendasDashboard,
+} from "../@types/types.controller";
 
 export const atualizarVendaDb = async (
   vendaId: number,
@@ -333,4 +337,23 @@ export const getVendasDashboard = async (): Promise<VendasDashboard> => {
     mesAnterior,
     crescimento: parseFloat(crescimento.toFixed(2)), // arredonda para 2 casas decimais
   };
+};
+
+export const getFormasPagamento = async (): Promise<FormaPagamentoCount[]> => {
+  const sql = `
+    SELECT 
+      forma_pagamento,
+      COUNT(*) AS total
+    FROM vendas
+    WHERE status != 'cancelado'
+    GROUP BY forma_pagamento
+    ORDER BY total DESC
+  `;
+
+  const [rows]: any = await db.query(sql);
+
+  return rows.map((row: any) => ({
+    forma_pagamento: row.forma_pagamento,
+    total: Number(row.total),
+  }));
 };

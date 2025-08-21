@@ -21,3 +21,14 @@ export interface VendasDashboard {
   mesAnterior: number;
   crescimento: number; // percentual de crescimento
 }
+
+export interface ProdutoMaisVendido {
+  produto_id: number;
+  nome: string;
+  total_vendido: number; // soma da quantidade vendida
+}
+
+export interface FormaPagamentoCount {
+  forma_pagamento: string;
+  total: number;
+}
