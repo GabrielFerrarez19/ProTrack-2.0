@@ -84,3 +84,43 @@ export const getAllProdutosDb = async (): Promise<any[]> => {
 
   return rows;
 };
+
+export const getTotalPrecoEstoque = async (): Promise<number> => {
+  const sql = `
+    SELECT SUM(preco_custo * quantidade) AS total_estoque
+    FROM produtos
+  `;
+
+  const [rows]: any = await db.query(sql);
+
+  // Retorna 0 caso não exista nenhum produto
+  return rows[0]?.total_estoque || 0;
+};
+
+export const calcularGiroEstoque = async (): Promise<number> => {
+  // 1. Total do estoque atual
+  const sqlEstoque = `
+    SELECT SUM(preco_custo * quantidade) AS total_estoque
+    FROM produtos
+  `;
+  const [estoqueRows]: any = await db.query(sqlEstoque);
+  const totalEstoque = estoqueRows[0]?.total_estoque || 0;
+
+  if (totalEstoque === 0) return 0; // evita divisão por zero
+
+  // 2. Custo das mercadorias vendidas (CMV)
+  const sqlCMV = `
+    SELECT SUM(iv.quantidade * p.preco_custo) AS cmv
+    FROM itens_venda iv
+    JOIN produtos p ON iv.produto_id = p.id
+    JOIN vendas v ON iv.venda_id = v.id
+    WHERE v.status != 'cancelado'
+  `;
+  const [cmvRows]: any = await db.query(sqlCMV);
+  const cmv = cmvRows[0]?.cmv || 0;
+
+  // 3. Calcula o giro do estoque em porcentagem
+  const giro = (cmv / totalEstoque) * 100;
+
+  return parseFloat(giro.toFixed(2)); // retorna com 2 casas decimais
+};

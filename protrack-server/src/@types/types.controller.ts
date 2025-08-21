@@ -15,3 +15,9 @@ export interface CriarVendaData {
   status?: string;
   produtos: ProdutoVenda[];
 }
+
+export interface VendasDashboard {
+  mesAtual: number;
+  mesAnterior: number;
+  crescimento: number; // percentual de crescimento
+}
