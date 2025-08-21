@@ -4,6 +4,7 @@ import type {
   ClientesResponse,
   EstoqueResponse,
   Produto,
+  TotalAPagarResponse,
   TotalClientesResponse,
   TotalVendasResponse,
   VendaAtualizacao,
@@ -101,5 +102,11 @@ export const fetchAllVendasById = async (
   id: number
 ): Promise<VendaResponse[]> => {
   const response = await api.get<VendaResponse[]>(`/clients/buscaVendas/${id}`);
+  return response.data;
+};
+
+// Chamada para buscar totais
+export const fetchTotalAPagar = async (): Promise<TotalAPagarResponse> => {
+  const response = await api.get<TotalAPagarResponse>("/clients/totalApagar");
   return response.data;
 };

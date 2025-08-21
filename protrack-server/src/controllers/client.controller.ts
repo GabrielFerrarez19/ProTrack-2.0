@@ -6,6 +6,7 @@ import {
   getTotalClientesDb,
   getAllClientesDb,
   getVendasByClienteId,
+  getTotalAPagarGeral,
 } from "../services/client.service";
 
 export const createCliente = async (req: Request, res: Response) => {
@@ -91,5 +92,21 @@ export const getVendasCliente = async (req: Request, res: Response) => {
     res
       .status(500)
       .json({ error: "Erro interno ao buscar vendas do cliente." });
+  }
+};
+
+export const getTotalGeralAReceberController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const totalGeral = await getTotalAPagarGeral();
+
+    res.status(200).json({
+      total_geral: totalGeral ?? 0, // garante número
+    });
+  } catch (err) {
+    console.error("Erro ao buscar total geral a receber:", err);
+    res.status(500).json({ error: "Erro interno do servidor" });
   }
 };
