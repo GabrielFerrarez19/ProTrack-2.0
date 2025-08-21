@@ -95,6 +95,9 @@ CREATE TABLE vendas (
 ALTER TABLE vendas
 MODIFY COLUMN status ENUM('pendente', 'pago', 'cancelado', 'aprazo') DEFAULT 'pendente';
 
+ALTER TABLE vendas
+ADD COLUMN forma_pagamento ENUM('À Vista', 'Cartão', 'Parcelado', 'Outro') DEFAULT 'À Vista';
+
 CREATE TABLE itens_venda (
   id INT AUTO_INCREMENT PRIMARY KEY,
   venda_id INT NOT NULL,
