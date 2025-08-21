@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SidebarContext } from "./SidebarContext";
 import { ChevronFirst, ChevronLast, MoreVertical } from "lucide-react";
 import img from "../../assets/Logo.svg";
+import { Link } from "react-router-dom";
 
 type SidebarProps = {
   children: React.ReactNode;
@@ -54,7 +55,9 @@ export function Sidebar({ children }: SidebarProps) {
                 gabrielferrarez@gmail.com
               </span>
             </div>
-            <MoreVertical size={20} />
+            <Link to="/configfinanceiro">
+              <MoreVertical size={20} />
+            </Link>
           </div>
         </div>
       </nav>

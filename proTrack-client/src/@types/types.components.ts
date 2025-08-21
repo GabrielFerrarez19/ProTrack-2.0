@@ -139,3 +139,34 @@ export interface ProdutoMaisVendido {
   nome: string; // Nome do produto
   total_vendido: number; // Quantidade total vendida
 }
+
+export interface ContaBancaria {
+  id: string;
+  nome: string;
+  banco: string;
+  agencia: string;
+  conta: string;
+  saldo: number;
+  ativa: boolean;
+}
+
+export interface MetodoPagamento {
+  id: string;
+  nome: string;
+  tipo: "dinheiro" | "cartao" | "pix" | "transferencia";
+  ativo: boolean;
+}
+
+export interface Categoria {
+  id: string;
+  nome: string;
+  tipo: "receita" | "despesa";
+  cor: string;
+}
+
+export interface LimitesFluxo {
+  limiteDiario: number;
+  limiteSemanal: number;
+  limiteMensal: number;
+  alertaFluxoCaixa: boolean;
+}
