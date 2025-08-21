@@ -112,3 +112,8 @@ export interface VendaAtualizacao {
   status?: "pendente" | "pago" | "cancelado" | "aprazo"; // novo campo
   produtos?: ItemVenda[];
 }
+
+// Tipagem para o retornoexport interface TotalAPagarResponse {
+export interface TotalAPagarResponse {
+  total_geral: number;
+}

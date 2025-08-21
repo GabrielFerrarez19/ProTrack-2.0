@@ -141,3 +141,13 @@ export const getVendasByClienteId = async (
   const [rows]: any = await db.query(sql, [idCliente]);
   return rows;
 };
+
+// Retorna a soma do total_a_pagar de todos os clientes
+export const getTotalAPagarGeral = async (): Promise<number> => {
+  const sql = `
+    SELECT SUM(c.valor_a_pagar) AS total_geral
+    FROM clientes c;
+  `;
+  const [rows]: any = await db.query(sql);
+  return rows[0]?.total_geral || 0;
+};
