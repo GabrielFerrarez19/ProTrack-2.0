@@ -65,9 +65,9 @@ export function DefaultLayout() {
         <SidebarItem
           icon={<TrendingUp size={20} />}
           text="Relatórios"
-          router="/relatorios"
+          router="/relatorio"
           alert
-          active={currentPath === "/relatorios"}
+          active={currentPath === "/relatorio"}
         />
         <SidebarItem
           icon={<Calculator size={20} />}

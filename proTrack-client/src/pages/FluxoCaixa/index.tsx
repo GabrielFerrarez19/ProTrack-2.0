@@ -4,15 +4,15 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "../../../components/ui/card";
+} from "../../components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../components/ui/select";
-import { Badge } from "../../../components/ui/badge";
+} from "../../components/ui/select";
+import { Badge } from "../../components/ui/badge";
 import {
   ResponsiveContainer,
   XAxis,
@@ -32,7 +32,7 @@ import {
   Calendar,
 } from "lucide-react";
 
-const FluxoCaixa = () => {
+export function FluxoCaixa() {
   const [periodo, setPeriodo] = useState("30dias");
   const [tipoVisualizacao, setTipoVisualizacao] = useState("diario");
 
@@ -396,6 +396,4 @@ const FluxoCaixa = () => {
       </Card>
     </div>
   );
-};
-
-export default FluxoCaixa;
+}
