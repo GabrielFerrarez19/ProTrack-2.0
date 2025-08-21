@@ -5,6 +5,7 @@ import {
   atualizarVendaDb,
   criarVendaDb,
   getAllVendasDb,
+  getFormasPagamento,
   getTotalVendasDb,
   getVendasDashboard,
   mapVendasComItens,
@@ -81,6 +82,19 @@ export const getVendasDashboardController = async (
     res.status(200).json(vendas);
   } catch (err) {
     console.error("Erro ao buscar dados de vendas do dashboard:", err);
+    res.status(500).json({ error: (err as Error).message });
+  }
+};
+
+export const getFormasPagamentoController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const formas = await getFormasPagamento();
+    res.status(200).json({ formas });
+  } catch (err) {
+    console.error("Erro ao buscar formas de pagamento:", err);
     res.status(500).json({ error: (err as Error).message });
   }
 };

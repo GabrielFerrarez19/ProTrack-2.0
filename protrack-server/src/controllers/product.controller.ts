@@ -7,6 +7,7 @@ import {
   getAllProdutosDb,
   getTotalPrecoEstoque,
   calcularGiroEstoque,
+  getProdutosMaisVendidos,
 } from "../services/product.service";
 
 export const createProduct = async (req: Request, res: Response) => {
@@ -96,6 +97,23 @@ export const getGiroEstoqueController = async (req: Request, res: Response) => {
     res.status(200).json({ giroEstoque: giro });
   } catch (err) {
     console.error("Erro ao calcular o giro de estoque:", err);
+    res.status(500).json({ error: (err as Error).message });
+  }
+};
+
+export const getProdutosMaisVendidosController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    // Podemos aceitar um parâmetro 'limit' opcional na query string
+    const limit = req.query.limit ? Number(req.query.limit) : 5;
+
+    const produtos = await getProdutosMaisVendidos(limit);
+
+    res.status(200).json({ produtos });
+  } catch (err) {
+    console.error("Erro ao buscar produtos mais vendidos:", err);
     res.status(500).json({ error: (err as Error).message });
   }
 };

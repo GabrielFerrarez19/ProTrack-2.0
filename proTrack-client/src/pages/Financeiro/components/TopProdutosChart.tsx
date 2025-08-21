@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -13,15 +14,43 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
-
-const topProdutos = [
-  { nome: "Produto A", vendas: 4500, lucro: 1350 },
-  { nome: "Produto B", vendas: 3200, lucro: 960 },
-  { nome: "Produto C", vendas: 2800, lucro: 840 },
-  { nome: "Produto D", vendas: 2100, lucro: 630 },
-];
+import type { ProdutosMaisVendidosResponse } from "../../../@types/types.api";
+import { fetchProdutosMaisVendidos } from "../../../services/api";
 
 export function TopProdutosChart() {
+  const [topProdutos, setTopProdutos] = useState<
+    { nome: string; vendas: number; lucro?: number }[]
+  >([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadTopProdutos = async () => {
+      try {
+        setLoading(true);
+        const data: ProdutosMaisVendidosResponse =
+          await fetchProdutosMaisVendidos(4); // Buscar somente os 4 mais vendidos
+
+        // Transformando os dados para o formato do gráfico
+        const chartData = data.produtos.map((p) => ({
+          nome: p.nome,
+          vendas: p.total_vendido,
+          lucro: undefined, // opcional, se você tiver lucro calculado pode adicionar
+        }));
+        setTopProdutos(chartData);
+      } catch (err) {
+        console.error("Erro ao buscar top produtos:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTopProdutos();
+  }, []);
+
+  if (loading) return <p className="p-6">Carregando top produtos...</p>;
+  if (!topProdutos.length)
+    return <p className="p-6">Nenhum produto encontrado.</p>;
+
   return (
     <Card className="bg-white shadow-sm">
       <CardHeader>
@@ -35,7 +64,9 @@ export function TopProdutosChart() {
             <YAxis stroke="#9CA3AF" />
             <Tooltip />
             <Bar dataKey="vendas" fill="#A5D8FF" name="Vendas" />
-            <Bar dataKey="lucro" fill="#B9FBC0" name="Lucro" />
+            {topProdutos.some((p) => p.lucro !== undefined) && (
+              <Bar dataKey="lucro" fill="#B9FBC0" name="Lucro" />
+            )}
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

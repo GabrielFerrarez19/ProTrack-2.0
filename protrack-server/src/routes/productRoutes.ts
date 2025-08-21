@@ -3,6 +3,7 @@ import {
   createProduct,
   getAllProdutos,
   getGiroEstoqueController,
+  getProdutosMaisVendidosController,
   getTotalEstoque,
   getTotalEstoquePrecoController,
   updateProduct,
@@ -18,4 +19,5 @@ router.get("/produtos/todos", getAllProdutos);
 router.put("/produtos/:id", updateProduct);
 router.get("/totalPreco", getTotalEstoquePrecoController);
 router.get("/giroEstoque", getGiroEstoqueController);
+router.get("/maisVendidos", getProdutosMaisVendidosController);
 export default router;
