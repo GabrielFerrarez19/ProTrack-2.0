@@ -12,6 +12,7 @@ import { Vendas } from "./pages/Vendas";
 import { TotalVendas } from "./pages/TotalVenda";
 import { DashboardFinanceiro } from "./pages/Financeiro";
 import { RelatoriosFinanceiros } from "./pages/RelatoriosFinanceiros";
+import { ConfiguracoesFinanceiras } from "./pages/ConfigFinanceiro";
 
 export function Router() {
   return (
@@ -29,6 +30,10 @@ export function Router() {
         <Route path="/totalVendas" element={<TotalVendas />} />
         <Route path="/financeiro" element={<DashboardFinanceiro />} />
         <Route path="/relatorio" element={<RelatoriosFinanceiros />} />
+        <Route
+          path="/configfinanceiro"
+          element={<ConfiguracoesFinanceiras />}
+        />
       </Route>
     </Routes>
   );
