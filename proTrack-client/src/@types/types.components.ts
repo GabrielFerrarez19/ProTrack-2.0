@@ -133,3 +133,9 @@ export interface ProdutoApi {
   codigo_barras?: string;
   preco_venda?: number;
 }
+
+export interface ProdutoMaisVendido {
+  produto_id: number; // ID do produto
+  nome: string; // Nome do produto
+  total_vendido: number; // Quantidade total vendida
+}

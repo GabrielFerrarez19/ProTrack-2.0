@@ -1,3 +1,5 @@
+import type { ProdutoMaisVendido } from "./types.components";
+
 export interface Produto {
   id?: number;
   nome: string;
@@ -142,4 +144,17 @@ export interface VendasDashboardResponse {
   mesAtual: number;
   mesAnterior: number;
   crescimento: number;
+}
+
+export interface ProdutosMaisVendidosResponse {
+  produtos: ProdutoMaisVendido[];
+}
+
+export interface FormaPagamento {
+  forma_pagamento: string;
+  total: number;
+}
+
+export interface FormasPagamentoResponse {
+  formas: FormaPagamento[];
 }

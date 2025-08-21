@@ -1,3 +1,7 @@
+import {
+  FormaPagamentoCount,
+  ProdutoMaisVendido,
+} from "../@types/types.controller";
 import { db } from "../config/database";
 
 export interface ProdutoData {
@@ -123,4 +127,30 @@ export const calcularGiroEstoque = async (): Promise<number> => {
   const giro = (cmv / totalEstoque) * 100;
 
   return parseFloat(giro.toFixed(2)); // retorna com 2 casas decimais
+};
+
+export const getProdutosMaisVendidos = async (
+  limit: number = 5 // retorna top 5 por padrão
+): Promise<ProdutoMaisVendido[]> => {
+  const sql = `
+    SELECT 
+      p.id AS produto_id,
+      p.nome,
+      SUM(iv.quantidade) AS total_vendido
+    FROM itens_venda iv
+    INNER JOIN vendas v ON iv.venda_id = v.id
+    INNER JOIN produtos p ON iv.produto_id = p.id
+    WHERE v.status != 'cancelado'
+    GROUP BY p.id, p.nome
+    ORDER BY total_vendido DESC
+    LIMIT ?
+  `;
+
+  const [rows]: any = await db.query(sql, [limit]);
+
+  return rows.map((row: any) => ({
+    produto_id: row.produto_id,
+    nome: row.nome,
+    total_vendido: Number(row.total_vendido),
+  }));
 };

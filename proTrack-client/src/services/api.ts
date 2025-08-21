@@ -3,8 +3,10 @@ import type {
   Cliente,
   ClientesResponse,
   EstoqueResponse,
+  FormasPagamentoResponse,
   GiroEstoqueResponse,
   Produto,
+  ProdutosMaisVendidosResponse,
   TotalAPagarResponse,
   TotalClientesResponse,
   TotalEstoqueResponse,
@@ -131,6 +133,23 @@ export const fetchVendasDashboard =
   async (): Promise<VendasDashboardResponse> => {
     const response = await api.get<VendasDashboardResponse>(
       "/vendas/resumoDeVendas"
+    );
+    return response.data;
+  };
+
+export const fetchProdutosMaisVendidos = async (
+  limit: number = 5
+): Promise<ProdutosMaisVendidosResponse> => {
+  const response = await api.get<ProdutosMaisVendidosResponse>(
+    `/product/maisVendidos?limit=${limit}`
+  );
+  return response.data;
+};
+
+export const fetchFormasPagamento =
+  async (): Promise<FormasPagamentoResponse> => {
+    const response = await api.get<FormasPagamentoResponse>(
+      "/vendas/formasPagamentos"
     );
     return response.data;
   };

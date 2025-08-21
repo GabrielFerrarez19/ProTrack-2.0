@@ -6,6 +6,7 @@ import {
 } from "../../../components/ui/card";
 import { Badge } from "../../../components/ui/badge";
 import { TrendingUp } from "lucide-react";
+import { formatBRL } from "../../../utils/functions";
 
 interface ResumoVendasProps {
   vendas: {
@@ -29,14 +30,14 @@ export function ResumoVendas({ vendas }: ResumoVendasProps) {
           <div>
             <p className="text-sm text-gray-400">Vendas do Mês</p>
             <p className="text-2xl font-bold text-gray-800">
-              R${vendas?.mesAtual?.toLocaleString("pt-BR") ?? "0,00"}
+              R${formatBRL(vendas?.mesAtual?.toLocaleString("pt-BR") ?? "0,00")}
             </p>
             <div className="flex items-center gap-2 mt-2">
               <Badge
                 variant="secondary"
                 className="bg-green-100 text-green-700"
               >
-                +{vendas?.crescimento ?? 0}%
+                +{formatBRL(vendas?.crescimento ?? 0)}%
               </Badge>
               <span className="text-sm text-gray-400">vs mês anterior</span>
             </div>
@@ -44,7 +45,7 @@ export function ResumoVendas({ vendas }: ResumoVendasProps) {
           <div>
             <p className="text-sm text-gray-400">Mês Anterior</p>
             <p className="text-xl font-semibold text-gray-500">
-              R${vendas?.mesAnterior?.toLocaleString("pt-BR") ?? "0,00"}
+              R${formatBRL(vendas?.mesAnterior ?? "0,00")}
             </p>
           </div>
         </div>
