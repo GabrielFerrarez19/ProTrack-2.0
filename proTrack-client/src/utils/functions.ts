@@ -104,3 +104,19 @@ export function formatCurrency(value: number) {
     maximumFractionDigits: 2,
   });
 }
+
+// Função utilitária
+export const formatBRL = (value: number | string | undefined | null) => {
+  if (value === undefined || value === null) return "0,00";
+
+  // garante que seja número
+  const num = typeof value === "string" ? parseFloat(value) : value;
+
+  // separa parte inteira e decimal
+  const [inteiro, decimal] = num.toFixed(2).split(".");
+
+  // adiciona pontos a cada 3 dígitos
+  const inteiroFormatado = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+  return `${inteiroFormatado},${decimal}`;
+};

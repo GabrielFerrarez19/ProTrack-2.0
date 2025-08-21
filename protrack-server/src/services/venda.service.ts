@@ -1,6 +1,6 @@
 import { ResultSetHeader } from "mysql2";
 import { db } from "../config/database";
-import { CriarVendaData } from "../@types/types.controller";
+import { CriarVendaData, VendasDashboard } from "../@types/types.controller";
 
 export const atualizarVendaDb = async (
   vendaId: number,
@@ -300,4 +300,37 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
   } finally {
     connection.release();
   }
+};
+
+export const getVendasDashboard = async (): Promise<VendasDashboard> => {
+  const sqlMesAtual = `
+    SELECT COALESCE(SUM(total_com_desconto), 0) AS total
+    FROM vendas
+    WHERE MONTH(data_venda) = MONTH(CURRENT_DATE())
+      AND YEAR(data_venda) = YEAR(CURRENT_DATE())
+      AND status != 'cancelado'
+  `;
+
+  const sqlMesAnterior = `
+    SELECT COALESCE(SUM(total_com_desconto), 0) AS total
+    FROM vendas
+    WHERE MONTH(data_venda) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)
+      AND YEAR(data_venda) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)
+      AND status != 'cancelado'
+  `;
+
+  const [resMesAtual]: any = await db.query(sqlMesAtual);
+  const [resMesAnterior]: any = await db.query(sqlMesAnterior);
+
+  const mesAtual = resMesAtual[0]?.total || 0;
+  const mesAnterior = resMesAnterior[0]?.total || 0;
+
+  const crescimento =
+    mesAnterior === 0 ? 100 : ((mesAtual - mesAnterior) / mesAnterior) * 100;
+
+  return {
+    mesAtual,
+    mesAnterior,
+    crescimento: parseFloat(crescimento.toFixed(2)), // arredonda para 2 casas decimais
+  };
 };

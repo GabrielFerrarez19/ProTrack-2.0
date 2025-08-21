@@ -6,6 +6,7 @@ import {
   criarVendaDb,
   getAllVendasDb,
   getTotalVendasDb,
+  getVendasDashboard,
   mapVendasComItens,
 } from "../services/venda.service";
 
@@ -68,5 +69,18 @@ export const atualizarVenda = async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message });
   } finally {
     connection.release();
+  }
+};
+
+export const getVendasDashboardController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const vendas = await getVendasDashboard();
+    res.status(200).json(vendas);
+  } catch (err) {
+    console.error("Erro ao buscar dados de vendas do dashboard:", err);
+    res.status(500).json({ error: (err as Error).message });
   }
 };
