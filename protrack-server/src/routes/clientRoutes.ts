@@ -3,6 +3,7 @@ import {
   createCliente,
   getAllClientes,
   getTotalClientes,
+  getTotalGeralAReceberController,
   getVendasCliente,
   updateCliente,
 } from "../controllers/client.controller";
@@ -14,5 +15,6 @@ router.get("/clientes/total", getTotalClientes);
 router.get("/clientes/todos", getAllClientes);
 router.put("/altera/:id", updateCliente);
 router.get("/buscaVendas/:id", getVendasCliente);
+router.get("/totalApagar", getTotalGeralAReceberController);
 
 export default router;
