@@ -4,7 +4,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "../../../components/ui/card";
+} from "../../components/ui/card";
 import {
   Table,
   TableBody,
@@ -12,17 +12,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../../components/ui/table";
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
-import { Badge } from "../../../components/ui/badge";
+} from "../../components/ui/table";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Badge } from "../../components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../components/ui/select";
+} from "../../components/ui/select";
 import {
   Search,
   Filter,
@@ -49,7 +49,7 @@ interface Movimentacao {
   status: "confirmado" | "pendente" | "cancelado";
 }
 
-const MovimentacoesFinanceiras = () => {
+export function MovimentacoesFinanceiras() {
   const [searchTerm, setSearchTerm] = useState("");
   const [tipoFilter, setTipoFilter] = useState("todos");
   const [categoriaFilter, setCategoriaFilter] = useState("todas");
@@ -470,6 +470,4 @@ const MovimentacoesFinanceiras = () => {
       </Card>
     </div>
   );
-};
-
-export default MovimentacoesFinanceiras;
+}

@@ -11,6 +11,7 @@ import { Cliente } from "./pages/Clientes";
 import { Vendas } from "./pages/Vendas";
 import { TotalVendas } from "./pages/TotalVenda";
 import { DashboardFinanceiro } from "./pages/Financeiro";
+import { RelatoriosFinanceiros } from "./pages/RelatoriosFinanceiros";
 
 export function Router() {
   return (
@@ -27,6 +28,7 @@ export function Router() {
         <Route path="/venda" element={<Vendas />} />
         <Route path="/totalVendas" element={<TotalVendas />} />
         <Route path="/financeiro" element={<DashboardFinanceiro />} />
+        <Route path="/relatorio" element={<RelatoriosFinanceiros />} />
       </Route>
     </Routes>
   );
