@@ -57,19 +57,20 @@ export function DashboardFinanceiro() {
             fetchTotalValorEstoque(),
             fetchTotalAPagar(),
             fetchGiroEstoque(),
-            fetchVendasDashboard(), // nova chamada para resumo de vendas
+            fetchVendasDashboard(),
           ]);
 
         setDados({
           estoque: estoqueRes,
           financeiro: financeiroRes,
           giro: giroRes,
-          vendas: vendasRes, // adiciona ao estado
+          vendas: vendasRes,
         });
 
-        console.log(dados.financeiro);
-        console.log(dados.giro);
-        console.log(dados.vendas); // log do resumo de vendas
+        // Log correto usando os dados recebidos
+        console.log("Financeiro:", financeiroRes);
+        console.log("Giro:", giroRes);
+        console.log("Vendas:", vendasRes);
       } catch (err) {
         console.error("Erro ao buscar dados do dashboard:", err);
       } finally {
@@ -88,14 +89,14 @@ export function DashboardFinanceiro() {
     caixa: 15400.5,
     banco: 45200.3,
     contasReceber: 0,
-    contasPagar: dados.financeiro?.total_geral ?? 0,
+    aReceber: dados.financeiro?.total_geral ?? 0,
   };
 
   const saldoTotal =
     saldoAtual.caixa +
     saldoAtual.banco +
     saldoAtual.contasReceber -
-    saldoAtual.contasPagar;
+    saldoAtual.aReceber;
 
   const fluxoCaixaDados = [
     { data: "01/12", entrada: 4500, saida: 2300 },
@@ -115,9 +116,9 @@ export function DashboardFinanceiro() {
   ];
 
   const distribuicaoVendas = [
-    { name: "À Vista", value: 45, color: "#A5D8FF" }, // azul pastel
-    { name: "Cartão", value: 35, color: "#B9FBC0" }, // verde pastel
-    { name: "Parcelado", value: 20, color: "#FFE3B3" }, // laranja pastel
+    { name: "À Vista", value: 45, color: "#A5D8FF" },
+    { name: "Cartão", value: 35, color: "#B9FBC0" },
+    { name: "Parcelado", value: 20, color: "#FFE3B3" },
   ];
 
   const alertas = [
@@ -194,7 +195,8 @@ export function DashboardFinanceiro() {
             <div>
               <p className="text-sm opacity-90">A Receber</p>
               <h3 className="text-2xl font-bold">
-                R$ {dados.financeiro?.total_geral}
+                R$
+                {dados.financeiro?.total_geral}
               </h3>
             </div>
             <TrendingUp className="h-8 w-8 opacity-80" />
@@ -216,14 +218,14 @@ export function DashboardFinanceiro() {
               <div>
                 <p className="text-sm text-gray-400">Vendas do Mês</p>
                 <p className="text-2xl font-bold text-gray-800">
-                  R${dados.vendas?.mesAtual}
+                  R${dados.vendas?.mesAtual?.toLocaleString("pt-BR") ?? "0,00"}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge
                     variant="secondary"
                     className="bg-green-100 text-green-700"
                   >
-                    +{dados.vendas?.crescimento}%
+                    +{dados.vendas?.crescimento ?? 0}%
                   </Badge>
                   <span className="text-sm text-gray-400">vs mês anterior</span>
                 </div>
@@ -231,7 +233,8 @@ export function DashboardFinanceiro() {
               <div>
                 <p className="text-sm text-gray-400">Mês Anterior</p>
                 <p className="text-xl font-semibold text-gray-500">
-                  R${dados.vendas?.mesAnterior}
+                  R$
+                  {dados.vendas?.mesAnterior?.toLocaleString("pt-BR") ?? "0,00"}
                 </p>
               </div>
             </div>
@@ -371,7 +374,7 @@ export function DashboardFinanceiro() {
             <div className="space-y-4">
               <div>
                 <p className="text-2xl font-bold text-gray-800">
-                  R$ {formatBRL(dados.estoque?.totalEstoque)}
+                  R$ {formatBRL(dados.estoque?.totalEstoque ?? 0)}
                 </p>
                 <p className="text-sm text-gray-400">Total investido</p>
               </div>
@@ -379,11 +382,11 @@ export function DashboardFinanceiro() {
                 <div className="flex justify-between text-sm">
                   <span>Giro de estoque</span>
                   <span className="font-medium text-gray-800">
-                    {dados.giro?.giroEstoque}%
+                    {dados.giro?.giroEstoque ?? 0}%
                   </span>
                 </div>
                 <Progress
-                  value={dados.giro?.giroEstoque}
+                  value={dados.giro?.giroEstoque ?? 0}
                   className="h-2 bg-blue-100"
                 />
               </div>
@@ -404,7 +407,7 @@ export function DashboardFinanceiro() {
           <CardContent>
             <div className="space-y-4">
               <div>
-                <p className="text-2xl font-bold text-red-400">R$10</p>
+                <p className="text-2xl font-bold text-red-400">R$ 10</p>
                 <p className="text-sm text-gray-400">Total pendente</p>
               </div>
               <div className="space-y-2">
