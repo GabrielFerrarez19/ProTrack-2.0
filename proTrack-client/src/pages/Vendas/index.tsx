@@ -40,7 +40,7 @@ export function Vendas() {
     if (produto) {
       methods.setValue(
         `produtos.${index}.precoUnitario`,
-        produto.preco_venda ?? 0
+        Number(produto.preco_venda) || 0
       );
     } else {
       methods.setValue(`produtos.${index}.precoUnitario`, 0);

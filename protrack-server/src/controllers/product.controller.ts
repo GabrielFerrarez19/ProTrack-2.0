@@ -5,6 +5,8 @@ import {
   updateProductDb,
   getTotalEstoqueDb,
   getAllProdutosDb,
+  getTotalPrecoEstoque,
+  calcularGiroEstoque,
 } from "../services/product.service";
 
 export const createProduct = async (req: Request, res: Response) => {
@@ -72,5 +74,28 @@ export const getAllProdutos = async (req: Request, res: Response) => {
   } catch (err) {
     console.error("Erro ao buscar produtos:", err); // já tem, mas vamos confirmar que imprime
     res.status(500).json({ error: (err as Error).message }); // mostra a mensagem real
+  }
+};
+
+export const getTotalEstoquePrecoController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const total = await getTotalPrecoEstoque();
+    res.status(200).json({ totalEstoque: total });
+  } catch (err) {
+    console.error("Erro ao calcular o total do estoque:", err);
+    res.status(500).json({ error: (err as Error).message });
+  }
+};
+
+export const getGiroEstoqueController = async (req: Request, res: Response) => {
+  try {
+    const giro = await calcularGiroEstoque();
+    res.status(200).json({ giroEstoque: giro });
+  } catch (err) {
+    console.error("Erro ao calcular o giro de estoque:", err);
+    res.status(500).json({ error: (err as Error).message });
   }
 };

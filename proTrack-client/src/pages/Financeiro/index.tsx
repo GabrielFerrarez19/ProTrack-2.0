@@ -30,18 +30,54 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { fetchTotalAPagar } from "../../services/api";
-import type { TotalAPagarResponse } from "../../@types/types.api";
+import {
+  fetchGiroEstoque,
+  fetchTotalAPagar,
+  fetchTotalValorEstoque,
+  fetchVendasDashboard,
+} from "../../services/api";
+import type { DashboardDados } from "../../@types/types.api";
+import { formatBRL } from "../../utils/functions";
 
 export function DashboardFinanceiro() {
-  const [dados, setDados] = useState<TotalAPagarResponse | null>(null);
+  const [dados, setDados] = useState<DashboardDados>({
+    estoque: null,
+    financeiro: null,
+    giro: null,
+    vendas: null,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchTotalAPagar()
-      .then((res) => setDados(res))
-      .catch((err) => console.error("Erro ao buscar dados financeiros:", err))
-      .finally(() => setLoading(false));
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [estoqueRes, financeiroRes, giroRes, vendasRes] =
+          await Promise.all([
+            fetchTotalValorEstoque(),
+            fetchTotalAPagar(),
+            fetchGiroEstoque(),
+            fetchVendasDashboard(), // nova chamada para resumo de vendas
+          ]);
+
+        setDados({
+          estoque: estoqueRes,
+          financeiro: financeiroRes,
+          giro: giroRes,
+          vendas: vendasRes, // adiciona ao estado
+        });
+
+        console.log(dados.financeiro);
+        console.log(dados.giro);
+        console.log(dados.vendas); // log do resumo de vendas
+      } catch (err) {
+        console.error("Erro ao buscar dados do dashboard:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   if (loading) return <p className="p-6">Carregando dados financeiros...</p>;
@@ -52,7 +88,7 @@ export function DashboardFinanceiro() {
     caixa: 15400.5,
     banco: 45200.3,
     contasReceber: 0,
-    contasPagar: dados.total_geral,
+    contasPagar: dados.financeiro?.total_geral ?? 0,
   };
 
   const saldoTotal =
@@ -60,12 +96,6 @@ export function DashboardFinanceiro() {
     saldoAtual.banco +
     saldoAtual.contasReceber -
     saldoAtual.contasPagar;
-
-  const vendas = {
-    mesAtual: 125400.5,
-    mesAnterior: 98200.3,
-    crescimento: 27.7,
-  };
 
   const fluxoCaixaDados = [
     { data: "01/12", entrada: 4500, saida: 2300 },
@@ -164,10 +194,7 @@ export function DashboardFinanceiro() {
             <div>
               <p className="text-sm opacity-90">A Receber</p>
               <h3 className="text-2xl font-bold">
-                R${" "}
-                {saldoAtual.contasPagar.toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                })}
+                R$ {dados.financeiro?.total_geral}
               </h3>
             </div>
             <TrendingUp className="h-8 w-8 opacity-80" />
@@ -189,17 +216,14 @@ export function DashboardFinanceiro() {
               <div>
                 <p className="text-sm text-gray-400">Vendas do Mês</p>
                 <p className="text-2xl font-bold text-gray-800">
-                  R${" "}
-                  {vendas.mesAtual.toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                  })}
+                  R${dados.vendas?.mesAtual}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge
                     variant="secondary"
                     className="bg-green-100 text-green-700"
                   >
-                    +{vendas.crescimento}%
+                    +{dados.vendas?.crescimento}%
                   </Badge>
                   <span className="text-sm text-gray-400">vs mês anterior</span>
                 </div>
@@ -207,10 +231,7 @@ export function DashboardFinanceiro() {
               <div>
                 <p className="text-sm text-gray-400">Mês Anterior</p>
                 <p className="text-xl font-semibold text-gray-500">
-                  R${" "}
-                  {vendas.mesAnterior.toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                  })}
+                  R${dados.vendas?.mesAnterior}
                 </p>
               </div>
             </div>
@@ -349,15 +370,22 @@ export function DashboardFinanceiro() {
           <CardContent>
             <div className="space-y-4">
               <div>
-                <p className="text-2xl font-bold text-gray-800">R$ 85.400</p>
+                <p className="text-2xl font-bold text-gray-800">
+                  R$ {formatBRL(dados.estoque?.totalEstoque)}
+                </p>
                 <p className="text-sm text-gray-400">Total investido</p>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Giro de estoque</span>
-                  <span className="font-medium text-gray-800">68%</span>
+                  <span className="font-medium text-gray-800">
+                    {dados.giro?.giroEstoque}%
+                  </span>
                 </div>
-                <Progress value={68} className="h-2 bg-blue-100" />
+                <Progress
+                  value={dados.giro?.giroEstoque}
+                  className="h-2 bg-blue-100"
+                />
               </div>
               <Button variant="outline" size="sm" className="w-full">
                 Ver Detalhes
@@ -376,12 +404,7 @@ export function DashboardFinanceiro() {
           <CardContent>
             <div className="space-y-4">
               <div>
-                <p className="text-2xl font-bold text-red-400">
-                  R${" "}
-                  {saldoAtual.contasPagar.toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                  })}
-                </p>
+                <p className="text-2xl font-bold text-red-400">R$10</p>
                 <p className="text-sm text-gray-400">Total pendente</p>
               </div>
               <div className="space-y-2">

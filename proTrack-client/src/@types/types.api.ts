@@ -117,3 +117,29 @@ export interface VendaAtualizacao {
 export interface TotalAPagarResponse {
   total_geral: number;
 }
+
+// Define o tipo de retorno esperado
+export interface TotalEstoqueResponse {
+  totalEstoque: number;
+}
+
+export interface DashboardDados {
+  estoque: TotalEstoqueResponse | null;
+  financeiro: TotalAPagarResponse | null;
+  giro?: GiroEstoqueResponse | null; // opcional
+  vendas: VendasDashboardResponse | null;
+}
+
+export interface GiroEstoqueResponse {
+  percentual: number; // ex: 68
+}
+
+export interface GiroEstoqueResponse {
+  giroEstoque: number;
+}
+
+export interface VendasDashboardResponse {
+  mesAtual: number;
+  mesAnterior: number;
+  crescimento: number;
+}

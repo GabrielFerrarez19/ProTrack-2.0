@@ -43,9 +43,9 @@ export function ProdutoSelect({
           produtos
             .map((p) => ({
               value: String(p.id),
-              label: `${p.nome} - Cod: ${p.codigo_barras ?? "-"} - R$ ${
-                p.preco_venda?.toFixed(2) ?? "0.00"
-              }`,
+              label: `${p.nome} - Cod: ${p.codigo_barras ?? "-"} - R$ ${Number(
+                p.preco_venda ?? 0
+              ).toFixed(2)}`,
             }))
             .find((opt) => opt.value === String(field.value)) || null;
 
@@ -55,9 +55,9 @@ export function ProdutoSelect({
               <Select
                 options={produtos.map((p) => ({
                   value: String(p.id),
-                  label: `${p.nome} - Cod: ${p.codigo_barras ?? "-"} - R$ ${
-                    p.preco_venda?.toFixed(2) ?? "0.00"
-                  }`,
+                  label: `${p.nome} - Cod: ${
+                    p.codigo_barras ?? "-"
+                  } - R$ ${Number(p.preco_venda ?? 0).toFixed(2)}`,
                 }))}
                 value={selectedOption}
                 onChange={(option: SingleValue<OptionType>) => {

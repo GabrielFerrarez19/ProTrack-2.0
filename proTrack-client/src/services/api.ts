@@ -3,13 +3,16 @@ import type {
   Cliente,
   ClientesResponse,
   EstoqueResponse,
+  GiroEstoqueResponse,
   Produto,
   TotalAPagarResponse,
   TotalClientesResponse,
+  TotalEstoqueResponse,
   TotalVendasResponse,
   VendaAtualizacao,
   VendaData,
   VendaResponse,
+  VendasDashboardResponse,
 } from "../@types/types.api";
 import type { ClienteFormData } from "../@types/types.components";
 import { api } from "./apiClient";
@@ -110,3 +113,24 @@ export const fetchTotalAPagar = async (): Promise<TotalAPagarResponse> => {
   const response = await api.get<TotalAPagarResponse>("/clients/totalApagar");
   return response.data;
 };
+
+// Chamada para buscar o total do estoque
+export const fetchTotalValorEstoque =
+  async (): Promise<TotalEstoqueResponse> => {
+    const response = await api.get<TotalEstoqueResponse>("/product/totalPreco");
+    return response.data;
+  };
+
+// Chamada para buscar o giro de estoque
+export const fetchGiroEstoque = async (): Promise<GiroEstoqueResponse> => {
+  const response = await api.get<GiroEstoqueResponse>("/product/giroEstoque");
+  return response.data;
+};
+
+export const fetchVendasDashboard =
+  async (): Promise<VendasDashboardResponse> => {
+    const response = await api.get<VendasDashboardResponse>(
+      "/vendas/resumoDeVendas"
+    );
+    return response.data;
+  };
