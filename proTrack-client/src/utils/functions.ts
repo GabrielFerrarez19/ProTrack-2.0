@@ -2,24 +2,30 @@ import type { Cliente } from "../@types/types.components";
 
 export function normalizeCliente(cliente: any): Cliente {
   return {
-    id: cliente.id,
-    nome: cliente.nome,
-    dataNascimento: cliente.data_nascimento,
-    cpf: cliente.cpf,
-    rg: cliente.rg,
-    estadoCivil: cliente.estado_civil,
-    sexo: cliente.sexo,
-    telefoneWhatsapp: cliente.telefone_whatsapp,
-    telefoneCelular: cliente.telefone_celular,
-    telefoneResidencial: cliente.telefone_residencial,
-    email: cliente.email,
-    cep: cliente.cep,
-    endereco: cliente.endereco,
-    numero: cliente.numero,
-    complemento: cliente.complemento,
-    bairro: cliente.bairro,
-    cidade: cliente.cidade,
-    valorAPagar: cliente.valor_a_pagar ?? 0,
+    id: String(cliente.id),
+    nome: cliente.nome ?? "",
+    dataNascimento: cliente.data_nascimento ?? "",
+    cpf: cliente.cpf ? String(cliente.cpf) : "",
+    rg: cliente.rg ?? "",
+    estadoCivil: cliente.estado_civil ?? "",
+    sexo: cliente.sexo ?? "",
+    telefoneWhatsapp: cliente.telefone_whatsapp
+      ? String(cliente.telefone_whatsapp)
+      : "",
+    telefoneCelular: cliente.telefone_celular
+      ? String(cliente.telefone_celular)
+      : "",
+    telefoneResidencial: cliente.telefone_residencial
+      ? String(cliente.telefone_residencial)
+      : "",
+    email: cliente.email ?? "",
+    cep: cliente.cep ?? "",
+    endereco: cliente.endereco ?? "",
+    numero: cliente.numero ?? "",
+    complemento: cliente.complemento ?? "",
+    bairro: cliente.bairro ?? "",
+    cidade: cliente.cidade ?? "",
+    valorAPagar: cliente.valor_a_pagar ?? 0, // continua número
   };
 }
 

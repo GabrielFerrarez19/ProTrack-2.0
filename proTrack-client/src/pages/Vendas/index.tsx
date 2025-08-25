@@ -31,12 +31,12 @@ export function Vendas() {
   });
 
   const watchedProdutos = methods.watch("produtos");
-  const { produtos } = useProdutos();
+  const { products } = useProdutos();
   const [totalGeral, setTotalGeral] = useState(0);
   const [totalComDesconto, setTotalComDesconto] = useState(0);
 
   const atualizarPrecoProduto = (index: number, produtoId: string) => {
-    const produto = produtos.find((p) => String(p.id) === produtoId);
+    const produto = products.find((p) => String(p.id) === produtoId);
     if (produto) {
       methods.setValue(
         `produtos.${index}.precoUnitario`,
@@ -114,7 +114,7 @@ export function Vendas() {
             remove={remove}
             control={methods.control}
             atualizarPrecoProduto={atualizarPrecoProduto}
-            produtos={produtos}
+            produtos={products}
           />
 
           <div className="flex justify-end space-x-4">
