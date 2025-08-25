@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
-import { findUserByEmailAndPassword } from "../services/user.service";
+import {
+  createUser,
+  findUserByEmailAndPassword,
+} from "../services/user.service";
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -15,5 +18,24 @@ export const login = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Erro interno do servidor" });
+  }
+};
+
+export const createUserController = async (req: Request, res: Response) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res
+        .status(400)
+        .json({ error: "Nome, email e senha são obrigatórios." });
+    }
+
+    const result = await createUser(name, email, password);
+
+    return res.status(201).json(result);
+  } catch (error: any) {
+    console.error("Erro ao criar usuário:", error);
+    return res.status(500).json({ error: "Erro interno do servidor." });
   }
 };
