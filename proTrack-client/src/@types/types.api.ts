@@ -64,11 +64,12 @@ export interface ProdutoVenda {
 export interface VendaData {
   clienteId: string;
   dataVenda: string;
-  desconto: number;
+  desconto?: number;
   total: number;
   status: string;
   totalComDesconto: number;
   produtos: ProdutoVenda[];
+  formaPagamento?: string;
 }
 
 export interface TotalVendasResponse {
@@ -101,17 +102,22 @@ export interface ItemVenda {
   produtoId: number;
   quantidade: number;
   precoUnitario: number;
-  desconto?: number; // opcional, padrão 0
+  desconto?: number;
 }
 
-// Tipagem do corpo da venda (atualização)
 export interface VendaAtualizacao {
   clienteId?: number;
   dataVenda?: string; // formato 'YYYY-MM-DD'
   desconto?: number;
   total?: number;
   totalComDesconto?: number;
-  status?: "pendente" | "pago" | "cancelado" | "aprazo"; // novo campo
+  status?: "pendente" | "pago" | "cancelado" | "aprazo";
+  formaPagamento?:
+    | "Dinheiro"
+    | "Cartão de Crédito"
+    | "Cartão de Débito"
+    | "Pix"
+    | "Boleto";
   produtos?: ItemVenda[];
 }
 
@@ -157,4 +163,8 @@ export interface FormaPagamento {
 
 export interface FormasPagamentoResponse {
   formas: FormaPagamento[];
+}
+
+export interface ProdutosQuantidadeBaixaResponse {
+  total: number;
 }

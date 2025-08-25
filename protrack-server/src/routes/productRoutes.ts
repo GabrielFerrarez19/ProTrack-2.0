@@ -6,6 +6,7 @@ import {
   getProdutosMaisVendidosController,
   getTotalEstoque,
   getTotalEstoquePrecoController,
+  produtosQuantidadeBaixaController,
   updateProduct,
 } from "../controllers/product.controller";
 
@@ -20,4 +21,5 @@ router.put("/produtos/:id", updateProduct);
 router.get("/totalPreco", getTotalEstoquePrecoController);
 router.get("/giroEstoque", getGiroEstoqueController);
 router.get("/maisVendidos", getProdutosMaisVendidosController);
+router.get("/faltaEstoque", produtosQuantidadeBaixaController);
 export default router;

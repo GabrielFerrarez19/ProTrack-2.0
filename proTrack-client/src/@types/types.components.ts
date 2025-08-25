@@ -49,7 +49,7 @@ export interface ClienteFormData {
 }
 
 export interface Cliente {
-  id: number;
+  id: string;
   nome: string;
   dataNascimento: string;
   cpf: string;
@@ -124,6 +124,12 @@ export interface VendaForm {
   data_venda: string;
   desconto: number;
   status: "pendente" | "pago" | "cancelado" | "aprazo"; // novo campo
+  formaPagamento?:
+    | "Dinheiro"
+    | "Cartão de Crédito"
+    | "Cartão de Débito"
+    | "Pix"
+    | "Boleto";
   itens: ItemVendaForm[];
 }
 
@@ -139,7 +145,6 @@ export interface ProdutoMaisVendido {
   nome: string; // Nome do produto
   total_vendido: number; // Quantidade total vendida
 }
-
 export interface ContaBancaria {
   id: string;
   nome: string;
@@ -169,4 +174,10 @@ export interface LimitesFluxo {
   limiteSemanal: number;
   limiteMensal: number;
   alertaFluxoCaixa: boolean;
+}
+
+export interface Alerta {
+  tipo: string;
+  mensagem: string;
+  urgencia: "alta" | "media";
 }

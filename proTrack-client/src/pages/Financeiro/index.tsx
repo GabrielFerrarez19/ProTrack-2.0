@@ -1,11 +1,4 @@
-import { useEffect, useState } from "react";
-import type { DashboardDados } from "../../@types/types.api";
-import {
-  fetchGiroEstoque,
-  fetchTotalAPagar,
-  fetchTotalValorEstoque,
-  fetchVendasDashboard,
-} from "../../services/api";
+import { useDashboard } from "../../hooks/useDashboard";
 import { AlertasDashboard } from "./components/AlertasDashboard";
 import { FluxoCaixaChart } from "./components/FluxoCaixaChart";
 import { ResumoVendas } from "./components/ResumoVendas";
@@ -14,59 +7,23 @@ import { ContasPagarCard } from "./components/ContasPagarCard";
 import { DistribuicaoVendasChart } from "./components/DistribuicaoVendasChart";
 import { TopProdutosChart } from "./components/TopProdutosChart";
 import { ValorEstoqueCard } from "./components/ValorEstoqueCard";
+import { Header } from "../../components/header";
 
 export function DashboardFinanceiro() {
-  const [dados, setDados] = useState<DashboardDados>({
-    estoque: null,
-    financeiro: null,
-    giro: null,
-    vendas: null,
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [estoqueRes, financeiroRes, giroRes, vendasRes] =
-          await Promise.all([
-            fetchTotalValorEstoque(),
-            fetchTotalAPagar(),
-            fetchGiroEstoque(),
-            fetchVendasDashboard(),
-          ]);
-
-        setDados({
-          estoque: estoqueRes,
-          financeiro: financeiroRes,
-          giro: giroRes,
-          vendas: vendasRes,
-        });
-      } catch (err) {
-        console.error("Erro ao buscar dados do dashboard:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const { dados, loading, error } = useDashboard();
 
   if (loading) return <p className="p-6">Carregando dados financeiros...</p>;
-  if (!dados)
-    return <p className="p-6 text-red-600">Erro ao carregar informações</p>;
+  if (error) return <p className="p-6 text-red-600">{error}</p>;
 
   return (
     <div className="p-6 space-y-6 bg-gray-50">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">
-          Dashboard Financeiro
-        </h1>
-        <p className="text-gray-500">
-          Visão geral da situação financeira da empresa
-        </p>
-      </div>
+      <Header
+        title="Dashboard Financeiro"
+        text="Visão geral da situação financeira da empresa"
+      />
 
       <SaldoCards dados={dados} />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <ResumoVendas vendas={dados.vendas} />
         <AlertasDashboard />
