@@ -64,7 +64,7 @@ export interface ProdutoVenda {
 export interface VendaData {
   clienteId: string;
   dataVenda: string;
-  desconto: number;
+  desconto?: number;
   total: number;
   status: string;
   totalComDesconto: number;

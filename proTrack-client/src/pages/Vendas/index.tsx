@@ -11,6 +11,9 @@ import { useState } from "react";
 import { criarVenda } from "../../services/api";
 import type { VendaData } from "../../@types/types.api";
 
+// Sonner Toast
+import { toast, Toaster } from "sonner";
+
 export function Vendas() {
   const methods = useForm<VendaForm>({
     resolver: zodResolver(vendaSchema),
@@ -20,7 +23,7 @@ export function Vendas() {
       desconto: 0,
       total: 0,
       totalComDesconto: 0,
-      status: "Pendente", // valor padrão
+      status: "Pendente",
       produtos: [],
     },
   });
@@ -60,7 +63,7 @@ export function Vendas() {
         desconto: data.desconto,
         total: data.total,
         totalComDesconto: data.totalComDesconto,
-        status: "pendente", // envia sempre como pendente
+        status: "pendente",
         produtos: data.produtos.map((p) => ({
           produtoId: p.produtoId,
           quantidade: p.quantidade,
@@ -71,82 +74,94 @@ export function Vendas() {
 
       const resposta = await criarVenda(vendaParaEnviar);
       console.log("Venda cadastrada com sucesso:", resposta);
-      alert("Produto cadastrado com sucesso");
+
+      toast.success("Venda cadastrada com sucesso!", {
+        style: { background: "#4ade80", color: "#065f46" }, // verde pastel
+      });
+
       methods.reset({
         clienteId: "",
         dataVenda: new Date().toISOString().split("T")[0],
         desconto: 0,
         total: 0,
         totalComDesconto: 0,
-        status: "Pendente", // reset também mantém o padrão
+        status: "Pendente",
         produtos: [],
       });
       setTotalGeral(0);
       setTotalComDesconto(0);
     } catch (error) {
       console.error("Erro ao cadastrar venda:", error);
+      toast.error("Erro ao cadastrar venda. Verifique os dados!", {
+        style: { background: "#f87171", color: "#7f1d1d" }, // vermelho pastel
+      });
     }
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <Header
-        title="Bem vindo a página Venda!"
-        text="Aqui você pode registar suas vendas"
-      />
+    <>
+      {/* Toaster global */}
+      <Toaster position="top-right" richColors />
 
-      <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <InformacoesVenda control={methods.control} />
-            <ResumoVenda
-              produtos={watchedProdutos}
-              onChangeResumo={({ totalPreco, valorComDesconto }) => {
-                setTotalGeral(totalPreco);
-                setTotalComDesconto(valorComDesconto);
-              }}
+      <div className="p-6 space-y-6">
+        <Header
+          title="Bem vindo a página Venda!"
+          text="Aqui você pode registar suas vendas"
+        />
+
+        <FormProvider {...methods}>
+          <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <InformacoesVenda control={methods.control} />
+              <ResumoVenda
+                produtos={watchedProdutos}
+                onChangeResumo={({ totalPreco, valorComDesconto }) => {
+                  setTotalGeral(totalPreco);
+                  setTotalComDesconto(valorComDesconto);
+                }}
+              />
+            </div>
+
+            <ProdutosTable
+              fields={fields}
+              append={append}
+              remove={remove}
+              control={methods.control}
+              atualizarPrecoProduto={atualizarPrecoProduto}
+              produtos={products}
             />
-          </div>
 
-          <ProdutosTable
-            fields={fields}
-            append={append}
-            remove={remove}
-            control={methods.control}
-            atualizarPrecoProduto={atualizarPrecoProduto}
-            produtos={products}
-          />
-
-          <div className="flex justify-end space-x-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                methods.reset({
-                  clienteId: "",
-                  dataVenda: new Date().toISOString().split("T")[0],
-                  desconto: 0,
-                  total: 0,
-                  totalComDesconto: 0,
-                  status: "Pendente",
-                  produtos: [],
-                });
-                setTotalGeral(0);
-                setTotalComDesconto(0);
-              }}
-              className="cursor-pointer"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              className="bg-green-600 hover:bg-green-500 cursor-pointer"
-            >
-              Cadastrar Venda
-            </Button>
-          </div>
-        </form>
-      </FormProvider>
-    </div>
+            <div className="flex justify-end space-x-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  methods.reset({
+                    clienteId: "",
+                    dataVenda: new Date().toISOString().split("T")[0],
+                    desconto: 0,
+                    total: 0,
+                    totalComDesconto: 0,
+                    status: "Pendente",
+                    produtos: [],
+                  });
+                  setTotalGeral(0);
+                  setTotalComDesconto(0);
+                }}
+                className="cursor-pointer"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                className="bg-green-600 hover:bg-green-500 cursor-pointer"
+              >
+                Cadastrar Venda
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
+      </div>
+    </>
   );
 }
