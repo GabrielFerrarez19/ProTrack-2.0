@@ -56,6 +56,8 @@ export function Vendas() {
 
     console.log("Dados da venda:", data);
 
+    console.log(data);
+
     try {
       const vendaParaEnviar: VendaData = {
         clienteId: data.clienteId,
