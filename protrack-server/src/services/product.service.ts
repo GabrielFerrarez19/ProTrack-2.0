@@ -154,3 +154,16 @@ export const getProdutosMaisVendidos = async (
     total_vendido: Number(row.total_vendido),
   }));
 };
+
+export const contarProdutosQuantidadeBaixa = async (): Promise<number> => {
+  const sql = `
+    SELECT COUNT(*) AS total
+    FROM produtos
+    WHERE quantidade <= 4
+  `;
+
+  const [rows]: any = await db.query(sql);
+  const total = rows[0]?.total || 0;
+
+  return total;
+};

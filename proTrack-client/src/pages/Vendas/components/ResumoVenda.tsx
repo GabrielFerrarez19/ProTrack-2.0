@@ -7,6 +7,13 @@ import {
   CardHeader,
   CardTitle,
 } from "../../../components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../components/ui/select";
 import type { VendaForm } from "../../../schemas/schemaVendas";
 
 type Produto = {
@@ -81,6 +88,38 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
                 }
                 value={field.value ?? ""}
               />
+            )}
+          />
+        </div>
+
+        {/* Select de formas de pagamento */}
+        <div className="flex justify-between items-center">
+          <label
+            className="text-sm text-muted-foreground mr-2"
+            htmlFor="formaPagamento"
+          >
+            Forma de Pagamento:
+          </label>
+          <Controller
+            control={control}
+            name="formaPagamento"
+            defaultValue={undefined}
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Dinheiro">Dinheiro</SelectItem>
+                  <SelectItem value="Cartão de Crédito">
+                    Cartão de Crédito
+                  </SelectItem>
+                  <SelectItem value="Cartão de Débito">
+                    Cartão de Débito
+                  </SelectItem>
+                  <SelectItem value="Pix">PIX</SelectItem>
+                </SelectContent>
+              </Select>
             )}
           />
         </div>

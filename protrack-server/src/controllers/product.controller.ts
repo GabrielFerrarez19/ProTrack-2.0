@@ -8,6 +8,7 @@ import {
   getTotalPrecoEstoque,
   calcularGiroEstoque,
   getProdutosMaisVendidos,
+  contarProdutosQuantidadeBaixa,
 } from "../services/product.service";
 
 export const createProduct = async (req: Request, res: Response) => {
@@ -115,5 +116,18 @@ export const getProdutosMaisVendidosController = async (
   } catch (err) {
     console.error("Erro ao buscar produtos mais vendidos:", err);
     res.status(500).json({ error: (err as Error).message });
+  }
+};
+
+export const produtosQuantidadeBaixaController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const total = await contarProdutosQuantidadeBaixa();
+    res.json({ total });
+  } catch (error: any) {
+    console.error("Erro ao contar produtos:", error);
+    res.status(500).json({ error: "Erro interno do servidor" });
   }
 };
