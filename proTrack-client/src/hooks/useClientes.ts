@@ -1,36 +1,34 @@
-import { useEffect, useState } from "react";
+// hooks/useClientes.ts
+import { useState, useEffect } from "react";
+import type { Cliente } from "../@types/types.components";
 import { fetchAllClientes } from "../services/api";
+import { normalizeCliente } from "../utils/functions";
 
-export type Cliente = {
-  id: string;
-  nome: string;
-  email: string; // importante ter todos os campos usados
-  cpf?: string; // opcional se usar
-};
-
-export function useClientes() {
+export const useClientes = () => {
   const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadClientes() {
-      try {
-        const data = await fetchAllClientes();
-        setClientes(
-          data.clientes.map((c) => ({
-            ...c,
-            id: String(c.id),
-          }))
-        );
-      } catch {
-        setError("Erro ao carregar clientes");
-      } finally {
-        setLoading(false);
-      }
+  const loadClientes = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchAllClientes();
+
+      // Normaliza os clientes e força strings
+      const clientesNormalizados = (data.clientes ?? []).map(normalizeCliente);
+
+      setClientes(clientesNormalizados);
+    } catch (err) {
+      console.error("Erro ao carregar clientes:", err);
+      setError("Erro ao carregar clientes");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadClientes();
   }, []);
 
-  return { clientes, loading, error };
-}
+  return { clientes, loading, error, reload: loadClientes };
+};

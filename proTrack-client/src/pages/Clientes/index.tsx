@@ -1,41 +1,17 @@
-import { useState, useEffect } from "react";
-import type { Cliente } from "../../@types/types.components";
+// pages/Cliente.tsx
+import { useState } from "react";
 
-import { fetchAllClientes } from "../../services/api";
+// Hooks
+import { useClientes } from "../../hooks/useClientes";
+
+// Componentes
 import { Header } from "../../components/header";
 import { ClientTable } from "./components/ClientTable";
-import { normalizeCliente } from "../../utils/functions";
 import { SearchBar } from "./components/SearchFilter";
 
 export function Cliente() {
+  const { clientes, loading, error, reload } = useClientes();
   const [searchTerm, setSearchTerm] = useState("");
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadClientes = async () => {
-    try {
-      setLoading(true);
-      const data = await fetchAllClientes();
-
-      console.log("Puro", data);
-
-      const clientesNormalizados = data.clientes.map(normalizeCliente);
-
-      console.log("Normalizados", clientesNormalizados);
-
-      setClientes(clientesNormalizados);
-      console.log(clientesNormalizados);
-    } catch {
-      setError("Erro ao carregar clientes");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadClientes();
-  }, []);
 
   const filteredClientes = clientes.filter((cliente) => {
     const term = searchTerm.toLowerCase();
@@ -52,8 +28,8 @@ export function Cliente() {
     );
   });
 
-  if (loading) return <p>Carregando clientes...</p>;
-  if (error) return <p>{error}</p>;
+  if (loading) return <p className="p-6">Carregando clientes...</p>;
+  if (error) return <p className="p-6 text-red-600">{error}</p>;
 
   return (
     <div className="p-6 space-y-6">
@@ -62,10 +38,7 @@ export function Cliente() {
         text="Aqui você pode visualizar todos os clientes cadastrados no sistema."
       />
       <SearchBar searchTerm={searchTerm} onChange={setSearchTerm} />
-      <ClientTable
-        clientes={filteredClientes}
-        onClienteUpdated={loadClientes}
-      />
+      <ClientTable clientes={filteredClientes} onClienteUpdated={reload} />
     </div>
   );
 }

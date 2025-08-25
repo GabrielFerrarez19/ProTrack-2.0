@@ -49,7 +49,7 @@ export interface ClienteFormData {
 }
 
 export interface Cliente {
-  id: number;
+  id: string;
   nome: string;
   dataNascimento: string;
   cpf: string;
