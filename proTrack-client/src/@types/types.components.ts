@@ -139,3 +139,9 @@ export interface ProdutoMaisVendido {
   nome: string; // Nome do produto
   total_vendido: number; // Quantidade total vendida
 }
+
+export interface Alerta {
+  tipo: string;
+  mensagem: string;
+  urgencia: "alta" | "media";
+}

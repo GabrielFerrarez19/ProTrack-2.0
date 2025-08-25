@@ -14,6 +14,7 @@ import { ContasPagarCard } from "./components/ContasPagarCard";
 import { DistribuicaoVendasChart } from "./components/DistribuicaoVendasChart";
 import { TopProdutosChart } from "./components/TopProdutosChart";
 import { ValorEstoqueCard } from "./components/ValorEstoqueCard";
+import { Header } from "../../components/header";
 
 export function DashboardFinanceiro() {
   const [dados, setDados] = useState<DashboardDados>({
@@ -58,12 +59,10 @@ export function DashboardFinanceiro() {
   return (
     <div className="p-6 space-y-6 bg-gray-50">
       <div>
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">
-          Dashboard Financeiro
-        </h1>
-        <p className="text-gray-500">
-          Visão geral da situação financeira da empresa
-        </p>
+        <Header
+          title="Dashboard Financeiro"
+          text="Visão geral da situação financeira da empresa"
+        />
       </div>
 
       <SaldoCards dados={dados} />

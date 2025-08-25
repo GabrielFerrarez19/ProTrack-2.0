@@ -7,6 +7,7 @@ import type {
   GiroEstoqueResponse,
   Produto,
   ProdutosMaisVendidosResponse,
+  ProdutosQuantidadeBaixaResponse,
   TotalAPagarResponse,
   TotalClientesResponse,
   TotalEstoqueResponse,
@@ -150,6 +151,14 @@ export const fetchFormasPagamento =
   async (): Promise<FormasPagamentoResponse> => {
     const response = await api.get<FormasPagamentoResponse>(
       "/vendas/formasPagamentos"
+    );
+    return response.data;
+  };
+
+export const fetchProdutosQuantidadeBaixa =
+  async (): Promise<ProdutosQuantidadeBaixaResponse> => {
+    const response = await api.get<ProdutosQuantidadeBaixaResponse>(
+      "/product/faltaEstoque"
     );
     return response.data;
   };
