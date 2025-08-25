@@ -38,6 +38,12 @@ interface DialogAlterVendaProps {
     cliente_nome: string;
     desconto?: number;
     status: "pendente" | "pago" | "cancelado";
+    forma_pagamento?:
+      | "Dinheiro"
+      | "Cartão de Crédito"
+      | "Cartão de Débito"
+      | "Pix"
+      | "Boleto";
     data_venda: string;
     itens: ItemVendaForm[];
   };
@@ -50,13 +56,14 @@ export function DialogAlterVenda({
   setOpen,
   onVendaUpdated,
 }: DialogAlterVendaProps) {
-  const { produtos } = useProdutos();
+  const { products } = useProdutos();
 
   const methods = useForm<VendaForm>({
     defaultValues: {
       data_venda: venda.data_venda.split("T")[0],
       desconto: venda.desconto ?? 0,
-      status: venda.status, // valor inicial do status
+      status: venda.status,
+      formaPagamento: venda.forma_pagamento ?? "Dinheiro", // ✅ corrigido
       itens: venda.itens.map((item) => ({
         produto_id: item.produto_id,
         produto_nome: item.produto_nome,
@@ -83,7 +90,7 @@ export function DialogAlterVenda({
   const totalComDesconto = total - (total * desconto) / 100;
 
   const atualizarPrecoProduto = (index: number, produtoId: string) => {
-    const prod = produtos.find((p) => p.id === Number(produtoId));
+    const prod = products.find((p) => p.id === Number(produtoId));
     if (prod) {
       setValue(`itens.${index}.produto_id`, prod.id ?? 0);
       setValue(`itens.${index}.preco_unitario`, prod.preco_venda ?? 0);
@@ -106,7 +113,8 @@ export function DialogAlterVenda({
         desconto: formData.desconto,
         total,
         totalComDesconto,
-        status: formData.status, // envia o status selecionado
+        status: formData.status,
+        formaPagamento: formData.formaPagamento,
         produtos: produtosApi,
       });
 
@@ -156,6 +164,7 @@ export function DialogAlterVenda({
             <strong>Total com Desconto:</strong> R$
             {totalComDesconto.toFixed(2).replace(".", ",")}
           </div>
+
           <div>
             <strong>Status:</strong>
             <Select
@@ -177,6 +186,40 @@ export function DialogAlterVenda({
               </SelectContent>
             </Select>
           </div>
+
+          <div>
+            <strong>Forma de Pagamento:</strong>
+            <Select
+              value={methods.watch("formaPagamento")}
+              onValueChange={(value) =>
+                methods.setValue(
+                  "formaPagamento",
+                  value as
+                    | "Dinheiro"
+                    | "Cartão de Crédito"
+                    | "Cartão de Débito"
+                    | "Pix"
+                    | "Boleto"
+                )
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione a forma de pagamento" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Dinheiro">Dinheiro</SelectItem>
+                <SelectItem value="Cartão de Crédito">
+                  Cartão de Crédito
+                </SelectItem>
+                <SelectItem value="Cartão de Débito">
+                  Cartão de Débito
+                </SelectItem>
+                <SelectItem value="Pix">Pix</SelectItem>
+                <SelectItem value="Boleto">Boleto</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="pt-4">
             <div className="flex justify-between items-center mb-2">
               <strong>Itens:</strong>
@@ -213,7 +256,7 @@ export function DialogAlterVenda({
                       <ProdutoSelect
                         control={control}
                         name={`itens.${index}.produto_id`}
-                        produtos={produtos}
+                        produtos={products}
                         index={index}
                         atualizarPrecoProduto={atualizarPrecoProduto}
                       />

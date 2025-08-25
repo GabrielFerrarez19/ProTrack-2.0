@@ -124,6 +124,12 @@ export interface VendaForm {
   data_venda: string;
   desconto: number;
   status: "pendente" | "pago" | "cancelado" | "aprazo"; // novo campo
+  formaPagamento?:
+    | "Dinheiro"
+    | "Cartão de Crédito"
+    | "Cartão de Débito"
+    | "Pix"
+    | "Boleto";
   itens: ItemVendaForm[];
 }
 
