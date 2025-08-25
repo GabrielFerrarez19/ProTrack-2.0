@@ -14,6 +14,7 @@ export interface CriarVendaData {
   totalComDesconto: number;
   status?: string;
   produtos: ProdutoVenda[];
+  formaPagamento?: string;
 }
 
 export interface VendasDashboard {
