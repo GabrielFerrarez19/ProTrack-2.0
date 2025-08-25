@@ -1,25 +1,29 @@
-import { useEffect, useState } from "react";
+// hooks/useProdutos.ts
+import { useState, useEffect } from "react";
+import type { Product } from "../@types/types.components";
 import { fetchAllProdutos } from "../services/api";
-import type { Produto } from "../@types/types.api";
 
-export function useProdutos() {
-  const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [loading, setLoading] = useState(true);
+export const useProdutos = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadProdutos() {
-      try {
-        const data = await fetchAllProdutos();
-        setProdutos(data);
-      } catch {
-        setError("Erro ao carregar produtos");
-      } finally {
-        setLoading(false);
-      }
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchAllProdutos();
+      setProducts(data as Product[]);
+    } catch (err) {
+      console.error("Erro ao carregar produtos:", err);
+      setError("Erro ao carregar produtos");
+    } finally {
+      setLoading(false);
     }
-    loadProdutos();
+  };
+
+  useEffect(() => {
+    loadProducts();
   }, []);
 
-  return { produtos, loading, error };
-}
+  return { products, loading, error, reload: loadProducts };
+};
