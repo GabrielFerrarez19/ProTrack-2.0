@@ -158,3 +158,7 @@ export interface FormaPagamento {
 export interface FormasPagamentoResponse {
   formas: FormaPagamento[];
 }
+
+export interface ProdutosQuantidadeBaixaResponse {
+  total: number;
+}
