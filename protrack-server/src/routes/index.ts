@@ -3,6 +3,7 @@ import userRoutes from "./user.routes";
 import productRoutes from "./productRoutes";
 import clientRoutes from "./clientRoutes";
 import vendasRoutes from "./vendasRoutes";
+import metodosPagamentosRoutes from "./metodosPagamentosRoutes";
 
 const router = Router();
 
@@ -15,5 +16,6 @@ router.use("/users", userRoutes);
 router.use("/product", productRoutes);
 router.use("/clients", clientRoutes);
 router.use("/vendas", vendasRoutes);
+router.use("/metodo", metodosPagamentosRoutes);
 
 export default router;

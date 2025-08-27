@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Save } from "lucide-react";
 
@@ -12,6 +12,7 @@ import type {
   Categoria,
 } from "../../@types/types.components";
 import { LimitesFluxo } from "./components/LimitesFluxoCaixa";
+import { fetchMetodosPagamento } from "../../services/api"; // API que retorna todos os métodos do banco
 
 export function ConfiguracoesFinanceiras() {
   const [contasBancarias, setContasBancarias] = useState<ContaBancaria[]>([
@@ -35,18 +36,9 @@ export function ConfiguracoesFinanceiras() {
     },
   ]);
 
-  const [metodosPagamento, setMetodosPagamento] = useState<MetodoPagamento[]>([
-    { id: "1", nome: "Dinheiro", tipo: "dinheiro", ativo: true },
-    { id: "2", nome: "Cartão de Débito", tipo: "cartao", ativo: true },
-    { id: "3", nome: "Cartão de Crédito", tipo: "cartao", ativo: true },
-    { id: "4", nome: "PIX", tipo: "pix", ativo: true },
-    {
-      id: "5",
-      nome: "Transferência Bancária",
-      tipo: "transferencia",
-      ativo: false,
-    },
-  ]);
+  const [metodosPagamento, setMetodosPagamento] = useState<MetodoPagamento[]>(
+    []
+  );
 
   const [categorias] = useState<Categoria[]>([
     { id: "1", nome: "Vendas", tipo: "receita", cor: "#22c55e" },
@@ -71,6 +63,19 @@ export function ConfiguracoesFinanceiras() {
     limiteMensal: 100000,
     alertaFluxoCaixa: 10000,
   });
+
+  // Busca métodos de pagamento do banco ao montar
+  useEffect(() => {
+    const loadMetodos = async () => {
+      try {
+        const dados = await fetchMetodosPagamento(); // retorna {id, nome, tipo, ativo} de todos
+        setMetodosPagamento(dados);
+      } catch (error) {
+        console.error("Erro ao carregar métodos de pagamento:", error);
+      }
+    };
+    loadMetodos();
+  }, []);
 
   const handleSalvarConfiguracoes = () => {
     console.log("Configurações salvas", {
