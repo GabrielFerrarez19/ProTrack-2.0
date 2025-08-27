@@ -11,6 +11,7 @@ import type {
   FormasPagamentoResponse,
 } from "../../../@types/types.api";
 import { fetchFormasPagamento } from "../../../services/api";
+import { formatarFormaPagamento } from "../../../utils/functions";
 
 interface FormaPagamentoComCor extends FormaPagamento {
   color: string;
@@ -27,15 +28,25 @@ export function DistribuicaoVendasChart() {
     const loadDistribuicao = async () => {
       try {
         const data: FormasPagamentoResponse = await fetchFormasPagamento();
+
+        if (!data || !data.formas) {
+          setDistribuicaoVendas([]);
+          return;
+        }
+
         const formasComCores = data.formas.map((f, i) => ({
           ...f,
+          total: f.total ?? 0, // garante que nunca seja undefined
           color: cores[i % cores.length],
         }));
+
         setDistribuicaoVendas(formasComCores);
       } catch (err) {
         console.error("Erro ao carregar formas de pagamento:", err);
+        setDistribuicaoVendas([]);
       }
     };
+
     loadDistribuicao();
   }, []);
 
@@ -78,15 +89,18 @@ export function DistribuicaoVendasChart() {
             <Tooltip formatter={(value: number) => `${value} vendas`} />
           </PieChart>
         </ResponsiveContainer>
+
+        {/* Legenda personalizada */}
         <div className="flex justify-center gap-4 mt-4 flex-wrap">
-          {distribuicaoVendas.map((item, index) => (
-            <div key={index} className="flex items-center gap-2">
+          {distribuicaoVendas.map((item) => (
+            <div key={item.forma_pagamento} className="flex items-center gap-2">
               <div
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: item.color }}
               />
-              <span className="text-sm text-gray-500">
-                {item.forma_pagamento}: {item.total}
+              <span className="text-sm text-gray-600">
+                {formatarFormaPagamento(item.forma_pagamento)}:{" "}
+                <strong>{item.total}</strong>
               </span>
             </div>
           ))}

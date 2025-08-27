@@ -15,6 +15,7 @@ export const useVendasList = () => {
     try {
       const data: VendaResponse[] = await fetchAllVendas();
       setVendas(Array.isArray(data) ? data : []);
+      console.log("puro", data);
     } catch (err) {
       console.error("Erro ao buscar vendas:", err);
       setError("Erro ao buscar vendas");
@@ -23,6 +24,8 @@ export const useVendasList = () => {
       setLoading(false);
     }
   }, []);
+
+  console.log("VendasHook", vendas);
 
   useEffect(() => {
     loadVendas();

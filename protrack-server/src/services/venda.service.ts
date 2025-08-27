@@ -174,6 +174,7 @@ export const getAllVendasDb = async () => {
       v.total,
       v.total_com_desconto,
       v.status,
+      v.forma_pagamento, 
       v.data_cadastro,
       iv.id AS item_id,
       iv.produto_id,
