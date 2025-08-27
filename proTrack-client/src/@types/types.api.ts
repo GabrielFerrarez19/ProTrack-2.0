@@ -113,6 +113,7 @@ export interface VendaResponse {
   total: number;
   total_com_desconto: number;
   status: "pendente" | "pago" | "cancelado"; // novo campo
+  forma_pagamento: "dinheiro" | "cartao" | "pix" | "transferencia";
   data_cadastro: string; // formato DATETIME vindo do MySQL
   itens: {
     id: number;
@@ -140,12 +141,7 @@ export interface VendaAtualizacao {
   total?: number;
   totalComDesconto?: number;
   status?: "pendente" | "pago" | "cancelado" | "aprazo";
-  formaPagamento?:
-    | "Dinheiro"
-    | "Cartão de Crédito"
-    | "Cartão de Débito"
-    | "Pix"
-    | "Boleto";
+  formaPagamento?: "dinheiro" | "cartao" | "pix" | "transferencia"; // padronizado
   produtos?: ItemVenda[];
 }
 

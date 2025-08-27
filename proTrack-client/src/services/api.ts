@@ -97,6 +97,7 @@ export const fetchTotalVendas = async (): Promise<TotalVendasResponse> => {
 
 export const fetchAllVendas = async (): Promise<VendaResponse[]> => {
   const response = await api.get<VendaResponse[]>("/vendas/todas");
+  console.log("Vindo da API", response.data);
   return response.data;
 };
 
