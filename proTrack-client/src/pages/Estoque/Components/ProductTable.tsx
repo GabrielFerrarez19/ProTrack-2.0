@@ -42,6 +42,8 @@ export function ProductTable({
     }
   };
 
+  console.log(products);
+
   return (
     <div className="rounded-lg overflow-hidden border border-border">
       <Table>
@@ -80,9 +82,11 @@ export function ProductTable({
               <TableCell>{product.categoria ?? "—"}</TableCell>
               <TableCell>{product.tamanho ?? "—"}</TableCell>
               <TableCell>
-                {typeof product.preco_venda === "number"
-                  ? `R$ ${product.preco_venda.toFixed(2).replace(".", ",")}`
-                  : "—"}
+                {product.preco_venda != null
+                  ? `R$ ${Number(product.preco_venda)
+                      .toFixed(2)
+                      .replace(".", ",")}`
+                  : "0,00"}
               </TableCell>
               <TableCell>
                 <Badge className={getQuantityColor(product.quantidade)}>
