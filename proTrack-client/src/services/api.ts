@@ -1,10 +1,12 @@
 import { AxiosError } from "axios";
 import type {
   Cliente,
+  ClienteFormData,
   ClientesResponse,
   EstoqueResponse,
   FormasPagamentoResponse,
   GiroEstoqueResponse,
+  MetodoPagamentoConfig,
   Produto,
   ProdutosMaisVendidosResponse,
   ProdutosQuantidadeBaixaResponse,
@@ -17,7 +19,6 @@ import type {
   VendaResponse,
   VendasDashboardResponse,
 } from "../@types/types.api";
-import type { ClienteFormData } from "../@types/types.components";
 import { api } from "./apiClient";
 
 // Interceptor global de erros (opcional)
@@ -162,3 +163,24 @@ export const fetchProdutosQuantidadeBaixa =
     );
     return response.data;
   };
+
+// Buscar todos os métodos
+export const fetchMetodosPagamento = async (): Promise<
+  MetodoPagamentoConfig[]
+> => {
+  const response = await api.get<MetodoPagamentoConfig[]>(
+    "/metodo/metodos-pagamento"
+  );
+  return response.data;
+};
+
+export const toggleMetodoPagamentoApi = async (id: string, ativo: boolean) => {
+  await api.patch(`/metodo/metodos-pagamento/${id}/toggle`, { ativo });
+};
+
+export const fetchMetodosPagamentoAtivos = async (): Promise<
+  { nome: string; tipo: string; id: number }[]
+> => {
+  const response = await api.get("/metodo/metodos-pagamento/ativos"); // rota que retorna apenas os ativos
+  return response.data;
+};

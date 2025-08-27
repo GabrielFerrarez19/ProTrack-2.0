@@ -7,7 +7,7 @@ import { ResumoVenda } from "./components/ResumoVenda";
 import { ProdutosTable } from "./components/ProdutosTable";
 import { Header } from "../../components/header";
 import { useProdutos } from "../../hooks/useProdutos";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { criarVenda } from "../../services/api";
 import type { VendaData } from "../../@types/types.api";
 
@@ -51,12 +51,14 @@ export function Vendas() {
   };
 
   const onSubmit = async (data: VendaForm) => {
+    console.log("=== onSubmit chamado ===");
+    console.log("Dados recebidos:", data);
+    console.log("Erros do formulário:", methods.formState.errors);
+    console.log("Produtos no campo:", fields);
+    console.log("Forma de pagamento selecionada:", data.formaPagamento);
+
     data.totalComDesconto = totalComDesconto;
     data.total = totalGeral;
-
-    console.log("Dados da venda:", data);
-
-    console.log(data);
 
     try {
       const vendaParaEnviar: VendaData = {
@@ -72,13 +74,16 @@ export function Vendas() {
           precoUnitario: p.precoUnitario,
           desconto: p.desconto ?? 0,
         })),
+        formaPagamento: data.formaPagamento,
       };
+
+      console.log("Venda a enviar para API:", vendaParaEnviar);
 
       const resposta = await criarVenda(vendaParaEnviar);
       console.log("Venda cadastrada com sucesso:", resposta);
 
       toast.success("Venda cadastrada com sucesso!", {
-        style: { background: "#4ade80", color: "#065f46" }, // verde pastel
+        style: { background: "#4ade80", color: "#065f46" },
       });
 
       methods.reset({
@@ -95,14 +100,21 @@ export function Vendas() {
     } catch (error) {
       console.error("Erro ao cadastrar venda:", error);
       toast.error("Erro ao cadastrar venda. Verifique os dados!", {
-        style: { background: "#f87171", color: "#7f1d1d" }, // vermelho pastel
+        style: { background: "#f87171", color: "#7f1d1d" },
       });
     }
   };
 
+  useEffect(() => {
+    console.log("Campos produtos atualizados:", watchedProdutos);
+  }, [watchedProdutos]);
+
+  useEffect(() => {
+    console.log("FormState.errors:", methods.formState.errors);
+  }, [methods.formState.errors]);
+
   return (
     <>
-      {/* Toaster global */}
       <Toaster position="top-right" richColors />
 
       <div className="p-6 space-y-6">

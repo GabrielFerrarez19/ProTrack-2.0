@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import { Input } from "../../../components/ui/input";
 import {
@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "../../../components/ui/select";
 import type { VendaForm } from "../../../schemas/schemaVendas";
+import { fetchMetodosPagamentoAtivos } from "../../../services/api";
 
 type Produto = {
   produtoId: string;
@@ -43,11 +44,27 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
 
   const valorComDesconto = totalPreco * (1 - desconto / 100);
 
-  React.useEffect(() => {
+  // Atualiza resumo externo se existir callback
+  useEffect(() => {
     if (onChangeResumo) {
       onChangeResumo({ totalPreco, valorComDesconto });
     }
   }, [totalPreco, valorComDesconto, onChangeResumo]);
+
+  // Estado para formas de pagamento ativas
+  const [metodos, setMetodos] = useState<
+    { nome: string; tipo: string; id: number }[]
+  >([]);
+
+  useEffect(() => {
+    const loadMetodos = async () => {
+      const ativos = await fetchMetodosPagamentoAtivos();
+      setMetodos(ativos);
+    };
+    loadMetodos();
+  }, []);
+
+  console.log(metodos);
 
   return (
     <Card>
@@ -55,6 +72,7 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
         <CardTitle>Resumo da Venda</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Totais de itens */}
         <div className="flex justify-between items-center">
           <span className="text-sm text-muted-foreground">Itens:</span>
           <span className="font-medium">{totalItens}</span>
@@ -66,6 +84,7 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
           <span className="font-medium">{totalQuantidade}</span>
         </div>
 
+        {/* Desconto */}
         <div className="flex justify-between items-center">
           <label className="text-sm text-muted-foreground" htmlFor="desconto">
             Desconto (%):
@@ -103,27 +122,33 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
           <Controller
             control={control}
             name="formaPagamento"
-            defaultValue={undefined}
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Dinheiro">Dinheiro</SelectItem>
-                  <SelectItem value="Cartão de Crédito">
-                    Cartão de Crédito
-                  </SelectItem>
-                  <SelectItem value="Cartão de Débito">
-                    Cartão de Débito
-                  </SelectItem>
-                  <SelectItem value="Pix">PIX</SelectItem>
+                  {metodos.map((metodo) => (
+                    <SelectItem
+                      key={metodo.id} // id único do banco
+                      value={
+                        metodo.tipo as
+                          | "dinheiro"
+                          | "cartao"
+                          | "pix"
+                          | "transferencia"
+                      }
+                    >
+                      {metodo.nome}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             )}
           />
         </div>
 
+        {/* Totais finais */}
         <div className="border-t pt-4 space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-lg font-semibold">Total:</span>

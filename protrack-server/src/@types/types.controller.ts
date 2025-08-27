@@ -33,3 +33,10 @@ export interface FormaPagamentoCount {
   forma_pagamento: string;
   total: number;
 }
+
+export interface MetodoPagamentoConfig {
+  id: string;
+  nome: string;
+  tipo: "dinheiro" | "cartao" | "pix" | "transferencia" | "outro";
+  ativo: boolean;
+}
