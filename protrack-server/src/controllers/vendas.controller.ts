@@ -10,6 +10,7 @@ import {
   getVendasDashboard,
   mapVendasComItens,
 } from "../services/venda.service";
+import { mapVendasComItensF } from "../utils/functions";
 
 export const criarVenda = async (req: Request, res: Response) => {
   const dados = req.body;
@@ -46,7 +47,7 @@ export const getTotalVendas = async (req: Request, res: Response) => {
 export const getAllVendas = async (req: Request, res: Response) => {
   try {
     const rows = await getAllVendasDb();
-    const vendas = mapVendasComItens(rows);
+    const vendas = mapVendasComItensF(rows);
     res.status(200).json(vendas);
   } catch (err) {
     console.error("Erro ao buscar vendas:", err);

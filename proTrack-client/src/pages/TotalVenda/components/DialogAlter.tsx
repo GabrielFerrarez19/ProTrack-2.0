@@ -38,12 +38,7 @@ interface DialogAlterVendaProps {
     cliente_nome: string;
     desconto?: number;
     status: "pendente" | "pago" | "cancelado";
-    forma_pagamento?:
-      | "Dinheiro"
-      | "Cartão de Crédito"
-      | "Cartão de Débito"
-      | "Pix"
-      | "Boleto";
+    forma_pagamento?: "dinheiro" | "cartao" | "pix" | "transferencia";
     data_venda: string;
     itens: ItemVendaForm[];
   };
@@ -63,7 +58,7 @@ export function DialogAlterVenda({
       data_venda: venda.data_venda.split("T")[0],
       desconto: venda.desconto ?? 0,
       status: venda.status,
-      formaPagamento: venda.forma_pagamento ?? "Dinheiro", // ✅ corrigido
+      formaPagamento: venda.forma_pagamento, // ✅ corrigido
       itens: venda.itens.map((item) => ({
         produto_id: item.produto_id,
         produto_nome: item.produto_nome,
@@ -73,6 +68,8 @@ export function DialogAlterVenda({
       })),
     },
   });
+
+  console.log("methods", venda);
 
   const { control, handleSubmit, watch, setValue } = methods;
   const { fields, append, remove } = useFieldArray({
@@ -194,12 +191,7 @@ export function DialogAlterVenda({
               onValueChange={(value) =>
                 methods.setValue(
                   "formaPagamento",
-                  value as
-                    | "Dinheiro"
-                    | "Cartão de Crédito"
-                    | "Cartão de Débito"
-                    | "Pix"
-                    | "Boleto"
+                  value as "dinheiro" | "cartao" | "pix" | "transferencia"
                 )
               }
             >
@@ -207,15 +199,11 @@ export function DialogAlterVenda({
                 <SelectValue placeholder="Selecione a forma de pagamento" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Dinheiro">Dinheiro</SelectItem>
-                <SelectItem value="Cartão de Crédito">
-                  Cartão de Crédito
-                </SelectItem>
-                <SelectItem value="Cartão de Débito">
-                  Cartão de Débito
-                </SelectItem>
-                <SelectItem value="Pix">Pix</SelectItem>
-                <SelectItem value="Boleto">Boleto</SelectItem>
+                <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                <SelectItem value="cartao">Cartão de Crédito</SelectItem>
+                <SelectItem value="cartao">Cartão de Débito</SelectItem>
+                <SelectItem value="pix">Pix</SelectItem>
+                <SelectItem value="transferencia">Transferencia</SelectItem>
               </SelectContent>
             </Select>
           </div>
