@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import type { MetodoPagamento } from "../../../@types/types.components";
 import {
   Card,
@@ -7,6 +8,10 @@ import {
 } from "../../../components/ui/card";
 import { Switch } from "../../../components/ui/switch";
 import { CreditCard } from "lucide-react";
+import {
+  fetchMetodosPagamento,
+  toggleMetodoPagamentoApi,
+} from "../../../services/api";
 
 interface Props {
   metodosPagamento: MetodoPagamento[];
@@ -17,10 +22,35 @@ export function MetodosPagamento({
   metodosPagamento,
   setMetodosPagamento,
 }: Props) {
-  const handleToggleMetodo = (id: string) => {
+  // Busca os métodos do banco ao montar o componente
+  useEffect(() => {
+    const loadMetodos = async () => {
+      try {
+        const dados = await fetchMetodosPagamento(); // retorna todos do banco
+        setMetodosPagamento(dados); // atualiza o estado do pai
+      } catch (error) {
+        console.error("Erro ao carregar métodos de pagamento:", error);
+      }
+    };
+    loadMetodos();
+  }, [setMetodosPagamento]);
+
+  const handleToggleMetodo = async (id: string, ativo: boolean) => {
+    // Atualiza estado local imediatamente
     setMetodosPagamento((metodos) =>
-      metodos.map((m) => (m.id === id ? { ...m, ativo: !m.ativo } : m))
+      metodos.map((m) => (m.id === id ? { ...m, ativo } : m))
     );
+
+    try {
+      // Atualiza no backend
+      await toggleMetodoPagamentoApi(id, ativo);
+    } catch (error) {
+      console.error("Erro ao atualizar método:", error);
+      // Reverte se der erro
+      setMetodosPagamento((metodos) =>
+        metodos.map((m) => (m.id === id ? { ...m, ativo: !ativo } : m))
+      );
+    }
   };
 
   const getTipoMetodoIcon = (tipo: string) => {
@@ -38,12 +68,25 @@ export function MetodosPagamento({
     }
   };
 
+  // Se não houver métodos carregados ainda
+  if (!metodosPagamento || metodosPagamento.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5" /> Métodos de Pagamento
+          </CardTitle>
+        </CardHeader>
+        <CardContent>Carregando métodos de pagamento...</CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <CreditCard className="h-5 w-5" />
-          Métodos de Pagamento
+          <CreditCard className="h-5 w-5" /> Métodos de Pagamento
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -66,7 +109,9 @@ export function MetodosPagamento({
               </div>
               <Switch
                 checked={metodo.ativo}
-                onCheckedChange={() => handleToggleMetodo(metodo.id)}
+                onCheckedChange={(checked) =>
+                  handleToggleMetodo(metodo.id, checked)
+                }
               />
             </div>
           ))}

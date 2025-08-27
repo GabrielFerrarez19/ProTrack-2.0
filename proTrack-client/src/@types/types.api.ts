@@ -61,6 +61,34 @@ export interface ProdutoVenda {
   desconto?: number;
 }
 
+export interface ClienteFormData {
+  id: number;
+  nome: string;
+  dataNascimento: string;
+  cpf: string;
+  rg?: string;
+  estadoCivil?: string;
+  sexo?: string;
+  telefoneWhatsapp?: string;
+  telefoneCelular?: string;
+  telefoneResidencial?: string;
+  email: string;
+  cep?: string;
+  endereco?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  valorAPagar?: number;
+}
+
+export interface MetodoPagamentoConfig {
+  id: string;
+  nome: string;
+  tipo: "dinheiro" | "cartao" | "pix" | "transferencia";
+  ativo: boolean;
+}
+
 export interface VendaData {
   clienteId: string;
   dataVenda: string;

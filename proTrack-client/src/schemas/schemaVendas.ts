@@ -1,18 +1,14 @@
 import * as z from "zod";
 
+// Agora os tipos correspondem aos valores que vêm do banco
 export const vendaSchema = z.object({
   clienteId: z.string(),
   dataVenda: z.string(),
   desconto: z.number(),
   total: z.number().optional(),
   totalComDesconto: z.number().optional(),
-  status: z.enum(["Pendente", "pago", "cancelado"]).optional(), // novo campo
-  formaPagamento: z.enum([
-    "Dinheiro",
-    "Cartão de Crédito",
-    "Cartão de Débito",
-    "Pix",
-  ]),
+  status: z.enum(["Pendente", "pago", "cancelado"]).optional(),
+  formaPagamento: z.enum(["dinheiro", "cartao", "pix", "transferencia"]),
   produtos: z.array(
     z.object({
       produtoId: z.string(),
