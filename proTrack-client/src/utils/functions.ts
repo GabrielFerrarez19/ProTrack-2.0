@@ -128,7 +128,9 @@ export const formatBRL = (value: number | string | undefined | null) => {
 };
 
 // Função utilitária para formatar os nomes
-export function formatarFormaPagamento(nome: string): string {
+export function formatarFormaPagamento(nome?: string | null): string {
+  if (!nome) return "À prazo";
+
   const mapa: Record<string, string> = {
     pix: "Pix",
     dinheiro: "Dinheiro",
@@ -136,6 +138,5 @@ export function formatarFormaPagamento(nome: string): string {
     transferencia: "Transferência",
   };
 
-  // Se existir no mapa, retorna o valor formatado, senão capitaliza a primeira letra
   return mapa[nome] || nome.charAt(0).toUpperCase() + nome.slice(1);
 }
