@@ -43,7 +43,11 @@ export function ContasBancarias({
             <Building className="h-5 w-5" />
             Contas Bancárias
           </CardTitle>
-          <Button onClick={handleAdicionarConta}>
+          <Button
+            onClick={handleAdicionarConta}
+            className="cursor-pointer bg-gradient-to-r from-[#628DFD] to-[#6F31FF] 
+      text-white font-semibold hover:from-[#7A9BFD] hover:to-[#B597F9]"
+          >
             <Plus className="h-4 w-4 mr-2" /> Nova Conta
           </Button>
         </div>

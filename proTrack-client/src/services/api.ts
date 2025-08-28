@@ -1,5 +1,6 @@
 import { AxiosError } from "axios";
 import type {
+  Categoria,
   Cliente,
   ClienteFormData,
   ClientesResponse,
@@ -170,18 +171,41 @@ export const fetchMetodosPagamento = async (): Promise<
   MetodoPagamentoConfig[]
 > => {
   const response = await api.get<MetodoPagamentoConfig[]>(
-    "/metodo/metodos-pagamento"
+    "/config/metodos-pagamento"
   );
   return response.data;
 };
 
 export const toggleMetodoPagamentoApi = async (id: string, ativo: boolean) => {
-  await api.patch(`/metodo/metodos-pagamento/${id}/toggle`, { ativo });
+  await api.patch(`/config/metodos-pagamento/${id}/toggle`, { ativo });
 };
 
 export const fetchMetodosPagamentoAtivos = async (): Promise<
   { nome: string; tipo: string; id: number }[]
 > => {
-  const response = await api.get("/metodo/metodos-pagamento/ativos"); // rota que retorna apenas os ativos
+  const response = await api.get("/config/metodos-pagamento/ativos"); // rota que retorna apenas os ativos
   return response.data;
+};
+
+// Buscar todas as categorias
+export const fetchCategorias = async (): Promise<Categoria[]> => {
+  const response = await api.get("/config/categorias");
+  return response.data;
+};
+
+// Criar nova categoria
+export const createCategoria = async (categoria: Categoria): Promise<void> => {
+  await api.post("/config/categorias", categoria);
+};
+
+// Atualizar categoria existente
+export const updateCategoriaApi = async (
+  categoria: Categoria
+): Promise<void> => {
+  await api.put(`/config/categorias/${categoria.id}`, categoria);
+};
+
+// Remover categoria pelo ID
+export const deleteCategoriaApi = async (id: string): Promise<void> => {
+  await api.delete(`/config/categorias/${id}`);
 };

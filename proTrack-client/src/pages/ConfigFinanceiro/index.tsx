@@ -6,13 +6,22 @@ import { Alertas } from "./components/Alertas";
 import { Categorias } from "./components/Categorias";
 import { ContasBancarias } from "./components/ContasBancarias";
 import { MetodosPagamento } from "./components/MetodosPagamento";
+import { LimitesFluxo } from "./components/LimitesFluxoCaixa";
+
 import type {
   ContaBancaria,
   MetodoPagamento,
   Categoria,
 } from "../../@types/types.components";
-import { LimitesFluxo } from "./components/LimitesFluxoCaixa";
-import { fetchMetodosPagamento } from "../../services/api"; // API que retorna todos os métodos do banco
+
+import {
+  createCategoria,
+  deleteCategoriaApi,
+  fetchCategorias,
+  fetchMetodosPagamento,
+  updateCategoriaApi,
+} from "../../services/api";
+// service que criamos
 
 export function ConfiguracoesFinanceiras() {
   const [contasBancarias, setContasBancarias] = useState<ContaBancaria[]>([
@@ -39,16 +48,7 @@ export function ConfiguracoesFinanceiras() {
   const [metodosPagamento, setMetodosPagamento] = useState<MetodoPagamento[]>(
     []
   );
-
-  const [categorias] = useState<Categoria[]>([
-    { id: "1", nome: "Vendas", tipo: "receita", cor: "#22c55e" },
-    { id: "2", nome: "Serviços", tipo: "receita", cor: "#3b82f6" },
-    { id: "3", nome: "Mercadorias", tipo: "despesa", cor: "#ef4444" },
-    { id: "4", nome: "Salários", tipo: "despesa", cor: "#f97316" },
-    { id: "5", nome: "Utilidades", tipo: "despesa", cor: "#8b5cf6" },
-    { id: "6", nome: "Marketing", tipo: "despesa", cor: "#ec4899" },
-  ]);
-
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [alertas, setAlertas] = useState({
     contasVencidas: true,
     estoqueMinimo: true,
@@ -64,11 +64,11 @@ export function ConfiguracoesFinanceiras() {
     alertaFluxoCaixa: 10000,
   });
 
-  // Busca métodos de pagamento do banco ao montar
+  // Busca métodos de pagamento
   useEffect(() => {
     const loadMetodos = async () => {
       try {
-        const dados = await fetchMetodosPagamento(); // retorna {id, nome, tipo, ativo} de todos
+        const dados = await fetchMetodosPagamento();
         setMetodosPagamento(dados);
       } catch (error) {
         console.error("Erro ao carregar métodos de pagamento:", error);
@@ -77,6 +77,20 @@ export function ConfiguracoesFinanceiras() {
     loadMetodos();
   }, []);
 
+  // Busca categorias
+  useEffect(() => {
+    const loadCategorias = async () => {
+      try {
+        const dados = await fetchCategorias();
+        setCategorias(dados);
+      } catch (error) {
+        console.error("Erro ao carregar categorias:", error);
+      }
+    };
+    loadCategorias();
+  }, []);
+
+  // Salvar todas as configurações localmente (ou chamar API)
   const handleSalvarConfiguracoes = () => {
     console.log("Configurações salvas", {
       contasBancarias,
@@ -85,6 +99,38 @@ export function ConfiguracoesFinanceiras() {
       alertas,
       limites,
     });
+  };
+
+  // Funções para manipular categorias usando API
+  const handleAddCategoria = async (nova: Categoria) => {
+    try {
+      await createCategoria(nova);
+      setCategorias((prev) => [...prev, nova]);
+    } catch (error) {
+      console.error("Erro ao criar categoria:", error);
+    }
+  };
+
+  const handleUpdateCategoria = async (categoriaAtualizada: Categoria) => {
+    try {
+      await updateCategoriaApi(categoriaAtualizada);
+      setCategorias((prev) =>
+        prev.map((c) =>
+          c.id === categoriaAtualizada.id ? categoriaAtualizada : c
+        )
+      );
+    } catch (error) {
+      console.error("Erro ao atualizar categoria:", error);
+    }
+  };
+
+  const handleDeleteCategoria = async (id: string) => {
+    try {
+      await deleteCategoriaApi(id);
+      setCategorias((prev) => prev.filter((c) => c.id !== id));
+    } catch (error) {
+      console.error("Erro ao deletar categoria:", error);
+    }
   };
 
   return (
@@ -102,11 +148,19 @@ export function ConfiguracoesFinanceiras() {
         contasBancarias={contasBancarias}
         setContasBancarias={setContasBancarias}
       />
+
       <MetodosPagamento
         metodosPagamento={metodosPagamento}
         setMetodosPagamento={setMetodosPagamento}
       />
-      <Categorias categorias={categorias} />
+
+      <Categorias
+        categorias={categorias}
+        onAddCategoria={handleAddCategoria}
+        onUpdateCategoria={handleUpdateCategoria}
+        onDeleteCategoria={handleDeleteCategoria}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <LimitesFluxo limites={limites} setLimites={setLimites} />
         <Alertas alertas={alertas} setAlertas={setAlertas} />

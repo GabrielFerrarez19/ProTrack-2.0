@@ -108,3 +108,26 @@ CREATE TABLE itens_venda (
   FOREIGN KEY (venda_id) REFERENCES vendas(id),
   FOREIGN KEY (produto_id) REFERENCES produtos(id)
 );
+
+CREATE TABLE metodos_pagamento (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    tipo ENUM('dinheiro', 'cartao', 'pix', 'transferencia', 'outro') NOT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+INSERT INTO metodos_pagamento (nome, tipo, ativo) VALUES
+('Dinheiro em espécie', 'dinheiro', TRUE),
+('Cartão de Crédito', 'cartao', TRUE),
+('Cartão de Débito', 'cartao', TRUE),
+('PIX', 'pix', TRUE),
+('Transferência Bancária', 'transferencia', FALSE);
+
+CREATE TABLE categorias (
+    id VARCHAR(36) PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    tipo ENUM('receita', 'despesa') NOT NULL,
+    cor VARCHAR(7) DEFAULT '#FFFFFF',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
