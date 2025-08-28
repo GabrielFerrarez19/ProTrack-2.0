@@ -39,7 +39,7 @@ export function Sidebar({ children }: SidebarProps) {
         {/* Footer */}
         <div className="border-t flex p-3">
           <img
-            src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
+            src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=Gabriel+Ferrarez"
             alt="Avatar"
             className="w-10 h-10 rounded-md"
           />
