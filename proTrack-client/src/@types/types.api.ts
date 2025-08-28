@@ -192,3 +192,27 @@ export interface FormasPagamentoResponse {
 export interface ProdutosQuantidadeBaixaResponse {
   total: number;
 }
+
+// interface para a categoria
+export interface Categoria {
+  id: string; // UUID ou string única
+  nome: string; // nome da categoria
+  tipo: "receita" | "despesa"; // tipo da categoria
+  cor: string; // cor em hexadecimal (#FFFFFF)
+}
+
+// response da listagem de categorias
+export interface ListCategoriasResponse extends Array<Categoria> {}
+
+// request para criar ou atualizar uma categoria
+export interface CategoriaRequest {
+  id: string;
+  nome: string;
+  tipo: "receita" | "despesa";
+  cor: string;
+}
+
+// response padrão de sucesso (POST, PUT, DELETE)
+export interface CategoriaResponse {
+  message: string;
+}
