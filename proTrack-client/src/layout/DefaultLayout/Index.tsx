@@ -9,7 +9,8 @@ import {
   UserPlus,
   UserSearch,
   Store,
-  FileText,
+  BarChart3,
+  Wallet,
 } from "lucide-react";
 import { SidebarItem } from "../../components/Sidebar/SidebarItem";
 
@@ -72,7 +73,7 @@ export function DefaultLayout() {
 
         {/* Área de análise e gestão financeira */}
         <SidebarItem
-          icon={<FileText size={20} />}
+          icon={<BarChart3 size={20} />}
           text="Relatórios"
           router="/relatorio"
           alert
@@ -84,7 +85,14 @@ export function DefaultLayout() {
           router="/financeiro"
           active={currentPath === "/financeiro"}
         />
+        <SidebarItem
+          icon={<Wallet size={20} />}
+          text="Contas a pagar"
+          router="/contasPagar"
+          active={currentPath === "/contasPagar"}
+        />
       </Sidebar>
+
       <main className="flex-1 overflow-auto">
         <Outlet />
       </main>

@@ -176,3 +176,15 @@ export interface Alerta {
   mensagem: string;
   urgencia: "alta" | "media";
 }
+
+export interface ContaPagar {
+  id: string;
+  fornecedor: string;
+  valor: number;
+  dataVencimento: string;
+  diasAtraso: number;
+  status: "pendente" | "pago" | "vencido" | "agendado";
+  categoria: string;
+  descricao: string;
+  dataAgendamento?: string;
+}

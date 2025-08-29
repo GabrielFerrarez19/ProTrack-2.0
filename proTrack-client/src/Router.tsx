@@ -13,6 +13,7 @@ import { TotalVendas } from "./pages/TotalVenda";
 import { DashboardFinanceiro } from "./pages/Financeiro";
 import { RelatoriosFinanceiros } from "./pages/RelatoriosFinanceiros";
 import { ConfiguracoesFinanceiras } from "./pages/ConfigFinanceiro";
+import { ContasPagar } from "./pages/ContasPagar";
 
 export function Router() {
   return (
@@ -34,6 +35,7 @@ export function Router() {
           path="/configfinanceiro"
           element={<ConfiguracoesFinanceiras />}
         />
+        <Route path="/contasPagar" element={<ContasPagar />} />
       </Route>
     </Routes>
   );
