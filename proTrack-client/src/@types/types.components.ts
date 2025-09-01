@@ -188,3 +188,15 @@ export interface ContaPagar {
   descricao: string;
   dataAgendamento?: string;
 }
+
+export interface ProdutoMargemLucroResponse {
+  produtos: {
+    id: number;
+    nome: string;
+    categoria?: string;
+    preco_custo: number;
+    preco_venda: number;
+    margem_lucro: number;
+    lucro_unitario: number;
+  }[];
+}

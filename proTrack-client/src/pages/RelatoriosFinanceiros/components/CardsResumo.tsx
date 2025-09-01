@@ -1,8 +1,11 @@
+import type { DashboardDados } from "../../../@types/types.api";
 import { Card, CardContent } from "../../../components/ui/card";
 import { TrendingUp, Package, DollarSign, Calendar } from "lucide-react";
+import { formatBRL } from "../../../utils/functions";
 
 // Tipagem das props
 export interface CardsResumoProps {
+  dados: DashboardDados;
   contasDetalhadas: {
     id?: number;
     data?: string;
@@ -10,27 +13,15 @@ export interface CardsResumoProps {
     categoria?: string;
     valor: number;
   }[];
-  estoqueInvestimento: { categoria: string; valor: number }[];
-  lucroPorProduto: { produto: string; lucro: number }[];
 }
 
-export function CardsResumo({
-  contasDetalhadas,
-  estoqueInvestimento,
-  lucroPorProduto,
-}: CardsResumoProps) {
-  const getMargemLucroTotal = () => {
-    const totalVendas = lucroPorProduto.reduce((sum, p) => sum + p.lucro, 0);
-    return totalVendas > 0 ? totalVendas / lucroPorProduto.length : 0;
-  };
+export function CardsResumo({ dados, contasDetalhadas }: CardsResumoProps) {
+  console.log(
+    "Margem de lucro total:",
+    dados.margemTotal?.margem_lucro_total ?? 0
+  );
 
-  const getTotalInvestimentoEstoque = () => {
-    return estoqueInvestimento.reduce((sum, item) => sum + item.valor, 0);
-  };
-
-  const totalReceber = contasDetalhadas
-    .filter((c) => c.valor > 0)
-    .reduce((sum, c) => sum + c.valor, 0);
+  const totalReceber = formatBRL(dados.financeiro?.total_geral) ?? 0;
 
   const totalPagar = contasDetalhadas
     .filter((c) => c.valor < 0)
@@ -46,7 +37,7 @@ export function CardsResumo({
                 Margem de Lucro Total
               </p>
               <h3 className="text-2xl font-bold text-foreground">
-                {getMargemLucroTotal().toFixed(1)}%
+                {formatBRL(dados.margemTotal?.margem_lucro_total ?? 0)}%
               </h3>
             </div>
             <TrendingUp className="h-8 w-8 text-blue-300" />
@@ -60,7 +51,7 @@ export function CardsResumo({
             <div>
               <p className="text-sm text-muted-foreground">Valor em Estoque</p>
               <h3 className="text-2xl font-bold text-foreground">
-                R$ {getTotalInvestimentoEstoque().toLocaleString("pt-BR")}
+                R$ {formatBRL(dados.estoque?.totalEstoque ?? 0)}
               </h3>
             </div>
             <Package className="h-8 w-8 text-green-300" />
@@ -74,7 +65,7 @@ export function CardsResumo({
             <div>
               <p className="text-sm text-muted-foreground">A Receber</p>
               <h3 className="text-2xl font-bold text-yellow-600">
-                R$ {totalReceber.toLocaleString("pt-BR")}
+                R$ {totalReceber}
               </h3>
             </div>
             <DollarSign className="h-8 w-8 text-yellow-400" />

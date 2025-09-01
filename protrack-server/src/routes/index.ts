@@ -4,6 +4,7 @@ import productRoutes from "./productRoutes";
 import clientRoutes from "./clientRoutes";
 import vendasRoutes from "./vendasRoutes";
 import configRoutes from "./configRoutes";
+import relatorioRoutes from "./relatorioRoutes";
 
 const router = Router();
 
@@ -17,5 +18,6 @@ router.use("/product", productRoutes);
 router.use("/clients", clientRoutes);
 router.use("/vendas", vendasRoutes);
 router.use("/config", configRoutes);
+router.use("/relatorios", relatorioRoutes);
 
 export default router;
