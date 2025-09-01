@@ -140,3 +140,10 @@ export function formatarFormaPagamento(nome?: string | null): string {
 
   return mapa[nome] || nome.charAt(0).toUpperCase() + nome.slice(1);
 }
+
+export function getBadgeClass(valor: number) {
+  if (valor < 0) {
+    return "bg-red-100 text-red-700"; // negativo
+  }
+  return "bg-green-100 text-green-700"; // positivo
+}

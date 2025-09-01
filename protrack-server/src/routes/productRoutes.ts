@@ -4,6 +4,11 @@ import {
   getAllProdutos,
   getGiroEstoqueController,
   getProdutosMaisVendidosController,
+  getProdutosMelhorMargemLucroController,
+  getMargemLucroTotalController,
+  getEvolucaoLucroMensalController,
+  getValorInvestidoPorCategoriaController,
+  getDistribuicaoMargemLucroController,
   getTotalEstoque,
   getTotalEstoquePrecoController,
   produtosQuantidadeBaixaController,
@@ -22,4 +27,12 @@ router.get("/totalPreco", getTotalEstoquePrecoController);
 router.get("/giroEstoque", getGiroEstoqueController);
 router.get("/maisVendidos", getProdutosMaisVendidosController);
 router.get("/faltaEstoque", produtosQuantidadeBaixaController);
+router.get("/melhorMargemLucro", getProdutosMelhorMargemLucroController);
+router.get("/margemLucroTotal", getMargemLucroTotalController);
+router.get("/evolucaoLucroMensal", getEvolucaoLucroMensalController);
+router.get(
+  "/valorInvestidoPorCategoria",
+  getValorInvestidoPorCategoriaController
+);
+router.get("/distribuicaoMargemLucro", getDistribuicaoMargemLucroController);
 export default router;

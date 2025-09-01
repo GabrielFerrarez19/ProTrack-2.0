@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import {
-  ProdutoData,
   createProductDb,
   updateProductDb,
   getTotalEstoqueDb,
@@ -9,7 +8,13 @@ import {
   calcularGiroEstoque,
   getProdutosMaisVendidos,
   contarProdutosQuantidadeBaixa,
+  getProdutosMelhorMargemLucro,
+  getMargemLucroTotal,
+  getEvolucaoLucroMensal,
+  getValorInvestidoPorCategoria,
+  getDistribuicaoMargemLucro,
 } from "../services/product.service";
+import { ProdutoData } from "../@types/types.service";
 
 export const createProduct = async (req: Request, res: Response) => {
   const produto: ProdutoData = req.body;
@@ -129,5 +134,77 @@ export const produtosQuantidadeBaixaController = async (
   } catch (error: any) {
     console.error("Erro ao contar produtos:", error);
     res.status(500).json({ error: "Erro interno do servidor" });
+  }
+};
+
+export const getProdutosMelhorMargemLucroController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    // Podemos aceitar um parâmetro 'limit' opcional na query string
+    const limit = req.query.limit ? Number(req.query.limit) : 5;
+
+    const produtos = await getProdutosMelhorMargemLucro(limit);
+
+    res.status(200).json({ produtos });
+  } catch (err) {
+    console.error("Erro ao buscar produtos com melhor margem de lucro:", err);
+    res.status(500).json({ error: (err as Error).message });
+  }
+};
+
+export const getMargemLucroTotalController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const margemLucroTotal = await getMargemLucroTotal();
+    res.status(200).json(margemLucroTotal);
+  } catch (err) {
+    console.error("Erro ao calcular margem de lucro total:", err);
+    res.status(500).json({ error: (err as Error).message });
+  }
+};
+
+export const getEvolucaoLucroMensalController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    // Podemos aceitar um parâmetro 'meses' opcional na query string
+    const meses = req.query.meses ? Number(req.query.meses) : 12;
+
+    const evolucao = await getEvolucaoLucroMensal(meses);
+    res.status(200).json({ evolucao });
+  } catch (err) {
+    console.error("Erro ao buscar evolução do lucro mensal:", err);
+    res.status(500).json({ error: (err as Error).message });
+  }
+};
+
+export const getValorInvestidoPorCategoriaController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const valorInvestidoPorCategoria = await getValorInvestidoPorCategoria();
+    res.status(200).json({ categorias: valorInvestidoPorCategoria });
+  } catch (err) {
+    console.error("Erro ao calcular valor investido por categoria:", err);
+    res.status(500).json({ error: (err as Error).message });
+  }
+};
+
+export const getDistribuicaoMargemLucroController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const distribuicaoMargemLucro = await getDistribuicaoMargemLucro();
+    res.status(200).json(distribuicaoMargemLucro);
+  } catch (err) {
+    console.error("Erro ao calcular distribuição de margem de lucro:", err);
+    res.status(500).json({ error: (err as Error).message });
   }
 };

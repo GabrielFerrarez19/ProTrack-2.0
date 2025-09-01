@@ -1,3 +1,4 @@
+import type { DashboardDados } from "../../../@types/types.api";
 import {
   Card,
   CardContent,
@@ -18,14 +19,47 @@ import {
 
 // Tipagem
 export interface GraficosPrincipaisProps {
-  lucroPorProduto: { produto: string; lucro: number }[];
-  lucroPorPeriodo: { mes: string; valor: number }[];
+  dados: DashboardDados;
 }
 
-export function GraficosPrincipais({
-  lucroPorProduto,
-  lucroPorPeriodo,
-}: GraficosPrincipaisProps) {
+export function GraficosPrincipais({ dados }: GraficosPrincipaisProps) {
+  console.log("dados.evolucaoLucroMensal", dados.evolucaoLucroMensal);
+
+  // Transformar os dados da melhor margem para o formato do gráfico
+  const dadosMelhorMargem =
+    dados.melhorMargem?.produtos
+      ?.map((produto) => ({
+        produto: produto.nome,
+        lucro: produto.lucro_unitario,
+        margem: produto.margem_lucro,
+      }))
+      // 🔽 inverter a ordem para que maior venha primeiro (esquerda)
+      .sort((a, b) => b.lucro - a.lucro) ?? [];
+
+  // Garantir que sempre seja um array de { mes, valor }
+  const evolucaoFormatada: { mes: string; valor: number }[] = (
+    dados.evolucaoLucroMensal ?? []
+  )
+    .map((item) => {
+      // item pode ter evolucao ou ser simples
+      if ("evolucao" in item && Array.isArray(item.evolucao)) {
+        return item.evolucao.map((ev) => ({
+          mes: ev.mes,
+          valor: ev.lucro_mensal,
+        }));
+      } else if ("mes" in item && "lucro_mensal" in item) {
+        return [{ mes: item.mes, valor: item.lucro_mensal }];
+      } else {
+        return [];
+      }
+    })
+    .flat() // aqui você "achata" o array, equivalente ao flatMap
+    .sort((a, b) => {
+      const [m1, y1] = a.mes.split("/").map(Number);
+      const [m2, y2] = b.mes.split("/").map(Number);
+      return y1 !== y2 ? y1 - y2 : m1 - m2;
+    });
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card className="bg-pastel-purple">
@@ -34,7 +68,7 @@ export function GraficosPrincipais({
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={lucroPorProduto}>
+            <BarChart data={dadosMelhorMargem}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-20" />
               <XAxis dataKey="produto" />
               <YAxis />
@@ -47,11 +81,11 @@ export function GraficosPrincipais({
 
       <Card className="bg-pastel-orange">
         <CardHeader>
-          <CardTitle>Evolução do Lucro (3 meses)</CardTitle>
+          <CardTitle>Evolução do Lucro (Por mes)</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={lucroPorPeriodo}>
+            <LineChart data={evolucaoFormatada}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-20" />
               <XAxis dataKey="mes" />
               <YAxis />
