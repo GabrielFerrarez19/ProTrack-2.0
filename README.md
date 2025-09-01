@@ -4,7 +4,7 @@
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-orange.svg)](https://www.mysql.com/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-red.svg)](LICENSE)
 
 > Sistema completo de gestão empresarial para controle de vendas, estoque, clientes e relatórios financeiros.
 
@@ -323,7 +323,9 @@ chore: tarefas de manutenção
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+Copyright © 2025 Gabriel Cristiano Ferrarez. Todos os direitos reservados.
+
+Este software é de propriedade exclusiva do autor. É proibida a cópia, distribuição, modificação ou qualquer uso não autorizado deste projeto sem permissão expressa do autor. Para mais detalhes, veja o arquivo [LICENSE](LICENSE).
 
 ---
 
