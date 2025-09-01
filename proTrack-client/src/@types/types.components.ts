@@ -200,3 +200,16 @@ export interface ProdutoMargemLucroResponse {
     lucro_unitario: number;
   }[];
 }
+
+export interface RelatorioItem {
+  produto_id: number;
+  nome: string;
+  categoria: string;
+  preco_custo: number;
+  preco_venda: number;
+  [key: string]: string | number | null; // Para suportar outros campos dinâmicos
+}
+
+export interface RelatorioResponse {
+  relatorio: RelatorioItem[];
+}
