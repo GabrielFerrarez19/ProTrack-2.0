@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { AnalisesDetalhadas } from "./components/AnalisesDetalhadas";
 import { CardsResumo } from "./components/CardsResumo";
-import { ExportarRelatorios } from "./components/ExportarRelatorios";
 import { GraficosPrincipais } from "./components/GraficosPrincipais";
 import { RelatorioConfig } from "./components/RelatorioConfig";
 import { useDashboard } from "../../hooks/useDashboard";
@@ -68,8 +67,6 @@ export function RelatoriosFinanceiros() {
         periodoFim={periodoFim}
         setPeriodoFim={setPeriodoFim}
       />
-
-      <ExportarRelatorios />
     </div>
   );
 }
