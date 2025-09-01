@@ -4,23 +4,33 @@ import type {
   Cliente,
   ClienteFormData,
   ClientesResponse,
+  DistribuicaoMargemLucroResponse,
   EstoqueResponse,
+  EvolucaoLucroMensalResponse,
   FormasPagamentoResponse,
   GiroEstoqueResponse,
+  MargemLucroTotalResponse,
   MetodoPagamentoConfig,
   Produto,
   ProdutosMaisVendidosResponse,
   ProdutosQuantidadeBaixaResponse,
+  RelatorioCompleto,
+  RelatorioEstoqueInvestimento,
+  RelatorioLucroCategoria,
+  RelatorioLucroPeriodo,
+  RelatorioLucroProduto,
   TotalAPagarResponse,
   TotalClientesResponse,
   TotalEstoqueResponse,
   TotalVendasResponse,
+  ValorInvestidoPorCategoriaResponse,
   VendaAtualizacao,
   VendaData,
   VendaResponse,
   VendasDashboardResponse,
 } from "../@types/types.api";
 import { api } from "./apiClient";
+import type { ProdutoMargemLucroResponse } from "../@types/types.components";
 
 // Interceptor global de erros (opcional)
 api.interceptors.response.use(
@@ -208,4 +218,112 @@ export const updateCategoriaApi = async (
 // Remover categoria pelo ID
 export const deleteCategoriaApi = async (id: string): Promise<void> => {
   await api.delete(`/config/categorias/${id}`);
+};
+
+export const getProdutosMelhorMargemLucro =
+  async (): Promise<ProdutoMargemLucroResponse> => {
+    const response = await api.get<ProdutoMargemLucroResponse>(
+      "/product/melhorMargemLucro"
+    );
+    return response.data;
+  };
+
+export const getMargemLucroTotal =
+  async (): Promise<MargemLucroTotalResponse> => {
+    const response = await api.get<MargemLucroTotalResponse>(
+      "/product/margemLucroTotal"
+    );
+    return response.data;
+  };
+
+// 🔹 Chamada para buscar evolução do lucro mensal
+export const getEvolucaoLucroMensal = async (): Promise<
+  EvolucaoLucroMensalResponse[]
+> => {
+  const response = await api.get<EvolucaoLucroMensalResponse[]>(
+    "/product/evolucaoLucroMensal"
+  );
+  return response.data;
+};
+
+// 🔹 Chamada para buscar valor investido por categoria
+export const getValorInvestidoPorCategoria =
+  async (): Promise<ValorInvestidoPorCategoriaResponse> => {
+    const response = await api.get<ValorInvestidoPorCategoriaResponse>(
+      "/product/valorInvestidoPorCategoria"
+    );
+    return response.data;
+  };
+
+// 🔹 Chamada para buscar distribuição de margem de lucro
+export const getDistribuicaoMargemLucro =
+  async (): Promise<DistribuicaoMargemLucroResponse> => {
+    const response = await api.get<DistribuicaoMargemLucroResponse>(
+      "/product/distribuicaoMargemLucro"
+    );
+    return response.data;
+  };
+
+// 🔹 APIs para Relatórios
+export const getRelatorioLucroProduto = async (): Promise<{
+  relatorio: RelatorioLucroProduto[];
+}> => {
+  const response = await api.get<{ relatorio: RelatorioLucroProduto[] }>(
+    "/relatorios/lucro-produto"
+  );
+  return response.data;
+};
+
+export const getRelatorioLucroCategoria = async (): Promise<{
+  relatorio: RelatorioLucroCategoria[];
+}> => {
+  const response = await api.get<{ relatorio: RelatorioLucroCategoria[] }>(
+    "/relatorios/lucro-categoria"
+  );
+  return response.data;
+};
+
+export const getRelatorioLucroPeriodo = async (
+  dataInicio: string,
+  dataFim: string
+): Promise<{ relatorio: RelatorioLucroPeriodo[] }> => {
+  const response = await api.get<{ relatorio: RelatorioLucroPeriodo[] }>(
+    `/relatorios/lucro-periodo?dataInicio=${dataInicio}&dataFim=${dataFim}`
+  );
+  return response.data;
+};
+
+export const getRelatorioEstoqueInvestimento = async (): Promise<{
+  relatorio: RelatorioEstoqueInvestimento[];
+}> => {
+  const response = await api.get<{ relatorio: RelatorioEstoqueInvestimento[] }>(
+    "/relatorios/estoque-investimento"
+  );
+  return response.data;
+};
+
+export const getRelatorioCompleto = async (
+  dataInicio: string,
+  dataFim: string
+): Promise<RelatorioCompleto> => {
+  const response = await api.get<RelatorioCompleto>(
+    `/relatorios/completo?dataInicio=${dataInicio}&dataFim=${dataFim}`
+  );
+  return response.data;
+};
+
+// 🔹 API genérica para relatórios
+export const getRelatorioPorTipo = async (
+  tipo: string,
+  dataInicio?: string,
+  dataFim?: string
+): Promise<{ relatorio: any }> => {
+  let url = `/relatorios/por-tipo?tipo=${tipo}`;
+
+  if (dataInicio && dataFim) {
+    url += `&dataInicio=${dataInicio}&dataFim=${dataFim}`;
+  }
+
+  const response = await api.get<{ relatorio: any }>(url);
+  return response.data;
 };

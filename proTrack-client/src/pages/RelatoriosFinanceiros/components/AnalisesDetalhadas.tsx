@@ -1,3 +1,4 @@
+import type { DashboardDados } from "../../../@types/types.api";
 import {
   Card,
   CardContent,
@@ -5,24 +6,32 @@ import {
   CardTitle,
 } from "../../../components/ui/card";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
+import { formatBRL } from "../../../utils/functions";
 
 // Tipagem
 export interface AnalisesDetalhadasProps {
-  margemLucroDistribuicao: { faixa: string; qtd: number }[];
-  estoqueInvestimento: { categoria: string; valor: number }[];
+  dados: DashboardDados;
 }
 
-export function AnalisesDetalhadas({
-  margemLucroDistribuicao,
-  estoqueInvestimento,
-}: AnalisesDetalhadasProps) {
+export function AnalisesDetalhadas({ dados }: AnalisesDetalhadasProps) {
   const cores = ["#ffd6d6", "#fff3b0", "#caffbf", "#9bf6ff", "#ffc6ff"];
+
+  // Usar dados da API
+  const margemLucroDistribuicao =
+    dados.distribuicaoMargemLucro?.distribuicao || [];
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card className="bg-pastel-yellow">
         <CardHeader>
           <CardTitle>Distribuição de Margem de Lucro</CardTitle>
+          {dados.distribuicaoMargemLucro && (
+            <p className="text-sm text-muted-foreground">
+              Total: {dados.distribuicaoMargemLucro.total_produtos} produtos |
+              Margem Média:{" "}
+              {dados.distribuicaoMargemLucro.margem_media_geral.toFixed(1)}%
+            </p>
+          )}
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={250}>
@@ -40,7 +49,14 @@ export function AnalisesDetalhadas({
                   <Cell key={index} fill={cores[index % cores.length]} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip
+                formatter={(value: number) => [
+                  `${value} produtos (${margemLucroDistribuicao
+                    .find((item) => item.qtd === value)
+                    ?.percentual.toFixed(1)}%)`,
+                  "Quantidade",
+                ]}
+              />
             </PieChart>
           </ResponsiveContainer>
 
@@ -52,7 +68,8 @@ export function AnalisesDetalhadas({
                   style={{ backgroundColor: cores[index % cores.length] }}
                 />
                 <span className="text-sm text-muted-foreground">
-                  {item.faixa}: {item.qtd} produtos
+                  {item.faixa}: {item.qtd} produtos (
+                  {item.percentual.toFixed(1)}%)
                 </span>
               </div>
             ))}
@@ -66,7 +83,7 @@ export function AnalisesDetalhadas({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {estoqueInvestimento.map((item, index) => (
+            {dados.valorInvestidoPorCategoria?.categorias.map((item, index) => (
               <div
                 key={index}
                 className="flex items-center justify-between p-3 rounded-lg bg-white/30"
@@ -76,7 +93,16 @@ export function AnalisesDetalhadas({
                     {item.categoria}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Valor: R$ {item.valor.toLocaleString("pt-BR")}
+                    {item.quantidade_produtos} produtos |{" "}
+                    {item.percentual_total.toFixed(1)}% do total
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">
+                    R$ {formatBRL(item.valor_investido)}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Média: R$ {formatBRL(item.preco_medio_custo)}
                   </p>
                 </div>
               </div>

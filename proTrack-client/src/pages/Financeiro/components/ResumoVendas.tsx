@@ -6,7 +6,7 @@ import {
 } from "../../../components/ui/card";
 import { Badge } from "../../../components/ui/badge";
 import { TrendingUp } from "lucide-react";
-import { formatBRL } from "../../../utils/functions";
+import { formatBRL, getBadgeClass } from "../../../utils/functions";
 
 interface ResumoVendasProps {
   vendas: {
@@ -35,9 +35,9 @@ export function ResumoVendas({ vendas }: ResumoVendasProps) {
             <div className="flex items-center gap-2 mt-2">
               <Badge
                 variant="secondary"
-                className="bg-green-100 text-green-700"
+                className={getBadgeClass(vendas?.crescimento ?? 0)}
               >
-                +{formatBRL(vendas?.crescimento ?? 0)}%
+                {formatBRL(vendas?.crescimento ?? 0)}%
               </Badge>
               <span className="text-sm text-gray-400">vs mês anterior</span>
             </div>

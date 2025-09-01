@@ -4,7 +4,7 @@ import {
   CriarVendaData,
   FormaPagamentoCount,
   VendasDashboard,
-} from "../@types/types.controller";
+} from "../@types/types.service";
 
 export const atualizarVendaDb = async (
   vendaId: number,
