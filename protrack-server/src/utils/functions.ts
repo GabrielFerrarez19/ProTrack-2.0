@@ -10,11 +10,13 @@ export function mapVendasComItensF(rows: any[]): VendaResponse[] {
         cliente_id: row.cliente_id,
         cliente_nome: row.cliente_nome,
         data_venda: row.data_venda,
+        data_vencimento: row.data_vencimento,
         desconto: row.venda_desconto,
         total: row.total,
         total_com_desconto: row.total_com_desconto,
         status: row.status,
         forma_pagamento: row.forma_pagamento,
+        dias_vencimento: row.dias_vencimento,
         data_cadastro: row.data_cadastro,
         itens: [],
       });

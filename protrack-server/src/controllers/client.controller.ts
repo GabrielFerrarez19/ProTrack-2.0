@@ -7,6 +7,7 @@ import {
   getAllClientesDb,
   getVendasByClienteId,
   getTotalAPagarGeral,
+  getClientesEmAbertoCountDb,
 } from "../services/client.service";
 
 export const createCliente = async (req: Request, res: Response) => {
@@ -107,6 +108,19 @@ export const getTotalGeralAReceberController = async (
     });
   } catch (err) {
     console.error("Erro ao buscar total geral a receber:", err);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
+};
+
+export const getClientesEmAbertoCountController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const total = await getClientesEmAbertoCountDb();
+    res.status(200).json({ totalClientesEmAberto: total });
+  } catch (err) {
+    console.error("Erro ao buscar contagem de clientes em aberto:", err);
     res.status(500).json({ error: "Erro interno do servidor" });
   }
 };

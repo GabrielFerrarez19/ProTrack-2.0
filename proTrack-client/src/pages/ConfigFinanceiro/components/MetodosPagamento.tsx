@@ -63,6 +63,8 @@ export function MetodosPagamento({
         return "📱";
       case "transferencia":
         return "🏦";
+      case "aprazo": // ⬅ novo método
+        return "🕒"; // ícone de relógio para representar prazo
       default:
         return "💰";
     }

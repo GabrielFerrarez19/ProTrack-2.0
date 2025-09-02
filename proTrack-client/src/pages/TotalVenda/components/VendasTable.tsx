@@ -29,6 +29,8 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
   );
   const [open, setOpen] = useState(false);
 
+  console.log("VendaSelecionada", selectedVenda);
+
   const handleDialogClose = (isOpen: boolean) => {
     if (!isOpen) {
       setOpen(false);

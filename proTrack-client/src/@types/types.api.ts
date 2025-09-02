@@ -88,7 +88,7 @@ export interface ClienteFormData {
 export interface MetodoPagamentoConfig {
   id: string;
   nome: string;
-  tipo: "dinheiro" | "cartao" | "pix" | "transferencia";
+  tipo: "dinheiro" | "cartao" | "pix" | "transferencia" | "aprazo";
   ativo: boolean;
 }
 
@@ -101,6 +101,7 @@ export interface VendaData {
   totalComDesconto: number;
   produtos: ProdutoVenda[];
   formaPagamento?: string;
+  diasVencimento?: number;
 }
 
 export interface TotalVendasResponse {
@@ -144,7 +145,8 @@ export interface VendaAtualizacao {
   total?: number;
   totalComDesconto?: number;
   status?: "pendente" | "pago" | "cancelado" | "aprazo";
-  formaPagamento?: "dinheiro" | "cartao" | "pix" | "transferencia"; // padronizado
+  formaPagamento?: "dinheiro" | "cartao" | "pix" | "transferencia" | "aprazo"; // inclui aprazo
+  diasVencimento?: number;
   produtos?: ItemVenda[];
 }
 
@@ -161,13 +163,14 @@ export interface TotalEstoqueResponse {
 export interface DashboardDados {
   estoque: TotalEstoqueResponse | null;
   financeiro: TotalAPagarResponse | null;
-  giro?: GiroEstoqueResponse | null; // opcional
+  giro: GiroEstoqueResponse | null;
   vendas: VendasDashboardResponse | null;
   melhorMargem: ProdutoMargemLucroResponse | null;
   margemTotal: MargemLucroTotalResponse | null;
-  evolucaoLucroMensal: EvolucaoLucroMensalResponse[] | null;
+  evolucaoLucroMensal: EvolucaoLucroMensalResponse[];
   valorInvestidoPorCategoria: ValorInvestidoPorCategoriaResponse | null;
   distribuicaoMargemLucro: DistribuicaoMargemLucroResponse | null;
+  vendasEmAberto: VendasAberto | null;
 }
 
 export interface GiroEstoqueResponse {
@@ -325,4 +328,8 @@ export interface RelatorioCompleto {
   distribuicao_margem: DistribuicaoMargemLucro[];
   estoque_investimento: RelatorioEstoqueInvestimento[];
   contas_detalhadas: any[];
+}
+
+export interface VendasAberto {
+  totalClientesEmAberto: number;
 }

@@ -9,10 +9,16 @@ import { FiltrosContas } from "./components/FiltrosContas";
 import { ResumoCards } from "./components/ResumoCards";
 import { TabelaContas } from "./components/TabelaContas";
 import type { ContaReceber } from "../../@types/types.components";
+import { useDashboard } from "../../hooks/useDashboard";
 
 export function ContasReceber() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
+
+  const { dados, loading, error } = useDashboard();
+
+  if (loading) return <p className="p-6">Carregando dados financeiros...</p>;
+  if (error) return <p className="p-6 text-red-600">{error}</p>;
 
   const contas: ContaReceber[] = [
     {
@@ -76,10 +82,6 @@ export function ContasReceber() {
     return matchesSearch && matchesStatus;
   });
 
-  const totalPendente = filteredContas
-    .filter((c) => c.status !== "pago")
-    .reduce((total, conta) => total + (conta.valor - conta.valorPago), 0);
-
   const totalVencido = filteredContas
     .filter((c) => c.status === "vencido")
     .reduce((total, conta) => total + conta.valor, 0);
@@ -95,11 +97,7 @@ export function ContasReceber() {
         </p>
       </div>
 
-      <ResumoCards
-        totalPendente={totalPendente}
-        totalVencido={totalVencido}
-        totalContas={filteredContas.length}
-      />
+      <ResumoCards totalVencido={totalVencido} dados={dados} />
 
       <FiltrosContas
         searchTerm={searchTerm}

@@ -86,11 +86,13 @@ export interface VendaResponse {
   cliente_id: number;
   cliente_nome: string;
   data_venda: string; // formato YYYY-MM-DD vindo do MySQL
+  data_vencimento?: string | null;
   desconto: number;
   total: number;
   total_com_desconto: number;
   status: "pendente" | "pago" | "cancelado"; // novo campo
   forma_pagamento: "dinheiro" | "cartao" | "pix" | "transferencia";
+  dias_vencimento?: number | null;
   data_cadastro: string; // formato DATETIME vindo do MySQL
   itens: {
     id: number;
@@ -125,7 +127,8 @@ export interface VendaForm {
   data_venda: string;
   desconto: number;
   status: "pendente" | "pago" | "cancelado" | "aprazo";
-  formaPagamento?: "dinheiro" | "cartao" | "pix" | "transferencia";
+  formaPagamento?: "dinheiro" | "cartao" | "pix" | "transferencia" | "aprazo";
+  diasVencimento?: number;
   itens: ItemVendaForm[];
 }
 export interface ProdutoApi {
