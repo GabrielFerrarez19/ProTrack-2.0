@@ -37,8 +37,14 @@ interface DialogAlterVendaProps {
     cliente_id: number;
     cliente_nome: string;
     desconto?: number;
-    status: "pendente" | "pago" | "cancelado";
-    forma_pagamento?: "dinheiro" | "cartao" | "pix" | "transferencia";
+    status: "pendente" | "pago" | "cancelado" | "aprazo";
+    forma_pagamento?:
+      | "dinheiro"
+      | "cartao"
+      | "pix"
+      | "transferencia"
+      | "aprazo";
+    dias_vencimento?: number | null; // ✅ novo campo
     data_venda: string;
     itens: ItemVendaForm[];
   };
@@ -58,7 +64,8 @@ export function DialogAlterVenda({
       data_venda: venda.data_venda.split("T")[0],
       desconto: venda.desconto ?? 0,
       status: venda.status,
-      formaPagamento: venda.forma_pagamento, // ✅ corrigido
+      formaPagamento: venda.forma_pagamento,
+      diasVencimento: venda.dias_vencimento ?? 1, // valor padrão se não tiver
       itens: venda.itens.map((item) => ({
         produto_id: item.produto_id,
         produto_nome: item.produto_nome,
@@ -69,8 +76,6 @@ export function DialogAlterVenda({
     },
   });
 
-  console.log("methods", venda);
-
   const { control, handleSubmit, watch, setValue } = methods;
   const { fields, append, remove } = useFieldArray({
     control,
@@ -79,6 +84,9 @@ export function DialogAlterVenda({
 
   const itens = watch("itens");
   const desconto = watch("desconto");
+  const diasVencimentoAtual = watch("diasVencimento");
+
+  console.log("DiaVencimento", diasVencimentoAtual);
 
   const total = itens.reduce(
     (acc, item) => acc + item.quantidade * item.preco_unitario,
@@ -112,6 +120,10 @@ export function DialogAlterVenda({
         totalComDesconto,
         status: formData.status,
         formaPagamento: formData.formaPagamento,
+        diasVencimento:
+          formData.formaPagamento === "aprazo"
+            ? formData.diasVencimento
+            : undefined,
         produtos: produtosApi,
       });
 
@@ -139,6 +151,7 @@ export function DialogAlterVenda({
         </DialogHeader>
 
         <CardContent className="p-6 space-y-4">
+          {/* Cliente, Data, Desconto, Totais... */}
           <div>
             <strong>Cliente:</strong>
             <Input value={venda.cliente_nome} disabled />
@@ -162,12 +175,13 @@ export function DialogAlterVenda({
             {totalComDesconto.toFixed(2).replace(".", ",")}
           </div>
 
+          {/* Status */}
           <div>
             <strong>Status:</strong>
             <Select
-              value={methods.watch("status")}
+              value={watch("status")}
               onValueChange={(value) =>
-                methods.setValue(
+                setValue(
                   "status",
                   value as "pendente" | "pago" | "cancelado" | "aprazo"
                 )
@@ -179,19 +193,25 @@ export function DialogAlterVenda({
               <SelectContent>
                 <SelectItem value="pago">Pago</SelectItem>
                 <SelectItem value="cancelado">Cancelado</SelectItem>
-                <SelectItem value="aprazo">A prazo</SelectItem>
+                <SelectItem value="aprazo">À prazo</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
+          {/* Forma de pagamento */}
           <div>
             <strong>Forma de Pagamento:</strong>
             <Select
-              value={methods.watch("formaPagamento")}
+              value={watch("formaPagamento")}
               onValueChange={(value) =>
-                methods.setValue(
+                setValue(
                   "formaPagamento",
-                  value as "dinheiro" | "cartao" | "pix" | "transferencia"
+                  value as
+                    | "dinheiro"
+                    | "cartao"
+                    | "pix"
+                    | "transferencia"
+                    | "aprazo"
                 )
               }
             >
@@ -203,11 +223,37 @@ export function DialogAlterVenda({
                 <SelectItem value="cartao">Cartão de Crédito</SelectItem>
                 <SelectItem value="cartao">Cartão de Débito</SelectItem>
                 <SelectItem value="pix">Pix</SelectItem>
-                <SelectItem value="transferencia">Transferencia</SelectItem>
+                <SelectItem value="transferencia">Transferência</SelectItem>
+                <SelectItem value="aprazo">À prazo</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
+          {/* Select de dias de vencimento se for à prazo */}
+          {watch("formaPagamento") === "aprazo" && (
+            <div className="pt-2">
+              <strong>Dias para Vencimento</strong>
+              <Select
+                value={String(diasVencimentoAtual)} // valor inicial do backend
+                onValueChange={(value) =>
+                  setValue("diasVencimento", Number(value))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione dias de vencimento" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 3, 5, 9, 11, 15].map((dia) => (
+                    <SelectItem key={dia} value={String(dia)}>
+                      {dia} dias
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Itens da venda */}
           <div className="pt-4">
             <div className="flex justify-between items-center mb-2">
               <strong>Itens:</strong>
@@ -236,7 +282,6 @@ export function DialogAlterVenda({
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
-
               <TableBody>
                 {fields.map((item, index) => (
                   <TableRow key={item.id}>
@@ -285,6 +330,7 @@ export function DialogAlterVenda({
             </Table>
           </div>
 
+          {/* Botões */}
           <div className="pt-4 flex gap-2">
             <Button
               onClick={handleSubmit(onSubmit)}

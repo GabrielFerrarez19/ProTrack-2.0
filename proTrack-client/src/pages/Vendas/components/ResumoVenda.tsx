@@ -32,8 +32,9 @@ type ResumoVendaProps = {
 };
 
 export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
-  const { control, watch } = useFormContext<VendaForm>();
+  const { control, watch, setValue } = useFormContext<VendaForm>();
   const desconto = watch("desconto") ?? 0;
+  const formaPagamentoSelecionada = watch("formaPagamento");
 
   const totalItens = produtos.length;
   const totalQuantidade = produtos.reduce((acc, p) => acc + p.quantidade, 0);
@@ -41,17 +42,14 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
     (acc, p) => acc + p.quantidade * p.precoUnitario,
     0
   );
-
   const valorComDesconto = totalPreco * (1 - desconto / 100);
 
-  // Atualiza resumo externo se existir callback
   useEffect(() => {
     if (onChangeResumo) {
       onChangeResumo({ totalPreco, valorComDesconto });
     }
   }, [totalPreco, valorComDesconto, onChangeResumo]);
 
-  // Estado para formas de pagamento ativas
   const [metodos, setMetodos] = useState<
     { nome: string; tipo: string; id: number }[]
   >([]);
@@ -64,7 +62,8 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
     loadMetodos();
   }, []);
 
-  console.log(metodos);
+  // Dias de vencimento disponíveis
+  const diasVencimentoOpcoes = [1, 3, 5, 9, 11, 15];
 
   return (
     <Card>
@@ -123,22 +122,19 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
             control={control}
             name="formaPagamento"
             render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  if (value !== "aprazo") setValue("diasVencimento", undefined); // limpa dias se não for aprazo
+                }}
+                value={field.value}
+              >
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
                   {metodos.map((metodo) => (
-                    <SelectItem
-                      key={metodo.id} // id único do banco
-                      value={
-                        metodo.tipo as
-                          | "dinheiro"
-                          | "cartao"
-                          | "pix"
-                          | "transferencia"
-                      }
-                    >
+                    <SelectItem key={metodo.id} value={metodo.tipo}>
                       {metodo.nome}
                     </SelectItem>
                   ))}
@@ -147,6 +143,40 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
             )}
           />
         </div>
+
+        {/* Select de dias de vencimento apenas se forma de pagamento for aprazo */}
+        {formaPagamentoSelecionada === "aprazo" && (
+          <div className="flex justify-between items-center">
+            <label
+              className="text-sm text-muted-foreground mr-2"
+              htmlFor="diasVencimento"
+            >
+              Dias para Vencimento:
+            </label>
+            <Controller
+              control={control}
+              name="diasVencimento"
+              defaultValue={diasVencimentoOpcoes[0]} // valor padrão
+              render={({ field }) => (
+                <Select
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  value={(field.value ?? diasVencimentoOpcoes[0]).toString()} // garante valor mesmo que undefined
+                >
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {diasVencimentoOpcoes.map((dias) => (
+                      <SelectItem key={dias} value={dias.toString()}>
+                        Dia {dias}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+        )}
 
         {/* Totais finais */}
         <div className="border-t pt-4 space-y-2">

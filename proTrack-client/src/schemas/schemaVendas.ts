@@ -9,8 +9,9 @@ export const vendaSchema = z.object({
   totalComDesconto: z.number().optional(),
   status: z.enum(["Pendente", "pago", "cancelado"]).optional(),
   formaPagamento: z
-    .enum(["dinheiro", "cartao", "pix", "transferencia"])
+    .enum(["dinheiro", "cartao", "pix", "transferencia", "aprazo"])
     .optional(),
+  diasVencimento: z.number().optional(), // <-- Adicione esta linha
   produtos: z.array(
     z.object({
       produtoId: z.string(),
