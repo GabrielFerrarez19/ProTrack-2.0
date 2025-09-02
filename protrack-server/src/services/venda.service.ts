@@ -35,6 +35,25 @@ export const atualizarVendaDb = async (
       updateValues.push(dados.formaPagamento);
     }
 
+    // Atualiza dias_vencimento e data_vencimento (se existir coluna)
+    if (dados.diasVencimento != null) {
+      updateFields.push("dias_vencimento = ?");
+      updateValues.push(Number(dados.diasVencimento));
+
+      // calcula data_vencimento com base na data_venda (nova ou atual)
+      const dataBase = dados.dataVenda || null;
+      if (dataBase) {
+        updateFields.push("data_vencimento = DATE_ADD(?, INTERVAL ? DAY)");
+        updateValues.push(dataBase, Number(dados.diasVencimento));
+      } else {
+        // usar a data_venda atual da venda
+        updateFields.push(
+          "data_vencimento = DATE_ADD(data_venda, INTERVAL ? DAY)"
+        );
+        updateValues.push(Number(dados.diasVencimento));
+      }
+    }
+
     if (updateFields.length > 0) {
       const sql = `UPDATE vendas SET ${updateFields.join(", ")} WHERE id = ?`;
       updateValues.push(vendaId);
@@ -175,6 +194,7 @@ export const getAllVendasDb = async () => {
       v.total_com_desconto,
       v.status,
       v.forma_pagamento, 
+      v.dias_vencimento,
       v.data_cadastro,
       iv.id AS item_id,
       iv.produto_id,
@@ -208,6 +228,8 @@ export const mapVendasComItens = (rows: any[]) => {
         total: row.total,
         total_com_desconto: row.total_com_desconto,
         status: row.status,
+        forma_pagamento: row.forma_pagamento,
+        dias_vencimento: row.dias_vencimento,
         data_cadastro: row.data_cadastro,
         itens: [],
       };
@@ -262,13 +284,16 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
     // 2. Determinar forma de pagamento e status
     const formaPagamento = dados.formaPagamento?.toString().trim() || null;
 
-    const statusVenda = formaPagamento ? "pago" : dados.status || "pendente";
+    // ✅ Se for "aprazo", status também será "aprazo"
+    const statusVenda =
+      formaPagamento === "aprazo" ? "aprazo" : dados.status || "pago";
 
     // 3. Inserir a venda
     const [vendaResult] = await connection.execute<ResultSetHeader>(
       `
-      INSERT INTO vendas (cliente_id, data_venda, desconto, total, total_com_desconto, status, forma_pagamento)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO vendas 
+      (cliente_id, data_venda, desconto, total, total_com_desconto, status, forma_pagamento, dias_vencimento)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `,
       [
         dados.clienteId,
@@ -278,6 +303,7 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
         dados.totalComDesconto,
         statusVenda,
         formaPagamento,
+        formaPagamento === "aprazo" ? dados.diasVencimento ?? null : null, // <-- dias_vencimento
       ]
     );
 
@@ -330,7 +356,6 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
     connection.release();
   }
 };
-
 export const getVendasDashboard = async (): Promise<VendasDashboard> => {
   const sqlMesAtual = `
     SELECT COALESCE(SUM(total_com_desconto), 0) AS total

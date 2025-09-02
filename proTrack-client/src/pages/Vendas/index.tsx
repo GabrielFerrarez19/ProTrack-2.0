@@ -68,6 +68,7 @@ export function Vendas() {
         total: data.total,
         totalComDesconto: data.totalComDesconto,
         status: "pendente",
+        diasVencimento: data.diasVencimento,
         produtos: data.produtos.map((p) => ({
           produtoId: p.produtoId,
           quantidade: p.quantidade,

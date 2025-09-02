@@ -93,10 +93,25 @@ CREATE TABLE vendas (
 );
 
 ALTER TABLE vendas
-MODIFY COLUMN status ENUM('pendente', 'pago', 'cancelado', 'aprazo') DEFAULT 'pendente';
+ADD COLUMN dias_vencimento INT DEFAULT NULL AFTER total_com_desconto;
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE vendas
+SET forma_pagamento = 'dinheiro'
+WHERE forma_pagamento IS NULL;
+
+SET SQL_SAFE_UPDATES = 1;
 
 ALTER TABLE vendas
-ADD COLUMN forma_pagamento ENUM('À Vista', 'Cartão', 'Parcelado', 'Outro') DEFAULT 'À Vista';
+MODIFY COLUMN forma_pagamento ENUM(
+    'dinheiro', 'cartao', 'pix', 'transferencia', "aprazo"
+);
+
+
+
+ALTER TABLE vendas
+MODIFY COLUMN status ENUM('pendente', 'pago', 'cancelado', 'aprazo');
 
 CREATE TABLE itens_venda (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -116,12 +131,18 @@ CREATE TABLE metodos_pagamento (
     ativo BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+ALTER TABLE metodos_pagamento
+MODIFY COLUMN tipo ENUM('dinheiro', 'cartao', 'pix', 'transferencia', 'outro', 'aprazo') NOT NULL;
+
+
 INSERT INTO metodos_pagamento (nome, tipo, ativo) VALUES
 ('Dinheiro em espécie', 'dinheiro', TRUE),
 ('Cartão de Crédito', 'cartao', TRUE),
 ('Cartão de Débito', 'cartao', TRUE),
 ('PIX', 'pix', TRUE),
-('Transferência Bancária', 'transferencia', FALSE);
+('Transferência Bancária', 'transferencia', FALSE),
+('À Prazo', 'aprazo', TRUE); -- ⬅ novo método
+
 
 CREATE TABLE categorias (
     id VARCHAR(36) PRIMARY KEY,

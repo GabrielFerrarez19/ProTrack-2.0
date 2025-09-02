@@ -27,6 +27,7 @@ import type {
   VendaAtualizacao,
   VendaData,
   VendaResponse,
+  VendasAberto,
   VendasDashboardResponse,
 } from "../@types/types.api";
 import { api } from "./apiClient";
@@ -325,5 +326,10 @@ export const getRelatorioPorTipo = async (
   }
 
   const response = await api.get<{ relatorio: any }>(url);
+  return response.data;
+};
+
+export const getQuantidadeVendasEmAberto = async (): Promise<VendasAberto> => {
+  const response = await api.get("/clients/em-aberto/count");
   return response.data;
 };

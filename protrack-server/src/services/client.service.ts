@@ -151,3 +151,14 @@ export const getTotalAPagarGeral = async (): Promise<number> => {
   const [rows]: any = await db.query(sql);
   return rows[0]?.total_geral || 0;
 };
+
+// Conta quantos clientes possuem valor_a_pagar em aberto (> 0)
+export const getClientesEmAbertoCountDb = async (): Promise<number> => {
+  const sql = `
+    SELECT COUNT(*) AS total
+    FROM clientes
+    WHERE COALESCE(valor_a_pagar, 0) > 0;
+  `;
+  const [rows]: any = await db.query(sql);
+  return rows[0]?.total || 0;
+};

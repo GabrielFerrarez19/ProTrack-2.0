@@ -15,6 +15,7 @@ export interface CriarVendaData {
   status?: string;
   produtos: ProdutoVenda[];
   formaPagamento?: string;
+  diasVencimento?: number; // somente se formaPagamento === "aprazo"
 }
 
 export interface VendasDashboard {
@@ -135,11 +136,13 @@ export interface VendaResponse {
   cliente_id: number;
   cliente_nome: string;
   data_venda: string; // formato YYYY-MM-DD vindo do MySQL
+  data_vencimento?: string | null;
   desconto: number;
   total: number;
   total_com_desconto: number;
   status: "pendente" | "pago" | "cancelado"; // novo campo
   forma_pagamento: string;
+  dias_vencimento?: number | null;
   data_cadastro: string; // formato DATETIME vindo do MySQL
   itens: {
     id: number;

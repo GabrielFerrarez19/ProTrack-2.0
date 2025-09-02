@@ -9,6 +9,8 @@ import { VendasTable } from "./components/VendasTable";
 export function TotalVendas() {
   const { vendas, loading, error, reload } = useVendasList();
 
+  console.log("PaginaVendas", vendas);
+
   return (
     <div className="p-6 space-y-6">
       <Header
