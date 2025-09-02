@@ -9,19 +9,16 @@ import {
 import { Button } from "../../../components/ui/button";
 import { Mail, Check } from "lucide-react";
 import { StatusBadge } from "./StatusBadge";
+import type { VendaResponse } from "../../../@types/types.components";
+import { calcularDiasAtraso, formatBRL } from "../../../utils/functions";
 
-interface ContaReceber {
-  id: string;
-  cliente: string;
-  valor: number;
-  dataVencimento: string;
-  diasAtraso: number;
-  status: "pendente" | "parcial" | "pago" | "vencido";
-  valorPago: number;
-  descricao: string;
+interface Props {
+  vendas: VendaResponse[];
 }
 
-export function TabelaContas({ contas }: { contas: ContaReceber[] }) {
+export function TabelaContas({ vendas }: Props) {
+  console.log("vendas", vendas);
+
   return (
     <Table>
       <TableHeader>
@@ -37,37 +34,56 @@ export function TabelaContas({ contas }: { contas: ContaReceber[] }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {contas.map((conta) => (
+        {vendas.map((conta) => (
           <TableRow key={conta.id}>
-            <TableCell className="font-medium">{conta.cliente}</TableCell>
-            <TableCell>{conta.descricao}</TableCell>
+            <TableCell className="font-medium">{conta.cliente_nome}</TableCell>
+
+            {/* Descrição: lista de produtos */}
+            <TableCell>
+              {conta.itens.map((item) => item.produto_nome).join(", ")}
+            </TableCell>
+
+            {/* Valor total com desconto */}
+            <TableCell>R$ {formatBRL(conta.total_com_desconto)}</TableCell>
+
+            {/* Valor original */}
             <TableCell>
               R${" "}
-              {conta.valor.toLocaleString("pt-BR", {
+              {conta.total.toLocaleString("pt-BR", {
                 minimumFractionDigits: 2,
               })}
             </TableCell>
-            <TableCell>
-              R${" "}
-              {conta.valorPago.toLocaleString("pt-BR", {
-                minimumFractionDigits: 2,
-              })}
-            </TableCell>
-            <TableCell>
-              {new Date(conta.dataVencimento).toLocaleDateString("pt-BR")}
-            </TableCell>
+
+            {/* Vencimento */}
+            <TableCell>Dia {conta.dias_vencimento}</TableCell>
+
+            {/* Status */}
             <TableCell>
               <StatusBadge status={conta.status} />
             </TableCell>
+
+            {/* Dias em atraso */}
             <TableCell>
-              {conta.diasAtraso > 0 ? (
-                <span className="text-pastel-red font-medium">
-                  {conta.diasAtraso} dias
-                </span>
+              {conta.dias_vencimento ? (
+                (() => {
+                  const atraso = calcularDiasAtraso(
+                    conta.data_venda,
+                    conta.dias_vencimento
+                  );
+                  return atraso && atraso > 0 ? (
+                    <span className="text-pastel-red font-medium">
+                      {atraso} dias
+                    </span>
+                  ) : (
+                    <span className="text-green-600 font-medium">Em dia</span>
+                  );
+                })()
               ) : (
                 <span className="text-muted-foreground">-</span>
               )}
             </TableCell>
+
+            {/* Ações */}
             <TableCell>
               <div className="flex gap-2">
                 {conta.status !== "pago" && (

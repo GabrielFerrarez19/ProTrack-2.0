@@ -333,3 +333,11 @@ export interface RelatorioCompleto {
 export interface VendasAberto {
   totalClientesEmAberto: number;
 }
+
+export interface VendasVencidasResponse {
+  vendas: VendaResponse[];
+}
+
+export interface TotalVendasVencidasResponse {
+  totalVendasVencidas: number;
+}

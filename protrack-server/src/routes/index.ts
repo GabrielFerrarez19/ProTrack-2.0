@@ -5,6 +5,7 @@ import clientRoutes from "./clientRoutes";
 import vendasRoutes from "./vendasRoutes";
 import configRoutes from "./configRoutes";
 import relatorioRoutes from "./relatorioRoutes";
+import vendasMonitoramentoRoutes from "./vendasMonitoramentoRoutes";
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.use("/clients", clientRoutes);
 router.use("/vendas", vendasRoutes);
 router.use("/config", configRoutes);
 router.use("/relatorios", relatorioRoutes);
+router.use("/monitoramento", vendasMonitoramentoRoutes);
 
 export default router;
