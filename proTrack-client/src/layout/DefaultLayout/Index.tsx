@@ -10,7 +10,8 @@ import {
   UserSearch,
   Store,
   BarChart3,
-  Wallet,
+  BanknoteArrowUp,
+  BanknoteArrowDown,
 } from "lucide-react";
 import { SidebarItem } from "../../components/Sidebar/SidebarItem";
 
@@ -86,10 +87,16 @@ export function DefaultLayout() {
           active={currentPath === "/financeiro"}
         />
         <SidebarItem
-          icon={<Wallet size={20} />}
+          icon={<BanknoteArrowUp size={20} />}
           text="Contas a pagar"
           router="/contasPagar"
           active={currentPath === "/contasPagar"}
+        />
+        <SidebarItem
+          icon={<BanknoteArrowDown size={20} />}
+          text="Contas a receber"
+          router="/contasReceber"
+          active={currentPath === "/contasReceber"}
         />
       </Sidebar>
 
