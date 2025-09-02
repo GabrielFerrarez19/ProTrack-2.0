@@ -216,14 +216,3 @@ export interface RelatorioItem {
 export interface RelatorioResponse {
   relatorio: RelatorioItem[];
 }
-
-export interface ContaReceber {
-  id: string;
-  cliente: string;
-  valor: number;
-  dataVencimento: string;
-  diasAtraso: number;
-  status: "pendente" | "parcial" | "pago" | "vencido";
-  valorPago: number;
-  descricao: string;
-}
