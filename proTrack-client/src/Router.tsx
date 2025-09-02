@@ -14,6 +14,7 @@ import { DashboardFinanceiro } from "./pages/Financeiro";
 import { RelatoriosFinanceiros } from "./pages/RelatoriosFinanceiros";
 import { ConfiguracoesFinanceiras } from "./pages/ConfigFinanceiro";
 import { ContasPagar } from "./pages/ContasPagar";
+import { ContasReceber } from "./pages/ContasReceber";
 
 export function Router() {
   return (
@@ -36,6 +37,7 @@ export function Router() {
           element={<ConfiguracoesFinanceiras />}
         />
         <Route path="/contasPagar" element={<ContasPagar />} />
+        <Route path="/contasReceber" element={<ContasReceber />} />
       </Route>
     </Routes>
   );
