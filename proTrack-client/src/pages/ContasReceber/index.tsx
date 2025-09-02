@@ -8,96 +8,55 @@ import {
 import { FiltrosContas } from "./components/FiltrosContas";
 import { ResumoCards } from "./components/ResumoCards";
 import { TabelaContas } from "./components/TabelaContas";
-import type { ContaReceber } from "../../@types/types.components";
 import { useDashboard } from "../../hooks/useDashboard";
+import { useVendasVencidas } from "../../hooks/useVendasVencidas";
+import { Header } from "../../components/header";
+
+// IMPORT DOS COMPONENTES SEPARADOS
+import { StatusMonitoramento } from "./components/StatusMonitoramento";
+import { CardMonitoramento } from "./components/CardMonitoramento";
 
 export function ContasReceber() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
 
   const { dados, loading, error } = useDashboard();
+  const {
+    vendas,
+    totalVencidas,
+    loadingVencidas,
+    errorVencidas,
+    monitoramentoExecutado,
+    executarMonitoramento,
+    reload,
+  } = useVendasVencidas();
 
-  if (loading) return <p className="p-6">Carregando dados financeiros...</p>;
-  if (error) return <p className="p-6 text-red-600">{error}</p>;
+  if (loading || loadingVencidas)
+    return <p className="p-6">Carregando dados financeiros...</p>;
 
-  const contas: ContaReceber[] = [
-    {
-      id: "1",
-      cliente: "João Silva",
-      valor: 2500.5,
-      dataVencimento: "2024-12-15",
-      diasAtraso: 5,
-      status: "vencido",
-      valorPago: 0,
-      descricao: "Venda #001",
-    },
-    {
-      id: "2",
-      cliente: "Maria Santos",
-      valor: 1800.0,
-      dataVencimento: "2024-12-20",
-      diasAtraso: 0,
-      status: "pendente",
-      valorPago: 0,
-      descricao: "Venda #002",
-    },
-    {
-      id: "3",
-      cliente: "Pedro Costa",
-      valor: 3200.75,
-      dataVencimento: "2024-12-10",
-      diasAtraso: 10,
-      status: "parcial",
-      valorPago: 1600.0,
-      descricao: "Venda #003",
-    },
-    {
-      id: "4",
-      cliente: "Ana Oliveira",
-      valor: 950.0,
-      dataVencimento: "2024-12-18",
-      diasAtraso: 0,
-      status: "pago",
-      valorPago: 950.0,
-      descricao: "Venda #004",
-    },
-    {
-      id: "5",
-      cliente: "Carlos Ferreira",
-      valor: 4500.25,
-      dataVencimento: "2024-12-25",
-      diasAtraso: 0,
-      status: "pendente",
-      valorPago: 0,
-      descricao: "Venda #005",
-    },
-  ];
-
-  const filteredContas = contas.filter((conta) => {
-    const matchesSearch =
-      conta.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      conta.descricao.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "todos" || conta.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const totalVencido = filteredContas
-    .filter((c) => c.status === "vencido")
-    .reduce((total, conta) => total + conta.valor, 0);
+  if (error || errorVencidas)
+    return <p className="p-6 text-red-600">{error || errorVencidas}</p>;
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          Contas a Receber
-        </h1>
-        <p className="text-muted-foreground">
-          Gerencie os valores a receber de clientes
-        </p>
+      <div className="flex justify-between items-start">
+        <Header
+          title="Contas a Receber!"
+          text="Gerencie os valores a receber de clientes."
+        />
+
+        {/* Status do Monitoramento */}
+        <StatusMonitoramento
+          monitoramentoExecutado={monitoramentoExecutado}
+          executarMonitoramento={executarMonitoramento}
+          reload={reload}
+        />
       </div>
 
-      <ResumoCards totalVencido={totalVencido} dados={dados} />
+      {/* Card de Monitoramento */}
+      <CardMonitoramento monitoramentoExecutado={monitoramentoExecutado} />
+
+      <ResumoCards totalVencidas={totalVencidas} dados={dados} />
 
       <FiltrosContas
         searchTerm={searchTerm}
@@ -111,7 +70,7 @@ export function ContasReceber() {
           <CardTitle>Lista de Contas a Receber</CardTitle>
         </CardHeader>
         <CardContent>
-          <TabelaContas contas={filteredContas} />
+          <TabelaContas vendas={vendas} />
         </CardContent>
       </Card>
     </div>

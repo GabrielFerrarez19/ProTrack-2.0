@@ -9,6 +9,8 @@ import {
   getTotalVendasDb,
   getVendasDashboard,
   mapVendasComItens,
+  getVendasVencidasDb,
+  getTotalVendasVencidasDb,
 } from "../services/venda.service";
 import { mapVendasComItensF } from "../utils/functions";
 
@@ -97,5 +99,26 @@ export const getFormasPagamentoController = async (
   } catch (err) {
     console.error("Erro ao buscar formas de pagamento:", err);
     res.status(500).json({ error: (err as Error).message });
+  }
+};
+
+export const getVendasVencidas = async (req: Request, res: Response) => {
+  try {
+    const rows = await getVendasVencidasDb();
+    const vendas = mapVendasComItensF(rows);
+    res.status(200).json(vendas);
+  } catch (err) {
+    console.error("Erro ao buscar vendas vencidas:", err);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
+};
+
+export const getTotalVendasVencidas = async (req: Request, res: Response) => {
+  try {
+    const total = await getTotalVendasVencidasDb();
+    res.status(200).json({ totalVendasVencidas: total });
+  } catch (err) {
+    console.error("Erro ao buscar total de vendas vencidas:", err);
+    res.status(500).json({ error: "Erro interno do servidor" });
   }
 };

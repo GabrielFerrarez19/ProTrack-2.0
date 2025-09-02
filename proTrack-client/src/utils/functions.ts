@@ -1,4 +1,5 @@
-import type { Cliente } from "../@types/types.components";
+import type { Cliente, VendaResponse } from "../@types/types.components";
+import dayjs from "dayjs";
 
 export function normalizeCliente(cliente: any): Cliente {
   return {
@@ -146,4 +147,42 @@ export function getBadgeClass(valor: number) {
     return "bg-red-100 text-red-700"; // negativo
   }
   return "bg-green-100 text-green-700"; // positivo
+}
+
+// Calcula dias de atraso considerando vencimento fixo todo dia do mês
+
+export const calcularDiasAtraso = (
+  dataCompra: string,
+  diaVencimento: number
+): number => {
+  const hoje = dayjs();
+  let vencimento = dayjs(dataCompra).date(diaVencimento);
+
+  // Se o vencimento calculado ainda é antes da compra, avança para o próximo mês
+  if (vencimento.isBefore(dayjs(dataCompra), "day")) {
+    vencimento = vencimento.add(1, "month");
+  }
+
+  // Se ainda não venceu
+  if (hoje.isBefore(vencimento, "day")) return 0;
+
+  return hoje.diff(vencimento, "day");
+};
+export // Função para calcular o status "local" da venda
+function calcularStatusVenda(
+  venda: VendaResponse
+): "pago" | "pendente" | "cancelado" | "vencido" {
+  if (venda.status === "pago") return "pago";
+  if (venda.status === "cancelado") return "cancelado";
+
+  // calcula a data de vencimento
+  if (venda.dias_vencimento && venda.data_venda) {
+    const dataVencimento = new Date(venda.data_venda);
+    dataVencimento.setDate(dataVencimento.getDate() + venda.dias_vencimento);
+
+    const hoje = new Date();
+    if (dataVencimento < hoje) return "vencido"; // está atrasada
+  }
+
+  return "pendente"; // ainda não venceu
 }

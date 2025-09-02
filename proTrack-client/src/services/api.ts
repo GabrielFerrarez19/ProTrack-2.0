@@ -29,6 +29,7 @@ import type {
   VendaResponse,
   VendasAberto,
   VendasDashboardResponse,
+  TotalVendasVencidasResponse,
 } from "../@types/types.api";
 import { api } from "./apiClient";
 import type { ProdutoMargemLucroResponse } from "../@types/types.components";
@@ -331,5 +332,31 @@ export const getRelatorioPorTipo = async (
 
 export const getQuantidadeVendasEmAberto = async (): Promise<VendasAberto> => {
   const response = await api.get("/clients/em-aberto/count");
+  return response.data;
+};
+
+export const fetchVendasVencidas = async (): Promise<VendaResponse[]> => {
+  const response = await api.get<VendaResponse[]>("/vendas/vencidas");
+  return response.data;
+};
+
+export const fetchTotalVendasVencidas =
+  async (): Promise<TotalVendasVencidasResponse> => {
+    const response = await api.get<TotalVendasVencidasResponse>(
+      "/vendas/vencidas/total"
+    );
+    return response.data;
+  };
+
+export const executarMonitoramentoVendas = async (): Promise<{
+  success: boolean;
+  message: string;
+  resultado: {
+    vendasIdentificadas: number;
+    vendasProcessadas: number;
+    timestamp: string;
+  };
+}> => {
+  const response = await api.post("/monitoramento/executar");
   return response.data;
 };

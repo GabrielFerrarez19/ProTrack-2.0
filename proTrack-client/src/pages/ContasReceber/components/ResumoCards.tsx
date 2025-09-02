@@ -4,11 +4,11 @@ import { DollarSign, AlertCircle, Calendar } from "lucide-react";
 import { formatBRL } from "../../../utils/functions";
 
 interface Props {
-  totalVencido: number;
+  totalVencidas: number;
   dados: DashboardDados;
 }
 
-export function ResumoCards({ totalVencido, dados }: Props) {
+export function ResumoCards({ dados, totalVencidas }: Props) {
   console.log("dados", dados);
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -35,10 +35,7 @@ export function ResumoCards({ totalVencido, dados }: Props) {
             <div>
               <p className="text-sm text-gray-600">Contas Vencidas</p>
               <h3 className="text-2xl font-bold text-red-600">
-                R${" "}
-                {totalVencido.toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                })}
+                R$ {totalVencidas}
               </h3>
             </div>
             <AlertCircle className="h-8 w-8 text-red-500" />

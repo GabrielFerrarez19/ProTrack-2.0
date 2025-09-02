@@ -1,6 +1,8 @@
 import { Badge } from "../../../components/ui/badge";
 
 export function StatusBadge({ status }: { status: string }) {
+  console.log("status", status);
+
   switch (status) {
     case "pago":
       return <Badge className="bg-pastel-green text-green-900">Pago</Badge>;

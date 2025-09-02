@@ -407,3 +407,52 @@ export const getFormasPagamento = async (): Promise<FormaPagamentoCount[]> => {
     total: Number(row.total),
   }));
 };
+
+// Função que retorna todas as vendas vencidas
+export const getVendasVencidasDb = async () => {
+  const sql = `
+    SELECT 
+      v.id AS venda_id,
+      v.cliente_id,
+      c.nome AS cliente_nome,
+      v.data_venda,
+      v.desconto AS venda_desconto,
+      v.total,
+      v.total_com_desconto,
+      v.status,
+      v.forma_pagamento, 
+      v.dias_vencimento,
+      v.data_cadastro,
+      iv.id AS item_id,
+      iv.produto_id,
+      p.nome AS produto_nome,
+      iv.quantidade,
+      iv.preco_unitario,
+      iv.desconto AS item_desconto
+    FROM vendas v
+    JOIN clientes c ON v.cliente_id = c.id
+    LEFT JOIN itens_venda iv ON iv.venda_id = v.id
+    LEFT JOIN produtos p ON iv.produto_id = p.id
+    WHERE v.dias_vencimento < CURDATE() 
+      AND v.status NOT IN ('pago', 'cancelado')
+      AND v.forma_pagamento = 'aprazo'
+    ORDER BY v.dias_vencimento ASC, v.id, iv.id;
+  `;
+
+  const [results]: any[] = await db.query(sql);
+  return results;
+};
+
+// Função que retorna o valor total de todas as vendas vencidas
+export const getTotalVendasVencidasDb = async (): Promise<number> => {
+  const sql = `
+    SELECT COALESCE(SUM(v.total_com_desconto), 0) AS total_vencido
+    FROM vendas v
+    WHERE DATE_ADD(v.data_cadastro, INTERVAL v.dias_vencimento DAY) < CURDATE()
+      AND v.status NOT IN ('pago', 'cancelado')
+      AND v.status = ('vencido')
+  `;
+
+  const [rows]: any = await db.query(sql);
+  return rows[0]?.total_vencido || 0;
+};

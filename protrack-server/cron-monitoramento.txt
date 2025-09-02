@@ -1,0 +1,31 @@
+# Configurações de Cron Job para Monitoramento de Vendas Vencidas
+# Adicione estas linhas ao seu crontab (crontab -e)
+
+# Executar monitoramento a cada 5 minutos (configuração recomendada)
+*/5 * * * * cd /caminho/para/protrack-server && node src/scripts/monitoramentoVendas.js >> logs/monitoramento.log 2>&1
+
+# Executar monitoramento a cada hora (00:00, 01:00, 02:00, etc.)
+# 0 * * * * cd /caminho/para/protrack-server && node src/scripts/monitoramentoVendas.js >> logs/monitoramento.log 2>&1
+
+# Executar monitoramento a cada 30 minutos
+# */30 * * * * cd /caminho/para/protrack-server && node src/scripts/monitoramentoVendas.js >> logs/monitoramento.log 2>&1
+
+# Executar monitoramento diariamente às 08:00
+# 0 8 * * * cd /caminho/para/protrack-server && node src/scripts/monitoramentoVendas.js >> logs/monitoramento.log 2>&1
+
+# Executar monitoramento a cada 2 horas
+# 0 */2 * * * cd /caminho/para/protrack-server && node src/scripts/monitoramentoVendas.js >> logs/monitoramento.log 2>&1
+
+# INSTRUÇÕES:
+# 1. Substitua "/caminho/para/protrack-server" pelo caminho real do seu projeto
+# 2. Crie a pasta logs se não existir: mkdir -p logs
+# 3. Para editar o crontab: crontab -e
+# 4. Para ver o crontab atual: crontab -l
+# 5. Para remover o crontab: crontab -r
+
+# LOGS:
+# Os logs serão salvos em logs/monitoramento.log
+# Para monitorar em tempo real: tail -f logs/monitoramento.log
+
+# ⚠️ ATENÇÃO: Monitoramento a cada 5 minutos pode gerar muitos logs
+# Recomenda-se configurar rotação de logs para evitar arquivos muito grandes
