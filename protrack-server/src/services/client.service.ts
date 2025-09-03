@@ -58,7 +58,29 @@ export const updateClienteDb = async (
   id: number,
   cliente: ClienteData
 ): Promise<void> => {
-  const sql = `
+  console.log("Iniciando updateClienteDb para cliente id:", id);
+
+  // 1️⃣ Pega o valor atual do cliente antes de atualizar
+  const [clienteAtualResult]: any = await db.query(
+    "SELECT valor_a_pagar FROM clientes WHERE id = ?",
+    [id]
+  );
+
+  if (!clienteAtualResult[0]) {
+    console.log("Cliente não encontrado!");
+    throw new Error("Cliente não encontrado");
+  }
+
+  const valorAtual = clienteAtualResult[0].valor_a_pagar ?? 0;
+  const valorNovoPagamento = cliente.valorAPagar ?? 0;
+  const novoValorAPagar = valorAtual + valorNovoPagamento;
+
+  console.log("Valor atual do cliente:", valorAtual);
+  console.log("Novo pagamento recebido:", valorNovoPagamento);
+  console.log("Valor total disponível após pagamento:", novoValorAPagar);
+
+  // 2️⃣ Atualiza os dados do cliente com o valor acumulado
+  const sqlUpdateCliente = `
     UPDATE clientes SET 
       nome = ?, 
       data_nascimento = ?, 
@@ -79,7 +101,6 @@ export const updateClienteDb = async (
       valor_a_pagar = ?
     WHERE id = ?
   `;
-
   const values = [
     cliente.nome,
     cliente.dataNascimento,
@@ -97,15 +118,57 @@ export const updateClienteDb = async (
     cliente.complemento || null,
     cliente.bairro || null,
     cliente.cidade || null,
-    cliente.valorAPagar ?? 0,
+    novoValorAPagar,
     id,
   ];
+  const [result]: any = await db.query(sqlUpdateCliente, values);
+  console.log("Cliente atualizado com sucesso.");
 
-  const [result]: any = await db.query(sql, values);
+  // 3️⃣ Busca todas as vendas pendentes/aprazo/vencidas
+  const sqlGetVendas = `
+    SELECT id, total_com_desconto, status
+    FROM vendas
+    WHERE cliente_id = ? AND status IN ('pendente', 'aprazo', 'vencido')
+    ORDER BY data_venda ASC
+  `;
+  const [vendas]: any[] = await db.query(sqlGetVendas, [id]);
+  console.log("Vendas pendentes encontradas:", vendas.length);
 
-  if (result.affectedRows === 0) {
-    throw new Error("Cliente não encontrado");
+  // 4️⃣ Itera pelas vendas e marca como 'pago' se houver saldo suficiente
+  let valorRestante = novoValorAPagar;
+  for (const venda of vendas) {
+    console.log(
+      `Verificando venda id: ${venda.id}, total: ${venda.total_com_desconto}, status: ${venda.status}`
+    );
+    if (valorRestante >= venda.total_com_desconto) {
+      const sqlUpdateVenda = `
+        UPDATE vendas SET status = 'pago'
+        WHERE id = ?
+      `;
+      const [updateResult]: any = await db.query(sqlUpdateVenda, [venda.id]);
+      console.log(
+        `Venda id ${venda.id} atualizada para 'pago'. AffectedRows:`,
+        updateResult.affectedRows
+      );
+      valorRestante -= venda.total_com_desconto;
+      console.log("Valor restante após pagar venda:", valorRestante);
+    } else {
+      console.log(
+        `Saldo insuficiente para venda id ${venda.id}. Parando atualização.`
+      );
+      break;
+    }
   }
+
+  // 5️⃣ Atualiza o valor_a_pagar do cliente após aplicar os pagamentos
+  const sqlAtualizaSaldo = `
+    UPDATE clientes SET valor_a_pagar = ?
+    WHERE id = ?
+  `;
+  await db.query(sqlAtualizaSaldo, [valorRestante, id]);
+  console.log("Valor a pagar do cliente atualizado para:", valorRestante);
+
+  console.log("Processamento concluído para cliente id:", id);
 };
 
 export const getTotalClientesDb = async (): Promise<number> => {
