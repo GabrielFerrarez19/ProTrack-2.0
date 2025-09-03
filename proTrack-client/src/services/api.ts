@@ -447,6 +447,11 @@ export const atualizarStatusContasPagar = async () => {
   return response.data;
 };
 
+export const buscarContasPorVencimento = async () => {
+  const response = await api.get("/contas-pagar/contas/vencimentos");
+  return response.data;
+};
+
 // 🔹 FORNECEDORES
 
 export const listarFornecedores = async () => {

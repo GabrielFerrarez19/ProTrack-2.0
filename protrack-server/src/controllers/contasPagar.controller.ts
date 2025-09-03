@@ -13,6 +13,7 @@ import {
   atualizarFornecedor,
   excluirFornecedor,
   atualizarStatusContas,
+  buscarContasVencimento,
 } from "../services/contasPagar.service";
 import {
   ContaPagarCreateRequest,
@@ -490,6 +491,28 @@ export const atualizarStatusContasController = async (
     });
   } catch (error) {
     console.error("Erro ao atualizar status das contas:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro interno do servidor",
+      error: error instanceof Error ? error.message : "Erro desconhecido",
+    });
+  }
+};
+
+export const buscarContasVencimentoController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const contas = await buscarContasVencimento();
+
+    res.status(200).json({
+      success: true,
+      message: "Contas por vencimento obtidas com sucesso",
+      data: contas,
+    });
+  } catch (error) {
+    console.error("Erro ao buscar contas por vencimento:", error);
     res.status(500).json({
       success: false,
       message: "Erro interno do servidor",

@@ -339,12 +339,33 @@ export const obterResumo = async (): Promise<ContaPagarResumoResponse> => {
       "SELECT COUNT(*) as total FROM contas_pagar WHERE status = 'vencido'"
     );
 
+    // Calcular contas que vencem hoje
+    const hoje = new Date();
+    const hojeStr = hoje.toISOString().split("T")[0];
+
+    const [contasVencemHojeResult] = await db.execute(
+      "SELECT COALESCE(SUM(valor), 0) as total FROM contas_pagar WHERE DATE(data_vencimento) = ? AND status IN ('pendente', 'agendado')",
+      [hojeStr]
+    );
+
+    // Calcular contas que vencem nos próximos 7 dias
+    const proximos7Dias = new Date();
+    proximos7Dias.setDate(hoje.getDate() + 7);
+    const proximos7DiasStr = proximos7Dias.toISOString().split("T")[0];
+
+    const [contasProximos7DiasResult] = await db.execute(
+      "SELECT COALESCE(SUM(valor), 0) as total FROM contas_pagar WHERE DATE(data_vencimento) BETWEEN ? AND ? AND status IN ('pendente', 'agendado')",
+      [hojeStr, proximos7DiasStr]
+    );
+
     const pendentes = (pendentesResult as any[])[0];
     const vencidas = (vencidasResult as any[])[0];
     const agendadas = (agendadasResult as any[])[0];
     const pagas = (pagasResult as any[])[0];
     const totalContas = (totalContasResult as any[])[0];
     const contasVencidas = (contasVencidasResult as any[])[0];
+    const contasVencemHoje = (contasVencemHojeResult as any[])[0];
+    const contasProximos7Dias = (contasProximos7DiasResult as any[])[0];
 
     console.log("📊 Resultados das queries:");
     console.log("  - Pendentes:", pendentes?.total);
@@ -353,6 +374,8 @@ export const obterResumo = async (): Promise<ContaPagarResumoResponse> => {
     console.log("  - Pagas:", pagas?.total);
     console.log("  - Total contas:", totalContas?.total);
     console.log("  - Contas vencidas count:", contasVencidas?.total);
+    console.log("  - Contas que vencem hoje:", contasVencemHoje?.total);
+    console.log("  - Contas próximos 7 dias:", contasProximos7Dias?.total);
 
     const resumo = {
       total_pendente: Number(pendentes?.total || 0),
@@ -361,6 +384,8 @@ export const obterResumo = async (): Promise<ContaPagarResumoResponse> => {
       total_pago: Number(pagas?.total || 0),
       total_contas: Number(totalContas?.total || 0),
       contas_vencidas_count: Number(contasVencidas?.total || 0),
+      total_vence_hoje: Number(contasVencemHoje?.total || 0),
+      total_proximos_7_dias: Number(contasProximos7Dias?.total || 0),
     };
 
     console.log("🎯 Resumo final:", resumo);
@@ -385,6 +410,66 @@ export const atualizarStatusContas = async (): Promise<void> => {
     console.log("Status das contas atualizado com sucesso");
   } catch (error) {
     console.error("Erro ao atualizar status das contas:", error);
+    throw error;
+  }
+};
+
+export const buscarContasVencimento = async (): Promise<{
+  contasVencemHoje: ContaPagarResponse[];
+  contasProximos7Dias: ContaPagarResponse[];
+}> => {
+  try {
+    const hoje = new Date();
+    const hojeStr = hoje.toISOString().split("T")[0];
+
+    // Contas que vencem hoje
+    const [contasVencemHojeResult] = await db.execute(
+      `
+      SELECT 
+        cp.*,
+        COALESCE(c.nome, 'Sem categoria') as categoria_nome
+      FROM contas_pagar cp
+      LEFT JOIN categorias c ON cp.categoria_id = c.id
+      WHERE DATE(cp.data_vencimento) = ? 
+      AND cp.status IN ('pendente', 'agendado')
+      ORDER BY cp.valor DESC
+    `,
+      [hojeStr]
+    );
+
+    // Contas que vencem nos próximos 7 dias
+    const proximos7Dias = new Date();
+    proximos7Dias.setDate(hoje.getDate() + 7);
+    const proximos7DiasStr = proximos7Dias.toISOString().split("T")[0];
+
+    const [contasProximos7DiasResult] = await db.execute(
+      `
+      SELECT 
+        cp.*,
+        COALESCE(c.nome, 'Sem categoria') as categoria_nome
+      FROM contas_pagar cp
+      LEFT JOIN categorias c ON cp.categoria_id = c.id
+      WHERE DATE(cp.data_vencimento) BETWEEN ? AND ? 
+      AND cp.status IN ('pendente', 'agendado')
+      ORDER BY cp.data_vencimento ASC, cp.valor DESC
+    `,
+      [hojeStr, proximos7DiasStr]
+    );
+
+    const contasVencemHoje = (contasVencemHojeResult as any[]).map((conta) =>
+      formatarContaPagarResponse(conta)
+    );
+
+    const contasProximos7Dias = (contasProximos7DiasResult as any[]).map(
+      (conta) => formatarContaPagarResponse(conta)
+    );
+
+    return {
+      contasVencemHoje,
+      contasProximos7Dias,
+    };
+  } catch (error) {
+    console.error("Erro ao buscar contas por vencimento:", error);
     throw error;
   }
 };
