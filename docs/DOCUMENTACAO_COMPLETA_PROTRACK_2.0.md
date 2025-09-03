@@ -7,6 +7,7 @@ O **ProTrack 2.0** é um sistema completo de gestão empresarial desenvolvido co
 ## 🏗️ ARQUITETURA DO SISTEMA
 
 ### Estrutura Geral
+
 ```
 ProTrack-2.0/
 ├── proTrack-client/          # Frontend React + TypeScript
@@ -18,6 +19,7 @@ ProTrack-2.0/
 ### Stack Tecnológico
 
 #### Frontend (proTrack-client)
+
 - **React 19.1.0** - Framework principal
 - **TypeScript 5.8.3** - Tipagem estática
 - **Vite 4.6.0** - Build tool e dev server
@@ -31,6 +33,7 @@ ProTrack-2.0/
 - **XLSX 0.18.5** - Exportação Excel
 
 #### Backend (protrack-server)
+
 - **Node.js** - Runtime JavaScript
 - **Express 4.18.2** - Framework web
 - **TypeScript 5.8.3** - Tipagem estática
@@ -41,6 +44,7 @@ ProTrack-2.0/
 ## 🎨 FRONTEND - ESTRUTURA DETALHADA
 
 ### 1. Estrutura de Diretórios
+
 ```
 src/
 ├── @types/                   # Definições de tipos TypeScript
@@ -58,6 +62,7 @@ src/
 ```
 
 ### 2. Sistema de Roteamento
+
 ```typescript
 // Rotas principais
 /                           → Login
@@ -79,6 +84,7 @@ src/
 ### 3. Componentes Principais
 
 #### Componentes UI Base (shadcn/ui)
+
 - **Button** - Botões com variantes
 - **Card** - Containers de conteúdo
 - **Input** - Campos de entrada
@@ -89,6 +95,7 @@ src/
 - **Progress** - Barras de progresso
 
 #### Componentes Customizados
+
 - **Header** - Cabeçalho com navegação
 - **Sidebar** - Menu lateral responsivo
 - **FiltersBar** - Barra de filtros
@@ -98,42 +105,44 @@ src/
 ### 4. Hooks Customizados
 
 #### useContasPagar
+
 ```typescript
 const {
-  contas,                    // Lista de contas
-  categorias,               // Categorias de despesas
-  fornecedores,             // Lista de fornecedores
-  resumo,                   // Resumo financeiro
-  loading,                  // Estado de carregamento
-  error,                    // Tratamento de erros
-  
+  contas, // Lista de contas
+  categorias, // Categorias de despesas
+  fornecedores, // Lista de fornecedores
+  resumo, // Resumo financeiro
+  loading, // Estado de carregamento
+  error, // Tratamento de erros
+
   // Métodos principais
-  listarContas,            // Listar contas com filtros
-  criarConta,              // Criar nova conta
-  atualizarConta,          // Atualizar conta existente
-  excluirConta,            // Excluir conta
-  marcarComoPaga,          // Marcar conta como paga
-  
+  listarContas, // Listar contas com filtros
+  criarConta, // Criar nova conta
+  atualizarConta, // Atualizar conta existente
+  excluirConta, // Excluir conta
+  marcarComoPaga, // Marcar conta como paga
+
   // Métodos de fornecedores
-  listarFornecedores,      // Listar fornecedores
-  criarFornecedor,         // Criar fornecedor
-  atualizarFornecedor,     // Atualizar fornecedor
-  excluirFornecedor,       // Excluir fornecedor
-  
+  listarFornecedores, // Listar fornecedores
+  criarFornecedor, // Criar fornecedor
+  atualizarFornecedor, // Atualizar fornecedor
+  excluirFornecedor, // Excluir fornecedor
+
   // Métodos de categorias
-  listarCategorias,        // Listar categorias
-  criarCategoria,          // Criar categoria
-  atualizarCategoria,      // Atualizar categoria
-  excluirCategoria,        // Excluir categoria
-  
+  listarCategorias, // Listar categorias
+  criarCategoria, // Criar categoria
+  atualizarCategoria, // Atualizar categoria
+  excluirCategoria, // Excluir categoria
+
   // Utilitários
-  formatarMoeda,           // Formatação de valores
-  formatarData,            // Formatação de datas
-  calcularDiasAtraso       // Cálculo de atrasos
+  formatarMoeda, // Formatação de valores
+  formatarData, // Formatação de datas
+  calcularDiasAtraso, // Cálculo de atrasos
 } = useContasPagar();
 ```
 
 #### Outros Hooks
+
 - **useDashboard** - Dados do dashboard
 - **useVendas** - Gestão de vendas
 - **useClientes** - Gestão de clientes
@@ -143,53 +152,55 @@ const {
 ### 5. Serviços de API
 
 #### Estrutura de Serviços
+
 ```typescript
 // api.ts - Serviços principais
 export const {
   // Autenticação
   loginUser,
-  
+
   // Produtos
   cadastrarProduto,
   atualizarProduto,
   fetchTotalEstoque,
   fetchAllProdutos,
-  
+
   // Clientes
   cadastrarCliente,
   fetchTotalClientes,
   fetchAllClientes,
   atualizarCliente,
-  
+
   // Vendas
   criarVenda,
   fetchTotalVendas,
   fetchAllVendas,
   atualizarVenda,
-  
+
   // Financeiro
   fetchTotalAPagar,
   fetchTotalValorEstoque,
   fetchGiroEstoque,
-  
+
   // Relatórios
   getRelatorioCompleto,
   getRelatorioLucroProduto,
   getRelatorioLucroCategoria,
-  
+
   // Contas a Pagar
   listarContasPagar,
   criarContaPagar,
   atualizarContaPagar,
   excluirContaPagar,
   marcarContaComoPaga,
-  obterResumoContasPagar
-}
+  obterResumoContasPagar,
+};
 ```
 
 ## 🖥️ BACKEND - ESTRUTURA DETALHADA
 
 ### 1. Estrutura de Diretórios
+
 ```
 src/
 ├── @types/                   # Tipos TypeScript
@@ -203,6 +214,7 @@ src/
 ```
 
 ### 2. Configuração do Banco
+
 ```typescript
 // database.ts
 export const db = mysql.createPool({
@@ -218,6 +230,7 @@ export const db = mysql.createPool({
 ```
 
 ### 3. Rotas da API
+
 ```typescript
 // Rotas principais
 /                           → Rotas index
@@ -235,26 +248,31 @@ export const db = mysql.createPool({
 ### 4. Controladores Principais
 
 #### Auth Controller
+
 - Login de usuários
 - Validação de credenciais
 - Geração de tokens
 
 #### Client Controller
+
 - CRUD de clientes
 - Busca e filtros
 - Histórico de vendas
 
 #### Product Controller
+
 - CRUD de produtos
 - Gestão de estoque
 - Cálculos de margem de lucro
 
 #### Vendas Controller
+
 - Criação de vendas
 - Atualização de status
 - Relatórios de vendas
 
 #### Contas Pagar Controller
+
 - Gestão de contas a pagar
 - Controle de fornecedores
 - Categorização de despesas
@@ -262,16 +280,19 @@ export const db = mysql.createPool({
 ### 5. Serviços de Negócio
 
 #### Client Service
+
 - Lógica de negócio para clientes
 - Validações e regras
 - Integração com banco
 
 #### Product Service
+
 - Gestão de estoque
 - Cálculos financeiros
 - Relatórios de produtos
 
 #### Venda Service
+
 - Processamento de vendas
 - Cálculos de comissões
 - Controle de status
@@ -279,6 +300,7 @@ export const db = mysql.createPool({
 ## 🗄️ BANCO DE DADOS
 
 ### Estrutura Principal
+
 O sistema utiliza MySQL como banco de dados principal, com as seguintes tabelas principais:
 
 - **usuarios** - Usuários do sistema
@@ -292,6 +314,7 @@ O sistema utiliza MySQL como banco de dados principal, com as seguintes tabelas 
 - **fluxo_caixa** - Movimentações financeiras
 
 ### Relacionamentos
+
 - Clientes → Vendas (1:N)
 - Produtos → Vendas (1:N)
 - Categorias → Produtos (1:N)
@@ -301,36 +324,42 @@ O sistema utiliza MySQL como banco de dados principal, com as seguintes tabelas 
 ## 🔧 FUNCIONALIDADES PRINCIPAIS
 
 ### 1. Gestão de Clientes
+
 - ✅ Cadastro completo de clientes
 - ✅ Histórico de compras
 - ✅ Controle de contas a receber
 - ✅ Relatórios de clientes
 
 ### 2. Gestão de Produtos
+
 - ✅ Cadastro de produtos
 - ✅ Controle de estoque
 - ✅ Categorização
 - ✅ Cálculo de margem de lucro
 
 ### 3. Sistema de Vendas
+
 - ✅ Criação de vendas
 - ✅ Controle de status
 - ✅ Múltiplas formas de pagamento
 - ✅ Comissões e descontos
 
 ### 4. Controle Financeiro
+
 - ✅ Contas a pagar
 - ✅ Contas a receber
 - ✅ Fluxo de caixa
 - ✅ Relatórios financeiros
 
 ### 5. Relatórios e Analytics
+
 - ✅ Dashboard financeiro
 - ✅ Relatórios de lucro
 - ✅ Análise de estoque
 - ✅ Exportação PDF/Excel
 
 ### 6. Contas a Pagar (Nova Funcionalidade)
+
 - ✅ Gestão completa de contas
 - ✅ Categorização de despesas
 - ✅ Controle de fornecedores
@@ -341,11 +370,13 @@ O sistema utiliza MySQL como banco de dados principal, com as seguintes tabelas 
 ## 🚀 INSTALAÇÃO E CONFIGURAÇÃO
 
 ### Pré-requisitos
+
 - Node.js 18+
 - MySQL 8.0+
 - Git
 
 ### Frontend
+
 ```bash
 cd proTrack-client
 npm install
@@ -353,6 +384,7 @@ npm run dev
 ```
 
 ### Backend
+
 ```bash
 cd protrack-server
 npm install
@@ -360,6 +392,7 @@ npm run dev
 ```
 
 ### Banco de Dados
+
 ```bash
 # Executar o script SQL
 mysql -u root -p < protrack.sql
@@ -368,18 +401,21 @@ mysql -u root -p < protrack.sql
 ## 📱 RESPONSIVIDADE E UX
 
 ### Design System
+
 - **Tailwind CSS** para estilização
 - **Radix UI** para componentes acessíveis
 - **Lucide React** para ícones
 - **Tema escuro/claro** com next-themes
 
 ### Componentes Responsivos
+
 - Sidebar colapsível em mobile
 - Tabelas com scroll horizontal
 - Cards adaptáveis
 - Navegação otimizada para touch
 
 ### Acessibilidade
+
 - Componentes ARIA-compliant
 - Navegação por teclado
 - Contraste adequado
@@ -388,18 +424,21 @@ mysql -u root -p < protrack.sql
 ## 🔒 SEGURANÇA
 
 ### Autenticação
+
 - Login com email/senha
 - Senhas criptografadas com bcrypt
 - Controle de sessão
 - Middleware de autenticação
 
 ### Validação
+
 - Validação no frontend com Zod
 - Sanitização de inputs
 - Validação no backend
 - Tratamento de erros
 
 ### CORS
+
 - Configuração específica para desenvolvimento
 - Controle de origens permitidas
 - Credenciais habilitadas
@@ -407,11 +446,13 @@ mysql -u root -p < protrack.sql
 ## 📊 MONITORAMENTO E LOGS
 
 ### Logs do Sistema
+
 - Logs de erro não tratados
 - Logs de conexão com banco
 - Logs de operações críticas
 
 ### Monitoramento de Vendas
+
 - Scripts de monitoramento automático
 - Alertas de vendas vencidas
 - Atualização automática de status
@@ -419,11 +460,13 @@ mysql -u root -p < protrack.sql
 ## 🧪 TESTES E QUALIDADE
 
 ### Linting e Formatação
+
 - ESLint configurado
 - TypeScript strict mode
 - Prettier para formatação
 
 ### Validação de Tipos
+
 - TypeScript em todo o projeto
 - Interfaces bem definidas
 - Tipos para APIs e componentes
@@ -431,6 +474,7 @@ mysql -u root -p < protrack.sql
 ## 📈 ROADMAP E MELHORIAS
 
 ### Funcionalidades Planejadas
+
 - [ ] Sistema de notificações push
 - [ ] Integração com APIs de pagamento
 - [ ] Dashboard mobile nativo
@@ -438,6 +482,7 @@ mysql -u root -p < protrack.sql
 - [ ] Sistema de auditoria completo
 
 ### Melhorias Técnicas
+
 - [ ] Cache Redis para performance
 - [ ] Testes automatizados
 - [ ] CI/CD pipeline
@@ -447,16 +492,19 @@ mysql -u root -p < protrack.sql
 ## 🆘 SUPORTE E MANUTENÇÃO
 
 ### Estrutura de Logs
+
 - Logs de erro centralizados
 - Monitoramento de performance
 - Alertas automáticos
 
 ### Backup e Recuperação
+
 - Scripts de backup automático
 - Recuperação de dados
 - Versionamento de banco
 
 ### Documentação de API
+
 - Endpoints documentados
 - Exemplos de uso
 - Códigos de erro
@@ -464,6 +512,7 @@ mysql -u root -p < protrack.sql
 ## 📋 CHECKLIST DE IMPLEMENTAÇÃO
 
 ### Frontend ✅
+
 - [x] Estrutura React + TypeScript
 - [x] Sistema de roteamento
 - [x] Componentes UI
@@ -473,6 +522,7 @@ mysql -u root -p < protrack.sql
 - [x] Tema escuro/claro
 
 ### Backend ✅
+
 - [x] API Express
 - [x] Conexão MySQL
 - [x] Controladores
@@ -481,12 +531,14 @@ mysql -u root -p < protrack.sql
 - [x] Tratamento de erros
 
 ### Banco de Dados ✅
+
 - [x] Estrutura de tabelas
 - [x] Relacionamentos
 - [x] Scripts de criação
 - [x] Migrações
 
 ### Funcionalidades ✅
+
 - [x] Gestão de clientes
 - [x] Gestão de produtos
 - [x] Sistema de vendas

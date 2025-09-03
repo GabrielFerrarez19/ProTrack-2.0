@@ -25,15 +25,15 @@ O **ProTrack 2.0** é uma solução empresarial robusta e moderna que integra to
 
 ### **Stack Tecnológico**
 
-| Camada | Tecnologia | Versão |
-|--------|------------|---------|
-| **Frontend** | React + TypeScript | 19.1.0 + 5.8.3 |
-| **Build Tool** | Vite | 4.6.0 |
-| **Styling** | Tailwind CSS | 4.1.11 |
-| **UI Components** | Radix UI | 3.2.1 |
-| **Backend** | Node.js + Express | 18+ + 4.18.2 |
-| **Database** | MySQL | 8.0+ |
-| **Authentication** | bcrypt + JWT | 6.0.0 |
+| Camada             | Tecnologia         | Versão         |
+| ------------------ | ------------------ | -------------- |
+| **Frontend**       | React + TypeScript | 19.1.0 + 5.8.3 |
+| **Build Tool**     | Vite               | 4.6.0          |
+| **Styling**        | Tailwind CSS       | 4.1.11         |
+| **UI Components**  | Radix UI           | 3.2.1          |
+| **Backend**        | Node.js + Express  | 18+ + 4.18.2   |
+| **Database**       | MySQL              | 8.0+           |
+| **Authentication** | bcrypt + JWT       | 6.0.0          |
 
 ### **Estrutura do Projeto**
 
@@ -62,7 +62,7 @@ ProTrack-2.0/
 
 ### **Pré-requisitos**
 
-- [Node.js](https://nodejs.org/) 18+ 
+- [Node.js](https://nodejs.org/) 18+
 - [MySQL](https://www.mysql.com/) 8.0+
 - [Git](https://git-scm.com/)
 
@@ -120,36 +120,42 @@ npm run dev
 ## 🔧 FUNCIONALIDADES
 
 ### **📊 Dashboard Financeiro**
+
 - Visão geral do fluxo de caixa
 - Gráficos de receitas e despesas
 - Indicadores de performance
 - Relatórios em tempo real
 
 ### **👥 Gestão de Clientes**
+
 - Cadastro completo de clientes
 - Histórico de compras
 - Controle de contas a receber
 - Relatórios de comportamento
 
 ### **📦 Gestão de Produtos**
+
 - Controle de estoque
 - Categorização inteligente
 - Cálculo de margem de lucro
 - Alertas de estoque baixo
 
 ### **💰 Sistema de Vendas**
+
 - Criação de vendas
 - Múltiplas formas de pagamento
 - Controle de status
 - Comissões e descontos
 
 ### **💳 Contas a Pagar**
+
 - Gestão de fornecedores
 - Categorização de despesas
 - Alertas de vencimento
 - Relatórios detalhados
 
 ### **📈 Relatórios e Analytics**
+
 - Exportação em PDF e Excel
 - Análise de lucro por produto
 - Relatórios de estoque
@@ -158,12 +164,14 @@ npm run dev
 ## 🎨 INTERFACE DO USUÁRIO
 
 ### **Design System**
+
 - **Componentes Atômicos** - Botões, inputs, cards
 - **Tema Escuro/Claro** - Suporte a múltiplos temas
 - **Responsividade** - Mobile-first approach
 - **Acessibilidade** - Componentes ARIA-compliant
 
 ### **Componentes Principais**
+
 - `Header` - Navegação principal
 - `Sidebar` - Menu lateral responsivo
 - `SummaryCards` - Cards de resumo
@@ -173,12 +181,14 @@ npm run dev
 ## 🔌 API ENDPOINTS
 
 ### **Autenticação**
+
 ```http
 POST /login                    # Login de usuário
 POST /logout                   # Logout de usuário
 ```
 
 ### **Clientes**
+
 ```http
 GET    /clients/clientes       # Listar clientes
 POST   /clients/clientes       # Criar cliente
@@ -188,6 +198,7 @@ DELETE /clients/clientes/:id   # Excluir cliente
 ```
 
 ### **Produtos**
+
 ```http
 GET    /product/produtos       # Listar produtos
 POST   /product/produtos       # Criar produto
@@ -197,6 +208,7 @@ DELETE /product/produtos/:id   # Excluir produto
 ```
 
 ### **Vendas**
+
 ```http
 GET    /vendas/todas           # Listar vendas
 POST   /vendas/cadvendas       # Criar venda
@@ -205,6 +217,7 @@ PUT    /vendas/altera/:id      # Atualizar venda
 ```
 
 ### **Contas a Pagar**
+
 ```http
 GET    /contas-pagar/contas    # Listar contas
 POST   /contas-pagar/contas    # Criar conta
@@ -217,6 +230,7 @@ DELETE /contas-pagar/contas/:id # Excluir conta
 ### **Scripts Disponíveis**
 
 #### **Frontend (proTrack-client)**
+
 ```bash
 npm run dev          # Servidor de desenvolvimento
 npm run build        # Build de produção
@@ -225,6 +239,7 @@ npm run preview      # Preview do build
 ```
 
 #### **Backend (protrack-server)**
+
 ```bash
 npm run dev          # Servidor de desenvolvimento
 npm run build        # Build TypeScript
@@ -234,12 +249,13 @@ npm start            # Servidor de produção
 ### **Estrutura de Desenvolvimento**
 
 #### **Frontend**
+
 ```typescript
 // Exemplo de hook customizado
 const useContasPagar = () => {
   const [contas, setContas] = useState<ContaPagar[]>([]);
   const [loading, setLoading] = useState(false);
-  
+
   const listarContas = async (filtros?: ContaPagarFiltros) => {
     setLoading(true);
     try {
@@ -248,37 +264,38 @@ const useContasPagar = () => {
         setContas(response.data);
       }
     } catch (error) {
-      console.error('Erro ao listar contas:', error);
+      console.error("Erro ao listar contas:", error);
     } finally {
       setLoading(false);
     }
   };
-  
+
   return { contas, loading, listarContas };
 };
 ```
 
 #### **Backend**
+
 ```typescript
 // Exemplo de controller
 export const listarContasPagar = async (req: Request, res: Response) => {
   try {
     const { search, status, categoria_id } = req.query;
-    
+
     const contas = await contasPagarService.listarComFiltros({
       search: search as string,
       status: status as string,
-      categoria_id: categoria_id as string
+      categoria_id: categoria_id as string,
     });
-    
+
     res.json({
       success: true,
-      data: contas
+      data: contas,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'Erro interno do servidor'
+      error: "Erro interno do servidor",
     });
   }
 };
@@ -287,6 +304,7 @@ export const listarContasPagar = async (req: Request, res: Response) => {
 ## 🔒 SEGURANÇA
 
 ### **Medidas Implementadas**
+
 - **Autenticação** - bcrypt para hash de senhas
 - **Validação** - Zod para validação de dados
 - **CORS** - Configuração segura de origens
@@ -294,6 +312,7 @@ export const listarContasPagar = async (req: Request, res: Response) => {
 - **Logs** - Auditoria de operações
 
 ### **Boas Práticas**
+
 - Senhas criptografadas com salt
 - Validação em frontend e backend
 - Headers de segurança
@@ -302,11 +321,13 @@ export const listarContasPagar = async (req: Request, res: Response) => {
 ## 📱 RESPONSIVIDADE
 
 ### **Breakpoints**
+
 - **Mobile**: < 768px
 - **Tablet**: 768px - 1024px
 - **Desktop**: > 1024px
 
 ### **Componentes Responsivos**
+
 - Sidebar colapsível em mobile
 - Tabelas com scroll horizontal
 - Cards adaptáveis
@@ -315,12 +336,14 @@ export const listarContasPagar = async (req: Request, res: Response) => {
 ## 📊 PERFORMANCE
 
 ### **Otimizações Frontend**
+
 - **Code Splitting** - Lazy loading de páginas
 - **Memoization** - React.memo e useMemo
 - **Bundle Optimization** - Vite com rollup
 - **Image Optimization** - SVGs e lazy loading
 
 ### **Otimizações Backend**
+
 - **Connection Pooling** - MySQL com pool
 - **Query Optimization** - Prepared statements
 - **Caching** - Cache em memória
@@ -329,6 +352,7 @@ export const listarContasPagar = async (req: Request, res: Response) => {
 ## 🚀 DEPLOY
 
 ### **Ambiente de Produção**
+
 ```bash
 # Build do frontend
 cd proTrack-client
@@ -343,6 +367,7 @@ npm start
 ```
 
 ### **Docker (Opcional)**
+
 ```bash
 # Build das imagens
 docker-compose build
@@ -354,6 +379,7 @@ docker-compose up -d
 ## 📚 DOCUMENTAÇÃO
 
 ### **Documentos Disponíveis**
+
 - 📖 [Documentação Completa](DOCUMENTACAO_COMPLETA_PROTRACK_2.0.md)
 - 🏗️ [Arquitetura Técnica](ARQUITETURA_TECNICA_ATUALIZADA.md)
 - 📊 [Resumo Executivo](RESUMO_EXECUTIVO_PROTRACK_2.0.md)
@@ -362,6 +388,7 @@ docker-compose up -d
 - 👤 [Manual do Usuário](USER_MANUAL.md)
 
 ### **Navegação Rápida**
+
 - **Desenvolvedores** → [Arquitetura Técnica](ARQUITETURA_TECNICA_ATUALIZADA.md)
 - **Usuários** → [Manual do Usuário](USER_MANUAL.md)
 - **Instalação** → [Instalação Rápida](INSTALACAO_RAPIDA.md)
@@ -370,6 +397,7 @@ docker-compose up -d
 ## 🤝 CONTRIBUIÇÃO
 
 ### **Como Contribuir**
+
 1. Fork o projeto
 2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
 3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
@@ -377,6 +405,7 @@ docker-compose up -d
 5. Abra um Pull Request
 
 ### **Padrões de Código**
+
 - Use TypeScript strict mode
 - Siga as convenções de nomenclatura
 - Adicione testes para novas funcionalidades
@@ -385,6 +414,7 @@ docker-compose up -d
 ## 🐛 REPORTAR BUGS
 
 ### **Como Reportar**
+
 1. Use o sistema de Issues do GitHub
 2. Descreva o problema detalhadamente
 3. Inclua passos para reproduzir
@@ -392,11 +422,13 @@ docker-compose up -d
 5. Especifique seu ambiente (OS, browser, versão)
 
 ### **Template de Bug Report**
+
 ```markdown
 **Descrição do Bug**
 Descrição clara e concisa do problema.
 
 **Passos para Reproduzir**
+
 1. Vá para '...'
 2. Clique em '...'
 3. Role até '...'
@@ -409,6 +441,7 @@ O que deveria acontecer.
 Se aplicável, adicione screenshots.
 
 **Ambiente**
+
 - OS: [ex: Windows 10]
 - Browser: [ex: Chrome 120]
 - Versão: [ex: 2.0.0]
@@ -421,10 +454,12 @@ Este projeto está licenciado sob a licença **ISC** - veja o arquivo [LICENSE](
 ## 👥 EQUIPE
 
 ### **Desenvolvedores**
+
 - **Equipe ProTrack** - Desenvolvimento principal
 - **Contribuidores** - Comunidade open source
 
 ### **Contato**
+
 - **Documentação**: Este repositório
 - **Issues**: [GitHub Issues](https://github.com/seu-usuario/ProTrack-2.0/issues)
 - **Suporte**: Equipe ProTrack
@@ -445,7 +480,7 @@ Este projeto está licenciado sob a licença **ISC** - veja o arquivo [LICENSE](
 **🚀 Pronto para**: Deploy em produção  
 **📱 Responsivo**: Mobile, tablet e desktop  
 **🔒 Seguro**: Autenticação e validação implementadas  
-**📚 Documentado**: Documentação completa disponível  
+**📚 Documentado**: Documentação completa disponível
 
 **O ProTrack 2.0 está pronto para revolucionar a gestão empresarial! 🚀**
 
