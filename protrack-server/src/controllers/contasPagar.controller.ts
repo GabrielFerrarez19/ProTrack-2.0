@@ -7,13 +7,13 @@ import {
   excluirConta,
   marcarComoPaga,
   obterResumo,
+  buscarContasVencimento,
+  atualizarStatusContas,
   criarFornecedor,
   listarFornecedores,
   buscarFornecedorPorId,
   atualizarFornecedor,
   excluirFornecedor,
-  atualizarStatusContas,
-  buscarContasVencimento,
 } from "../services/contasPagar.service";
 import {
   ContaPagarCreateRequest,

@@ -9,10 +9,12 @@ import { FiltersBar } from "./components/FiltersBar";
 import { SummaryCards } from "./components/SummaryCards";
 import { AccountsTable } from "./components/AccountsTable";
 import { useContasPagar } from "../../hooks/useContasPagar";
+import { useContasPagarVencidas } from "../../hooks/useContasPagarVencidas";
 import type { ContaPagarFiltros } from "../../@types/types.contasPagar";
 import { Button } from "../../components/ui/button";
 import { Plus, RefreshCw } from "lucide-react";
 import { toast, Toaster } from "sonner";
+import { StatusMonitoramento } from "./components";
 
 export function ContasPagar() {
   const {
@@ -25,6 +27,15 @@ export function ContasPagar() {
     limparErro,
     formatarMoeda,
   } = useContasPagar();
+
+  const {
+    totalVencidas,
+    loadingVencidas,
+    errorVencidas,
+    monitoramentoExecutado,
+    executarMonitoramento,
+    reload: reloadVencidas,
+  } = useContasPagarVencidas();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
@@ -60,6 +71,11 @@ export function ContasPagar() {
     limparErro();
   }
 
+  // Tratar erros do monitoramento
+  if (errorVencidas) {
+    toast.error(errorVencidas);
+  }
+
   // Preparar dados para os componentes
   const categoriasOptions = [
     { value: "todas", label: "Todas as Categorias" },
@@ -72,7 +88,6 @@ export function ContasPagar() {
   const statusOptions = [
     { value: "todos", label: "Todos os Status" },
     { value: "pendente", label: "Pendente" },
-    { value: "pago", label: "Pago" },
     { value: "vencido", label: "Vencido" },
     { value: "agendado", label: "Agendado" },
   ];
@@ -108,6 +123,13 @@ export function ContasPagar() {
             Nova Conta
           </Button>
         </div>
+
+        {/* Status do Monitoramento */}
+        <StatusMonitoramento
+          monitoramentoExecutado={monitoramentoExecutado}
+          executarMonitoramento={executarMonitoramento}
+          reload={reloadVencidas}
+        />
       </div>
 
       {/* Cards de Resumo */}
@@ -118,6 +140,7 @@ export function ContasPagar() {
           totalAgendado={resumo.total_agendado || 0}
           totalCount={resumo.total_contas || 0}
           contasVencidasCount={resumo.contas_vencidas_count || 0}
+          totalVencidasMonitoramento={totalVencidas}
           formatarMoeda={formatarMoeda}
         />
       ) : (
@@ -177,7 +200,7 @@ export function ContasPagar() {
       </Card>
 
       {/* Estado de carregamento */}
-      {loading && (
+      {(loading || loadingVencidas) && (
         <div className="flex justify-center items-center py-8">
           <div className="flex items-center gap-2">
             <RefreshCw className="h-5 w-5 animate-spin" />
@@ -187,7 +210,7 @@ export function ContasPagar() {
       )}
 
       {/* Estado vazio */}
-      {!loading && contas.length === 0 && (
+      {!loading && !loadingVencidas && contas.length === 0 && (
         <Card>
           <CardContent className="py-12">
             <div className="text-center">
