@@ -67,7 +67,7 @@ export function ClientTable({ clientes, onClienteUpdated }: ClientTableProps) {
           {clientes.map((cliente, index) => (
             <TableRow
               key={cliente.cpf ?? index}
-              className="hover:bg-gray-200 cursor-pointer"
+              className="hover:bg-gray-200 cursor-pointer text-sm"
               onClick={() => {
                 setSelectedCliente(cliente);
                 setOpen(true);
