@@ -14,15 +14,25 @@ interface Props {
 }
 
 export function ResumoCards({ fluxoCaixaHistorico, projecaoFutura }: Props) {
+  const saldoAtual =
+    fluxoCaixaHistorico.reduce((sum, item) => sum + item.entradas, 0) -
+    fluxoCaixaHistorico.reduce((sum, item) => sum + item.saidas, 0);
+
   const totalEntradas = fluxoCaixaHistorico.reduce(
     (sum, item) => sum + item.entradas,
     0
   );
+
   const totalSaidas = fluxoCaixaHistorico.reduce(
     (sum, item) => sum + item.saidas,
     0
   );
-  const saldoAtual = totalEntradas - totalSaidas;
+
+  const projecao30Dias = projecaoFutura.reduce(
+    (sum, item) => sum + (item.entradas - item.saidas),
+    0
+  );
+
   const crescimento = ((saldoAtual - 12400) / 12400) * 100;
 
   return (
@@ -96,12 +106,12 @@ export function ResumoCards({ fluxoCaixaHistorico, projecaoFutura }: Props) {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm opacity-80">Previsão 5 dias</p>
+              <p className="text-sm opacity-80">Projeção 30 dias</p>
               <h3 className="text-2xl font-bold">
                 R$
-                {projecaoFutura
-                  .reduce((sum, item) => sum + (item.entradas - item.saidas), 0)
-                  .toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                {projecao30Dias.toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                })}
               </h3>
             </div>
             <Calendar className="h-8 w-8 text-purple-700" />

@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const config_controller_1 = require("../controllers/config.controller");
+const router = (0, express_1.Router)();
+router.get("/metodos-pagamento", config_controller_1.getMetodosPagamentoConfig);
+router.patch("/metodos-pagamento/:id/toggle", config_controller_1.toggleMetodoPagamentoController);
+router.get("/metodos-pagamento/ativos", config_controller_1.getMetodosPagamentoAtivosController);
+router.get("/categorias", config_controller_1.listarCategorias);
+router.post("/categorias", config_controller_1.criarCategoria);
+router.put("/categorias/:id", config_controller_1.atualizarCategoria);
+router.delete("/categorias/:id", config_controller_1.removerCategoria);
+exports.default = router;
