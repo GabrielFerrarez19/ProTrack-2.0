@@ -61,6 +61,7 @@ src/
 ### 2. **Component Architecture**
 
 #### **Atomic Design Pattern**
+
 ```
 Atoms → Molecules → Organisms → Templates → Pages
 
@@ -72,6 +73,7 @@ Atoms → Molecules → Organisms → Templates → Pages
 ```
 
 #### **Component Composition**
+
 ```typescript
 // Exemplo de composição de componentes
 <DefaultLayout>
@@ -90,6 +92,7 @@ Atoms → Molecules → Organisms → Templates → Pages
 ### 3. **State Management Strategy**
 
 #### **Local State (useState)**
+
 ```typescript
 const [searchTerm, setSearchTerm] = useState("");
 const [statusFilter, setStatusFilter] = useState("todos");
@@ -97,25 +100,20 @@ const [categoriaFilter, setCategoriaFilter] = useState("todas");
 ```
 
 #### **Business Logic State (Custom Hooks)**
+
 ```typescript
-const {
-  contas,
-  categorias,
-  resumo,
-  loading,
-  error,
-  listarContas,
-  criarConta
-} = useContasPagar();
+const { contas, categorias, resumo, loading, error, listarContas, criarConta } =
+  useContasPagar();
 ```
 
 #### **API State Management**
+
 ```typescript
 // Centralized API state management
 const [apiState, setApiState] = useState({
   loading: false,
   error: null,
-  data: null
+  data: null,
 });
 ```
 
@@ -153,6 +151,7 @@ src/
 ### 2. **API Design Pattern**
 
 #### **RESTful Endpoints**
+
 ```typescript
 // Client Management
 GET    /clients/clientes          # List all clients
@@ -176,6 +175,7 @@ PUT    /vendas/altera/:id         # Update sale
 ```
 
 #### **Response Pattern**
+
 ```typescript
 // Success Response
 {
@@ -195,6 +195,7 @@ PUT    /vendas/altera/:id         # Update sale
 ### 3. **Database Architecture**
 
 #### **Connection Pooling**
+
 ```typescript
 export const db = mysql.createPool({
   host: "localhost",
@@ -206,11 +207,12 @@ export const db = mysql.createPool({
   connectionLimit: 10,
   acquireTimeout: 60000,
   timeout: 60000,
-  reconnect: true
+  reconnect: true,
 });
 ```
 
 #### **Database Schema Design**
+
 ```sql
 -- Core Tables
 usuarios (id, email, senha, nome, criado_em)
@@ -247,10 +249,10 @@ User Action → Component → Hook → Service → API → Backend → Database
 const handleCreateAccount = async (accountData) => {
   // 2. Hook calls service
   const result = await criarConta(accountData);
-  
+
   // 3. Service makes HTTP request
   const response = await api.post("/contas-pagar/contas", accountData);
-  
+
   // 4. Backend processes request
   // 5. Database operation
   // 6. Response flows back
@@ -265,7 +267,7 @@ const response = await criarContaPagar(contaData);
 
 // 2. State updated in hook
 if (response.success) {
-  setContas(prev => [...prev, response.data]);
+  setContas((prev) => [...prev, response.data]);
   setResumo(await obterResumo());
 }
 
@@ -278,6 +280,7 @@ if (response.success) {
 ### 1. **Frontend Optimization**
 
 #### **Code Splitting**
+
 ```typescript
 // Lazy loading of pages
 const ContasPagar = lazy(() => import("./pages/ContasPagar"));
@@ -285,6 +288,7 @@ const Vendas = lazy(() => import("./pages/Vendas"));
 ```
 
 #### **Memoization**
+
 ```typescript
 // React.memo for expensive components
 const AccountsTable = React.memo(({ contas, loading }) => {
@@ -293,14 +297,15 @@ const AccountsTable = React.memo(({ contas, loading }) => {
 
 // useMemo for expensive calculations
 const filteredContas = useMemo(() => {
-  return contas.filter(conta => 
-    conta.status === statusFilter && 
-    conta.descricao.includes(searchTerm)
+  return contas.filter(
+    (conta) =>
+      conta.status === statusFilter && conta.descricao.includes(searchTerm)
   );
 }, [contas, statusFilter, searchTerm]);
 ```
 
 #### **Bundle Optimization**
+
 ```typescript
 // Vite configuration for optimal builds
 export default defineConfig({
@@ -308,33 +313,35 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-select']
-        }
-      }
-    }
-  }
+          vendor: ["react", "react-dom"],
+          ui: ["@radix-ui/react-dialog", "@radix-ui/react-select"],
+        },
+      },
+    },
+  },
 });
 ```
 
 ### 2. **Backend Optimization**
 
 #### **Database Query Optimization**
+
 ```typescript
 // Connection pooling
 const pool = mysql.createPool({
   connectionLimit: 10,
-  acquireTimeout: 60000
+  acquireTimeout: 60000,
 });
 
 // Prepared statements
 const [rows] = await db.execute(
-  'SELECT * FROM contas_pagar WHERE status = ? AND categoria_id = ?',
+  "SELECT * FROM contas_pagar WHERE status = ? AND categoria_id = ?",
   [status, categoriaId]
 );
 ```
 
 #### **Caching Strategy**
+
 ```typescript
 // In-memory caching for frequently accessed data
 const cache = new Map();
@@ -345,7 +352,7 @@ const getCachedData = async (key: string, fetchFn: () => Promise<any>) => {
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return cached.data;
   }
-  
+
   const data = await fetchFn();
   cache.set(key, { data, timestamp: Date.now() });
   return data;
@@ -357,6 +364,7 @@ const getCachedData = async (key: string, fetchFn: () => Promise<any>) => {
 ### 1. **Authentication & Authorization**
 
 #### **Password Security**
+
 ```typescript
 // bcrypt for password hashing
 const hashPassword = async (password: string): Promise<string> => {
@@ -364,45 +372,53 @@ const hashPassword = async (password: string): Promise<string> => {
   return await bcrypt.hash(password, saltRounds);
 };
 
-const verifyPassword = async (password: string, hash: string): Promise<boolean> => {
+const verifyPassword = async (
+  password: string,
+  hash: string
+): Promise<boolean> => {
   return await bcrypt.compare(password, hash);
 };
 ```
 
 #### **Session Management**
+
 ```typescript
 // JWT token generation
 const generateToken = (userId: string): string => {
-  return jwt.sign(
-    { userId, iat: Date.now() },
-    process.env.JWT_SECRET,
-    { expiresIn: '24h' }
-  );
+  return jwt.sign({ userId, iat: Date.now() }, process.env.JWT_SECRET, {
+    expiresIn: "24h",
+  });
 };
 ```
 
 ### 2. **Input Validation & Sanitization**
 
 #### **Frontend Validation (Zod)**
+
 ```typescript
 const contaSchema = z.object({
   fornecedor_nome: z.string().min(1, "Nome do fornecedor é obrigatório"),
   valor: z.number().positive("Valor deve ser positivo"),
   data_vencimento: z.string().datetime("Data de vencimento inválida"),
   categoria_id: z.string().min(1, "Categoria é obrigatória"),
-  descricao: z.string().min(1, "Descrição é obrigatória")
+  descricao: z.string().min(1, "Descrição é obrigatória"),
 });
 ```
 
 #### **Backend Validation**
+
 ```typescript
 // Middleware de validação
-const validateContaPagar = (req: Request, res: Response, next: NextFunction) => {
+const validateContaPagar = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { error } = contaSchema.validate(req.body);
   if (error) {
     return res.status(400).json({
       success: false,
-      error: error.details[0].message
+      error: error.details[0].message,
     });
   }
   next();
@@ -413,23 +429,27 @@ const validateContaPagar = (req: Request, res: Response, next: NextFunction) => 
 
 ```typescript
 // CORS configuration
-app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 // Security headers
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"]
-    }
-  }
-}));
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+      },
+    },
+  })
+);
 ```
 
 ## 📊 MONITORING & LOGGING
@@ -447,7 +467,7 @@ const logger = {
   },
   warn: (message: string, meta?: any) => {
     console.warn(`[WARN] ${new Date().toISOString()}: ${message}`, meta);
-  }
+  },
 };
 ```
 
@@ -457,12 +477,12 @@ const logger = {
 // Response time monitoring
 app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
-  
-  res.on('finish', () => {
+
+  res.on("finish", () => {
     const duration = Date.now() - start;
     logger.info(`${req.method} ${req.path} - ${duration}ms`);
   });
-  
+
   next();
 });
 ```
@@ -472,23 +492,23 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 ```typescript
 // Global error handler
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-  logger.error('Unhandled error:', error);
-  
+  logger.error("Unhandled error:", error);
+
   res.status(500).json({
     success: false,
-    error: 'Internal server error',
-    timestamp: new Date().toISOString()
+    error: "Internal server error",
+    timestamp: new Date().toISOString(),
   });
 });
 
 // Process error handlers
-process.on('uncaughtException', (error) => {
-  logger.error('Uncaught Exception:', error);
+process.on("uncaughtException", (error) => {
+  logger.error("Uncaught Exception:", error);
   process.exit(1);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+process.on("unhandledRejection", (reason, promise) => {
+  logger.error("Unhandled Rejection at:", promise, "reason:", reason);
   process.exit(1);
 });
 ```
@@ -498,12 +518,13 @@ process.on('unhandledRejection', (reason, promise) => {
 ### 1. **Horizontal Scaling**
 
 #### **Load Balancer Strategy**
+
 ```typescript
 // Multiple backend instances
 const backendInstances = [
-  'http://backend1:8085',
-  'http://backend2:8085',
-  'http://backend3:8085'
+  "http://backend1:8085",
+  "http://backend2:8085",
+  "http://backend3:8085",
 ];
 
 // Round-robin load balancing
@@ -516,6 +537,7 @@ const getNextInstance = () => {
 ```
 
 #### **Database Scaling**
+
 ```typescript
 // Read replicas for read operations
 const readDb = mysql.createPool({
@@ -532,6 +554,7 @@ const writeDb = mysql.createPool({
 ### 2. **Vertical Scaling**
 
 #### **Resource Optimization**
+
 ```typescript
 // Memory management
 const optimizeMemory = () => {
@@ -557,24 +580,24 @@ setInterval(optimizeMemory, 5 * 60 * 1000);
 const config = {
   development: {
     database: {
-      host: 'localhost',
+      host: "localhost",
       port: 3306,
-      database: 'protrack_dev'
+      database: "protrack_dev",
     },
     cors: {
-      origin: 'http://localhost:5173'
-    }
+      origin: "http://localhost:5173",
+    },
   },
   production: {
     database: {
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT),
-      database: process.env.DB_NAME
+      database: process.env.DB_NAME,
     },
     cors: {
-      origin: process.env.FRONTEND_URL
-    }
-  }
+      origin: process.env.FRONTEND_URL,
+    },
+  },
 };
 ```
 
@@ -593,7 +616,7 @@ CMD ["node", "dist/app.js"]
 
 ```yaml
 # docker-compose.yml
-version: '3.8'
+version: "3.8"
 services:
   backend:
     build: ./protrack-server
@@ -604,7 +627,7 @@ services:
       - DB_HOST=mysql
     depends_on:
       - mysql
-  
+
   mysql:
     image: mysql:8.0
     environment:
@@ -621,6 +644,7 @@ volumes:
 ## 🎯 BEST PRACTICES IMPLEMENTED
 
 ### 1. **Code Quality**
+
 - ✅ TypeScript strict mode
 - ✅ ESLint configuration
 - ✅ Consistent code formatting
@@ -628,6 +652,7 @@ volumes:
 - ✅ Comprehensive error handling
 
 ### 2. **Security**
+
 - ✅ Input validation and sanitization
 - ✅ Password hashing with bcrypt
 - ✅ CORS configuration
@@ -635,6 +660,7 @@ volumes:
 - ✅ SQL injection prevention
 
 ### 3. **Performance**
+
 - ✅ Database connection pooling
 - ✅ Lazy loading of components
 - ✅ Memoization of expensive operations
@@ -642,6 +668,7 @@ volumes:
 - ✅ Response time monitoring
 
 ### 4. **Maintainability**
+
 - ✅ Clear separation of concerns
 - ✅ Modular architecture
 - ✅ Comprehensive documentation
@@ -659,7 +686,7 @@ volumes:
 **🔒 Security**: bcrypt + JWT + CORS + Input validation  
 **📱 Responsive**: Mobile-first design approach  
 **🚀 Performance**: Optimized bundles + caching + monitoring  
-**🔧 Scalable**: Horizontal + vertical scaling ready  
+**🔧 Scalable**: Horizontal + vertical scaling ready
 
 **A arquitetura do ProTrack 2.0 foi projetada para ser robusta, escalável e fácil de manter, seguindo as melhores práticas da indústria e padrões modernos de desenvolvimento.**
 
