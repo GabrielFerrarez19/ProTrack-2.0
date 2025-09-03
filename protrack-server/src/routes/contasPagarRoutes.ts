@@ -13,6 +13,7 @@ import {
   atualizarFornecedorController,
   excluirFornecedorController,
   atualizarStatusContasController,
+  buscarContasVencimentoController,
 } from "../controllers/contasPagar.controller";
 
 const router = Router();
@@ -27,6 +28,9 @@ router.get("/contas", listarContasController);
 
 // Obter resumo das contas (DEVE VIR ANTES das rotas com parâmetros)
 router.get("/contas/resumo", obterResumoController);
+
+// Buscar contas por vencimento
+router.get("/contas/vencimentos", buscarContasVencimentoController);
 
 // Buscar conta por ID
 router.get("/contas/:id", buscarContaPorIdController);

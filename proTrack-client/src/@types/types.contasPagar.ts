@@ -59,6 +59,8 @@ export interface ContaPagarResumo {
   total_pago: number;
   total_contas: number;
   contas_vencidas_count: number;
+  total_vence_hoje: number;
+  total_proximos_7_dias: number;
 }
 
 export interface ContaPagarResponse {

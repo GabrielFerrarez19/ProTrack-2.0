@@ -27,78 +27,84 @@ export function SummaryCards({
   return (
     <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
       {/* Total a Pagar */}
-      <Card>
+      <Card className="bg-pink-100 border-pink-200">
         <CardContent className="p-6 flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">Total a Pagar</p>
-            <h3 className="text-2xl font-bold text-foreground">
+            <p className="text-sm text-pink-700">Total a Pagar</p>
+            <h3 className="text-2xl font-bold text-pink-800">
               {formatarMoeda(totalPendente)}
             </h3>
-            <p className="text-xs text-muted-foreground mt-1">
-              Contas pendentes
-            </p>
+            <p className="text-xs text-pink-600 mt-1">Contas pendentes</p>
           </div>
-          <DollarSign className="h-8 w-8 text-destructive" />
+          <DollarSign className="h-8 w-8 text-pink-500" />
         </CardContent>
       </Card>
 
       {/* Contas Vencidas */}
-      <Card>
+      <Card className="bg-red-100 border-red-200">
         <CardContent className="p-6 flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">Contas Vencidas</p>
-            <h3 className="text-2xl font-bold text-destructive">
+            <p className="text-sm text-red-700">Contas Vencidas</p>
+            <h3 className="text-2xl font-bold text-red-800">
               {formatarMoeda(totalVencido)}
             </h3>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-red-600 mt-1">
               {contasVencidasCount} conta{contasVencidasCount !== 1 ? "s" : ""}
             </p>
           </div>
-          <AlertTriangle className="h-8 w-8 text-destructive" />
+          <AlertTriangle className="h-8 w-8 text-red-500" />
         </CardContent>
       </Card>
 
       {/* Pagamentos Agendados */}
-      <Card>
+      <Card className="bg-blue-100 border-blue-200">
         <CardContent className="p-6 flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">
-              Pagamentos Agendados
-            </p>
-            <h3 className="text-2xl font-bold text-primary">
+            <p className="text-sm text-blue-700">Pagamentos Agendados</p>
+            <h3 className="text-2xl font-bold text-blue-800">
               {formatarMoeda(totalAgendado)}
             </h3>
-            <p className="text-xs text-muted-foreground mt-1">
-              Contas agendadas
-            </p>
+            <p className="text-xs text-blue-600 mt-1">Contas agendadas</p>
           </div>
-          <Clock className="h-8 w-8 text-primary" />
+          <Clock className="h-8 w-8 text-blue-500" />
         </CardContent>
       </Card>
 
       {/* Total de Contas */}
-      <Card>
+      <Card className="bg-purple-100 border-purple-200">
         <CardContent className="p-6 flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">Total de Contas</p>
-            <h3 className="text-2xl font-bold text-foreground">{totalCount}</h3>
-            <p className="text-xs text-muted-foreground mt-1">
-              Contas cadastradas
-            </p>
+            <p className="text-sm text-purple-700">Total de Contas</p>
+            <h3 className="text-2xl font-bold text-purple-800">{totalCount}</h3>
+            <p className="text-xs text-purple-600 mt-1">Contas cadastradas</p>
           </div>
-          <Calendar className="h-8 w-8 text-muted-foreground" />
+          <Calendar className="h-8 w-8 text-purple-500" />
         </CardContent>
       </Card>
 
       {/* Status Geral */}
-      <Card>
+      <Card
+        className={`${
+          totalVencido > 0
+            ? "bg-red-100 border-red-200"
+            : "bg-green-100 border-green-200"
+        }`}
+      >
         <CardContent className="p-6 flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">Status Geral</p>
-            <h3 className="text-lg font-bold text-foreground">
+            <p className="text-sm text-gray-600">Status Geral</p>
+            <h3
+              className={`text-lg font-bold ${
+                totalVencido > 0 ? "text-red-800" : "text-green-800"
+              }`}
+            >
               {totalVencido > 0 ? "⚠️ Atenção" : "✅ Em dia"}
             </h3>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p
+              className={`text-xs mt-1 ${
+                totalVencido > 0 ? "text-red-600" : "text-green-600"
+              }`}
+            >
               {totalVencido > 0
                 ? `${contasVencidasCount} conta${
                     contasVencidasCount !== 1 ? "s" : ""
@@ -108,7 +114,7 @@ export function SummaryCards({
           </div>
           <TrendingUp
             className={`h-8 w-8 ${
-              totalVencido > 0 ? "text-destructive" : "text-green-600"
+              totalVencido > 0 ? "text-red-500" : "text-green-500"
             }`}
           />
         </CardContent>

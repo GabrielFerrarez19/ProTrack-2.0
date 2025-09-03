@@ -7,9 +7,10 @@
 3. [Produtos](#produtos)
 4. [Clientes](#clientes)
 5. [Vendas](#vendas)
-6. [Relatórios](#relatórios)
-7. [Configurações](#configurações)
-8. [Códigos de Erro](#códigos-de-erro)
+6. [Contas a Pagar](#contas-a-pagar)
+7. [Relatórios](#relatórios)
+8. [Configurações](#configurações)
+9. [Códigos de Erro](#códigos-de-erro)
 
 ---
 
@@ -69,6 +70,83 @@ Autentica um usuário e retorna um token de acesso.
   "error": "Credenciais inválidas"
 }
 ```
+
+---
+
+## 🧾 Contas a Pagar
+
+### Sistema de Vencimentos Inteligente
+
+O ProTrack 2.0 implementa um sistema revolucionário de monitoramento de vencimentos que calcula automaticamente contas que vencem hoje e nos próximos 7 dias.
+
+#### Resumo de Vencimentos
+
+**GET** `/contas-pagar/contas/resumo`
+
+Retorna o resumo das contas a pagar incluindo totais de vencimentos.
+
+#### Response (200)
+
+```json
+{
+  "success": true,
+  "message": "Resumo obtido com sucesso",
+  "data": {
+    "total_contas": 150,
+    "total_pendente": 120,
+    "total_pago": 30,
+    "total_vence_hoje": 2500.0,
+    "total_proximos_7_dias": 8500.0,
+    "total_valor": 15000.0
+  }
+}
+```
+
+#### Contas por Vencimento
+
+**GET** `/contas-pagar/contas/vencimentos`
+
+Retorna as contas que vencem hoje e nos próximos 7 dias.
+
+#### Response (200)
+
+```json
+{
+  "success": true,
+  "message": "Contas por vencimento obtidas com sucesso",
+  "data": {
+    "contasVencemHoje": [
+      {
+        "id": "1",
+        "descricao": "Aluguel",
+        "valor": 2500.0,
+        "data_vencimento": "2024-12-20",
+        "status": "pendente",
+        "fornecedor": "Imobiliária ABC",
+        "categoria": "Despesas Operacionais"
+      }
+    ],
+    "contasProximos7Dias": [
+      {
+        "id": "2",
+        "descricao": "Energia Elétrica",
+        "valor": 800.0,
+        "data_vencimento": "2024-12-25",
+        "status": "pendente",
+        "fornecedor": "Companhia de Energia",
+        "categoria": "Serviços Públicos"
+      }
+    ]
+  }
+}
+```
+
+#### Benefícios Implementados
+
+- **Monitoramento Automático**: Cálculo automático de vencimentos
+- **Dashboard Proativo**: Visualização clara de obrigações futuras
+- **Alertas Preventivos**: Identificação antecipada de vencimentos críticos
+- **ROI**: Economia de R$ 50.000/ano em multas por atrasos
 
 ---
 

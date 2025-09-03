@@ -27,24 +27,6 @@ export function RelatoriosFinanceiros() {
   if (loading) return <p className="p-6">Carregando dados financeiros...</p>;
   if (error) return <p className="p-6 text-red-600">{error}</p>;
 
-  // ---------- DADOS MOCKADOS ----------
-  const contasDetalhadas = [
-    {
-      id: 1,
-      data: "2025-08-01",
-      descricao: "Conta de luz",
-      categoria: "Despesas",
-      valor: -450,
-    },
-    {
-      id: 2,
-      data: "2025-08-03",
-      descricao: "Venda serviço X",
-      categoria: "Receitas",
-      valor: 2000,
-    },
-  ];
-
   // ---------- RENDER ----------
   return (
     <div className="p-6 space-y-6">
@@ -53,7 +35,7 @@ export function RelatoriosFinanceiros() {
         text="Análises detalhadas de performance financeira e lucratividade"
       />
 
-      <CardsResumo dados={dados} contasDetalhadas={contasDetalhadas} />
+      <CardsResumo dados={dados} />
 
       <GraficosPrincipais dados={dados} />
 

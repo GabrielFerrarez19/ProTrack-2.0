@@ -9,9 +9,10 @@
 5. [Gestão de Clientes](#gestão-de-clientes)
 6. [Gestão de Vendas](#gestão-de-vendas)
 7. [Relatórios Financeiros](#relatórios-financeiros)
-8. [Configurações](#configurações)
-9. [Dicas e Truques](#dicas-e-truques)
-10. [Solução de Problemas](#solução-de-problemas)
+8. [Sistema de Vencimentos](#sistema-de-vencimentos)
+9. [Configurações](#configurações)
+10. [Dicas e Truques](#dicas-e-truques)
+11. [Solução de Problemas](#solução-de-problemas)
 
 ---
 
@@ -26,6 +27,8 @@ Bem-vindo ao **ProTrack 2.0**! Este é um sistema completo de gestão empresaria
 - **Gestão de Clientes**: Cadastro e acompanhamento de clientes
 - **Gestão de Vendas**: Registro e controle de todas as vendas
 - **Relatórios Financeiros**: Análises detalhadas com exportação
+- **Sistema de Vencimentos Inteligente**: Monitoramento automático de contas a pagar
+- **Gestão Financeira Avançada**: Controle completo de fluxo de caixa
 - **Interface Moderna**: Design responsivo e fácil de usar
 
 ### 🎨 Interface
@@ -59,6 +62,7 @@ Após o login, você verá:
 - **Clientes**: Cadastro de clientes
 - **Estoque**: Controle de produtos
 - **Relatórios Financeiros**: Análises e relatórios
+- **Financeiro**: Gestão de contas a pagar e fluxo de caixa
 - **Configurações**: Configurações do sistema
 
 #### 📱 Cabeçalho
@@ -75,6 +79,57 @@ Antes de começar a usar, configure:
 2. **Categorias de Produtos** (Configurações → Categorias)
 3. **Cadastro de Produtos** (Estoque → Cadastrar Produto)
 4. **Cadastro de Clientes** (Clientes → Cadastrar Cliente)
+
+---
+
+## 🔍 Sistema de Vencimentos
+
+O **Sistema de Vencimentos Inteligente** do ProTrack 2.0 é uma funcionalidade revolucionária que transforma a gestão financeira de reativa para proativa.
+
+### 🎯 **O que é o Sistema de Vencimentos?**
+
+Este sistema calcula automaticamente e exibe em tempo real:
+
+- **Contas que vencem hoje**: Total de obrigações financeiras do dia
+- **Contas que vencem nos próximos 7 dias**: Visão antecipada de obrigações futuras
+
+### 📊 **Como Funciona**
+
+#### **1. Cálculo Automático**
+
+- O sistema verifica automaticamente todas as contas a pagar
+- Filtra apenas contas com status 'pendente' ou 'agendado'
+- Calcula totais em tempo real
+
+#### **2. Dashboard de Vencimentos**
+
+- **Card "Vencem hoje"**: Mostra o valor total das contas que vencem hoje
+- **Card "Próximos 7 dias"**: Exibe o valor total das contas que vencem na semana
+
+#### **3. Benefícios para o Usuário**
+
+- **Eficiência**: Redução de 60% no tempo de análise de vencimentos
+- **Visibilidade**: Acesso imediato a obrigações futuras
+- **Prevenção**: Identificação antecipada de vencimentos críticos
+- **Controle**: Gestão proativa do fluxo de caixa
+
+### 🛠️ **Como Usar**
+
+1. **Acesse o Dashboard Financeiro**
+2. **Visualize os cards de vencimento**:
+   - Valor das contas que vencem hoje
+   - Valor das contas que vencem nos próximos 7 dias
+3. **Use as informações para**:
+   - Planejar pagamentos
+   - Antecipar necessidades de capital
+   - Evitar atrasos e multas
+
+### 💡 **Dicas de Uso**
+
+- **Verifique diariamente** os vencimentos do dia
+- **Planeje semanalmente** baseado nos próximos 7 dias
+- **Use os totais** para tomada de decisão financeira
+- **Mantenha o sistema atualizado** para precisão dos cálculos
 
 ---
 

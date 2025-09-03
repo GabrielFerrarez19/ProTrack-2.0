@@ -70,15 +70,23 @@ Este índice organiza toda a documentação disponível para o sistema **ProTrac
   - Logs e estatísticas
   - Manutenção
 
-### **8. Relatórios e Exportação**
+### **8. Sistema de Vencimentos (NOVO!)**
+
+- **🔍 [API_CONTAS_PAGAR.md](./API_CONTAS_PAGAR.md)**
+  - Monitoramento inteligente de contas a pagar
+  - Cálculo automático de vencimentos
+  - Dashboard de vencimentos
+  - Gestão de fornecedores
+  - APIs e endpoints específicos
+
+### **9. Relatórios e Exportação**
 
 - **📊 [EXPORTACAO_RELATORIOS.md](./EXPORTACAO_RELATORIOS.md)**
-  - Geração de relatórios
-  - Exportação em PDF/Excel
-  - Configurações
-  - Formatação
+  - Sistema de exportação de relatórios
+  - Formato Excel e PDF
+  - Filtros avançados
 
-### **9. Instalação Rápida**
+### **10. Instalação Rápida**
 
 - **⚡ [INSTALACAO_RAPIDA.md](./INSTALACAO_RAPIDA.md)**
   - Setup em 5 minutos
@@ -86,9 +94,25 @@ Este índice organiza toda a documentação disponível para o sistema **ProTrac
   - Verificação de instalação
   - Primeiros passos
 
+### **10. Resumo Executivo**
+
+- **📊 [RESUMO_EXECUTIVO_PROTRACK_2.0.md](./RESUMO_EXECUTIVO_PROTRACK_2.0.md)**
+  - Visão executiva das inovações
+  - ROI e impacto financeiro
+  - Roadmap futuro
+  - Diferenciais competitivos
+
+### **11. Sistema de Monitoramento**
+
+- **🔄 [MONITORAMENTO_VENDAS.md](./MONITORAMENTO_VENDAS.md)**
+  - Funcionamento do monitoramento
+  - Configuração automática
+  - Logs e estatísticas
+  - Manutenção
+
 ## 🗄️ Recursos do Sistema
 
-### **10. Schema do Banco**
+### **11. Schema do Banco**
 
 - **🗃️ [protrack.sql](./protrack.sql)**
   - Estrutura completa do banco
@@ -96,12 +120,19 @@ Este índice organiza toda a documentação disponível para o sistema **ProTrac
   - Índices e constraints
   - Dados de exemplo
 
-### **11. Configurações**
+### **12. Configurações**
 
 - **⚙️ [package.json](./package.json)**
   - Dependências do projeto
   - Scripts disponíveis
   - Configurações de build
+
+### **13. Fluxo de Caixa**
+
+- **💰 [FLUXO_CAIXA_BACKEND_README.md](./FLUXO_CAIXA_BACKEND_README.md)**
+  - Documentação do fluxo de caixa
+  - Controle de entradas e saídas
+  - Relatórios financeiros
 
 ## 🎯 Como Usar Esta Documentação
 
@@ -175,15 +206,27 @@ Este índice organiza toda a documentação disponível para o sistema **ProTrac
 
 ### **Versão Atual**: 2.0
 
-### **Última Atualização**: Janeiro 2025
+### **Última Atualização**: Dezembro 2024
 
 ### **Próxima Revisão**: Março 2025
 
 ### **Histórico de Mudanças**
 
-- **v2.0**: Sistema de monitoramento automático
+- **v2.0**: Sistema de Vencimentos Inteligente e Gestão Financeira Avançada
 - **v1.5**: Funcionalidades financeiras avançadas
 - **v1.0**: Sistema base com CRUDs
+
+### **📊 Documentação Consolidada**
+
+A documentação foi consolidada por assunto em arquivos únicos e completos:
+
+- ✅ **Documentação Completa**: `DOCUMENTACAO_COMPLETA_PROTRACK.md`
+- ✅ **Arquitetura Técnica**: `ARQUITETURA_TECNICA_PROTRACK.md`
+- ✅ **Contas a Pagar**: `API_CONTAS_PAGAR.md`
+- ✅ **README Principal**: `README.md`
+- ✅ **Índice**: `INDICE_DOCUMENTACAO.md`
+
+**Total de arquivos consolidados**: 15 arquivos organizados por assunto
 
 ## 📞 Suporte e Contato
 
