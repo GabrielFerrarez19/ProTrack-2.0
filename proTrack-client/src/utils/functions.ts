@@ -137,6 +137,7 @@ export function formatarFormaPagamento(nome?: string | null): string {
     dinheiro: "Dinheiro",
     cartao: "Cartão",
     transferencia: "Transferência",
+    aprazo: "À prazo",
   };
 
   return mapa[nome] || nome.charAt(0).toUpperCase() + nome.slice(1);

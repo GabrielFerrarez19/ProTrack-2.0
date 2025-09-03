@@ -12,6 +12,7 @@ import {
   BarChart3,
   BanknoteArrowUp,
   BanknoteArrowDown,
+  TrendingUp,
 } from "lucide-react";
 import { SidebarItem } from "../../components/Sidebar/SidebarItem";
 
@@ -97,6 +98,12 @@ export function DefaultLayout() {
           text="Contas a receber"
           router="/contasReceber"
           active={currentPath === "/contasReceber"}
+        />
+        <SidebarItem
+          icon={<TrendingUp size={20} />}
+          text="Fluxo de caixa"
+          router="/flucoCaixa"
+          active={currentPath === "/flucoCaixa"}
         />
       </Sidebar>
 
