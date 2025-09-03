@@ -14,7 +14,7 @@ import { Header } from "../../components/header";
 
 // IMPORT DOS COMPONENTES SEPARADOS
 import { StatusMonitoramento } from "./components/StatusMonitoramento";
-import { CardMonitoramento } from "./components/CardMonitoramento";
+/* import { CardMonitoramento } from "./components/CardMonitoramento"; */
 
 export function ContasReceber() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -56,7 +56,7 @@ export function ContasReceber() {
       </div>
 
       {/* Card de Monitoramento */}
-      <CardMonitoramento monitoramentoExecutado={monitoramentoExecutado} />
+      {/* <CardMonitoramento monitoramentoExecutado={monitoramentoExecutado} /> */}
 
       <ResumoCards totalVencidas={totalVencidas} dados={dados} />
 
