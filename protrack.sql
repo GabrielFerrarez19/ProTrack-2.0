@@ -142,6 +142,7 @@ INSERT INTO metodos_pagamento (nome, tipo, ativo) VALUES
 ('À Prazo', 'aprazo', TRUE); -- ⬅ novo método
 
 
+-- Tabela de categorias
 CREATE TABLE categorias (
     id VARCHAR(36) PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -150,3 +151,98 @@ CREATE TABLE categorias (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+-- Inserir categorias padrão para despesas
+INSERT INTO categorias (id, nome, tipo, cor) VALUES
+(UUID(), 'Mercadoria', 'despesa', '#FF6B6B'),
+(UUID(), 'Utilidades', 'despesa', '#4ECDC4'),
+(UUID(), 'Tecnologia', 'despesa', '#45B7D1'),
+(UUID(), 'Financeiro', 'despesa', '#96CEB4'),
+(UUID(), 'Marketing', 'despesa', '#FFEAA7'),
+(UUID(), 'Transporte', 'despesa', '#DDA0DD'),
+(UUID(), 'Outros', 'despesa', '#F8BBD9');
+
+-- Tabela de fornecedores
+CREATE TABLE fornecedores (
+    id VARCHAR(36) PRIMARY KEY,
+    nome VARCHAR(200) NOT NULL,
+    cnpj VARCHAR(18),
+    email VARCHAR(100),
+    telefone VARCHAR(20),
+    endereco TEXT,
+    ativo BOOLEAN DEFAULT TRUE,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Tabela principal de contas a pagar
+CREATE TABLE contas_pagar (
+    id VARCHAR(36) PRIMARY KEY,
+    fornecedor_id VARCHAR(36),
+    fornecedor_nome VARCHAR(200) NOT NULL,
+    valor DECIMAL(10,2) NOT NULL,
+    data_vencimento DATE NOT NULL,
+    status ENUM('pendente', 'pago', 'vencido', 'agendado') DEFAULT 'pendente',
+    categoria_id VARCHAR(36),
+    descricao TEXT,
+    data_agendamento DATE,
+    data_pagamento DATE,
+    valor_pago DECIMAL(10,2),
+    forma_pagamento VARCHAR(50),
+    observacoes TEXT,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (categoria_id) REFERENCES categorias(id),
+    FOREIGN KEY (fornecedor_id) REFERENCES fornecedores(id)
+);
+
+-- Índices para melhor performance
+CREATE INDEX idx_contas_pagar_status ON contas_pagar(status);
+CREATE INDEX idx_contas_pagar_vencimento ON contas_pagar(data_vencimento);
+CREATE INDEX idx_contas_pagar_fornecedor ON contas_pagar(fornecedor_id);
+CREATE INDEX idx_contas_pagar_categoria ON contas_pagar(categoria_id);
+
+-- Inserir alguns fornecedores de exemplo
+INSERT INTO fornecedores (id, nome, cnpj, email, telefone, endereco) VALUES
+(UUID(), 'Fornecedor ABC Ltda', '12.345.678/0001-90', 'contato@abc.com', '(11) 99999-9999', 'Rua das Flores, 123 - São Paulo/SP'),
+(UUID(), 'Energia Elétrica SA', '98.765.432/0001-10', 'fatura@energia.com', '(11) 88888-8888', 'Av. Paulista, 1000 - São Paulo/SP'),
+(UUID(), 'Internet Provider', '11.222.333/0001-44', 'suporte@internet.com', '(11) 77777-7777', 'Rua Augusta, 500 - São Paulo/SP'),
+(UUID(), 'Distribuidora XYZ', '55.666.777/0001-88', 'vendas@xyz.com', '(11) 66666-6666', 'Rua Consolação, 200 - São Paulo/SP'),
+(UUID(), 'Banco Central', '00.000.000/0001-91', 'atendimento@banco.com', '(11) 55555-5555', 'SBS Quadra 3 - Brasília/DF');
+
+-- Inserir algumas contas a pagar de exemplo
+INSERT INTO contas_pagar (id, fornecedor_nome, valor, data_vencimento, status, categoria_id, descricao, data_agendamento) 
+SELECT 
+    UUID(),
+    'Fornecedor ABC Ltda',
+    3500.00,
+    '2024-12-15',
+    'vencido',
+    c.id,
+    'Compra de estoque',
+    NULL
+FROM categorias c WHERE c.nome = 'Mercadoria' LIMIT 1;
+
+INSERT INTO contas_pagar (id, fornecedor_nome, valor, data_vencimento, status, categoria_id, descricao, data_agendamento) 
+SELECT 
+    UUID(),
+    'Energia Elétrica SA',
+    850.75,
+    '2024-12-20',
+    'pendente',
+    c.id,
+    'Conta de luz',
+    NULL
+FROM categorias c WHERE c.nome = 'Utilidades' LIMIT 1;
+
+INSERT INTO contas_pagar (id, fornecedor_nome, valor, data_vencimento, status, categoria_id, descricao, data_agendamento) 
+SELECT 
+    UUID(),
+    'Internet Provider',
+    199.90,
+    '2024-12-25',
+    'agendado',
+    c.id,
+    'Internet empresarial',
+    '2024-12-24'
+FROM categorias c WHERE c.nome = 'Tecnologia' LIMIT 1;

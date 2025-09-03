@@ -6,6 +6,7 @@ import vendasRoutes from "./vendasRoutes";
 import configRoutes from "./configRoutes";
 import relatorioRoutes from "./relatorioRoutes";
 import vendasMonitoramentoRoutes from "./vendasMonitoramentoRoutes";
+import contasPagarRoutes from "./contasPagarRoutes";
 
 const router = Router();
 
@@ -21,5 +22,6 @@ router.use("/vendas", vendasRoutes);
 router.use("/config", configRoutes);
 router.use("/relatorios", relatorioRoutes);
 router.use("/monitoramento", vendasMonitoramentoRoutes);
+router.use("/contas-pagar", contasPagarRoutes);
 
 export default router;

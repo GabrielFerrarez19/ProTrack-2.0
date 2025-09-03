@@ -200,3 +200,173 @@ export interface ValorInvestidoPorCategoria {
   percentual_total: number;
   preco_medio_custo: number;
 }
+
+// Tipos para Fluxo de Caixa
+export interface MovimentacaoFinanceira {
+  id: number;
+  tipo: "entrada" | "saida";
+  categoria_id: string;
+  descricao: string;
+  valor: number;
+  data_movimentacao: Date;
+  data_vencimento?: Date;
+  status: "pendente" | "pago" | "cancelado" | "vencido";
+  forma_pagamento: "dinheiro" | "cartao" | "pix" | "transferencia" | "aprazo";
+  venda_id?: number;
+  cliente_id?: number;
+  fornecedor_id?: number;
+  observacoes?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Fornecedor {
+  id: number;
+  nome: string;
+  cnpj?: string;
+  email?: string;
+  telefone?: string;
+  endereco?: string;
+  ativo: boolean;
+  created_at: Date;
+}
+
+export interface ContaBancaria {
+  id: number;
+  nome: string;
+  banco?: string;
+  agencia?: string;
+  conta?: string;
+  saldo_inicial: number;
+  ativo: boolean;
+  created_at: Date;
+}
+
+export interface FluxoCaixaPeriodo {
+  data: string;
+  entradas: number;
+  saidas: number;
+  saldo: number;
+  tipo?: "historico" | "projecao";
+}
+
+export interface CategoriaFluxoCaixa {
+  categoria: string;
+  valor: number;
+  percentual: number;
+}
+
+export interface ComparativoPeriodos {
+  periodo: string;
+  entradas: number;
+  saidas: number;
+  saldo: number;
+}
+
+export interface ResumoFluxoCaixa {
+  saldo_atual: number;
+  total_entradas_periodo: number;
+  total_saidas_periodo: number;
+  saldo_periodo: number;
+  projecao_30_dias: number;
+}
+
+export interface FiltrosFluxoCaixa {
+  periodo: "7dias" | "30dias" | "90dias" | "1ano";
+  tipo_visualizacao: "diario" | "semanal" | "mensal";
+  data_inicio?: Date;
+  data_fim?: Date;
+  categoria_id?: string;
+  tipo_movimentacao?: "entrada" | "saida";
+}
+
+export interface ContaPagarCreateRequest {
+  fornecedor_id?: string;
+  fornecedor_nome: string;
+  valor: number;
+  data_vencimento: string;
+  categoria_id: string;
+  descricao: string;
+  data_agendamento?: string;
+  forma_pagamento?: string;
+  observacoes?: string;
+}
+
+export interface ContaPagarUpdateRequest {
+  fornecedor_id?: string;
+  fornecedor_nome?: string;
+  valor?: number;
+  data_vencimento?: string;
+  categoria_id?: string;
+  descricao?: string;
+  data_agendamento?: string;
+  forma_pagamento?: string;
+  observacoes?: string;
+}
+
+export interface ContaPagarResponse {
+  id: string;
+  fornecedor_id?: string;
+  fornecedor_nome: string;
+  valor: number;
+  data_vencimento: string;
+  status: "pendente" | "pago" | "vencido" | "agendado";
+  categoria_id: string;
+  categoria_nome: string;
+  descricao: string;
+  data_agendamento?: string;
+  data_pagamento?: string;
+  valor_pago?: number;
+  forma_pagamento?: string;
+  observacoes?: string;
+  dias_atraso: number;
+  criado_em: string;
+  atualizado_em: string;
+}
+
+export interface ContaPagarResumoResponse {
+  total_pendente: number;
+  total_vencido: number;
+  total_agendado: number;
+  total_pago: number;
+  total_contas: number;
+  contas_vencidas_count: number;
+}
+
+export interface FornecedorCreateRequest {
+  nome: string;
+  cnpj?: string;
+  email?: string;
+  telefone?: string;
+  endereco?: string;
+}
+
+export interface FornecedorUpdateRequest {
+  nome?: string;
+  cnpj?: string;
+  email?: string;
+  telefone?: string;
+  endereco?: string;
+  ativo?: boolean;
+}
+
+export interface FornecedorResponse {
+  id: string;
+  nome: string;
+  cnpj?: string;
+  email?: string;
+  telefone?: string;
+  endereco?: string;
+  ativo: boolean;
+  criado_em: string;
+  atualizado_em: string;
+}
+
+export interface ContaPagarFiltros {
+  search?: string;
+  status?: string;
+  categoria_id?: string;
+  data_inicio?: string;
+  data_fim?: string;
+  fornecedor_id?: string;
+}
