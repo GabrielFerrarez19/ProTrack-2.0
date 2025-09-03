@@ -80,6 +80,54 @@ export const obterResumo = async (): Promise<ContaPagarResumoResponse> => {
 };
 ```
 
+### Componentes de Interface Avançados
+
+```typescript
+// SummaryCards - Cards de resumo financeiro responsivos
+export function SummaryCards({
+  totalPendente,
+  totalVencido,
+  totalAgendado,
+  totalCount,
+  contasVencidasCount,
+  totalVencidasMonitoramento,
+  formatarMoeda,
+}: SummaryCardsProps) {
+  // Grid responsivo com 5 cards principais
+  // Cores diferenciadas por status (pink, red, blue, purple, green)
+  // Indicadores visuais de alerta para contas vencidas
+}
+
+// FiltersBar - Sistema de filtros inteligente
+export function FiltersBar({
+  searchTerm,
+  statusFilter,
+  categoriaFilter,
+  categorias,
+  statusOptions,
+  onAplicarFiltros,
+  onLimparFiltros,
+  loading,
+}: FiltersBarProps) {
+  // Busca em tempo real com debounce automático
+  // Filtros dropdown para status e categoria
+  // Aplicação automática de filtros
+  // Indicador visual de filtros ativos
+}
+
+// AccountsTable - Tabela interativa com ações
+export function AccountsTable({
+  contas,
+  loading,
+  onRefresh,
+}: AccountsTableProps) {
+  // Tabela responsiva com ordenação automática
+  // Badges de status coloridos
+  // Ações inline: pagar, editar, excluir, visualizar
+  // Menu dropdown para ações adicionais
+}
+```
+
 ### Queries SQL Otimizadas
 
 ```sql

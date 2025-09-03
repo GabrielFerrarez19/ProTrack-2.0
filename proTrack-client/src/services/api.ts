@@ -447,6 +447,30 @@ export const atualizarStatusContasPagar = async () => {
   return response.data;
 };
 
+// 🔹 MONITORAMENTO DE CONTAS A PAGAR VENCIDAS
+
+export const executarMonitoramentoContasPagar = async () => {
+  const response = await api.post("/monitoramento-contas/executar");
+  return response.data;
+};
+
+export const obterEstatisticasContasVencidas = async () => {
+  const response = await api.get("/monitoramento-contas/estatisticas");
+  return response.data;
+};
+
+export const verificarStatusMonitoramentoContas = async () => {
+  const response = await api.get("/monitoramento-contas/status");
+  return response.data;
+};
+
+export const limparContasVencidasAntigas = async (dias: number = 365) => {
+  const response = await api.delete(
+    `/monitoramento-contas/limpar?dias=${dias}`
+  );
+  return response.data;
+};
+
 export const buscarContasPorVencimento = async () => {
   const response = await api.get("/contas-pagar/contas/vencimentos");
   return response.data;

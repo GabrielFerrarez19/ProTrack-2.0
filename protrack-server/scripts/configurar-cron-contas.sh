@@ -1,66 +1,34 @@
 #!/bin/bash
 
-# Script para configurar cron job de atualização de status das contas a pagar
-# ProTrack 2.0
+# Script para configurar cron job de monitoramento de contas a pagar vencidas
+# Este script configura um cron job que executa a cada 30 minutos
 
-echo "🔧 Configurando cron job para atualização de status das contas a pagar..."
+echo "=== Configurando Cron Job para Monitoramento de Contas a Pagar ==="
 
-# Obter o diretório atual do script
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+# Diretório do projeto
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+echo "Diretório do projeto: $PROJECT_DIR"
 
-# Verificar se o diretório existe
-if [ ! -d "$PROJECT_DIR" ]; then
-    echo "❌ Erro: Diretório do projeto não encontrado: $PROJECT_DIR"
+# Verifica se o cron está instalado
+if ! command -v crontab &> /dev/null; then
+    echo "Erro: crontab não está instalado. Instale o cron primeiro."
     exit 1
 fi
 
-# Caminho completo para o script de atualização
-UPDATE_SCRIPT="$PROJECT_DIR/scripts/atualizarStatusContas.js"
+# Cria o comando do cron
+CRON_COMMAND="*/30 * * * * cd $PROJECT_DIR && node scripts/monitoramentoContasPagar.js >> logs/monitoramento_contas.log 2>&1"
 
-# Verificar se o script existe
-if [ ! -f "$UPDATE_SCRIPT" ]; then
-    echo "❌ Erro: Script de atualização não encontrado: $UPDATE_SCRIPT"
-    exit 1
-fi
-
-# Criar entrada do cron job
-CRON_JOB="0 0 * * * cd $PROJECT_DIR && node scripts/atualizarStatusContas.js >> logs/cron-contas.log 2>&1"
-
-# Verificar se já existe
-if crontab -l 2>/dev/null | grep -q "atualizarStatusContas.js"; then
-    echo "⚠️  Cron job já existe. Removendo entrada anterior..."
-    crontab -l 2>/dev/null | grep -v "atualizarStatusContas.js" | crontab -
-fi
-
-# Adicionar novo cron job
-(crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
-
-# Criar diretório de logs se não existir
+# Cria o diretório de logs se não existir
 mkdir -p "$PROJECT_DIR/logs"
 
-# Verificar se foi adicionado
-if crontab -l 2>/dev/null | grep -q "atualizarStatusContas.js"; then
-    echo "✅ Cron job configurado com sucesso!"
-    echo "📅 Executará diariamente às 00:00"
-    echo "📁 Logs serão salvos em: $PROJECT_DIR/logs/cron-contas.log"
-    echo ""
-    echo "📋 Cron jobs ativos:"
-    crontab -l
-else
-    echo "❌ Erro ao configurar cron job"
-    exit 1
-fi
+# Adiciona o job ao crontab
+(crontab -l 2>/dev/null; echo "$CRON_COMMAND") | crontab -
 
+echo "Cron job configurado com sucesso!"
+echo "Comando adicionado: $CRON_COMMAND"
 echo ""
-echo "🔍 Para verificar os logs:"
-echo "   tail -f $PROJECT_DIR/logs/cron-contas.log"
+echo "Para verificar os cron jobs ativos, execute: crontab -l"
+echo "Para remover todos os cron jobs, execute: crontab -r"
 echo ""
-echo "🔍 Para listar cron jobs:"
-echo "   crontab -l"
-echo ""
-echo "🔍 Para remover cron job:"
-echo "   crontab -e"
-echo "   (remova a linha com atualizarStatusContas.js)"
-echo ""
-echo "✅ Configuração concluída!"
+echo "O monitoramento será executado automaticamente a cada 30 minutos"
+echo "Logs serão salvos em: $PROJECT_DIR/logs/monitoramento_contas.log"

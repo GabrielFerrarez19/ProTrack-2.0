@@ -13,6 +13,7 @@ interface SummaryCardsProps {
   totalAgendado: number;
   totalCount: number;
   contasVencidasCount: number;
+  totalVencidasMonitoramento?: number;
   formatarMoeda: (valor: number) => string;
 }
 
@@ -22,6 +23,7 @@ export function SummaryCards({
   totalAgendado,
   totalCount,
   contasVencidasCount,
+  totalVencidasMonitoramento,
   formatarMoeda,
 }: SummaryCardsProps) {
   return (
@@ -49,7 +51,13 @@ export function SummaryCards({
               {formatarMoeda(totalVencido)}
             </h3>
             <p className="text-xs text-red-600 mt-1">
-              {contasVencidasCount} conta{contasVencidasCount !== 1 ? "s" : ""}
+              {totalVencidasMonitoramento !== undefined
+                ? `${totalVencidasMonitoramento} conta${
+                    totalVencidasMonitoramento !== 1 ? "s" : ""
+                  }`
+                : `${contasVencidasCount} conta${
+                    contasVencidasCount !== 1 ? "s" : ""
+                  }`}
             </p>
           </div>
           <AlertTriangle className="h-8 w-8 text-red-500" />
@@ -85,7 +93,8 @@ export function SummaryCards({
       {/* Status Geral */}
       <Card
         className={`${
-          totalVencido > 0
+          totalVencido > 0 ||
+          (totalVencidasMonitoramento && totalVencidasMonitoramento > 0)
             ? "bg-red-100 border-red-200"
             : "bg-green-100 border-green-200"
         }`}
@@ -95,26 +104,53 @@ export function SummaryCards({
             <p className="text-sm text-gray-600">Status Geral</p>
             <h3
               className={`text-lg font-bold ${
-                totalVencido > 0 ? "text-red-800" : "text-green-800"
+                totalVencido > 0 ||
+                (totalVencidasMonitoramento && totalVencidasMonitoramento > 0)
+                  ? "text-red-800"
+                  : "text-green-800"
               }`}
             >
-              {totalVencido > 0 ? "⚠️ Atenção" : "✅ Em dia"}
+              {totalVencido > 0 ||
+              (totalVencidasMonitoramento && totalVencidasMonitoramento > 0)
+                ? "⚠️ Atenção"
+                : "✅ Em dia"}
             </h3>
             <p
               className={`text-xs mt-1 ${
-                totalVencido > 0 ? "text-red-600" : "text-green-600"
+                totalVencido > 0 ||
+                (totalVencidasMonitoramento && totalVencidasMonitoramento > 0)
+                  ? "text-red-600"
+                  : "text-green-600"
               }`}
             >
-              {totalVencido > 0
-                ? `${contasVencidasCount} conta${
-                    contasVencidasCount !== 1 ? "s" : ""
-                  } vencida${contasVencidasCount !== 1 ? "s" : ""}`
+              {totalVencido > 0 ||
+              (totalVencidasMonitoramento && totalVencidasMonitoramento > 0)
+                ? `${
+                    totalVencidasMonitoramento !== undefined
+                      ? totalVencidasMonitoramento
+                      : contasVencidasCount
+                  } conta${
+                    (totalVencidasMonitoramento !== undefined
+                      ? totalVencidasMonitoramento
+                      : contasVencidasCount) !== 1
+                      ? "s"
+                      : ""
+                  } vencida${
+                    (totalVencidasMonitoramento !== undefined
+                      ? totalVencidasMonitoramento
+                      : contasVencidasCount) !== 1
+                      ? "s"
+                      : ""
+                  }`
                 : "Todas as contas em dia"}
             </p>
           </div>
           <TrendingUp
             className={`h-8 w-8 ${
-              totalVencido > 0 ? "text-red-500" : "text-green-500"
+              totalVencido > 0 ||
+              (totalVencidasMonitoramento && totalVencidasMonitoramento > 0)
+                ? "text-red-500"
+                : "text-green-500"
             }`}
           />
         </CardContent>
