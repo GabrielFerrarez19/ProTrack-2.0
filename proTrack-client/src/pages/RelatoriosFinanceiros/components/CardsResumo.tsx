@@ -2,30 +2,21 @@ import type { DashboardDados } from "../../../@types/types.api";
 import { Card, CardContent } from "../../../components/ui/card";
 import { TrendingUp, Package, DollarSign, Calendar } from "lucide-react";
 import { formatBRL } from "../../../utils/functions";
+import { useContasPagar } from "../../../hooks/useContasPagar";
 
 // Tipagem das props
 export interface CardsResumoProps {
   dados: DashboardDados;
-  contasDetalhadas: {
-    id?: number;
-    data?: string;
-    descricao?: string;
-    categoria?: string;
-    valor: number;
-  }[];
 }
 
-export function CardsResumo({ dados, contasDetalhadas }: CardsResumoProps) {
+export function CardsResumo({ dados }: CardsResumoProps) {
+  const { resumo } = useContasPagar();
   console.log(
     "Margem de lucro total:",
     dados.margemTotal?.margem_lucro_total ?? 0
   );
 
   const totalReceber = formatBRL(dados.financeiro?.total_geral) ?? 0;
-
-  const totalPagar = contasDetalhadas
-    .filter((c) => c.valor < 0)
-    .reduce((sum, c) => sum + Math.abs(c.valor), 0);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -79,7 +70,7 @@ export function CardsResumo({ dados, contasDetalhadas }: CardsResumoProps) {
             <div>
               <p className="text-sm text-muted-foreground">A Pagar</p>
               <h3 className="text-2xl font-bold text-red-400">
-                R$ {totalPagar.toLocaleString("pt-BR")}
+                R$ {formatBRL(resumo?.total_pendente || 0)}
               </h3>
             </div>
             <Calendar className="h-8 w-8 text-red-300" />

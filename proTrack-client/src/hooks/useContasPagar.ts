@@ -22,6 +22,7 @@ import {
   marcarAlertaComoLido,
   obterConfiguracoesContasPagar,
   atualizarConfiguracoesContasPagar,
+  buscarContasPorVencimento,
 } from "../services/api";
 import type {
   ContaPagar,
@@ -192,6 +193,20 @@ export const useContasPagar = () => {
     } catch (error: any) {
       console.error("❌ Erro ao obter resumo:", error);
       setError(error.message || "Erro ao conectar com o servidor");
+    }
+  };
+
+  const obterContasPorVencimento = async (): Promise<{
+    contasVencemHoje: ContaPagar[];
+    contasProximos7Dias: ContaPagar[];
+  } | null> => {
+    try {
+      const response = await buscarContasPorVencimento();
+      return response;
+    } catch (error: any) {
+      console.error("Erro ao buscar contas por vencimento:", error);
+      setError(error.message || "Erro ao conectar com o servidor");
+      return null;
     }
   };
 
@@ -583,6 +598,7 @@ export const useContasPagar = () => {
     excluirConta,
     marcarComoPaga,
     obterResumo,
+    obterContasPorVencimento,
 
     // Métodos de fornecedores
     listarFornecedores: listarFornecedoresHook,
