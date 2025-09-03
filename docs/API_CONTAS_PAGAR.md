@@ -86,21 +86,114 @@ export const obterResumoContasPagar = async () => {
 };
 ```
 
-#### **Hook Customizado**
+#### **Hook Customizado Avançado**
 
 ```typescript
 export const useContasPagar = () => {
   // Estados
   const [contas, setContas] = useState<ContaPagar[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
   const [resumo, setResumo] = useState<ContaPagarResumo | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Métodos
-  const obterContasPorVencimento = async () => {
+  // Métodos principais
+  const listarContas = async (filtros: ContaPagarFiltros = {}) => {
     /* ... */
   };
+  const criarConta = async (contaData: ContaPagarCreate) => {
+    /* ... */
+  };
+  const atualizarConta = async (id: string, contaData: ContaPagarUpdate) => {
+    /* ... */
+  };
+  const excluirConta = async (id: string) => {
+    /* ... */
+  };
+  const marcarComoPaga = async (
+    id: string,
+    valorPago: number,
+    formaPagamento: string
+  ) => {
+    /* ... */
+  };
+
+  // Métodos de resumo e estatísticas
   const obterResumo = async () => {
     /* ... */
   };
+  const obterEstatisticas = async () => {
+    /* ... */
+  };
+  const obterProjecaoPagamentos = async () => {
+    /* ... */
+  };
+  const obterAlertas = async () => {
+    /* ... */
+  };
+
+  // Métodos de exportação
+  const gerarRelatorio = async (filtros: RelatorioFiltros) => {
+    /* ... */
+  };
+  const exportarDados = async (filtros: ExportacaoFiltros) => {
+    /* ... */
+  };
+};
+```
+
+#### **Componentes de Interface Implementados**
+
+```typescript
+// SummaryCards - Cards de resumo financeiro
+export function SummaryCards({
+  totalPendente,
+  totalVencido,
+  totalAgendado,
+  totalCount,
+  contasVencidasCount,
+  totalVencidasMonitoramento,
+  formatarMoeda,
+}: SummaryCardsProps) {
+  // Cards responsivos com cores diferenciadas por status
+  // Indicadores visuais de alerta para contas vencidas
+  // Formatação automática de moeda brasileira
+}
+
+// FiltersBar - Barra de filtros avançada
+export function FiltersBar({
+  searchTerm,
+  setSearchTerm,
+  statusFilter,
+  setStatusFilter,
+  categoriaFilter,
+  setCategoriaFilter,
+  categorias,
+  statusOptions,
+  onAplicarFiltros,
+  onLimparFiltros,
+  loading,
+}: FiltersBarProps) {
+  // Busca em tempo real com debounce
+  // Filtros por status e categoria
+  // Aplicação automática de filtros
+  // Indicador visual de filtros ativos
+  // Botões para filtros avançados e exportação
+}
+
+// AccountsTable - Tabela de contas com ações
+export function AccountsTable({
+  contas,
+  loading,
+  onRefresh,
+}: AccountsTableProps) {
+  // Tabela responsiva com ordenação
+  // Badges de status coloridos
+  // Ações inline (pagar, editar, excluir)
+  // Menu dropdown para ações adicionais
+  // Formatação automática de datas e valores
+}
 ```
 
 ## 📊 Contas a Pagar

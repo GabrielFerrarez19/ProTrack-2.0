@@ -137,6 +137,57 @@ Atoms → Molecules → Organisms → Templates → Pages
 </DefaultLayout>
 ```
 
+#### **Componentes de Contas a Pagar Implementados**
+
+```typescript
+// SummaryCards - Cards de resumo financeiro responsivos
+export function SummaryCards({
+  totalPendente,
+  totalVencido,
+  totalAgendado,
+  totalCount,
+  contasVencidasCount,
+  totalVencidasMonitoramento,
+  formatarMoeda,
+}: SummaryCardsProps) {
+  // Grid responsivo com 5 cards principais
+  // Cores diferenciadas por status (pink, red, blue, purple, green)
+  // Indicadores visuais de alerta para contas vencidas
+  // Formatação automática de moeda brasileira
+}
+
+// FiltersBar - Sistema de filtros avançado
+export function FiltersBar({
+  searchTerm,
+  statusFilter,
+  categoriaFilter,
+  categorias,
+  statusOptions,
+  onAplicarFiltros,
+  onLimparFiltros,
+  loading,
+}: FiltersBarProps) {
+  // Busca em tempo real com debounce automático
+  // Filtros dropdown para status e categoria
+  // Aplicação automática de filtros
+  // Indicador visual de filtros ativos com contador
+  // Botões para filtros avançados, exportação e limpeza
+}
+
+// AccountsTable - Tabela de dados com ações inline
+export function AccountsTable({
+  contas,
+  loading,
+  onRefresh,
+}: AccountsTableProps) {
+  // Tabela responsiva com ordenação automática
+  // Badges de status coloridos (pago, agendado, vencido, pendente)
+  // Ações inline: pagar, editar, excluir, visualizar
+  // Menu dropdown para ações adicionais
+  // Formatação automática de datas e valores monetários
+}
+```
+
 ### 3. **State Management Strategy**
 
 #### **Local State (useState)**
@@ -152,6 +203,100 @@ const [categoriaFilter, setCategoriaFilter] = useState("todas");
 ```typescript
 const { contas, categorias, resumo, loading, error, listarContas, criarConta } =
   useContasPagar();
+```
+
+#### **Hooks Customizados Implementados**
+
+```typescript
+// useContasPagar - Gestão completa de contas a pagar
+export const useContasPagar = () => {
+  // Estados principais
+  const [contas, setContas] = useState<ContaPagar[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
+  const [resumo, setResumo] = useState<ContaPagarResumo | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Métodos de CRUD
+  const listarContas = async (filtros: ContaPagarFiltros = {}) => {
+    /* ... */
+  };
+  const criarConta = async (contaData: ContaPagarCreate) => {
+    /* ... */
+  };
+  const atualizarConta = async (id: string, contaData: ContaPagarUpdate) => {
+    /* ... */
+  };
+  const excluirConta = async (id: string) => {
+    /* ... */
+  };
+  const marcarComoPaga = async (
+    id: string,
+    valorPago: number,
+    formaPagamento: string
+  ) => {
+    /* ... */
+  };
+
+  // Métodos de análise e relatórios
+  const obterResumo = async () => {
+    /* ... */
+  };
+  const obterEstatisticas = async () => {
+    /* ... */
+  };
+  const obterProjecaoPagamentos = async () => {
+    /* ... */
+  };
+  const obterAlertas = async () => {
+    /* ... */
+  };
+
+  return {
+    contas,
+    categorias,
+    fornecedores,
+    resumo,
+    loading,
+    error,
+    listarContas,
+    criarConta,
+    atualizarConta,
+    excluirConta,
+    marcarComoPaga,
+    obterResumo,
+    obterEstatisticas,
+    obterProjecaoPagamentos,
+    obterAlertas,
+  };
+};
+
+// useContasPagarMonitoramento - Monitoramento automático
+export const useContasPagarMonitoramento = () => {
+  // Estados de monitoramento
+  const [statusSistema, setStatusSistema] = useState<
+    "ativo" | "inativo" | "erro"
+  >("ativo");
+  const [ultimaVerificacao, setUltimaVerificacao] = useState<Date | null>(null);
+  const [totalContasVencidas, setTotalContasVencidas] = useState(0);
+
+  // Métodos de monitoramento
+  const executarMonitoramento = async () => {
+    /* ... */
+  };
+  const obterStatusSistema = async () => {
+    /* ... */
+  };
+
+  return {
+    statusSistema,
+    ultimaVerificacao,
+    totalContasVencidas,
+    executarMonitoramento,
+    obterStatusSistema,
+  };
+};
 ```
 
 #### **API State Management**

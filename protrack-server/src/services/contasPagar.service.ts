@@ -127,6 +127,12 @@ export const listarContas = async (
     `;
     const params: any[] = [];
 
+    // Filtro padrão: excluir apenas contas pagas, canceladas e arquivadas
+    // Contas vencidas devem aparecer por padrão (são parte do total pendente)
+    if (!filtros.status || filtros.status === "todos") {
+      query += " AND cp.status NOT IN ('pago', 'cancelado', 'arquivado')";
+    }
+
     if (filtros.search) {
       query +=
         " AND (cp.fornecedor_nome LIKE ? OR cp.descricao LIKE ? OR cp.observacoes LIKE ?)";
@@ -134,12 +140,12 @@ export const listarContas = async (
       params.push(searchTerm, searchTerm, searchTerm);
     }
 
-    if (filtros.status) {
+    if (filtros.status && filtros.status !== "todos") {
       query += " AND cp.status = ?";
       params.push(filtros.status);
     }
 
-    if (filtros.categoria_id) {
+    if (filtros.categoria_id && filtros.categoria_id !== "todas") {
       query += " AND cp.categoria_id = ?";
       params.push(filtros.categoria_id);
     }
@@ -317,24 +323,27 @@ export const marcarComoPaga = async (
 
 export const obterResumo = async (): Promise<ContaPagarResumoResponse> => {
   try {
-    console.log("🔍 Iniciando obtenção do resumo...");
-
-    // Executar queries uma por vez para debug
+    // Total pendente deve incluir contas pendentes, vencidas E agendadas (todas precisam ser pagas)
     const [pendentesResult] = await db.execute(
-      "SELECT COALESCE(SUM(valor), 0) as total FROM contas_pagar WHERE status = 'pendente'"
+      "SELECT COALESCE(SUM(valor), 0) as total FROM contas_pagar WHERE status IN ('pendente', 'vencido', 'agendado')"
     );
+
     const [vencidasResult] = await db.execute(
       "SELECT COALESCE(SUM(valor), 0) as total FROM contas_pagar WHERE status = 'vencido'"
     );
+
     const [agendadasResult] = await db.execute(
       "SELECT COALESCE(SUM(valor), 0) as total FROM contas_pagar WHERE status = 'agendado'"
     );
+
     const [pagasResult] = await db.execute(
       "SELECT COALESCE(SUM(valor), 0) as total FROM contas_pagar WHERE status = 'pago'"
     );
+
     const [totalContasResult] = await db.execute(
       "SELECT COUNT(*) as total FROM contas_pagar"
     );
+
     const [contasVencidasResult] = await db.execute(
       "SELECT COUNT(*) as total FROM contas_pagar WHERE status = 'vencido'"
     );
@@ -344,7 +353,7 @@ export const obterResumo = async (): Promise<ContaPagarResumoResponse> => {
     const hojeStr = hoje.toISOString().split("T")[0];
 
     const [contasVencemHojeResult] = await db.execute(
-      "SELECT COALESCE(SUM(valor), 0) as total FROM contas_pagar WHERE DATE(data_vencimento) = ? AND status IN ('pendente', 'agendado')",
+      "SELECT COALESCE(SUM(valor), 0) as total FROM contas_pagar WHERE DATE(data_vencimento) = ? AND status IN ('pendente', 'agendado', 'vencido')",
       [hojeStr]
     );
 
@@ -354,7 +363,7 @@ export const obterResumo = async (): Promise<ContaPagarResumoResponse> => {
     const proximos7DiasStr = proximos7Dias.toISOString().split("T")[0];
 
     const [contasProximos7DiasResult] = await db.execute(
-      "SELECT COALESCE(SUM(valor), 0) as total FROM contas_pagar WHERE DATE(data_vencimento) BETWEEN ? AND ? AND status IN ('pendente', 'agendado')",
+      "SELECT COALESCE(SUM(valor), 0) as total FROM contas_pagar WHERE DATE(data_vencimento) BETWEEN ? AND ? AND status IN ('pendente', 'agendado', 'vencido')",
       [hojeStr, proximos7DiasStr]
     );
 
@@ -367,16 +376,6 @@ export const obterResumo = async (): Promise<ContaPagarResumoResponse> => {
     const contasVencemHoje = (contasVencemHojeResult as any[])[0];
     const contasProximos7Dias = (contasProximos7DiasResult as any[])[0];
 
-    console.log("📊 Resultados das queries:");
-    console.log("  - Pendentes:", pendentes?.total);
-    console.log("  - Vencidas:", vencidas?.total);
-    console.log("  - Agendadas:", agendadas?.total);
-    console.log("  - Pagas:", pagas?.total);
-    console.log("  - Total contas:", totalContas?.total);
-    console.log("  - Contas vencidas count:", contasVencidas?.total);
-    console.log("  - Contas que vencem hoje:", contasVencemHoje?.total);
-    console.log("  - Contas próximos 7 dias:", contasProximos7Dias?.total);
-
     const resumo = {
       total_pendente: Number(pendentes?.total || 0),
       total_vencido: Number(vencidas?.total || 0),
@@ -388,7 +387,6 @@ export const obterResumo = async (): Promise<ContaPagarResumoResponse> => {
       total_proximos_7_dias: Number(contasProximos7Dias?.total || 0),
     };
 
-    console.log("🎯 Resumo final:", resumo);
     return resumo;
   } catch (error) {
     console.error("Erro ao obter resumo:", error);
@@ -431,7 +429,7 @@ export const buscarContasVencimento = async (): Promise<{
       FROM contas_pagar cp
       LEFT JOIN categorias c ON cp.categoria_id = c.id
       WHERE DATE(cp.data_vencimento) = ? 
-      AND cp.status IN ('pendente', 'agendado')
+      AND cp.status IN ('pendente', 'agendado', 'vencido')
       ORDER BY cp.valor DESC
     `,
       [hojeStr]
@@ -450,7 +448,7 @@ export const buscarContasVencimento = async (): Promise<{
       FROM contas_pagar cp
       LEFT JOIN categorias c ON cp.categoria_id = c.id
       WHERE DATE(cp.data_vencimento) BETWEEN ? AND ? 
-      AND cp.status IN ('pendente', 'agendado')
+      AND cp.status IN ('pendente', 'agendado', 'vencido')
       ORDER BY cp.data_vencimento ASC, cp.valor DESC
     `,
       [hojeStr, proximos7DiasStr]

@@ -65,7 +65,14 @@ Este índice organiza toda a documentação disponível para o sistema **ProTrac
 ### **7. Sistema de Monitoramento**
 
 - **🔄 [MONITORAMENTO_VENDAS.md](./MONITORAMENTO_VENDAS.md)**
-  - Funcionamento do monitoramento
+
+  - Funcionamento do monitoramento de vendas
+  - Configuração automática
+  - Logs e estatísticas
+  - Manutenção
+
+- **💰 [MONITORAMENTO_CONTAS_PAGAR.md](./MONITORAMENTO_CONTAS_PAGAR.md)**
+  - Funcionamento do monitoramento de contas a pagar
   - Configuração automática
   - Logs e estatísticas
   - Manutenção
@@ -78,15 +85,34 @@ Este índice organiza toda a documentação disponível para o sistema **ProTrac
   - Dashboard de vencimentos
   - Gestão de fornecedores
   - APIs e endpoints específicos
+  - **Componentes de Interface Avançados**
+  - **Hooks Customizados**
+  - **Sistema de Filtros Inteligente**
 
-### **9. Relatórios e Exportação**
+### **9. Componentes e Interface (NOVO!)**
+
+- **🎨 [ARQUITETURA_TECNICA_PROTRACK.md](./ARQUITETURA_TECNICA_PROTRACK.md#componentes-de-contas-a-pagar-implementados)**
+
+  - Componentes de interface implementados
+  - SummaryCards responsivos
+  - FiltersBar com filtros avançados
+  - AccountsTable com ações inline
+  - Padrões de composição de componentes
+
+- **⚡ [DOCUMENTACAO_COMPLETA_PROTRACK.md](./DOCUMENTACAO_COMPLETA_PROTRACK.md#componentes-de-interface-avançados)**
+  - Sistema de tipos TypeScript
+  - Hooks customizados para gestão de estado
+  - Componentes responsivos e acessíveis
+  - Padrões de UX avançados
+
+### **10. Relatórios e Exportação**
 
 - **📊 [EXPORTACAO_RELATORIOS.md](./EXPORTACAO_RELATORIOS.md)**
   - Sistema de exportação de relatórios
   - Formato Excel e PDF
   - Filtros avançados
 
-### **10. Instalação Rápida**
+### **11. Instalação Rápida**
 
 - **⚡ [INSTALACAO_RAPIDA.md](./INSTALACAO_RAPIDA.md)**
   - Setup em 5 minutos

@@ -8,9 +8,22 @@ import {
 } from "../../../components/ui/table";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
-import { Check, Edit, Trash2, Eye, AlertTriangle } from "lucide-react";
+import {
+  Check,
+  Edit,
+  Trash2,
+  Eye,
+  AlertTriangle,
+  MoreHorizontal,
+} from "lucide-react";
 import { useContasPagar } from "../../../hooks/useContasPagar";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu";
 
 interface AccountsTableProps {
   contas: Array<{
@@ -194,8 +207,8 @@ export function AccountsTable({
                   </Badge>
                 </TableCell>
                 <TableCell className="font-mono">
-                  <div className="space-y-1">
-                    <div className="font-bold text-lg">
+                  <div className="space-y-1 ">
+                    <div className="font-bold text-sm">
                       {formatarMoeda(conta.valor)}
                     </div>
                     {conta.valor_pago && (
@@ -253,39 +266,48 @@ export function AccountsTable({
                   )}
                 </TableCell>
                 <TableCell>
-                  <div className="flex gap-1 flex-wrap">
-                    <Button size="sm" variant="ghost" title="Visualizar">
-                      <Eye className="h-4 w-4" />
-                    </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => console.log("Visualizar")}
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        Visualizar
+                      </DropdownMenuItem>
 
-                    {conta.status !== "pago" && (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handlePagar(conta)}
-                          title="Marcar como paga"
-                          className="text-green-600 hover:text-green-700"
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
+                      {conta.status !== "pago" && (
+                        <>
+                          <DropdownMenuItem
+                            onClick={() => handlePagar(conta)}
+                            className="text-green-600"
+                          >
+                            <Check className="mr-2 h-4 w-4" />
+                            Marcar como paga
+                          </DropdownMenuItem>
 
-                        <Button size="sm" variant="ghost" title="Editar">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
+                          <DropdownMenuItem
+                            onClick={() => console.log("Editar")}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Editar
+                          </DropdownMenuItem>
+                        </>
+                      )}
 
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleExcluir(conta)}
-                      title="Excluir"
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                      <DropdownMenuItem
+                        onClick={() => handleExcluir(conta)}
+                        className="text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Excluir
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
