@@ -285,17 +285,21 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
     // 2. Determinar forma de pagamento e status
     const formaPagamento = dados.formaPagamento?.toString().trim() || null;
 
-    // ✅ Se for "aprazo", status também será "aprazo"
+    // Se for "aprazo", status será "pendente", caso contrário usa o status informado ou "pago"
     const statusVenda =
       formaPagamento === "aprazo" ? "pendente" : dados.status || "pago";
 
-    // 3. Inserir a venda
+    // 3. Determinar dias_vencimento corretamente
+    const diasVencimento =
+      formaPagamento === "aprazo" ? dados.diasVencimento ?? null : null;
+
+    // 4. Inserir a venda
     const [vendaResult] = await connection.execute<ResultSetHeader>(
       `
       INSERT INTO vendas 
       (cliente_id, data_venda, desconto, total, total_com_desconto, status, forma_pagamento, dias_vencimento)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `,
+      `,
       [
         dados.clienteId,
         dados.dataVenda,
@@ -304,13 +308,13 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
         dados.totalComDesconto,
         statusVenda,
         formaPagamento,
-        formaPagamento === "pendente" ? dados.diasVencimento ?? null : null, // <-- dias_vencimento
+        diasVencimento, // <-- agora vai gravar corretamente
       ]
     );
 
     const vendaId = vendaResult.insertId;
 
-    // 4. Inserir itens da venda e atualizar estoque
+    // 5. Inserir itens da venda e atualizar estoque
     for (const item of dados.produtos) {
       await connection.query(
         `INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario, desconto)
@@ -330,7 +334,7 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
       );
     }
 
-    // 5. Atualizar valor_a_pagar do cliente apenas se status não for "pago"
+    // 6. Atualizar valor_a_pagar do cliente apenas se status não for "pago"
     if (statusVenda !== "pago") {
       const totalItens = dados.produtos.reduce((acc, item) => {
         const precoComDesconto =
