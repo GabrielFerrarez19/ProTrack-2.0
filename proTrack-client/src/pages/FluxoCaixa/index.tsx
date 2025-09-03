@@ -12,8 +12,12 @@ import { GraficoFluxo } from "./components/GraficoFluxo";
 import { ResumoCards } from "./components/ResumoCards";
 
 export function FluxoCaixa() {
-  const [periodo, setPeriodo] = useState("30dias");
-  const [tipoVisualizacao, setTipoVisualizacao] = useState("diario");
+  const [periodo, setPeriodo] = useState<
+    "7dias" | "30dias" | "90dias" | "1ano"
+  >("30dias");
+  const [tipoVisualizacao, setTipoVisualizacao] = useState<
+    "diario" | "semanal" | "mensal"
+  >("diario");
 
   // Dados mockados
   const fluxoCaixaHistorico = [
@@ -104,7 +108,12 @@ export function FluxoCaixa() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Select value={periodo} onValueChange={setPeriodo}>
+          <Select
+            value={periodo}
+            onValueChange={(value: "7dias" | "30dias" | "90dias" | "1ano") =>
+              setPeriodo(value)
+            }
+          >
             <SelectTrigger className="w-[140px] bg-slate-100 border-slate-300">
               <SelectValue />
             </SelectTrigger>
@@ -115,7 +124,12 @@ export function FluxoCaixa() {
               <SelectItem value="1ano">1 ano</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={tipoVisualizacao} onValueChange={setTipoVisualizacao}>
+          <Select
+            value={tipoVisualizacao}
+            onValueChange={(value: "diario" | "semanal" | "mensal") =>
+              setTipoVisualizacao(value)
+            }
+          >
             <SelectTrigger className="w-[140px] bg-slate-100 border-slate-300">
               <SelectValue />
             </SelectTrigger>

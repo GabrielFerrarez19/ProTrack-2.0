@@ -360,3 +360,272 @@ export const executarMonitoramentoVendas = async (): Promise<{
   const response = await api.post("/monitoramento/executar");
   return response.data;
 };
+
+// 🔹 CONTAS A PAGAR
+
+export const listarContasPagar = async (filtros?: {
+  search?: string;
+  status?: string;
+  categoria_id?: string;
+  data_inicio?: string;
+  data_fim?: string;
+}) => {
+  const queryParams = new URLSearchParams();
+
+  if (filtros?.search) queryParams.append("search", filtros.search);
+  if (filtros?.status && filtros.status !== "todos")
+    queryParams.append("status", filtros.status);
+  if (filtros?.categoria_id && filtros.categoria_id !== "todas")
+    queryParams.append("categoria_id", filtros.categoria_id);
+  if (filtros?.data_inicio)
+    queryParams.append("data_inicio", filtros.data_inicio);
+  if (filtros?.data_fim) queryParams.append("data_fim", filtros.data_fim);
+
+  const response = await api.get(`/contas-pagar/contas?${queryParams}`);
+  return response.data;
+};
+
+export const buscarContaPagarPorId = async (id: string) => {
+  const response = await api.get(`/contas-pagar/contas/${id}`);
+  return response.data;
+};
+
+export const criarContaPagar = async (contaData: {
+  fornecedor_nome: string;
+  valor: number;
+  data_vencimento: string;
+  categoria_id: string;
+  descricao: string;
+  data_agendamento?: string;
+  forma_pagamento?: string;
+  observacoes?: string;
+}) => {
+  const response = await api.post("/contas-pagar/contas", contaData);
+  return response.data;
+};
+
+export const atualizarContaPagar = async (
+  id: string,
+  contaData: {
+    fornecedor_nome?: string;
+    valor?: number;
+    data_vencimento?: string;
+    categoria_id?: string;
+    descricao?: string;
+    data_agendamento?: string;
+    forma_pagamento?: string;
+    observacoes?: string;
+  }
+) => {
+  const response = await api.put(`/contas-pagar/contas/${id}`, contaData);
+  return response.data;
+};
+
+export const excluirContaPagar = async (id: string) => {
+  const response = await api.delete(`/contas-pagar/contas/${id}`);
+  return response.data;
+};
+
+export const marcarContaComoPaga = async (
+  id: string,
+  data: {
+    valor_pago: number;
+    forma_pagamento: string;
+  }
+) => {
+  const response = await api.put(`/contas-pagar/contas/${id}/pagar`, data);
+  return response.data;
+};
+
+export const obterResumoContasPagar = async () => {
+  const response = await api.get("/contas-pagar/contas/resumo");
+  return response.data;
+};
+
+export const atualizarStatusContasPagar = async () => {
+  const response = await api.post("/contas-pagar/contas/atualizar-status");
+  return response.data;
+};
+
+// 🔹 FORNECEDORES
+
+export const listarFornecedores = async () => {
+  const response = await api.get("/contas-pagar/fornecedores");
+  return response.data;
+};
+
+export const buscarFornecedorPorId = async (id: string) => {
+  const response = await api.get(`/contas-pagar/fornecedores/${id}`);
+  return response.data;
+};
+
+export const criarFornecedor = async (fornecedorData: {
+  nome: string;
+  cnpj?: string;
+  email?: string;
+  telefone?: string;
+  endereco?: string;
+  observacoes?: string;
+}) => {
+  const response = await api.post("/contas-pagar/fornecedores", fornecedorData);
+  return response.data;
+};
+
+export const atualizarFornecedor = async (
+  id: string,
+  fornecedorData: {
+    nome?: string;
+    cnpj?: string;
+    email?: string;
+    telefone?: string;
+    endereco?: string;
+    observacoes?: string;
+  }
+) => {
+  const response = await api.put(
+    `/contas-pagar/fornecedores/${id}`,
+    fornecedorData
+  );
+  return response.data;
+};
+
+export const excluirFornecedor = async (id: string) => {
+  const response = await api.delete(`/contas-pagar/fornecedores/${id}`);
+  return response.data;
+};
+
+// 🔹 CATEGORIAS DE DESPESAS (usando APIs existentes)
+
+export const listarCategoriasDespesas = async () => {
+  // Usa a API existente fetchCategorias
+  const categorias = await fetchCategorias();
+  // Filtra apenas categorias de despesa
+  const categoriasDespesa = categorias.filter(
+    (cat: any) => cat.tipo === "despesa"
+  );
+  return { success: true, data: categoriasDespesa };
+};
+
+export const criarCategoriaDespesa = async (categoriaData: {
+  nome: string;
+  tipo: "despesa";
+  cor: string;
+}) => {
+  // Usa a API existente createCategoria
+  return await createCategoria(categoriaData as Categoria);
+};
+
+export const atualizarCategoriaDespesa = async (
+  id: string,
+  categoriaData: {
+    nome?: string;
+    cor?: string;
+  }
+) => {
+  // Usa a API existente updateCategoriaApi
+  return await updateCategoriaApi({ id, ...categoriaData } as Categoria);
+};
+
+export const excluirCategoriaDespesa = async (id: string) => {
+  // Usa a API existente deleteCategoriaApi
+  return await deleteCategoriaApi(id);
+};
+
+// 🔹 RELATÓRIOS DE CONTAS A PAGAR
+
+export const gerarRelatorioContasPagar = async (filtros?: {
+  status?: string;
+  categoria_id?: string;
+  data_inicio?: string;
+  data_fim?: string;
+  formato?: "pdf" | "excel";
+}) => {
+  const queryParams = new URLSearchParams();
+
+  if (filtros?.status) queryParams.append("status", filtros.status);
+  if (filtros?.categoria_id)
+    queryParams.append("categoria_id", filtros.categoria_id);
+  if (filtros?.data_inicio)
+    queryParams.append("data_inicio", filtros.data_inicio);
+  if (filtros?.data_fim) queryParams.append("data_fim", filtros.data_fim);
+  if (filtros?.formato) queryParams.append("formato", filtros.formato);
+
+  const response = await api.get(`/contas-pagar/relatorios?${queryParams}`);
+  return response.data;
+};
+
+export const exportarContasPagar = async (filtros: {
+  status?: string;
+  categoria_id?: string;
+  data_inicio?: string;
+  data_fim?: string;
+  formato: "pdf" | "excel";
+}) => {
+  const queryParams = new URLSearchParams();
+
+  if (filtros.status) queryParams.append("status", filtros.status);
+  if (filtros.categoria_id)
+    queryParams.append("categoria_id", filtros.categoria_id);
+  if (filtros.data_inicio)
+    queryParams.append("data_inicio", filtros.data_inicio);
+  if (filtros.data_fim) queryParams.append("data_fim", filtros.data_fim);
+  queryParams.append("formato", filtros.formato);
+
+  const response = await api.get(`/contas-pagar/exportar?${queryParams}`, {
+    responseType: "blob",
+  });
+  return response.data;
+};
+
+// 🔹 DASHBOARD E ESTATÍSTICAS
+
+export const obterEstatisticasContasPagar = async (periodo?: {
+  data_inicio: string;
+  data_fim: string;
+}) => {
+  let url = "/contas-pagar/estatisticas";
+
+  if (periodo) {
+    const queryParams = new URLSearchParams();
+    queryParams.append("data_inicio", periodo.data_inicio);
+    queryParams.append("data_fim", periodo.data_fim);
+    url += `?${queryParams}`;
+  }
+
+  const response = await api.get(url);
+  return response.data;
+};
+
+export const obterProjecaoPagamentos = async (dias: number = 30) => {
+  const response = await api.get(`/contas-pagar/projecao?dias=${dias}`);
+  return response.data;
+};
+
+// 🔹 NOTIFICAÇÕES E ALERTAS
+
+export const obterAlertasContasPagar = async () => {
+  const response = await api.get("/contas-pagar/alertas");
+  return response.data;
+};
+
+export const marcarAlertaComoLido = async (alertaId: string) => {
+  const response = await api.put(`/contas-pagar/alertas/${alertaId}/lido`);
+  return response.data;
+};
+
+// 🔹 CONFIGURAÇÕES
+
+export const obterConfiguracoesContasPagar = async () => {
+  const response = await api.get("/contas-pagar/configuracoes");
+  return response.data;
+};
+
+export const atualizarConfiguracoesContasPagar = async (configuracoes: {
+  dias_alerta_vencimento?: number;
+  notificar_por_email?: boolean;
+  notificar_por_sms?: boolean;
+  categorias_padrao?: string[];
+}) => {
+  const response = await api.put("/contas-pagar/configuracoes", configuracoes);
+  return response.data;
+};

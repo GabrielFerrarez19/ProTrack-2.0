@@ -8,114 +8,127 @@ import {
 import { FiltersBar } from "./components/FiltersBar";
 import { SummaryCards } from "./components/SummaryCards";
 import { AccountsTable } from "./components/AccountsTable";
-import type { ContaPagar } from "../../@types/types.components";
+import { useContasPagar } from "../../hooks/useContasPagar";
+import type { ContaPagarFiltros } from "../../@types/types.contasPagar";
+import { Button } from "../../components/ui/button";
+import { Plus, RefreshCw } from "lucide-react";
+import { toast, Toaster } from "sonner";
 
 export function ContasPagar() {
+  const {
+    contas,
+    categorias,
+    resumo,
+    loading,
+    error,
+    listarContas,
+    limparErro,
+    formatarMoeda,
+  } = useContasPagar();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
   const [categoriaFilter, setCategoriaFilter] = useState("todas");
 
-  const contas: ContaPagar[] = [
-    {
-      id: "1",
-      fornecedor: "Fornecedor ABC Ltda",
-      valor: 3500.0,
-      dataVencimento: "2024-12-15",
-      diasAtraso: 5,
-      status: "vencido",
-      categoria: "Mercadoria",
-      descricao: "Compra de estoque",
-    },
-    {
-      id: "2",
-      fornecedor: "Energia Elétrica SA",
-      valor: 850.75,
-      dataVencimento: "2024-12-20",
-      diasAtraso: 0,
-      status: "pendente",
-      categoria: "Utilidades",
-      descricao: "Conta de luz",
-    },
-    {
-      id: "3",
-      fornecedor: "Internet Provider",
-      valor: 199.9,
-      dataVencimento: "2024-12-25",
-      diasAtraso: 0,
-      status: "agendado",
-      categoria: "Tecnologia",
-      descricao: "Internet empresarial",
-      dataAgendamento: "2024-12-24",
-    },
-    {
-      id: "4",
-      fornecedor: "Distribuidora XYZ",
-      valor: 2800.5,
-      dataVencimento: "2024-12-10",
-      diasAtraso: 0,
-      status: "pago",
-      categoria: "Mercadoria",
-      descricao: "Produtos para revenda",
-    },
-    {
-      id: "5",
-      fornecedor: "Banco Central",
-      valor: 1250.0,
-      dataVencimento: "2024-12-30",
-      diasAtraso: 0,
-      status: "pendente",
-      categoria: "Financeiro",
-      descricao: "Financiamento",
-    },
+  // Aplicar filtros
+  const aplicarFiltros = () => {
+    const filtros: ContaPagarFiltros = {};
+
+    if (searchTerm) filtros.search = searchTerm;
+    if (statusFilter !== "todos") filtros.status = statusFilter;
+    if (categoriaFilter !== "todas") filtros.categoria_id = categoriaFilter;
+
+    listarContas(filtros);
+  };
+
+  // Limpar filtros
+  const limparFiltros = () => {
+    setSearchTerm("");
+    setStatusFilter("todos");
+    setCategoriaFilter("todas");
+    listarContas();
+  };
+
+  // Recarregar dados
+  const recarregarDados = () => {
+    listarContas();
+  };
+
+  // Tratar erros
+  if (error) {
+    toast.error(error);
+    limparErro();
+  }
+
+  // Preparar dados para os componentes
+  const categoriasOptions = [
+    { value: "todas", label: "Todas as Categorias" },
+    ...categorias.map((cat) => ({
+      value: cat.id,
+      label: cat.nome,
+    })),
   ];
 
-  const categorias = [
-    "Mercadoria",
-    "Utilidades",
-    "Tecnologia",
-    "Financeiro",
-    "Outros",
+  const statusOptions = [
+    { value: "todos", label: "Todos os Status" },
+    { value: "pendente", label: "Pendente" },
+    { value: "pago", label: "Pago" },
+    { value: "vencido", label: "Vencido" },
+    { value: "agendado", label: "Agendado" },
   ];
-
-  const filteredContas = contas.filter((conta) => {
-    const matchesSearch =
-      conta.fornecedor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      conta.descricao.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "todos" || conta.status === statusFilter;
-    const matchesCategoria =
-      categoriaFilter === "todas" || conta.categoria === categoriaFilter;
-    return matchesSearch && matchesStatus && matchesCategoria;
-  });
-
-  const totalPendente = filteredContas
-    .filter((c) => c.status !== "pago")
-    .reduce((total, c) => total + c.valor, 0);
-  const totalVencido = filteredContas
-    .filter((c) => c.status === "vencido")
-    .reduce((total, c) => total + c.valor, 0);
-  const totalAgendado = filteredContas
-    .filter((c) => c.status === "agendado")
-    .reduce((total, c) => total + c.valor, 0);
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          Contas a Pagar
-        </h1>
-        <p className="text-muted-foreground">
-          Gerencie as contas e pagamentos a fornecedores
-        </p>
+      {/* Header */}
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Contas a Pagar
+          </h1>
+          <p className="text-muted-foreground">
+            Gerencie as contas e pagamentos a fornecedores
+          </p>
+        </div>
+
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={recarregarDados}
+            disabled={loading}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+            />
+            Atualizar
+          </Button>
+
+          <Button size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Conta
+          </Button>
+        </div>
       </div>
 
       {/* Cards de Resumo */}
-      <SummaryCards
-        totalPendente={totalPendente}
-        totalVencido={totalVencido}
-        totalAgendado={totalAgendado}
-        totalCount={filteredContas.length}
-      />
+      {resumo ? (
+        <SummaryCards
+          totalPendente={resumo.total_pendente || 0}
+          totalVencido={resumo.total_vencido || 0}
+          totalAgendado={resumo.total_agendado || 0}
+          totalCount={resumo.total_contas || 0}
+          contasVencidasCount={resumo.contas_vencidas_count || 0}
+          formatarMoeda={formatarMoeda}
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+          <div className="h-32 bg-muted rounded-lg animate-pulse"></div>
+          <div className="h-32 bg-muted rounded-lg animate-pulse"></div>
+          <div className="h-32 bg-muted rounded-lg animate-pulse"></div>
+          <div className="h-32 bg-muted rounded-lg animate-pulse"></div>
+          <div className="h-32 bg-muted rounded-lg animate-pulse"></div>
+        </div>
+      )}
 
       {/* Filtros */}
       <Card>
@@ -130,7 +143,11 @@ export function ContasPagar() {
             setStatusFilter={setStatusFilter}
             categoriaFilter={categoriaFilter}
             setCategoriaFilter={setCategoriaFilter}
-            categorias={categorias}
+            categorias={categoriasOptions}
+            statusOptions={statusOptions}
+            onAplicarFiltros={aplicarFiltros}
+            onLimparFiltros={limparFiltros}
+            loading={loading}
           />
         </CardContent>
       </Card>
@@ -138,12 +155,56 @@ export function ContasPagar() {
       {/* Tabela de Contas */}
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Contas a Pagar</CardTitle>
+          <CardTitle>
+            Lista de Contas a Pagar
+            {contas.length > 0 && (
+              <span className="text-sm font-normal text-muted-foreground ml-2">
+                ({contas.length} conta{contas.length !== 1 ? "s" : ""})
+              </span>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <AccountsTable contas={filteredContas} />
+          <AccountsTable
+            contas={contas.map((conta) => ({
+              ...conta,
+              descricao: conta.descricao || "", // garante que seja string
+            }))}
+            loading={loading}
+            onRefresh={recarregarDados}
+          />
         </CardContent>
       </Card>
+
+      {/* Estado de carregamento */}
+      {loading && (
+        <div className="flex justify-center items-center py-8">
+          <div className="flex items-center gap-2">
+            <RefreshCw className="h-5 w-5 animate-spin" />
+            <span className="text-muted-foreground">Carregando...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Estado vazio */}
+      {!loading && contas.length === 0 && (
+        <Card>
+          <CardContent className="py-12">
+            <div className="text-center">
+              <div className="text-muted-foreground mb-4">
+                Nenhuma conta encontrada
+              </div>
+              <Button onClick={recarregarDados}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Recarregar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Toaster para notificações */}
+      <Toaster position="top-right" richColors />
     </div>
   );
 }

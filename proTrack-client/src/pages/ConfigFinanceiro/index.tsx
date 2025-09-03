@@ -21,6 +21,7 @@ import {
   fetchMetodosPagamento,
   updateCategoriaApi,
 } from "../../services/api";
+import type { MetodoPagamentoConfig } from "../../@types/types.api";
 // service que criamos
 
 export function ConfiguracoesFinanceiras() {
@@ -68,8 +69,18 @@ export function ConfiguracoesFinanceiras() {
   useEffect(() => {
     const loadMetodos = async () => {
       try {
-        const dados = await fetchMetodosPagamento();
-        setMetodosPagamento(dados);
+        const dados: MetodoPagamentoConfig[] = await fetchMetodosPagamento();
+
+        // Filtrar apenas os tipos compatíveis
+        const metodosFiltrados: MetodoPagamento[] = dados.filter(
+          (item): item is MetodoPagamento =>
+            item.tipo === "dinheiro" ||
+            item.tipo === "cartao" ||
+            item.tipo === "pix" ||
+            item.tipo === "transferencia"
+        );
+
+        setMetodosPagamento(metodosFiltrados);
       } catch (error) {
         console.error("Erro ao carregar métodos de pagamento:", error);
       }
