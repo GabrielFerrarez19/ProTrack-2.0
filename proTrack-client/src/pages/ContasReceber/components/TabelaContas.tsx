@@ -44,14 +44,12 @@ export function TabelaContas({ vendas }: Props) {
             </TableCell>
 
             {/* Valor total com desconto */}
-            <TableCell>R$ {formatBRL(conta.total_com_desconto)}</TableCell>
+            <TableCell>R$ {formatBRL(conta.total)}</TableCell>
 
             {/* Valor original */}
             <TableCell>
-              R${" "}
-              {conta.total.toLocaleString("pt-BR", {
-                minimumFractionDigits: 2,
-              })}
+              R$
+              {formatBRL(conta.total_com_desconto)}
             </TableCell>
 
             {/* Vencimento */}

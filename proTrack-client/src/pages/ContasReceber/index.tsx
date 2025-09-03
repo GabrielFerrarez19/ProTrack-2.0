@@ -31,6 +31,8 @@ export function ContasReceber() {
     reload,
   } = useVendasVencidas();
 
+  console.log("vendasIndex", vendas);
+
   if (loading || loadingVencidas)
     return <p className="p-6">Carregando dados financeiros...</p>;
 

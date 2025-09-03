@@ -206,6 +206,7 @@ export const getAllVendasDb = async () => {
     JOIN clientes c ON v.cliente_id = c.id
     LEFT JOIN itens_venda iv ON iv.venda_id = v.id
     LEFT JOIN produtos p ON iv.produto_id = p.id
+    WHERE v.status = 'pendente'
     ORDER BY v.id, iv.id;
   `;
 
@@ -286,7 +287,7 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
 
     // ✅ Se for "aprazo", status também será "aprazo"
     const statusVenda =
-      formaPagamento === "aprazo" ? "aprazo" : dados.status || "pago";
+      formaPagamento === "aprazo" ? "pendente" : dados.status || "pago";
 
     // 3. Inserir a venda
     const [vendaResult] = await connection.execute<ResultSetHeader>(
@@ -303,7 +304,7 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
         dados.totalComDesconto,
         statusVenda,
         formaPagamento,
-        formaPagamento === "aprazo" ? dados.diasVencimento ?? null : null, // <-- dias_vencimento
+        formaPagamento === "pendente" ? dados.diasVencimento ?? null : null, // <-- dias_vencimento
       ]
     );
 
@@ -356,6 +357,7 @@ export const criarVendaDb = async (dados: CriarVendaData): Promise<number> => {
     connection.release();
   }
 };
+
 export const getVendasDashboard = async (): Promise<VendasDashboard> => {
   const sqlMesAtual = `
     SELECT COALESCE(SUM(total_com_desconto), 0) AS total
@@ -433,24 +435,19 @@ export const getVendasVencidasDb = async () => {
     JOIN clientes c ON v.cliente_id = c.id
     LEFT JOIN itens_venda iv ON iv.venda_id = v.id
     LEFT JOIN produtos p ON iv.produto_id = p.id
-    WHERE v.dias_vencimento < CURDATE() 
-      AND v.status NOT IN ('pago', 'cancelado')
-      AND v.forma_pagamento = 'aprazo'
-    ORDER BY v.dias_vencimento ASC, v.id, iv.id;
+    WHERE v.status IN ('pendente', 'vencido')
+    ORDER BY v.data_venda ASC, v.id, iv.id;
   `;
 
   const [results]: any[] = await db.query(sql);
   return results;
 };
 
-// Função que retorna o valor total de todas as vendas vencidas
 export const getTotalVendasVencidasDb = async (): Promise<number> => {
   const sql = `
     SELECT COALESCE(SUM(v.total_com_desconto), 0) AS total_vencido
     FROM vendas v
-    WHERE DATE_ADD(v.data_cadastro, INTERVAL v.dias_vencimento DAY) < CURDATE()
-      AND v.status NOT IN ('pago', 'cancelado')
-      AND v.status = ('vencido')
+    WHERE v.status = 'vencido'
   `;
 
   const [rows]: any = await db.query(sql);

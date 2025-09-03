@@ -108,10 +108,8 @@ MODIFY COLUMN forma_pagamento ENUM(
     'dinheiro', 'cartao', 'pix', 'transferencia', "aprazo"
 );
 
-
-
 ALTER TABLE vendas
-MODIFY COLUMN status ENUM('pendente', 'pago', 'cancelado', 'aprazo');
+MODIFY COLUMN status ENUM('pendente', 'pago', 'cancelado','vencido');
 
 CREATE TABLE itens_venda (
   id INT AUTO_INCREMENT PRIMARY KEY,
