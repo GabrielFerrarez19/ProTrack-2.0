@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useContasPagarMonitoramento } from "../../hooks/useContasPagarMonitoramento";
 import { Button } from "../ui/button";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -79,7 +80,7 @@ export const ContasPagarMonitoramento: React.FC = () => {
     const contasArquivadas = await limparContasAntigas(diasLimpeza);
     if (contasArquivadas !== null) {
       await carregarDados(); // Recarrega dados após limpeza
-      alert(`${contasArquivadas} contas vencidas foram arquivadas`);
+      toast.success(`${contasArquivadas} contas vencidas foram arquivadas`);
     }
   };
 

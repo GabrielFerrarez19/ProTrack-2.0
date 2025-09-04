@@ -18,6 +18,7 @@ import {
 import { atualizarVenda } from "../../../services/api";
 import { ProdutoSelect } from "./ProdutoSelect";
 import { useProdutos } from "../../../hooks/useProdutos";
+import { toast } from "sonner";
 import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import type {
   VendaForm,
@@ -129,10 +130,10 @@ export function DialogAlterVenda({
 
       if (onVendaUpdated) onVendaUpdated();
       setOpen(false);
-      alert("Venda atualizada com sucesso!");
+      toast.success("Venda atualizada com sucesso!");
     } catch (error) {
       console.error("Erro ao atualizar venda:", error);
-      alert("Erro ao atualizar venda");
+      toast.error("Erro ao atualizar venda");
     }
   };
 

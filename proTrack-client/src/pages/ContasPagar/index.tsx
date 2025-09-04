@@ -13,7 +13,7 @@ import { useContasPagarVencidas } from "../../hooks/useContasPagarVencidas";
 import type { ContaPagarFiltros } from "../../@types/types.contasPagar";
 import { Button } from "../../components/ui/button";
 import { Plus, RefreshCw } from "lucide-react";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import { StatusMonitoramento } from "./components";
 
 export function ContasPagar() {
@@ -226,8 +226,6 @@ export function ContasPagar() {
         </Card>
       )}
 
-      {/* Toaster para notificações */}
-      <Toaster position="top-right" richColors />
     </div>
   );
 }

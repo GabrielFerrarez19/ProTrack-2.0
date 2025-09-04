@@ -21,7 +21,7 @@ import { cadastrarProduto } from "../../../services/api";
 import type { ProductFormData } from "../../../@types/types.components";
 
 // Sonner Toast
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 
 const categorias = [
   "Roupas",
@@ -76,11 +76,7 @@ export function ProductForm() {
   };
 
   return (
-    <>
-      {/* Toaster global */}
-      <Toaster position="top-right" richColors />
-
-      <Card className="w-full max-w-4xl mx-auto shadow-elegant border-2 bg-card border-[var(--bluePast-500)] p-0">
+    <Card className="w-full max-w-4xl mx-auto shadow-elegant border-2 bg-card border-[var(--bluePast-500)] p-0">
         <CardHeader className=" flex bg-[var(--bluePast-500)] h-20 text-primary-foreground rounded-t-lg items-center">
           <CardTitle className="flex items-center gap-2 text-2xl">
             <Package className="w-6 h-6" />
@@ -238,6 +234,5 @@ export function ProductForm() {
           </form>
         </CardContent>
       </Card>
-    </>
   );
 }
