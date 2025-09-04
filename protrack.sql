@@ -246,3 +246,20 @@ SELECT
     'Internet empresarial',
     '2024-12-24'
 FROM categorias c WHERE c.nome = 'Tecnologia' LIMIT 1;
+
+-- Tabela de histórico de pagamentos
+CREATE TABLE historico_pagamentos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  cliente_id INT NOT NULL,
+  venda_id INT,
+  valor_pago DECIMAL(10,2) NOT NULL,
+  data_pagamento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  observacoes TEXT,
+  FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
+  FOREIGN KEY (venda_id) REFERENCES vendas(id) ON DELETE SET NULL
+);
+
+-- Índices para melhor performance
+CREATE INDEX idx_historico_cliente ON historico_pagamentos(cliente_id);
+CREATE INDEX idx_historico_venda ON historico_pagamentos(venda_id);
+CREATE INDEX idx_historico_data ON historico_pagamentos(data_pagamento);

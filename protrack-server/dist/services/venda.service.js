@@ -147,11 +147,10 @@ const getAllVendasDb = async () => {
     JOIN clientes c ON v.cliente_id = c.id
     LEFT JOIN itens_venda iv ON iv.venda_id = v.id
     LEFT JOIN produtos p ON iv.produto_id = p.id
-    WHERE v.status = 'pendente'
     ORDER BY v.id, iv.id;
   `;
     const [results] = await database_1.db.query(sql);
-    return results;
+    return results; // Corrigido: removido filtro de status pendente
 };
 exports.getAllVendasDb = getAllVendasDb;
 // Função que organiza os dados em vendas com itens

@@ -1,4 +1,9 @@
 import { db } from "../config/database";
+import {
+  registrarPagamento,
+  getVendasPendentesComPagamento,
+  getTotalPagoVenda,
+} from "./pagamento.service";
 
 export interface ClienteData {
   nome: string;
@@ -71,15 +76,20 @@ export const updateClienteDb = async (
     throw new Error("Cliente não encontrado");
   }
 
-  const valorAtual = clienteAtualResult[0].valor_a_pagar ?? 0;
-  const valorNovoPagamento = cliente.valorAPagar ?? 0;
-  const novoValorAPagar = valorAtual + valorNovoPagamento;
+  const valorAtual = parseFloat(
+    String(clienteAtualResult[0].valor_a_pagar ?? 0)
+  );
+  const valorFinalEnviado = parseFloat(String(cliente.valorAPagar ?? 0));
+
+  // LÓGICA CORRIGIDA: O frontend envia o valor final calculado
+  // Calculamos a diferença para saber quanto foi pago
+  const valorPago = Math.round((valorAtual - valorFinalEnviado) * 100) / 100;
 
   console.log("Valor atual do cliente:", valorAtual);
-  console.log("Novo pagamento recebido:", valorNovoPagamento);
-  console.log("Valor total disponível após pagamento:", novoValorAPagar);
+  console.log("Valor final enviado pelo frontend:", valorFinalEnviado);
+  console.log("Valor pago calculado:", valorPago);
 
-  // 2️⃣ Atualiza os dados do cliente com o valor acumulado
+  // 2️⃣ Atualiza os dados do cliente (SEM o valor_a_pagar - será atualizado depois)
   const sqlUpdateCliente = `
     UPDATE clientes SET 
       nome = ?, 
@@ -97,8 +107,7 @@ export const updateClienteDb = async (
       numero = ?, 
       complemento = ?, 
       bairro = ?, 
-      cidade = ?,
-      valor_a_pagar = ?
+      cidade = ?
     WHERE id = ?
   `;
   const values = [
@@ -118,57 +127,146 @@ export const updateClienteDb = async (
     cliente.complemento || null,
     cliente.bairro || null,
     cliente.cidade || null,
-    novoValorAPagar,
     id,
   ];
   const [result]: any = await db.query(sqlUpdateCliente, values);
   console.log("Cliente atualizado com sucesso.");
 
-  // 3️⃣ Busca todas as vendas pendentes/aprazo/vencidas
-  const sqlGetVendas = `
-    SELECT id, total_com_desconto, status
-    FROM vendas
-    WHERE cliente_id = ? AND status IN ('pendente', 'aprazo', 'vencido')
-    ORDER BY data_venda ASC
-  `;
-  const [vendas]: any[] = await db.query(sqlGetVendas, [id]);
-  console.log("Vendas pendentes encontradas:", vendas.length);
+  // 3️⃣ Busca vendas pendentes com histórico de pagamentos
+  const vendasComPagamento = await getVendasPendentesComPagamento(id);
+  console.log("Vendas pendentes encontradas:", vendasComPagamento.length);
 
-  // 4️⃣ Itera pelas vendas e marca como 'pago' se houver saldo suficiente
-  let valorRestante = novoValorAPagar;
-  for (const venda of vendas) {
-    console.log(
-      `Verificando venda id: ${venda.id}, total: ${venda.total_com_desconto}, status: ${venda.status}`
-    );
-    if (valorRestante >= venda.total_com_desconto) {
-      const sqlUpdateVenda = `
-        UPDATE vendas SET status = 'pago'
-        WHERE id = ?
-      `;
-      const [updateResult]: any = await db.query(sqlUpdateVenda, [venda.id]);
-      console.log(
-        `Venda id ${venda.id} atualizada para 'pago'. AffectedRows:`,
-        updateResult.affectedRows
-      );
-      valorRestante -= venda.total_com_desconto;
-      console.log("Valor restante após pagar venda:", valorRestante);
-    } else {
-      console.log(
-        `Saldo insuficiente para venda id ${venda.id}. Parando atualização.`
-      );
-      break;
+  // 4️⃣ LÓGICA DE STATUS: Processa vendas pendentes baseado no valor pago
+  let valorRestante = valorFinalEnviado;
+  let valorPagoRestante = valorPago;
+
+  console.log("=== INICIANDO SISTEMA DE PAGAMENTO POR PARTES ===");
+  console.log(`Valor pago total: R$ ${valorPago.toFixed(2)}`);
+  console.log(`Vendas pendentes encontradas: ${vendasComPagamento.length}`);
+
+  if (vendasComPagamento.length > 0 && valorPago > 0) {
+    // 1. Registra o pagamento no histórico
+    const pagamentoId = await registrarPagamento({
+      cliente_id: id,
+      valor_pago: valorPago,
+      observacoes: `Pagamento parcial - Valor total pago: R$ ${valorPago.toFixed(
+        2
+      )}`,
+    });
+    console.log(`✅ Pagamento registrado no histórico (ID: ${pagamentoId})`);
+
+    // 2. Processa vendas em ordem cronológica (mais antigas primeiro)
+    for (let i = 0; i < vendasComPagamento.length; i++) {
+      const venda = vendasComPagamento[i];
+      const valorVenda = parseFloat(String(venda.total_com_desconto));
+      const totalPagoVenda = parseFloat(String(venda.total_pago));
+      const valorRestanteVenda = parseFloat(String(venda.valor_restante));
+
+      console.log(`\n--- Processando Venda ID: ${venda.id} ---`);
+      console.log(`Valor total da venda: R$ ${valorVenda.toFixed(2)}`);
+      console.log(`Total já pago: R$ ${totalPagoVenda.toFixed(2)}`);
+      console.log(`Valor restante: R$ ${valorRestanteVenda.toFixed(2)}`);
+      console.log(`Valor pago disponível: R$ ${valorPagoRestante.toFixed(2)}`);
+
+      if (valorPagoRestante > 0) {
+        // Calcula quanto pode ser aplicado nesta venda
+        const valorAplicar = Math.min(valorPagoRestante, valorRestanteVenda);
+
+        if (valorAplicar > 0) {
+          // Registra pagamento específico para esta venda
+          await registrarPagamento({
+            cliente_id: id,
+            venda_id: venda.id,
+            valor_pago: valorAplicar,
+            observacoes: `Pagamento aplicado à venda ID ${venda.id}`,
+          });
+
+          console.log(
+            `✅ R$ ${valorAplicar.toFixed(2)} aplicado à venda ID ${venda.id}`
+          );
+          valorPagoRestante =
+            Math.round((valorPagoRestante - valorAplicar) * 100) / 100;
+
+          // Verifica se a venda foi totalmente paga
+          const novoTotalPago = totalPagoVenda + valorAplicar;
+          if (novoTotalPago >= valorVenda) {
+            // Marca a venda como paga
+            const sqlUpdateVenda = `
+              UPDATE vendas SET status = 'pago'
+              WHERE id = ?
+            `;
+            const [updateResult]: any = await db.query(sqlUpdateVenda, [
+              venda.id,
+            ]);
+
+            if (updateResult.affectedRows > 0) {
+              console.log(`🎉 VENDA ID ${venda.id} TOTALMENTE PAGA!`);
+            }
+          } else {
+            console.log(
+              `📝 Venda ID ${
+                venda.id
+              } parcialmente paga (R$ ${novoTotalPago.toFixed(
+                2
+              )}/${valorVenda.toFixed(2)})`
+            );
+          }
+        }
+      } else {
+        console.log(`💰 Valor pago esgotado`);
+        break;
+      }
     }
+
+    console.log(`\n=== RESUMO DO PROCESSAMENTO ===`);
+    console.log(`Valor pago inicial: R$ ${valorPago.toFixed(2)}`);
+    console.log(`Valor pago restante: R$ ${valorPagoRestante.toFixed(2)}`);
+    console.log(`Valor a pagar final: R$ ${valorFinalEnviado.toFixed(2)}`);
+  } else if (valorPago <= 0) {
+    console.log("Nenhum pagamento realizado (valor pago <= 0)");
+    console.log("Todas as vendas permanecem com status atual");
+  } else {
+    console.log("Nenhuma venda pendente encontrada");
   }
 
   // 5️⃣ Atualiza o valor_a_pagar do cliente após aplicar os pagamentos
+  const valorFinal = Math.round(valorRestante * 100) / 100;
+  console.log("Valor final calculado:", valorFinal);
+  console.log("Valor restante original:", valorRestante);
   const sqlAtualizaSaldo = `
     UPDATE clientes SET valor_a_pagar = ?
     WHERE id = ?
   `;
-  await db.query(sqlAtualizaSaldo, [valorRestante, id]);
-  console.log("Valor a pagar do cliente atualizado para:", valorRestante);
+  console.log("Executando query SQL:", sqlAtualizaSaldo);
+  console.log("Parâmetros:", [valorFinal, id]);
+  const [updateResult]: any = await db.query(sqlAtualizaSaldo, [
+    valorFinal,
+    id,
+  ]);
+  console.log("Resultado da atualização:", updateResult);
+  console.log("Valor a pagar do cliente atualizado para:", valorFinal);
 
-  console.log("Processamento concluído para cliente id:", id);
+  // Verifica se a atualização foi bem-sucedida
+  if (updateResult.affectedRows > 0) {
+    console.log(
+      "✅ Atualização bem-sucedida! Linhas afetadas:",
+      updateResult.affectedRows
+    );
+  } else {
+    console.log("❌ ERRO: Nenhuma linha foi atualizada!");
+  }
+
+  // Verifica o valor atual no banco após a atualização
+  const [verificacao]: any = await db.query(
+    "SELECT valor_a_pagar FROM clientes WHERE id = ?",
+    [id]
+  );
+  console.log(
+    "Valor atual no banco após atualização:",
+    verificacao[0]?.valor_a_pagar
+  );
+
+  console.log("Processamento concluído para cliente id:", id); // Corrigido: precisão decimal e concatenação
 };
 
 export const getTotalClientesDb = async (): Promise<number> => {
