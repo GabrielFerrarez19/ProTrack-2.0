@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { Cliente } from "../../../@types/types.components";
 import {
   Table,
@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "../../../components/ui/table";
 import { Dialog } from "../../../components/ui/dialog";
+import { Button } from "../../../components/ui/button";
 import { DialogAlterCliente } from "./DialogAlterCliente";
 import { formatarDataNascimento } from "../../../utils/functions";
 
@@ -20,6 +21,31 @@ interface ClientTableProps {
 export function ClientTable({ clientes, onClienteUpdated }: ClientTableProps) {
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
   const [open, setOpen] = useState(false);
+
+  // Estados de paginação
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Cálculos de paginação
+  const totalPages = Math.ceil(clientes.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentClientes = useMemo(() => {
+    return clientes.slice(startIndex, endIndex);
+  }, [clientes, startIndex, endIndex]);
+
+  // Funções de navegação
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  const goToPreviousPage = () => {
+    setCurrentPage((prev) => Math.max(1, prev - 1));
+  };
+
+  const goToNextPage = () => {
+    setCurrentPage((prev) => Math.min(totalPages, prev + 1));
+  };
 
   const handleDialogClose = (isOpen: boolean) => {
     if (!isOpen) {
@@ -64,7 +90,7 @@ export function ClientTable({ clientes, onClienteUpdated }: ClientTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {clientes.map((cliente, index) => (
+          {currentClientes.map((cliente, index) => (
             <TableRow
               key={cliente.cpf ?? index}
               className="hover:bg-gray-200 cursor-pointer text-sm"
@@ -91,6 +117,56 @@ export function ClientTable({ clientes, onClienteUpdated }: ClientTableProps) {
           ))}
         </TableBody>
       </Table>
+
+      {/* Controles de Paginação */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t">
+          <div className="flex items-center text-sm text-gray-700">
+            <span>
+              Mostrando {startIndex + 1} a {Math.min(endIndex, clientes.length)}{" "}
+              de {clientes.length} clientes
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={goToPreviousPage}
+              disabled={currentPage === 1}
+              className="cursor-pointer"
+            >
+              Anterior
+            </Button>
+
+            <div className="flex items-center space-x-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => goToPage(page)}
+                    className="w-8 h-8 p-0 cursor-pointer"
+                  >
+                    {page}
+                  </Button>
+                )
+              )}
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className="cursor-pointer"
+            >
+              Próximo
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Dialog open={open} onOpenChange={handleDialogClose}>
         {selectedCliente && (

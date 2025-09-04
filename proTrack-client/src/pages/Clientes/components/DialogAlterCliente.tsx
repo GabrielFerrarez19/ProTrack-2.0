@@ -261,12 +261,22 @@ export function DialogAlterCliente({
         </Table>
 
         {/* Resumo de Vendas */}
-        <ResumoVendas
-          valorAPagar={valorAPagar}
-          valorPago={valorPago}
-          setValorPago={setValorPago}
-          setTotalRestantePai={setTotalRestante} // pega o total restante
-        />
+        <div className="flex flex-col gap-4">
+          <ResumoVendas
+            valorAPagar={valorAPagar}
+            valorPago={valorPago}
+            setValorPago={setValorPago}
+            setTotalRestantePai={setTotalRestante} // pega o total restante
+          />
+          <Button
+            type="button"
+            onClick={onRegistrarPagamento}
+            className="bg-blue-500 text-white h-11 px-8 hover:bg-blue-600 cursor-pointer"
+            disabled={valorPago <= 0}
+          >
+            Registrar Pagamento
+          </Button>
+        </div>
       </CardContent>
 
       {/* Formulário de Cliente */}
@@ -432,14 +442,6 @@ export function DialogAlterCliente({
               className="bg-green-500 text-white h-11 px-8 hover:bg-green-600"
             >
               Alterar Cliente
-            </Button>
-            <Button
-              type="button"
-              onClick={onRegistrarPagamento}
-              className="bg-blue-500 text-white h-11 px-8 hover:bg-blue-600"
-              disabled={valorPago <= 0}
-            >
-              Registrar Pagamento
             </Button>
           </div>
         </form>
