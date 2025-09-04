@@ -208,24 +208,6 @@ export function ContasPagar() {
           </div>
         </div>
       )}
-
-      {/* Estado vazio */}
-      {!loading && !loadingVencidas && contas.length === 0 && (
-        <Card>
-          <CardContent className="py-12">
-            <div className="text-center">
-              <div className="text-muted-foreground mb-4">
-                Nenhuma conta encontrada
-              </div>
-              <Button onClick={recarregarDados}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Recarregar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
     </div>
   );
 }
