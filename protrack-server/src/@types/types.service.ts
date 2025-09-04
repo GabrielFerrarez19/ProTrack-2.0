@@ -127,7 +127,7 @@ export interface RelatorioCompleto {
 export interface MetodoPagamentoConfig {
   id: string;
   nome: string;
-  tipo: "dinheiro" | "cartao" | "pix" | "transferencia" | "outro";
+  tipo: "dinheiro" | "cartao" | "pix" | "transferencia" | "outro" | "aprazo";
   ativo: boolean;
 }
 

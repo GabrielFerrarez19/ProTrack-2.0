@@ -156,7 +156,7 @@ export interface ContaBancaria {
 export interface MetodoPagamento {
   id: string;
   nome: string;
-  tipo: "dinheiro" | "cartao" | "pix" | "transferencia";
+  tipo: "dinheiro" | "cartao" | "pix" | "transferencia" | "aprazo";
   ativo: boolean;
 }
 

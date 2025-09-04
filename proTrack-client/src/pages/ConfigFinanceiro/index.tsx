@@ -77,7 +77,8 @@ export function ConfiguracoesFinanceiras() {
             item.tipo === "dinheiro" ||
             item.tipo === "cartao" ||
             item.tipo === "pix" ||
-            item.tipo === "transferencia"
+            item.tipo === "transferencia" ||
+            item.tipo === "aprazo"
         );
 
         setMetodosPagamento(metodosFiltrados);

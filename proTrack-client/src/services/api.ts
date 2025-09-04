@@ -182,10 +182,12 @@ export const fetchProdutosQuantidadeBaixa =
 export const fetchMetodosPagamento = async (): Promise<
   MetodoPagamentoConfig[]
 > => {
-  const response = await api.get<MetodoPagamentoConfig[]>(
-    "/config/metodos-pagamento"
-  );
-  return response.data;
+  const response = await api.get<any[]>("/config/metodos-pagamento");
+  // Converte id de number para string para compatibilidade com o tipo
+  return response.data.map((metodo) => ({
+    ...metodo,
+    id: metodo.id.toString(),
+  }));
 };
 
 export const toggleMetodoPagamentoApi = async (id: string, ativo: boolean) => {
