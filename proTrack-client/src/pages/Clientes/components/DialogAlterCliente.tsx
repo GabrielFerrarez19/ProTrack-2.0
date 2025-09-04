@@ -29,7 +29,6 @@ import {
   formatCurrency,
   formatStatus,
 } from "../../../utils/functions";
-import { Landmark } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -69,7 +68,7 @@ export function DialogAlterCliente({
   useEffect(() => {
     if (cliente) {
       reset({
-        id: cliente.id,
+        id: parseInt(cliente.id),
         nome: cliente.nome,
         dataNascimento: formatarDataParaInput(cliente.dataNascimento),
         cpf: cliente.cpf,
@@ -96,12 +95,12 @@ export function DialogAlterCliente({
     const loadVendas = async () => {
       if (!cliente?.id) return;
       try {
-        const vendas = await fetchAllVendasById(cliente.id);
-        setVendasPorCliente({ [cliente.id]: vendas });
+        const vendas = await fetchAllVendasById(parseInt(cliente.id));
+        setVendasPorCliente({ [parseInt(cliente.id)]: vendas });
         console.log("vendas", vendas);
       } catch (err) {
         console.error(`Erro ao buscar vendas do cliente ${cliente.id}`, err);
-        setVendasPorCliente({ [cliente.id]: [] });
+        setVendasPorCliente({ [parseInt(cliente.id)]: [] });
       }
     };
     loadVendas();
@@ -135,7 +134,7 @@ export function DialogAlterCliente({
     }
 
     try {
-      await atualizarCliente(cliente.id, {
+      await atualizarCliente(parseInt(cliente.id), {
         ...data,
         valorAPagar: totalRestante, // envia valor a pagar atualizado
       });
@@ -149,6 +148,40 @@ export function DialogAlterCliente({
         toast.error((error as { error: string }).error);
       } else {
         toast.error("Erro ao alterar cliente");
+      }
+    }
+  };
+
+  // Função para registrar apenas o pagamento
+  const onRegistrarPagamento = async () => {
+    if (!cliente.id) {
+      toast.error("ID do cliente ausente!");
+      return;
+    }
+
+    if (valorPago <= 0) {
+      toast.error("Valor do pagamento deve ser maior que zero!");
+      return;
+    }
+
+    try {
+      await atualizarCliente(parseInt(cliente.id), {
+        id: parseInt(cliente.id),
+        nome: cliente.nome,
+        dataNascimento: cliente.dataNascimento,
+        cpf: cliente.cpf,
+        email: cliente.email,
+        valorAPagar: totalRestante, // envia valor a pagar atualizado
+      });
+      toast.success("Pagamento registrado com sucesso!");
+      setValorPago(0);
+      if (onClienteUpdated) onClienteUpdated();
+    } catch (error: unknown) {
+      console.error("Erro ao registrar pagamento:", error);
+      if (typeof error === "object" && error !== null && "error" in error) {
+        toast.error((error as { error: string }).error);
+      } else {
+        toast.error("Erro ao registrar pagamento");
       }
     }
   };
@@ -192,34 +225,37 @@ export function DialogAlterCliente({
 
           {tabelaAberta && (
             <TableBody>
-              {(vendasPorCliente[cliente.id] ?? []).map((venda) => {
-                const desconto =
-                  Number(venda.total ?? 0) -
-                  Number(venda.total_com_desconto ?? 0);
-                return (
-                  <TableRow
-                    key={venda.id}
-                    className="hover:bg-gray-200 cursor-pointer"
-                  >
-                    <TableCell>{venda.id}</TableCell>
-                    <TableCell>
-                      {new Date(venda.data_venda).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      R$ {formatCurrency(Number(venda.total ?? 0))}
-                    </TableCell>
-                    <TableCell>R$ {formatCurrency(desconto)}</TableCell>
-                    <TableCell>
-                      R$ {formatCurrency(Number(venda.total_com_desconto ?? 0))}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={formatStatus(venda.status).color}>
-                        {formatStatus(venda.status).text}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {(vendasPorCliente[parseInt(cliente.id)] ?? []).map(
+                (venda: VendaResponse) => {
+                  const desconto =
+                    Number(venda.total ?? 0) -
+                    Number(venda.total_com_desconto ?? 0);
+                  return (
+                    <TableRow
+                      key={venda.id}
+                      className="hover:bg-gray-200 cursor-pointer"
+                    >
+                      <TableCell>{venda.id}</TableCell>
+                      <TableCell>
+                        {new Date(venda.data_venda).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        R$ {formatCurrency(Number(venda.total ?? 0))}
+                      </TableCell>
+                      <TableCell>R$ {formatCurrency(desconto)}</TableCell>
+                      <TableCell>
+                        R${" "}
+                        {formatCurrency(Number(venda.total_com_desconto ?? 0))}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={formatStatus(venda.status).color}>
+                          {formatStatus(venda.status).text}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  );
+                }
+              )}
             </TableBody>
           )}
         </Table>
@@ -397,8 +433,13 @@ export function DialogAlterCliente({
             >
               Alterar Cliente
             </Button>
-            <Button className="h-11 border-border bg-blue-700 text-white hover:bg-blue-600">
-              <Landmark />
+            <Button
+              type="button"
+              onClick={onRegistrarPagamento}
+              className="bg-blue-500 text-white h-11 px-8 hover:bg-blue-600"
+              disabled={valorPago <= 0}
+            >
+              Registrar Pagamento
             </Button>
           </div>
         </form>
