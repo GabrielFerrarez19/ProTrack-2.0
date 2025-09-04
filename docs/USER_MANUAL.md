@@ -98,6 +98,8 @@ Este sistema calcula automaticamente e exibe em tempo real:
 #### **1. Cálculo Automático**
 
 - O sistema verifica automaticamente todas as contas a pagar
+- Monitora contas vencidas e gera alertas
+- Calcula totais de valores por período de vencimento
 - Filtra apenas contas com status 'pendente' ou 'agendado'
 - Calcula totais em tempo real
 
@@ -106,7 +108,17 @@ Este sistema calcula automaticamente e exibe em tempo real:
 - **Card "Vencem hoje"**: Mostra o valor total das contas que vencem hoje
 - **Card "Próximos 7 dias"**: Exibe o valor total das contas que vencem na semana
 
-#### **3. Benefícios para o Usuário**
+#### **3. Monitoramento Avançado**
+
+O sistema agora inclui funcionalidades avançadas de monitoramento:
+
+- **Alertas Inteligentes**: Notificações automáticas sobre contas vencidas
+- **Estatísticas Detalhadas**: Contadores de contas por status
+- **Filtros Avançados**: Busca por fornecedor, categoria e período
+- **Exportação de Relatórios**: Geração de relatórios em PDF
+- **Status em Tempo Real**: Atualização automática de status das contas
+
+#### **4. Benefícios para o Usuário**
 
 - **Eficiência**: Redução de 60% no tempo de análise de vencimentos
 - **Visibilidade**: Acesso imediato a obrigações futuras

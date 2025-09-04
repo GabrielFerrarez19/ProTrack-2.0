@@ -97,7 +97,9 @@ Retorna o resumo das contas a pagar incluindo totais de vencimentos.
     "total_pago": 30,
     "total_vence_hoje": 2500.0,
     "total_proximos_7_dias": 8500.0,
-    "total_valor": 15000.0
+    "total_valor": 15000.0,
+    "total_vencidas": 3500.0,
+    "total_agendado": 2000.0
   }
 }
 ```
@@ -135,6 +137,36 @@ Retorna as contas que vencem hoje e nos próximos 7 dias.
         "status": "pendente",
         "fornecedor": "Companhia de Energia",
         "categoria": "Serviços Públicos"
+      }
+    ]
+  }
+}
+```
+
+#### Monitoramento de Contas
+
+**GET** `/contas-pagar/monitoramento`
+
+Retorna dados de monitoramento de contas a pagar com alertas e estatísticas.
+
+#### Response (200)
+
+```json
+{
+  "success": true,
+  "message": "Dados de monitoramento obtidos com sucesso",
+  "data": {
+    "contasVencidas": 5,
+    "contasVencemHoje": 3,
+    "contasProximos7Dias": 12,
+    "valorTotalVencidas": 3500.0,
+    "valorTotalVenceHoje": 1200.0,
+    "valorTotalProximos7Dias": 8500.0,
+    "alertas": [
+      {
+        "tipo": "vencimento",
+        "mensagem": "5 contas vencidas precisam de atenção",
+        "prioridade": "alta"
       }
     ]
   }
