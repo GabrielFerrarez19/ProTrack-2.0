@@ -45,6 +45,67 @@ export const obterResumo = async (): Promise<ContaPagarResumoResponse> => {
 
 - `GET /contas-pagar/contas/vencimentos` - Busca contas por vencimento
 - `GET /contas-pagar/contas/resumo` - Resumo com totais de vencimento
+- `GET /contas-pagar/monitoramento` - Dados de monitoramento com alertas
+- `GET /contas-pagar/contas/vencidas` - Lista contas vencidas
+- `GET /contas-pagar/contas/agendadas` - Lista contas agendadas
+- `PUT /contas-pagar/contas/:id/status` - Atualiza status da conta
+
+#### **Novos Hooks Implementados**
+
+```typescript
+// useContasPagarMonitoramento - Hook para monitoramento
+export const useContasPagarMonitoramento = () => {
+  const [dadosMonitoramento, setDadosMonitoramento] =
+    useState<DadosMonitoramento | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const obterDadosMonitoramento = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/contas-pagar/monitoramento");
+      setDadosMonitoramento(response.data.data);
+    } catch (err) {
+      setError("Erro ao obter dados de monitoramento");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    dadosMonitoramento,
+    loading,
+    error,
+    obterDadosMonitoramento,
+  };
+};
+
+// useContasPagarVencidas - Hook para contas vencidas
+export const useContasPagarVencidas = () => {
+  const [contasVencidas, setContasVencidas] = useState<ContaPagar[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const listarContasVencidas = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/contas-pagar/contas/vencidas");
+      setContasVencidas(response.data.data);
+    } catch (err) {
+      setError("Erro ao listar contas vencidas");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    contasVencidas,
+    loading,
+    error,
+    listarContasVencidas,
+  };
+};
+```
 
 #### **Benefícios Implementados**
 
