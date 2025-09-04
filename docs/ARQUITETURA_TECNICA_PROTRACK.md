@@ -41,6 +41,11 @@ O ProTrack 2.0 implementa um sistema revolucionário de monitoramento de vencime
 - **Dashboard Proativo**: Visualização clara de obrigações financeiras futuras
 - **Alertas Preventivos**: Identificação antecipada de vencimentos críticos
 - **Gestão de Fornecedores**: Sistema completo de cadastro e controle
+- **Sistema de Contas a Pagar**: Interface completa com filtros avançados e ações inline
+- **Dashboard Financeiro**: Visão consolidada de métricas financeiras
+- **Relatórios Avançados**: Análises detalhadas com exportação Excel/PDF
+- **Fluxo de Caixa**: Controle de entradas e saídas com projeções
+- **Configurações Financeiras**: Gestão de métodos de pagamento e categorias
 
 #### **Implementação Técnica**
 
@@ -87,12 +92,31 @@ src/
 │   ├── components/ui/           # Base components (shadcn/ui)
 │   ├── components/header/       # Header components
 │   ├── components/Sidebar/      # Navigation components
+│   ├── components/ContasPagarMonitoramento/ # Contas a pagar components
 │   └── pages/                  # Page components
+│       ├── ContasPagar/        # Contas a pagar page
+│       ├── Financeiro/         # Dashboard financeiro
+│       ├── RelatoriosFinanceiros/ # Relatórios financeiros
+│       ├── ConfigFinanceiro/   # Configurações financeiras
+│       ├── FluxoCaixa/         # Fluxo de caixa
+│       ├── ContasReceber/      # Contas a receber
+│       ├── Clientes/           # Gestão de clientes
+│       ├── Estoque/            # Gestão de estoque
+│       ├── Vendas/             # Gestão de vendas
+│       ├── Status/             # Dashboard principal
+│       └── Login/              # Autenticação
 ├── 🧠 Business Logic Layer (Hooks)
 │   ├── hooks/useContasPagar.ts # Business logic for accounts
+│   ├── hooks/useContasPagarVencidas.ts # Monitoramento de vencimentos
+│   ├── hooks/useContasPagarMonitoramento.ts # Status do sistema
 │   ├── hooks/useVendas.ts      # Business logic for sales
+│   ├── hooks/useVendasList.ts  # Lista de vendas
+│   ├── hooks/useVendasVencidas.ts # Vendas vencidas
 │   ├── hooks/useClientes.ts    # Business logic for clients
-│   └── hooks/useProdutos.ts    # Business logic for products
+│   ├── hooks/useProdutos.ts    # Business logic for products
+│   ├── hooks/useDashboard.ts   # Dashboard data
+│   ├── hooks/useRelatorios.ts  # Relatórios
+│   └── hooks/use-mobile.ts     # Mobile detection
 ├── 🔌 Data Access Layer (Services)
 │   ├── services/api.ts         # API service layer
 │   └── services/apiClient.ts   # HTTP client configuration
@@ -102,8 +126,13 @@ src/
 │   └── Local component state
 └── 🛠️ Utilities & Types
     ├── @types/                 # TypeScript type definitions
+    │   ├── types.api.ts        # API types
+    │   ├── types.components.ts # Component types
+    │   ├── types.contasPagar.ts # Contas a pagar types
+    │   └── jspdf.d.ts         # PDF types
     ├── utils/                  # Utility functions
-    └── schemas/                # Zod validation schemas
+    ├── schemas/                # Zod validation schemas
+    └── lib/                    # Library utilities
 ```
 
 ### 2. **Component Architecture**
@@ -185,6 +214,209 @@ export function AccountsTable({
   // Ações inline: pagar, editar, excluir, visualizar
   // Menu dropdown para ações adicionais
   // Formatação automática de datas e valores monetários
+}
+
+// StatusMonitoramento - Componente de status do sistema
+export function StatusMonitoramento({
+  monitoramentoExecutado,
+  executarMonitoramento,
+  reload,
+}: StatusMonitoramentoProps) {
+  // Indicador visual do status do monitoramento
+  // Botão para executar monitoramento manual
+  // Feedback visual de execução
+}
+```
+
+#### **Componentes de Dashboard Financeiro**
+
+```typescript
+// SaldoCards - Cards de saldo e métricas principais
+export function SaldoCards({ dados }: SaldoCardsProps) {
+  // Cards de saldo atual, receitas, despesas
+  // Indicadores visuais de crescimento/declínio
+  // Formatação automática de valores monetários
+}
+
+// ResumoVendas - Resumo de vendas com gráficos
+export function ResumoVendas({ vendas }: ResumoVendasProps) {
+  // Gráfico de evolução de vendas
+  // Métricas de performance
+  // Comparação com períodos anteriores
+}
+
+// AlertasDashboard - Sistema de alertas financeiros
+export function AlertasDashboard() {
+  // Lista de alertas importantes
+  // Classificação por prioridade
+  // Ações rápidas para resolução
+}
+
+// FluxoCaixaChart - Gráfico de fluxo de caixa
+export function FluxoCaixaChart() {
+  // Gráfico de linha com entradas e saídas
+  // Projeções futuras
+  // Indicadores de tendência
+}
+
+// TopProdutosChart - Gráfico dos produtos mais vendidos
+export function TopProdutosChart() {
+  // Gráfico de barras dos top produtos
+  // Métricas de performance por produto
+  // Análise de margem de lucro
+}
+
+// DistribuicaoVendasChart - Distribuição de vendas por categoria
+export function DistribuicaoVendasChart() {
+  // Gráfico de pizza com distribuição
+  // Percentuais de participação
+  // Comparação entre categorias
+}
+
+// ValorEstoqueCard - Card de valor do estoque
+export function ValorEstoqueCard({ dados }: ValorEstoqueCardProps) {
+  // Valor total investido em estoque
+  // Valor potencial de venda
+  // Indicadores de giro de estoque
+}
+
+// ContasPagarCard - Card de contas a pagar
+export function ContasPagarCard() {
+  // Resumo de contas pendentes
+  // Contas vencidas
+  // Próximos vencimentos
+}
+```
+
+#### **Componentes de Relatórios Financeiros**
+
+```typescript
+// CardsResumo - Cards de resumo dos relatórios
+export function CardsResumo({ dados }: CardsResumoProps) {
+  // Métricas principais de performance
+  // Indicadores de crescimento
+  // Comparações com períodos anteriores
+}
+
+// GraficosPrincipais - Gráficos principais dos relatórios
+export function GraficosPrincipais({ dados }: GraficosPrincipaisProps) {
+  // Gráfico de evolução de lucro
+  // Distribuição de margem por categoria
+  // Análise de investimento vs retorno
+}
+
+// AnalisesDetalhadas - Análises detalhadas
+export function AnalisesDetalhadas({ dados }: AnalisesDetalhadasProps) {
+  // Tabelas de dados detalhados
+  // Análises por produto/categoria
+  // Métricas de performance
+}
+
+// RelatorioConfig - Configuração de relatórios
+export function RelatorioConfig({
+  tipoRelatorio,
+  setTipoRelatorio,
+  periodoInicio,
+  setPeriodoInicio,
+  periodoFim,
+  setPeriodoFim,
+}: RelatorioConfigProps) {
+  // Seleção de tipo de relatório
+  // Configuração de período
+  // Filtros avançados
+  // Opções de exportação
+}
+```
+
+#### **Componentes de Configurações Financeiras**
+
+```typescript
+// ContasBancarias - Gestão de contas bancárias
+export function ContasBancarias({
+  contasBancarias,
+  setContasBancarias,
+}: ContasBancariasProps) {
+  // Lista de contas bancárias
+  // Formulário de cadastro/edição
+  // Status ativo/inativo
+}
+
+// MetodosPagamento - Gestão de métodos de pagamento
+export function MetodosPagamento({
+  metodosPagamento,
+  setMetodosPagamento,
+}: MetodosPagamentoProps) {
+  // Lista de métodos disponíveis
+  // Toggle ativo/inativo
+  // Configuração de tipos
+}
+
+// Categorias - Gestão de categorias
+export function Categorias({
+  categorias,
+  onAddCategoria,
+  onUpdateCategoria,
+  onDeleteCategoria,
+}: CategoriasProps) {
+  // Lista de categorias
+  // Formulário de cadastro/edição
+  // Seleção de cores
+  // Tipos (receita/despesa)
+}
+
+// LimitesFluxo - Configuração de limites de fluxo de caixa
+export function LimitesFluxo({ limites, setLimites }: LimitesFluxoProps) {
+  // Configuração de limites diários/semanais/mensais
+  // Alertas de fluxo de caixa
+  // Validação de valores
+}
+
+// Alertas - Configuração de alertas
+export function Alertas({ alertas, setAlertas }: AlertasProps) {
+  // Toggle de alertas por tipo
+  // Configuração de notificações
+  // Prioridades de alerta
+}
+```
+
+#### **Componentes de Fluxo de Caixa**
+
+```typescript
+// ResumoCards - Cards de resumo do fluxo de caixa
+export function ResumoCards({
+  fluxoCaixaHistorico,
+  projecaoFutura,
+}: ResumoCardsProps) {
+  // Saldo atual
+  // Entradas do período
+  // Saídas do período
+  // Projeções futuras
+}
+
+// GraficoFluxo - Gráfico principal do fluxo de caixa
+export function GraficoFluxo({
+  fluxoCaixaHistorico,
+  projecaoFutura,
+}: GraficoFluxoProps) {
+  // Gráfico de linha com histórico
+  // Projeções futuras
+  // Indicadores de tendência
+  // Marcadores de eventos importantes
+}
+
+// Categorias - Análise por categorias
+export function Categorias({ entradas, saidas }: CategoriasProps) {
+  // Gráfico de pizza para entradas
+  // Gráfico de pizza para saídas
+  // Percentuais de participação
+  // Valores absolutos
+}
+
+// ComparativoPeriodos - Comparação entre períodos
+export function ComparativoPeriodos({ dados }: ComparativoPeriodosProps) {
+  // Tabela comparativa
+  // Indicadores de crescimento
+  // Análise de tendências
 }
 ```
 
@@ -297,6 +529,177 @@ export const useContasPagarMonitoramento = () => {
     obterStatusSistema,
   };
 };
+
+// useDashboard - Hook para dados do dashboard
+export const useDashboard = () => {
+  const [dados, setDados] = useState<DashboardDados>({
+    estoque: null,
+    financeiro: null,
+    giro: null,
+    vendas: null,
+    melhorMargem: null,
+    margemTotal: null,
+    evolucaoLucroMensal: [],
+    valorInvestidoPorCategoria: null,
+    distribuicaoMargemLucro: null,
+    vendasEmAberto: null,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Carrega todos os dados do dashboard em paralelo
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [
+          estoqueRes,
+          financeiroRes,
+          giroRes,
+          vendasRes,
+          melhorMargemRes,
+          margemTotalRes,
+          evolucaoLucroMensalRes,
+          valorInvestidoPorCategoriaRes,
+          distribuicaoMargemLucroRes,
+          vendasEmAbertoRes,
+        ] = await Promise.all([
+          fetchTotalValorEstoque(),
+          fetchTotalAPagar(),
+          fetchGiroEstoque(),
+          fetchVendasDashboard(),
+          getProdutosMelhorMargemLucro(),
+          getMargemLucroTotal(),
+          getEvolucaoLucroMensal(),
+          getValorInvestidoPorCategoria(),
+          getDistribuicaoMargemLucro(),
+          getQuantidadeVendasEmAberto(),
+        ]);
+
+        setDados({
+          estoque: estoqueRes,
+          financeiro: financeiroRes,
+          giro: giroRes,
+          vendas: vendasRes,
+          melhorMargem: melhorMargemRes,
+          margemTotal: margemTotalRes,
+          evolucaoLucroMensal: Array.isArray(evolucaoLucroMensalRes)
+            ? evolucaoLucroMensalRes
+            : evolucaoLucroMensalRes
+            ? [evolucaoLucroMensalRes]
+            : [],
+          valorInvestidoPorCategoria: valorInvestidoPorCategoriaRes,
+          distribuicaoMargemLucro: distribuicaoMargemLucroRes,
+          vendasEmAberto: vendasEmAbertoRes ?? null,
+        });
+      } catch (err) {
+        console.error("Erro ao buscar dados do dashboard:", err);
+        setError("Erro ao carregar informações");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  return { dados, loading, error };
+};
+
+// useClientes - Hook para gestão de clientes
+export const useClientes = () => {
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadClientes = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchAllClientes();
+      const clientesNormalizados = (data.clientes ?? []).map(normalizeCliente);
+      setClientes(clientesNormalizados);
+    } catch (err) {
+      console.error("Erro ao carregar clientes:", err);
+      setError("Erro ao carregar clientes");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadClientes();
+  }, []);
+
+  return { clientes, loading, error, reload: loadClientes };
+};
+
+// useProdutos - Hook para gestão de produtos
+export const useProdutos = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchAllProdutos();
+      setProducts(data as Product[]);
+    } catch (err) {
+      console.error("Erro ao carregar produtos:", err);
+      setError("Erro ao carregar produtos");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  return { products, loading, error, reload: loadProducts };
+};
+
+// useVendas - Hook para gestão de vendas
+export const useVendas = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submitVenda = async (venda: VendaData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const resposta = await criarVenda(venda);
+      return resposta;
+    } catch (err) {
+      console.error("Erro ao cadastrar venda:", err);
+      setError("Erro ao cadastrar venda");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { submitVenda, loading, error };
+};
+
+// useIsMobile - Hook para detecção de dispositivos móveis
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(
+    undefined
+  );
+
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    const onChange = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+    mql.addEventListener("change", onChange);
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+
+  return !!isMobile;
+}
 ```
 
 #### **API State Management**
@@ -1087,6 +1490,158 @@ res.status(200).json({
 });
 ```
 
+#### **Controllers Implementados**
+
+```typescript
+// contasPagar.controller.ts - Controller de Contas a Pagar
+export const criarContaController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const data: ContaPagarCreateRequest = req.body;
+
+    // Validações básicas
+    if (
+      !data.fornecedor_nome ||
+      !data.valor ||
+      !data.data_vencimento ||
+      !data.categoria_id ||
+      !data.descricao
+    ) {
+      res.status(400).json({
+        success: false,
+        message:
+          "Campos obrigatórios: fornecedor_nome, valor, data_vencimento, categoria_id, descricao",
+      });
+      return;
+    }
+
+    if (data.valor <= 0) {
+      res.status(400).json({
+        success: false,
+        message: "Valor deve ser maior que zero",
+      });
+      return;
+    }
+
+    const conta = await criarConta(data);
+
+    res.status(201).json({
+      success: true,
+      message: "Conta criada com sucesso",
+      data: conta,
+    });
+  } catch (error) {
+    console.error("Erro ao criar conta:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro interno do servidor",
+      error: error instanceof Error ? error.message : "Erro desconhecido",
+    });
+  }
+};
+
+export const obterResumoController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const resumo = await obterResumo();
+
+    res.status(200).json({
+      success: true,
+      message: "Resumo obtido com sucesso",
+      data: resumo,
+    });
+  } catch (error) {
+    console.error("Erro ao obter resumo:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro interno do servidor",
+      error: error instanceof Error ? error.message : "Erro desconhecido",
+    });
+  }
+};
+
+// relatorio.controller.ts - Controller de Relatórios
+export const getRelatorioLucroProdutoController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const relatorio = await getRelatorioLucroProduto();
+    res.status(200).json({ relatorio });
+  } catch (err) {
+    console.error("Erro ao gerar relatório de lucro por produto:", err);
+    res.status(500).json({ error: (err as Error).message });
+  }
+};
+
+export const getRelatorioCompletoController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { dataInicio, dataFim } = req.query;
+
+    if (!dataInicio || !dataFim) {
+      return res.status(400).json({
+        error: "Data de início e data de fim são obrigatórias",
+      });
+    }
+
+    const relatorio = await getRelatorioCompleto(
+      dataInicio as string,
+      dataFim as string
+    );
+    res.status(200).json(relatorio);
+  } catch (err) {
+    console.error("Erro ao gerar relatório completo:", err);
+    res.status(500).json({ error: (err as Error).message });
+  }
+};
+
+// config.controller.ts - Controller de Configurações
+export const getMetodosPagamentoConfig = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const metodos = await getMetodosPagamento();
+    res.status(200).json(metodos);
+  } catch (error) {
+    console.error("Erro ao buscar métodos de pagamento:", error);
+    res.status(500).json({ error: "Erro interno no servidor" });
+  }
+};
+
+export const listarCategorias = async (req: Request, res: Response) => {
+  try {
+    const categorias = await getCategorias();
+    res.json(categorias);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao listar categorias" });
+  }
+};
+
+export const criarCategoria = async (req: Request, res: Response) => {
+  try {
+    const { id, nome, tipo, cor } = req.body;
+    if (!id || !nome || !tipo || !cor) {
+      return res.status(400).json({ message: "Dados incompletos" });
+    }
+
+    await addCategoria({ id, nome, tipo, cor });
+    res.status(201).json({ message: "Categoria criada com sucesso" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao criar categoria" });
+  }
+};
+```
+
 ### **3. Padrão de Services**
 
 #### **Separação de Responsabilidades**
@@ -1170,6 +1725,83 @@ router.get("/clientes/todos", getAllClientesController);
 router.post("/clientes", createClienteController);
 router.put("/altera/:id", updateClienteController);
 router.get("/em-aberto/count", getClientesEmAbertoCountController);
+
+export default router;
+
+// contasPagarRoutes.ts - Rotas de Contas a Pagar
+const router = Router();
+
+// Contas a Pagar
+router.post("/contas", criarContaController);
+router.get("/contas", listarContasController);
+router.get("/contas/:id", buscarContaPorIdController);
+router.put("/contas/:id", atualizarContaController);
+router.delete("/contas/:id", excluirContaController);
+router.patch("/contas/:id/pagar", marcarComoPagaController);
+router.get("/contas/resumo", obterResumoController);
+router.get("/contas/vencimentos", buscarContasVencimentoController);
+router.post("/contas/atualizar-status", atualizarStatusContasController);
+
+// Fornecedores
+router.post("/fornecedores", criarFornecedorController);
+router.get("/fornecedores", listarFornecedoresController);
+router.get("/fornecedores/:id", buscarFornecedorPorIdController);
+router.put("/fornecedores/:id", atualizarFornecedorController);
+router.delete("/fornecedores/:id", excluirFornecedorController);
+
+export default router;
+
+// relatorioRoutes.ts - Rotas de Relatórios
+const router = Router();
+
+router.get("/lucro-produto", getRelatorioLucroProdutoController);
+router.get("/lucro-categoria", getRelatorioLucroCategoriaController);
+router.get("/lucro-periodo", getRelatorioLucroPeriodoController);
+router.get("/estoque-investimento", getRelatorioEstoqueInvestimentoController);
+router.get("/completo", getRelatorioCompletoController);
+router.get("/por-tipo", getRelatorioPorTipoController);
+
+export default router;
+
+// configRoutes.ts - Rotas de Configurações
+const router = Router();
+
+// Métodos de Pagamento
+router.get("/metodos-pagamento", getMetodosPagamentoConfig);
+router.patch("/metodos-pagamento/:id", toggleMetodoPagamentoController);
+router.get("/metodos-pagamento/ativos", getMetodosPagamentoAtivosController);
+
+// Categorias
+router.get("/categorias", listarCategorias);
+router.post("/categorias", criarCategoria);
+router.put("/categorias/:id", atualizarCategoria);
+router.delete("/categorias/:id", removerCategoria);
+
+export default router;
+
+// vendasRoutes.ts - Rotas de Vendas
+const router = Router();
+
+router.get("/todas", getAllVendasController);
+router.post("/cadvendas", createVendaController);
+router.get("/:id", getVendaByIdController);
+router.put("/altera/:id", updateVendaController);
+router.delete("/:id", deleteVendaController);
+router.get("/total", getTotalVendasController);
+
+export default router;
+
+// productRoutes.ts - Rotas de Produtos
+const router = Router();
+
+router.get("/produtos/todos", getAllProdutosController);
+router.post("/produtos", createProdutoController);
+router.get("/produtos/:id", getProdutoByIdController);
+router.put("/produtos/:id", updateProdutoController);
+router.delete("/produtos/:id", deleteProdutoController);
+router.get("/produtos/estoque-total", getTotalEstoqueController);
+router.get("/margemLucroTotal", getMargemLucroTotalController);
+router.get("/evolucaoLucroMensal", getEvolucaoLucroMensalController);
 
 export default router;
 ```
