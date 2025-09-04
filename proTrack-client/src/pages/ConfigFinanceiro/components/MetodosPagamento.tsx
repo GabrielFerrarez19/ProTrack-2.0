@@ -22,12 +22,17 @@ export function MetodosPagamento({
   metodosPagamento,
   setMetodosPagamento,
 }: Props) {
-  // Busca os métodos do banco ao montar o componente
   useEffect(() => {
     const loadMetodos = async () => {
       try {
-        const dados = await fetchMetodosPagamento(); // retorna todos do banco
-        setMetodosPagamento(dados); // atualiza o estado do pai
+        const dados = await fetchMetodosPagamento();
+
+        console.log("dados", dados);
+
+        // filtra só os tipos aceitos
+        const metodosValidos = dados as MetodoPagamento[];
+
+        setMetodosPagamento(metodosValidos);
       } catch (error) {
         console.error("Erro ao carregar métodos de pagamento:", error);
       }
@@ -63,12 +68,14 @@ export function MetodosPagamento({
         return "📱";
       case "transferencia":
         return "🏦";
-      case "aprazo": // ⬅ novo método
-        return "🕒"; // ícone de relógio para representar prazo
+      case "aprazo":
+        return "🕒";
       default:
         return "💰";
     }
   };
+
+  console.log("metodosPagamento", metodosPagamento);
 
   // Se não houver métodos carregados ainda
   if (!metodosPagamento || metodosPagamento.length === 0) {
