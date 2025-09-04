@@ -8,8 +8,9 @@ import {
   TableRow,
 } from "../../../components/ui/table";
 import { Badge } from "../../../components/ui/badge";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Dialog } from "../../../components/ui/dialog";
+import { Button } from "../../../components/ui/button";
 import { DialogAlter } from "./DialogAlter";
 
 interface ProductTableProps {
@@ -30,6 +31,31 @@ export function ProductTable({
 }: ProductTableProps) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [open, setOpen] = useState(false);
+
+  // Estados de paginação
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Cálculos de paginação
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentProducts = useMemo(() => {
+    return products.slice(startIndex, endIndex);
+  }, [products, startIndex, endIndex]);
+
+  // Funções de navegação
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  const goToPreviousPage = () => {
+    setCurrentPage((prev) => Math.max(1, prev - 1));
+  };
+
+  const goToNextPage = () => {
+    setCurrentPage((prev) => Math.min(totalPages, prev + 1));
+  };
 
   const handleDialogClose = (isOpen: boolean) => {
     if (!isOpen) {
@@ -68,7 +94,7 @@ export function ProductTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {products.map((product, index) => (
+          {currentProducts.map((product, index) => (
             <TableRow
               key={product.codigo_barras ?? index}
               className="hover:bg-gray-200 cursor-pointer"
@@ -97,6 +123,56 @@ export function ProductTable({
           ))}
         </TableBody>
       </Table>
+
+      {/* Controles de Paginação */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t">
+          <div className="flex items-center text-sm text-gray-700">
+            <span>
+              Mostrando {startIndex + 1} a {Math.min(endIndex, products.length)}{" "}
+              de {products.length} produtos
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={goToPreviousPage}
+              disabled={currentPage === 1}
+              className="cursor-pointer"
+            >
+              Anterior
+            </Button>
+
+            <div className="flex items-center space-x-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => goToPage(page)}
+                    className="w-8 h-8 p-0 cursor-pointer"
+                  >
+                    {page}
+                  </Button>
+                )
+              )}
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className="cursor-pointer"
+            >
+              Próximo
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Dialog open={open} onOpenChange={handleDialogClose}>
         {selectedProduct && (
