@@ -7,8 +7,10 @@ import {
 import { Button } from "../../../components/ui/button";
 import { Calendar } from "lucide-react";
 import { useContasPagar } from "../../../hooks/useContasPagar";
+import { useNavigate } from "react-router-dom";
 
 export function ContasPagarCard() {
+  const navigate = useNavigate();
   const { resumo } = useContasPagar();
   return (
     <Card className="bg-white shadow-sm">
@@ -46,7 +48,12 @@ export function ContasPagarCard() {
               </span>
             </div>
           </div>
-          <Button variant="outline" size="sm" className="w-full">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full cursor-pointer"
+            onClick={() => navigate("/contasPagar")}
+          >
             Gerenciar Contas
           </Button>
         </div>
