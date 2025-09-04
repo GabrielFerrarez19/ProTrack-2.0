@@ -12,7 +12,7 @@ import { criarVenda } from "../../services/api";
 import type { VendaData } from "../../@types/types.api";
 
 // Sonner Toast
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 
 export function Vendas() {
   const methods = useForm<VendaForm>({
@@ -115,10 +115,7 @@ export function Vendas() {
   }, [methods.formState.errors]);
 
   return (
-    <>
-      <Toaster position="top-right" richColors />
-
-      <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6">
         <Header
           title="Bem vindo a página Venda!"
           text="Aqui você pode registar suas vendas"
@@ -177,6 +174,5 @@ export function Vendas() {
           </form>
         </FormProvider>
       </div>
-    </>
   );
 }

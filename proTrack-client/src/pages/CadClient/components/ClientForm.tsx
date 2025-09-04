@@ -20,7 +20,7 @@ import type { ClienteFormData } from "../../../@types/types.components";
 import { cadastrarCliente } from "../../../services/api";
 
 // Sonner Toast
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 
 export function ClientForm() {
   const { register, setValue, handleSubmit, reset } =
@@ -46,11 +46,7 @@ export function ClientForm() {
   };
 
   return (
-    <>
-      {/* Toaster global */}
-      <Toaster position="top-right" richColors />
-
-      <Card className="w-full max-w-5xl mx-auto shadow-elegant border-2 bg-card border-[var(--bluePast-500)] p-0">
+    <Card className="w-full max-w-5xl mx-auto shadow-elegant border-2 bg-card border-[var(--bluePast-500)] p-0">
         <CardHeader className="flex bg-[var(--bluePast-500)] h-20 text-primary-foreground rounded-t-lg items-center">
           <CardTitle className="flex items-center gap-2 text-2xl">
             <User className="w-6 h-6" />
@@ -275,6 +271,5 @@ export function ClientForm() {
           </form>
         </CardContent>
       </Card>
-    </>
   );
 }

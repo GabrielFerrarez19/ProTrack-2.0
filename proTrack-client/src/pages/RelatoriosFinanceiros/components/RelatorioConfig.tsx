@@ -20,7 +20,7 @@ import {
   getRelatorioPorTipo,
   getRelatorioCompleto,
 } from "../../../services/api";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -187,11 +187,7 @@ export function RelatorioConfig({
   };
 
   return (
-    <>
-      {/* 🔹 Toaster do Sonner */}
-      <Toaster richColors position="top-right" />
-
-      <Card>
+    <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Filter className="h-5 w-5" />
@@ -272,6 +268,5 @@ export function RelatorioConfig({
           </div>
         </CardContent>
       </Card>
-    </>
   );
 }
