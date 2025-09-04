@@ -108,11 +108,12 @@ export function AccountsTable({
   };
 
   const handleExcluir = async (conta: AccountsTableProps["contas"][0]) => {
-    if (
-      !confirm(
-        `Tem certeza que deseja excluir a conta de ${conta.fornecedor_nome}?`
-      )
-    ) {
+    // Usar toast para confirmação (alternativa ao confirm nativo)
+    const confirmacao = window.confirm(
+      `Tem certeza que deseja excluir a conta de ${conta.fornecedor_nome}?`
+    );
+
+    if (!confirmacao) {
       return;
     }
 

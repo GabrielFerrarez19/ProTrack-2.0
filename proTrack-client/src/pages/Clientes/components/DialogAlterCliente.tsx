@@ -18,6 +18,7 @@ import {
 } from "../../../components/ui/select";
 
 import { atualizarCliente, fetchAllVendasById } from "../../../services/api";
+import { toast } from "sonner";
 import type {
   ClienteFormData,
   Cliente,
@@ -129,7 +130,7 @@ export function DialogAlterCliente({
   // Envio do formulário
   const onSubmit = async (data: ClienteFormData) => {
     if (!cliente.id) {
-      alert("ID do cliente ausente!");
+      toast.error("ID do cliente ausente!");
       return;
     }
 
@@ -138,16 +139,16 @@ export function DialogAlterCliente({
         ...data,
         valorAPagar: totalRestante, // envia valor a pagar atualizado
       });
-      alert("Cliente alterado com sucesso!");
+      toast.success("Cliente alterado com sucesso!");
       reset();
       setOpen(false);
       if (onClienteUpdated) onClienteUpdated();
     } catch (error: unknown) {
       console.error("Erro ao alterar cliente:", error);
       if (typeof error === "object" && error !== null && "error" in error) {
-        alert((error as { error: string }).error);
+        toast.error((error as { error: string }).error);
       } else {
-        alert("Erro ao alterar cliente");
+        toast.error("Erro ao alterar cliente");
       }
     }
   };

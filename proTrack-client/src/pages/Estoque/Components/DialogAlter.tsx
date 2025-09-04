@@ -24,6 +24,7 @@ import type {
   Product,
 } from "../../../@types/types.components";
 import { atualizarProduto } from "../../../services/api"; // ajuste o caminho se necessário
+import { toast } from "sonner";
 
 const categorias = [
   "Roupas",
@@ -93,13 +94,13 @@ export function DialogAlter({
       await atualizarProduto(updatedProduct);
       setOpen(false);
       // Chama o callback para atualizar os dados da tabela
-      alert("Cliente alterado com sucesso!");
+      toast.success("Produto alterado com sucesso!");
       if (onProductUpdated) {
         onProductUpdated();
       }
     } catch (error: unknown) {
       console.error("Erro ao atualizar produto:", error);
-      alert(
+      toast.error(
         error instanceof Error ? error.message : "Erro ao atualizar produto"
       );
     }
