@@ -16,6 +16,7 @@ import { ConfiguracoesFinanceiras } from "./pages/ConfigFinanceiro";
 import { ContasPagar } from "./pages/ContasPagar";
 import { ContasReceber } from "./pages/ContasReceber";
 import { FluxoCaixa } from "./pages/FluxoCaixa";
+import { CadastroContasPagar } from "./pages/CadastroContasPagar";
 
 export function Router() {
   return (
@@ -23,6 +24,7 @@ export function Router() {
       <Route path="/" element={<Login />} />
       <Route path="/confirmacaoemail" element={<ConfirmacaoEmail />} />
       <Route path="/redefinirsenha" element={<RedefinirSenha />} />
+      <Route path="/cadastrocontaspagar" element={<CadastroContasPagar />} />
       <Route path="/" element={<DefaultLayout />}>
         <Route path="/status" element={<Status />} />
         <Route path="/cadastroprodutos" element={<CadProduct />} />
