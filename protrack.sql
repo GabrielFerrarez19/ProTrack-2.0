@@ -1,15 +1,25 @@
 use protrack
 
 CREATE TABLE users (
-  id INT PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  email VARCHAR(100) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,        -- Melhor que INT, suporta mais registros
+  name VARCHAR(150) NOT NULL,                  -- Nome completo do usuário
+  email VARCHAR(150) NOT NULL UNIQUE,          -- Login único
+  username VARCHAR(50) UNIQUE,                 -- Opcional: apelido/login
+  password_hash VARCHAR(255) NOT NULL,         -- Hash seguro da senha
+  role VARCHAR(50) NOT NULL DEFAULT 'user',    -- Ex: admin, financeiro, vendas
+  status ENUM('ativo', 'inativo', 'bloqueado') DEFAULT 'ativo',
+  empresa_id BIGINT NULL,                      -- Relacionar usuário a uma empresa
+  departamento_id BIGINT NULL,                 -- Relacionar a um setor (financeiro, estoque...)
+  ultimo_login DATETIME NULL,                  -- Último login
+  criado_por BIGINT NULL,                      -- Usuário que cadastrou
+  atualizado_por BIGINT NULL,                  -- Último que alterou
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-INSERT INTO users (id, name, email, password, created_at)
-VALUES (8, 'Gabriel Ferrarez', 'gabriel@example.com', '123456', '2025-07-30 17:50:52');
+
+INSERT INTO users (name, email, password_hash, username, role, status, created_at)
+VALUES ('Gabriel Ferrarez', 'gabriel@example.com', '$2b$10$dbbAkbWW0DrPFxLQQjE8R.EHB7z7j/LHqYLtNAaSQr465iPl14yki', 'gabriel', 'admin', 'ativo', '2025-07-30 17:50:52');
 
 CREATE TABLE produtos (
   id INT AUTO_INCREMENT PRIMARY KEY,
