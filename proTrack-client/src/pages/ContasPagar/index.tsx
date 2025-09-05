@@ -16,6 +16,7 @@ import { Plus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { StatusMonitoramento } from "./components";
 import { useNavigate } from "react-router-dom";
+import { Header } from "../../components/header";
 
 export function ContasPagar() {
   const {
@@ -98,14 +99,10 @@ export function ContasPagar() {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Contas a Pagar
-          </h1>
-          <p className="text-muted-foreground">
-            Gerencie as contas e pagamentos a fornecedores
-          </p>
-        </div>
+        <Header
+          title="Bem vindo a página Contas a Pagar!"
+          text="Aqui você pode gerenciar as contas e pagamentos a fornecedores"
+        />
 
         <div className="flex gap-2">
           <Button
