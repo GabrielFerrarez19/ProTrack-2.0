@@ -48,6 +48,65 @@ export const loginUser = async (email: string, password: string) => {
   return response.data;
 };
 
+// 🔹 FUNÇÕES DE AUTENTICAÇÃO E USUÁRIO
+
+export const getCurrentUser = async () => {
+  const response = await api.get("/user/me");
+  return response.data;
+};
+
+export const updateCurrentUser = async (userData: {
+  name?: string;
+  email?: string;
+  username?: string;
+  role?: string;
+  empresa_id?: number;
+  departamento_id?: number;
+}) => {
+  const response = await api.put("/user/me", userData);
+  return response.data;
+};
+
+export const logoutUser = async () => {
+  const response = await api.post("/user/logout");
+  return response.data;
+};
+
+// 🔹 FUNÇÕES ADMINISTRATIVAS (apenas para admins)
+
+export const getAllUsers = async () => {
+  const response = await api.get("/user/all");
+  return response.data;
+};
+
+export const getUserById = async (id: string) => {
+  const response = await api.get(`/user/${id}`);
+  return response.data;
+};
+
+export const updateUserById = async (
+  id: string,
+  userData: {
+    name?: string;
+    email?: string;
+    username?: string;
+    role?: string;
+    empresa_id?: number;
+    departamento_id?: number;
+  }
+) => {
+  const response = await api.put(`/user/${id}`, userData);
+  return response.data;
+};
+
+export const changeUserStatus = async (
+  id: string,
+  status: "ativo" | "inativo" | "bloqueado"
+) => {
+  const response = await api.patch(`/user/${id}/status`, { status });
+  return response.data;
+};
+
 export const cadastrarProduto = async (produto: Produto) => {
   const response = await api.post("/product/produtos", produto);
   return response.data;

@@ -24,7 +24,8 @@ import {
 } from "../../../components/ui/select";
 import { Separator } from "../../../components/ui/separator";
 import { Label } from "../../../components/ui/label";
-import type { PerfilFormData, User } from "../../../@types/types.components";
+import type { PerfilFormData } from "../../../@types/types.components";
+import type { User } from "../../../@types/types.api";
 import type { UseFormReturn } from "react-hook-form";
 
 type ProfileFormCardProps = {
@@ -56,6 +57,11 @@ export function ProfileFormCard({
         <Button
           variant={isEditing ? "outline" : "default"}
           onClick={() => setIsEditing(!isEditing)}
+          className={`${
+            isEditing
+              ? "hover:bg-muted "
+              : "cursor-pointer bg-gradient-to-r from-[#628DFD] to-[#6F31FF] text-white hover:from-[#7A9BFD] hover:to-[#B597F9]"
+          }`}
         >
           {isEditing ? "Cancelar" : "Editar"}
         </Button>
@@ -170,7 +176,12 @@ export function ProfileFormCard({
                 >
                   Cancelar
                 </Button>
-                <Button type="submit">Salvar Alterações</Button>
+                <Button
+                  type="submit"
+                  className={`cursor-pointer bg-gradient-to-r from-[#628DFD] to-[#6F31FF] text-white hover:from-[#7A9BFD] hover:to-[#B597F9]`}
+                >
+                  Salvar Alterações
+                </Button>
               </div>
             )}
           </form>

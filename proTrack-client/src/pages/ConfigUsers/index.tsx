@@ -1,71 +1,66 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { toast } from "sonner";
-
 import { AvatarCard } from "./components/AvatarCard";
 import { ProfileFormCard } from "./components/ProfileFormCard";
-import type { User } from "../../@types/types.components";
 import { Header } from "../../components/header";
-
-const perfilSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  username: z.string().min(3).optional(),
-  role: z.string(),
-  departamento_id: z.string().optional(),
-});
-type PerfilFormData = z.infer<typeof perfilSchema>;
-
-const mockUser = {
-  id: 1,
-  name: "João Silva",
-  email: "joao.silva@empresa.com",
-  username: "joaosilva",
-  role: "admin",
-  status: "ativo",
-  empresa_id: 1,
-  departamento_id: 2,
-  ultimo_login: "2024-01-15T10:30:00",
-  created_at: "2023-06-15T09:00:00",
-  updated_at: "2024-01-10T14:20:00",
-};
-
-const roles = [
-  { value: "admin", label: "Administrador" },
-  { value: "financeiro", label: "Financeiro" },
-  { value: "vendas", label: "Vendas" },
-  { value: "user", label: "Usuário" },
-];
-
-const departamentos = [
-  { value: "1", label: "Administrativo" },
-  { value: "2", label: "Financeiro" },
-  { value: "3", label: "Vendas" },
-  { value: "4", label: "Estoque" },
-];
+import { useAuth } from "../../hooks/useAuth";
+import { perfilSchema, type PerfilFormData } from "../../schemas/schemaUsers";
+import { roles, departamentos } from "../../utils/functions";
 
 export function ConfigUsers() {
   const [isEditing, setIsEditing] = useState(false);
+  const { user, updateUser, isLoading, error } = useAuth();
+
   const form = useForm<PerfilFormData>({
     resolver: zodResolver(perfilSchema),
     defaultValues: {
-      name: mockUser.name,
-      email: mockUser.email,
-      username: mockUser.username,
-      role: mockUser.role,
-      departamento_id: mockUser.departamento_id?.toString(),
+      name: "",
+      email: "",
+      username: "",
+      role: "",
+      departamento_id: "",
     },
   });
 
-  const onSubmit = (data: PerfilFormData) => {
-    console.log("Dados do perfil:", data);
-    toast.success("Perfil atualizado", {
-      description: "Suas informações foram atualizadas com sucesso.",
-      style: { background: "#4ade80", color: "#065f46" },
-    });
-    setIsEditing(false);
+  // Atualizar valores do formulário quando o usuário carregar
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        name: user.name,
+        email: user.email,
+        username: user.username || "",
+        role: user.role,
+        departamento_id: user.departamento_id || "",
+      });
+    }
+  }, [user, form]);
+
+  const onSubmit = async (data: PerfilFormData) => {
+    try {
+      await updateUser({
+        name: data.name,
+        email: data.email,
+        username: data.username,
+        role: data.role,
+        departamento_id: data.departamento_id
+          ? parseInt(data.departamento_id)
+          : undefined,
+      });
+
+      toast.success("Perfil atualizado", {
+        description: "Suas informações foram atualizadas com sucesso.",
+        style: { background: "#4ade80", color: "#065f46" },
+      });
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Erro ao atualizar perfil:", err);
+      toast.error("Erro ao atualizar perfil", {
+        description: "Não foi possível atualizar suas informações.",
+        style: { background: "#ef4444", color: "#ffffff" },
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -83,19 +78,79 @@ export function ConfigUsers() {
 
   const getRoleLabel = (role: string) =>
     roles.find((r) => r.value === role)?.label || role;
-  const getDepartamentoLabel = (id: number) =>
+  const getDepartamentoLabel = (id: string) =>
     departamentos.find((d) => d.value === id.toString())?.label ||
     "Não informado";
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <Header
+          title="Configurações de Usuário"
+          text="Carregando suas informações..."
+        />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando dados do usuário...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="p-6 space-y-6">
+        <Header
+          title="Configurações de Usuário"
+          text="Erro ao carregar informações"
+        />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-red-500 text-6xl mb-4">⚠️</div>
+            <p className="text-red-600 font-semibold">Erro ao carregar dados</p>
+            <p className="text-gray-600">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // No user state
+  if (!user) {
+    return (
+      <div className="p-6 space-y-6">
+        <Header
+          title="Configurações de Usuário"
+          text="Usuário não encontrado"
+        />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-gray-500 text-6xl mb-4">👤</div>
+            <p className="text-gray-600 font-semibold">
+              Usuário não encontrado
+            </p>
+            <p className="text-gray-500">
+              Faça login para acessar suas configurações
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
       <Header
-        title="Bem vindo a página Configurações de Usuários!"
-        text="Aqui você pode configurar as informações do usuário"
+        title="Configurações de Usuário"
+        text="Gerencie suas informações pessoais e configurações"
       />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <AvatarCard
-          user={mockUser as User}
           getStatusColor={getStatusColor}
           getRoleLabel={getRoleLabel}
           getDepartamentoLabel={getDepartamentoLabel}
@@ -107,7 +162,7 @@ export function ConfigUsers() {
           onSubmit={onSubmit}
           roles={roles}
           departamentos={departamentos}
-          user={mockUser as User}
+          user={user}
         />
       </div>
     </div>

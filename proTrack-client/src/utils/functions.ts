@@ -187,3 +187,17 @@ function calcularStatusVenda(
 
   return "pendente"; // ainda não venceu
 }
+
+export const roles = [
+  { value: "admin", label: "Administrador" },
+  { value: "financeiro", label: "Financeiro" },
+  { value: "vendas", label: "Vendas" },
+  { value: "user", label: "Usuário" },
+];
+
+export const departamentos = [
+  { value: "1", label: "Administrativo" },
+  { value: "2", label: "Financeiro" },
+  { value: "3", label: "Vendas" },
+  { value: "4", label: "Estoque" },
+];

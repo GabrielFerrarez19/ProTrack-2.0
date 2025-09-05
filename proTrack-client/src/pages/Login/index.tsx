@@ -3,14 +3,16 @@ import img from "../../assets/mesh-gradient.svg";
 import { Button } from "../../components/button";
 import { Input } from "../../components/input";
 import { Checkbox } from "../../components/ui/checkbox";
-import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../services/api";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login, isLoading, error, clearError } = useAuth();
 
   const handleCheckboxChange = () => {
     setMostrarSenha(!mostrarSenha);
@@ -18,11 +20,13 @@ export function Login() {
 
   const handleClickLogin = async () => {
     try {
-      const emailDigitado = email; // pegando do input
-      const senhaDigitada = password; // pegando do input
-      const result = await loginUser(emailDigitado, senhaDigitada);
+      clearError(); // Limpa erros anteriores
+      const result = await login(email, password);
       console.log("Login sucesso:", result);
-      navigate("/status");
+
+      // Redireciona para a página que o usuário tentou acessar ou para status
+      const from = location.state?.from?.pathname || "/status";
+      navigate(from, { replace: true });
     } catch (error) {
       console.error("Erro no login", error);
     }
@@ -96,7 +100,16 @@ export function Login() {
                 Esqueceu a senha?
               </span>
             </div>
-            <Button type="submit" Text="Entrar" />
+            <Button
+              type="submit"
+              Text={isLoading ? "Entrando..." : "Entrar"}
+              disabled={isLoading}
+            />
+            {error && (
+              <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded">
+                {error}
+              </div>
+            )}
           </form>
         </div>
       </div>
