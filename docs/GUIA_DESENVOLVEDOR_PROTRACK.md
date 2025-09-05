@@ -212,21 +212,119 @@ ProTrack-2.0/
 ├── protrack-server/           # Backend Node.js
 │   ├── src/
 │   │   ├── controllers/       # Controladores das APIs
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── user.controller.ts
+│   │   │   ├── client.controller.ts
+│   │   │   ├── product.controller.ts
+│   │   │   ├── vendas.controller.ts
+│   │   │   ├── vendasMonitoramento.controller.ts
+│   │   │   ├── contasPagar.controller.ts
+│   │   │   ├── contasPagarMonitoramento.controller.ts
+│   │   │   ├── config.controller.ts
+│   │   │   ├── relatorio.controller.ts
+│   │   │   └── pagamento.controller.ts
 │   │   ├── services/          # Lógica de negócio
+│   │   │   ├── user.service.ts
+│   │   │   ├── client.service.ts
+│   │   │   ├── product.service.ts
+│   │   │   ├── venda.service.ts
+│   │   │   ├── vendasMonitoramento.service.ts
+│   │   │   ├── contasPagar.service.ts
+│   │   │   ├── contasPagarMonitoramento.service.ts
+│   │   │   ├── config.service.ts
+│   │   │   ├── relatorio.service.ts
+│   │   │   └── pagamento.service.ts
 │   │   ├── routes/            # Definição de rotas
+│   │   │   ├── index.ts
+│   │   │   ├── user.routes.ts
+│   │   │   ├── userProfile.routes.ts
+│   │   │   ├── clientRoutes.ts
+│   │   │   ├── productRoutes.ts
+│   │   │   ├── vendasRoutes.ts
+│   │   │   ├── vendasMonitoramentoRoutes.ts
+│   │   │   ├── contasPagarRoutes.ts
+│   │   │   ├── contasPagarMonitoramentoRoutes.ts
+│   │   │   ├── configRoutes.ts
+│   │   │   ├── relatorioRoutes.ts
+│   │   │   └── pagamentoRoutes.ts
 │   │   ├── middlewares/       # Middlewares Express
+│   │   │   └── auth.middleware.ts
 │   │   ├── config/            # Configurações
+│   │   │   ├── database.ts
+│   │   │   └── prisma.ts
 │   │   ├── utils/             # Utilitários
+│   │   │   └── functions.ts
+│   │   ├── @types/            # Definições TypeScript
+│   │   │   └── types.service.ts
 │   │   └── scripts/           # Scripts de automação
-│   └── prisma/                # Schema e migrações
+│   │       └── monitoramentoContasPagar.js
+│   ├── prisma/                # Schema e migrações
+│   └── scripts/               # Scripts de configuração
 ├── proTrack-client/            # Frontend React
 │   ├── src/
 │   │   ├── components/        # Componentes reutilizáveis
+│   │   │   ├── ui/            # Componentes base (shadcn/ui)
+│   │   │   ├── header/        # Componentes de cabeçalho
+│   │   │   ├── Sidebar/       # Componentes de navegação
+│   │   │   ├── button.tsx     # Botão customizado
+│   │   │   ├── input.tsx      # Input customizado
+│   │   │   ├── ProtectedRoute.tsx
+│   │   │   └── PublicRoute.tsx
 │   │   ├── pages/             # Páginas da aplicação
+│   │   │   ├── Login/         # Autenticação
+│   │   │   ├── Status/        # Dashboard principal
+│   │   │   ├── CadProduct/    # Cadastro de produtos
+│   │   │   ├── CadClient/     # Cadastro de clientes
+│   │   │   ├── CadUsers/      # Cadastro de usuários
+│   │   │   ├── CadastroContasPagar/ # Cadastro de contas a pagar
+│   │   │   ├── Estoque/       # Gestão de estoque
+│   │   │   ├── Clientes/      # Gestão de clientes
+│   │   │   ├── Vendas/        # Gestão de vendas
+│   │   │   ├── TotalVenda/    # Total de vendas
+│   │   │   ├── Financeiro/    # Dashboard financeiro
+│   │   │   ├── RelatoriosFinanceiros/ # Relatórios financeiros
+│   │   │   ├── ConfigFinanceiro/ # Configurações financeiras
+│   │   │   ├── ConfigUsers/   # Configurações de usuários
+│   │   │   ├── FluxoCaixa/    # Fluxo de caixa
+│   │   │   ├── ContasPagar/   # Contas a pagar
+│   │   │   ├── ContasReceber/ # Contas a receber
+│   │   │   ├── MovimentaçõesFinanceitas/ # Movimentações financeiras
+│   │   │   ├── ConfirmacaoEmail/ # Confirmação de email
+│   │   │   └── RedefirirSenha/ # Redefinição de senha
 │   │   ├── hooks/             # Custom hooks
+│   │   │   ├── useAuth.ts
+│   │   │   ├── useClientes.ts
+│   │   │   ├── useContasPagar.ts
+│   │   │   ├── useContasPagarVencidas.ts
+│   │   │   ├── useContasPagarMonitoramento.ts
+│   │   │   ├── useDashboard.ts
+│   │   │   ├── useProdutos.ts
+│   │   │   ├── useRelatorios.ts
+│   │   │   ├── useUsers.ts
+│   │   │   ├── useVendas.ts
+│   │   │   ├── useVendasList.ts
+│   │   │   ├── useVendasVencidas.ts
+│   │   │   └── use-mobile.ts
 │   │   ├── services/          # Serviços de API
+│   │   │   ├── api.ts
+│   │   │   └── apiClient.ts
 │   │   ├── @types/            # Definições TypeScript
-│   │   └── utils/             # Utilitários
+│   │   │   ├── types.api.ts
+│   │   │   ├── types.components.ts
+│   │   │   ├── types.contasPagar.ts
+│   │   │   └── jspdf.d.ts
+│   │   ├── utils/             # Utilitários
+│   │   │   └── functions.ts
+│   │   ├── schemas/           # Validações Zod
+│   │   │   ├── schemaUsers.ts
+│   │   │   └── schemaVendas.ts
+│   │   ├── lib/               # Bibliotecas
+│   │   │   └── utils.ts
+│   │   ├── layout/            # Layouts
+│   │   │   └── DefaultLayout/
+│   │   ├── Router.tsx         # Roteamento
+│   │   ├── App.tsx            # Componente principal
+│   │   └── main.tsx           # Entry point
 │   └── public/                # Assets estáticos
 └── docs/                      # Documentação
 ```
