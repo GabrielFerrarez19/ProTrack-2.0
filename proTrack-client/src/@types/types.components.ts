@@ -216,3 +216,16 @@ export interface RelatorioItem {
 export interface RelatorioResponse {
   relatorio: RelatorioItem[];
 }
+
+export interface ContasPagarFormData {
+  fornecedor_nome: string;
+  valor: string; // pode ser string (do input) ou number, depende de como vai salvar
+  data_vencimento: string;
+  status: "pendente" | "pago" | "vencido" | "agendado";
+  categoria_id: string;
+  descricao: string;
+  data_agendamento: string;
+  valor_pago: string; // idem ao valor, pode ser number se preferir
+  forma_pagamento: string;
+  observacoes: string;
+}
