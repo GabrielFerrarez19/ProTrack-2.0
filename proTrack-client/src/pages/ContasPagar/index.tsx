@@ -15,6 +15,7 @@ import { Button } from "../../components/ui/button";
 import { Plus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { StatusMonitoramento } from "./components";
+import { useNavigate } from "react-router-dom";
 
 export function ContasPagar() {
   const {
@@ -36,6 +37,7 @@ export function ContasPagar() {
     executarMonitoramento,
     reload: reloadVencidas,
   } = useContasPagarVencidas();
+  const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
@@ -118,7 +120,11 @@ export function ContasPagar() {
             Atualizar
           </Button>
 
-          <Button size="sm">
+          <Button
+            size="sm"
+            className="cursor-pointer bg-gradient-to-r from-[#628DFD] to-[#6F31FF] hover:from-[#7A9BFD] hover:to-[#B597F9]"
+            onClick={() => navigate("/cadastrocontaspagar")}
+          >
             <Plus className="h-4 w-4 mr-2" />
             Nova Conta
           </Button>

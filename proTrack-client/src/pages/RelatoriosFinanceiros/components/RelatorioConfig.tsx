@@ -188,85 +188,81 @@ export function RelatorioConfig({
 
   return (
     <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Configurações do Relatório
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Label>Tipo de Relatório</Label>
-              <Select value={tipoRelatorio} onValueChange={setTipoRelatorio}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="lucro-produto">
-                    Lucro por Produto
-                  </SelectItem>
-                  <SelectItem value="lucro-categoria">
-                    Lucro por Categoria
-                  </SelectItem>
-                  <SelectItem value="lucro-periodo">
-                    Lucro por Período
-                  </SelectItem>
-                  <SelectItem value="estoque-investimento">
-                    Estoque x Investimento
-                  </SelectItem>
-                  <SelectItem value="completo">Relatório Completo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Data Início</Label>
-              <Input
-                type="date"
-                value={periodoInicio}
-                onChange={(e) => setPeriodoInicio(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Data Fim</Label>
-              <Input
-                type="date"
-                value={periodoFim}
-                onChange={(e) => setPeriodoFim(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>&nbsp;</Label>
-              <Button
-                className="w-full"
-                onClick={gerarRelatorio}
-                disabled={loading}
-              >
-                <BarChart3 className="h-4 w-4 mr-2" />
-                {loading ? "Gerando..." : "Gerar Relatório"}
-              </Button>
-            </div>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Filter className="h-5 w-5" />
+          Configurações do Relatório
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="space-y-2">
+            <Label>Tipo de Relatório</Label>
+            <Select value={tipoRelatorio} onValueChange={setTipoRelatorio}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="lucro-produto">Lucro por Produto</SelectItem>
+                <SelectItem value="lucro-categoria">
+                  Lucro por Categoria
+                </SelectItem>
+                <SelectItem value="lucro-periodo">Lucro por Período</SelectItem>
+                <SelectItem value="estoque-investimento">
+                  Estoque x Investimento
+                </SelectItem>
+                <SelectItem value="completo">Relatório Completo</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+          <div className="space-y-2">
+            <Label>Data Início</Label>
+            <Input
+              type="date"
+              value={periodoInicio}
+              onChange={(e) => setPeriodoInicio(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Data Fim</Label>
+            <Input
+              type="date"
+              value={periodoFim}
+              onChange={(e) => setPeriodoFim(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>&nbsp;</Label>
+            <Button
+              className="w-full cursor-pointer bg-gradient-to-r from-[#628DFD] to-[#6F31FF] hover:from-[#7A9BFD] hover:to-[#B597F9]"
+              onClick={gerarRelatorio}
+              disabled={loading}
+            >
+              <BarChart3 className="h-4 w-4 mr-2" />
+              {loading ? "Gerando..." : "Gerar Relatório"}
+            </Button>
+          </div>
+        </div>
 
-          <div className="flex gap-4 mt-6">
-            <Button
-              variant="outline"
-              onClick={exportarExcel}
-              disabled={loading}
-              className="flex-1"
-            >
-              <Download className="h-4 w-4 mr-2" /> Exportar Excel
-            </Button>
-            <Button
-              variant="outline"
-              onClick={exportarPDF}
-              disabled={loading}
-              className="flex-1"
-            >
-              <Download className="h-4 w-4 mr-2" /> Exportar PDF
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        <div className="flex gap-4 mt-6">
+          <Button
+            variant="outline"
+            onClick={exportarExcel}
+            disabled={loading}
+            className="flex-1"
+          >
+            <Download className="h-4 w-4 mr-2" /> Exportar Excel
+          </Button>
+          <Button
+            variant="outline"
+            onClick={exportarPDF}
+            disabled={loading}
+            className="flex-1"
+          >
+            <Download className="h-4 w-4 mr-2" /> Exportar PDF
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
