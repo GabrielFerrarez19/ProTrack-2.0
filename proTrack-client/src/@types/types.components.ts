@@ -229,3 +229,25 @@ export interface ContasPagarFormData {
   forma_pagamento: string;
   observacoes: string;
 }
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  username?: string;
+  role: string;
+  status: "ativo" | "inativo" | "bloqueado";
+  empresa_id: number;
+  departamento_id?: number;
+  ultimo_login: string; // ISO date string
+  created_at: string; // ISO date string
+  updated_at: string; // ISO date string
+}
+
+export interface PerfilFormData {
+  name: string;
+  email: string;
+  username?: string;
+  role: string;
+  departamento_id?: string; // string porque o Select envia valores como string
+}

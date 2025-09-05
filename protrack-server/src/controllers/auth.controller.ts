@@ -23,7 +23,16 @@ export const login = async (req: Request, res: Response) => {
 
 export const createUserController = async (req: Request, res: Response) => {
   try {
-    const { name, email, password } = req.body;
+    const {
+      name,
+      email,
+      password,
+      username,
+      role,
+      empresa_id,
+      departamento_id,
+      criado_por,
+    } = req.body;
 
     if (!name || !email || !password) {
       return res
@@ -31,7 +40,18 @@ export const createUserController = async (req: Request, res: Response) => {
         .json({ error: "Nome, email e senha são obrigatórios." });
     }
 
-    const result = await createUser(name, email, password);
+    const userData = {
+      name,
+      email,
+      password,
+      username,
+      role,
+      empresa_id,
+      departamento_id,
+      criado_por,
+    };
+
+    const result = await createUser(userData);
 
     return res.status(201).json(result);
   } catch (error: any) {

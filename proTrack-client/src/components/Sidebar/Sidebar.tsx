@@ -2,7 +2,14 @@ import { useState } from "react";
 import { SidebarContext } from "./SidebarContext";
 import { ChevronFirst, ChevronLast, MoreVertical } from "lucide-react";
 import img from "../../assets/Logo.svg";
-import { Link } from "react-router-dom";
+
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../components/ui/dropdown-menu"; // shadcn/ui
+import { useNavigate } from "react-router-dom";
 
 type SidebarProps = {
   children: React.ReactNode;
@@ -10,6 +17,7 @@ type SidebarProps = {
 
 export function Sidebar({ children }: SidebarProps) {
   const [expanded, setExpanded] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <aside className="h-screen sidebar relative z-1">
@@ -18,7 +26,7 @@ export function Sidebar({ children }: SidebarProps) {
         <div className="p-4 pb-2 flex justify-between items-center">
           <img
             src={img}
-            className={` overflow-hidden transition-all ${
+            className={`overflow-hidden transition-all ${
               expanded ? "w-22" : "w-0"
             }`}
             alt="Logo"
@@ -37,17 +45,16 @@ export function Sidebar({ children }: SidebarProps) {
         </SidebarContext.Provider>
 
         {/* Footer */}
-        <div className="border-t flex p-3">
+        <div className="border-t flex p-3 relative">
           <img
             src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=Gabriel+Ferrarez"
             alt="Avatar"
             className="w-10 h-10 rounded-md"
           />
           <div
-            className={`
-              flex justify-between items-center
-              overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}
-            `}
+            className={`flex justify-between items-center overflow-hidden transition-all ${
+              expanded ? "w-52 ml-3" : "w-0"
+            }`}
           >
             <div className="leading-4">
               <h4 className="font-semibold">Gabriel Ferrarez</h4>
@@ -55,9 +62,35 @@ export function Sidebar({ children }: SidebarProps) {
                 gabrielferrarez@gmail.com
               </span>
             </div>
-            <Link to="/configfinanceiro">
-              <MoreVertical size={20} />
-            </Link>
+
+            {/* Dropdown de Configurações */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="ml-2 p-1 rounded hover:bg-gray-100">
+                  <MoreVertical size={20} className="cursor-pointer" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => navigate("/configfinanceiro")}
+                  className="cursor-pointer"
+                >
+                  Configurações
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => navigate("/user")}
+                  className="cursor-pointer"
+                >
+                  Perfil
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => navigate("/")}
+                  className="text-red-600 cursor-pointer"
+                >
+                  Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </nav>
