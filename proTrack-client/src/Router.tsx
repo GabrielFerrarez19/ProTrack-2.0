@@ -81,14 +81,7 @@ export function Router() {
         <Route path="/cadastrocontaspagar" element={<CadastroContasPagar />} />
 
         {/* Rota de configuração de usuário - apenas para admins */}
-        <Route
-          path="/user"
-          element={
-            <ProtectedRoute requiredRole={["admin"]}>
-              <ConfigUsers />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/user" element={<ConfigUsers />} />
       </Route>
     </Routes>
   );
