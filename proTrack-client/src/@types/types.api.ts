@@ -3,6 +3,50 @@ import type {
   ProdutoMargemLucroResponse,
 } from "./types.components";
 
+// 🔹 TIPOS DE USUÁRIO
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  username?: string;
+  role: string;
+  status: string;
+  empresa_id?: string;
+  departamento_id?: string;
+  ultimo_login?: string;
+  criado_por?: string;
+  atualizado_por?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserResponse {
+  success: boolean;
+  user: User;
+}
+
+export interface UsersResponse {
+  success: boolean;
+  users: User[];
+  total: number;
+}
+
+export interface LoginResponse {
+  message: string;
+  user: User;
+  token: string;
+}
+
+export interface UpdateUserData {
+  name?: string;
+  email?: string;
+  username?: string;
+  role?: string;
+  empresa_id?: number;
+  departamento_id?: number;
+}
+
 export interface Produto {
   id?: number;
   nome: string;

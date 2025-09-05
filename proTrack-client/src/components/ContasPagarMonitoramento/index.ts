@@ -1,1 +1,0 @@
-export { ContasPagarMonitoramento } from "./ContasPagarMonitoramento";
