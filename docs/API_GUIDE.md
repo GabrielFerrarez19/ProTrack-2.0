@@ -4,13 +4,16 @@
 
 1. [Visão Geral](#visão-geral)
 2. [Autenticação](#autenticação)
-3. [Produtos](#produtos)
-4. [Clientes](#clientes)
-5. [Vendas](#vendas)
-6. [Contas a Pagar](#contas-a-pagar)
-7. [Relatórios](#relatórios)
-8. [Configurações](#configurações)
-9. [Códigos de Erro](#códigos-de-erro)
+3. [Usuários](#usuários)
+4. [Produtos](#produtos)
+5. [Clientes](#clientes)
+6. [Vendas](#vendas)
+7. [Contas a Pagar](#contas-a-pagar)
+8. [Monitoramento](#monitoramento)
+9. [Relatórios](#relatórios)
+10. [Configurações](#configurações)
+11. [Pagamentos](#pagamentos)
+12. [Códigos de Erro](#códigos-de-erro)
 
 ---
 
@@ -68,6 +71,67 @@ Autentica um usuário e retorna um token de acesso.
 ```json
 {
   "error": "Credenciais inválidas"
+}
+```
+
+---
+
+## 👤 Usuários
+
+### Listar Todos os Usuários
+
+**GET** `/users`
+
+Retorna todos os usuários cadastrados.
+
+#### Response (200)
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Gabriel Ferrarez",
+      "email": "gabriel@example.com",
+      "created_at": "2024-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+### Obter Usuário Atual
+
+**GET** `/user/profile`
+
+Retorna informações do usuário autenticado.
+
+#### Response (200)
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "name": "Gabriel Ferrarez",
+    "email": "gabriel@example.com",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+### Atualizar Usuário
+
+**PUT** `/user/profile`
+
+Atualiza dados do usuário autenticado.
+
+#### Request Body
+
+```json
+{
+  "name": "Gabriel Ferrarez Atualizado",
+  "email": "gabriel.novo@example.com"
 }
 ```
 
@@ -291,6 +355,118 @@ Retorna o total de produtos em estoque.
 }
 ```
 
+### Total de Preço do Estoque
+
+**GET** `/product/totalPreco`
+
+Retorna o valor total investido em estoque.
+
+#### Response (200)
+
+```json
+{
+  "totalPreco": 15000.0
+}
+```
+
+### Giro de Estoque
+
+**GET** `/product/giroEstoque`
+
+Retorna métricas de giro de estoque.
+
+#### Response (200)
+
+```json
+{
+  "giroEstoque": 2.5,
+  "periodo": "30 dias"
+}
+```
+
+### Produtos Mais Vendidos
+
+**GET** `/product/maisVendidos`
+
+Retorna os produtos mais vendidos.
+
+#### Response (200)
+
+```json
+{
+  "produtos": [
+    {
+      "id": 1,
+      "nome": "Camiseta Básica",
+      "quantidade_vendida": 50,
+      "total_vendas": 1995.0
+    }
+  ]
+}
+```
+
+### Produtos com Estoque Baixo
+
+**GET** `/product/faltaEstoque`
+
+Retorna produtos com quantidade baixa em estoque.
+
+#### Response (200)
+
+```json
+{
+  "total": 5,
+  "produtos": [
+    {
+      "id": 1,
+      "nome": "Produto Crítico",
+      "quantidade": 2,
+      "status": "CRÍTICO"
+    }
+  ]
+}
+```
+
+### Valor Investido por Categoria
+
+**GET** `/product/valorInvestidoPorCategoria`
+
+Retorna o valor investido por categoria.
+
+#### Response (200)
+
+```json
+{
+  "categorias": [
+    {
+      "categoria": "Vestuário",
+      "valor_investido": 5000.0,
+      "percentual": 40.0
+    }
+  ]
+}
+```
+
+### Distribuição de Margem de Lucro
+
+**GET** `/product/distribuicaoMargemLucro`
+
+Retorna a distribuição de margem de lucro.
+
+#### Response (200)
+
+```json
+{
+  "distribuicao": [
+    {
+      "faixa": "0-20%",
+      "quantidade": 5,
+      "percentual": 20.0
+    }
+  ]
+}
+```
+
 ### Margem de Lucro Total
 
 **GET** `/product/margemLucroTotal`
@@ -416,6 +592,55 @@ Retorna o total de clientes cadastrados.
 }
 ```
 
+### Vendas por Cliente
+
+**GET** `/clients/buscaVendas/:id`
+
+Retorna as vendas de um cliente específico.
+
+#### Response (200)
+
+```json
+{
+  "vendas": [
+    {
+      "id": 1,
+      "data_venda": "2024-01-01",
+      "total": 100.0,
+      "status": "pago"
+    }
+  ]
+}
+```
+
+### Total a Receber Geral
+
+**GET** `/clients/totalApagar`
+
+Retorna o total a receber de todos os clientes.
+
+#### Response (200)
+
+```json
+{
+  "totalAPagar": 5000.0
+}
+```
+
+### Contagem de Clientes em Aberto
+
+**GET** `/clients/em-aberto/count`
+
+Retorna a quantidade de clientes com valores em aberto.
+
+#### Response (200)
+
+```json
+{
+  "count": 25
+}
+```
+
 ---
 
 ## 🛒 Vendas
@@ -501,7 +726,7 @@ Atualiza uma venda existente.
 
 ### Total de Vendas
 
-**GET** `/vendas/total`
+**GET** `/vendas/totalvendas`
 
 Retorna o total de vendas realizadas.
 
@@ -510,6 +735,172 @@ Retorna o total de vendas realizadas.
 ```json
 {
   "totalVendas": 500
+}
+```
+
+### Resumo de Vendas para Dashboard
+
+**GET** `/vendas/resumoDeVendas`
+
+Retorna resumo de vendas para o dashboard.
+
+#### Response (200)
+
+```json
+{
+  "resumo": {
+    "total_vendas": 500,
+    "vendas_hoje": 10,
+    "vendas_mes": 150,
+    "ticket_medio": 89.5
+  }
+}
+```
+
+### Formas de Pagamento
+
+**GET** `/vendas/formasPagamentos`
+
+Retorna as formas de pagamento disponíveis.
+
+#### Response (200)
+
+```json
+{
+  "formas": [
+    {
+      "id": 1,
+      "nome": "Dinheiro",
+      "ativo": true
+    },
+    {
+      "id": 2,
+      "nome": "Cartão",
+      "ativo": true
+    }
+  ]
+}
+```
+
+### Vendas Vencidas
+
+**GET** `/vendas/vencidas`
+
+Retorna vendas que estão vencidas.
+
+#### Response (200)
+
+```json
+{
+  "vendas": [
+    {
+      "id": 1,
+      "cliente_nome": "João Silva",
+      "total": 150.0,
+      "data_vencimento": "2024-01-15",
+      "dias_vencido": 5
+    }
+  ]
+}
+```
+
+### Total de Vendas Vencidas
+
+**GET** `/vendas/vencidas/total`
+
+Retorna o total de vendas vencidas.
+
+#### Response (200)
+
+```json
+{
+  "total": 2500.0,
+  "quantidade": 15
+}
+```
+
+---
+
+## 🔍 Monitoramento
+
+### Monitoramento de Vendas
+
+**GET** `/monitoramento/vendas`
+
+Retorna dados de monitoramento de vendas.
+
+#### Response (200)
+
+```json
+{
+  "success": true,
+  "data": {
+    "vendasVencidas": 5,
+    "vendasPendentes": 10,
+    "totalVencido": 1500.0,
+    "ultimaVerificacao": "2024-01-20T10:30:00.000Z"
+  }
+}
+```
+
+### Executar Monitoramento de Vendas
+
+**POST** `/monitoramento/vendas/executar`
+
+Executa o monitoramento de vendas manualmente.
+
+#### Response (200)
+
+```json
+{
+  "success": true,
+  "message": "Monitoramento executado com sucesso",
+  "data": {
+    "vendasProcessadas": 15,
+    "vendasAtualizadas": 3,
+    "timestamp": "2024-01-20T10:30:00.000Z"
+  }
+}
+```
+
+### Monitoramento de Contas a Pagar
+
+**GET** `/monitoramento-contas/status`
+
+Retorna o status do monitoramento de contas a pagar.
+
+#### Response (200)
+
+```json
+{
+  "success": true,
+  "data": {
+    "status": "ativo",
+    "ultimaExecucao": "2024-01-20T10:30:00.000Z",
+    "proximaExecucao": "2024-01-20T10:35:00.000Z",
+    "contasProcessadas": 25,
+    "contasVencidas": 3
+  }
+}
+```
+
+### Executar Monitoramento de Contas
+
+**POST** `/monitoramento-contas/executar`
+
+Executa o monitoramento de contas a pagar.
+
+#### Response (200)
+
+```json
+{
+  "success": true,
+  "message": "Monitoramento de contas executado com sucesso",
+  "data": {
+    "contasProcessadas": 25,
+    "contasAtualizadas": 3,
+    "timestamp": "2024-01-20T10:30:00.000Z"
+  }
 }
 ```
 
@@ -723,6 +1114,114 @@ Retorna relatório específico por tipo.
 #### Deletar Categoria
 
 **DELETE** `/config/categorias/:id`
+
+---
+
+## 💳 Pagamentos
+
+### Listar Métodos de Pagamento
+
+**GET** `/pagamentos/metodos`
+
+Retorna todos os métodos de pagamento disponíveis.
+
+#### Response (200)
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "nome": "Dinheiro",
+      "tipo": "dinheiro",
+      "ativo": true
+    },
+    {
+      "id": 2,
+      "nome": "Cartão de Crédito",
+      "tipo": "cartao",
+      "ativo": true
+    }
+  ]
+}
+```
+
+### Criar Método de Pagamento
+
+**POST** `/pagamentos/metodos`
+
+Cria um novo método de pagamento.
+
+#### Request Body
+
+```json
+{
+  "nome": "PIX",
+  "tipo": "pix",
+  "ativo": true
+}
+```
+
+### Atualizar Método de Pagamento
+
+**PUT** `/pagamentos/metodos/:id`
+
+Atualiza um método de pagamento existente.
+
+#### Request Body
+
+```json
+{
+  "nome": "PIX Atualizado",
+  "ativo": false
+}
+```
+
+### Toggle Status do Método
+
+**PATCH** `/pagamentos/metodos/:id/toggle`
+
+Ativa/desativa um método de pagamento.
+
+#### Response (200)
+
+```json
+{
+  "success": true,
+  "message": "Status do método atualizado com sucesso",
+  "data": {
+    "id": 1,
+    "ativo": false
+  }
+}
+```
+
+### Métodos Ativos
+
+**GET** `/pagamentos/metodos/ativos`
+
+Retorna apenas os métodos de pagamento ativos.
+
+#### Response (200)
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "nome": "Dinheiro",
+      "tipo": "dinheiro"
+    },
+    {
+      "id": 2,
+      "nome": "PIX",
+      "tipo": "pix"
+    }
+  ]
+}
+```
 
 ---
 

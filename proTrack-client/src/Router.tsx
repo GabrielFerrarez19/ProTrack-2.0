@@ -69,18 +69,65 @@ export function Router() {
         <Route path="/clientes" element={<Cliente />} />
         <Route path="/venda" element={<Vendas />} />
         <Route path="/totalVendas" element={<TotalVendas />} />
-        <Route path="/financeiro" element={<DashboardFinanceiro />} />
-        <Route path="/relatorio" element={<RelatoriosFinanceiros />} />
+
+        {/* Rotas de financeiro - apenas para admins e financeiros */}
+        <Route
+          path="/financeiro"
+          element={
+            <ProtectedRoute requiredRole={["admin", "financeiro"]}>
+              <DashboardFinanceiro />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/relatorio"
+          element={
+            <ProtectedRoute requiredRole={["admin", "financeiro"]}>
+              <RelatoriosFinanceiros />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/configfinanceiro"
-          element={<ConfiguracoesFinanceiras />}
+          element={
+            <ProtectedRoute requiredRole={["admin", "financeiro"]}>
+              <ConfiguracoesFinanceiras />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/contasPagar" element={<ContasPagar />} />
-        <Route path="/contasReceber" element={<ContasReceber />} />
-        <Route path="/flucoCaixa" element={<FluxoCaixa />} />
-        <Route path="/cadastrocontaspagar" element={<CadastroContasPagar />} />
+        <Route
+          path="/contasPagar"
+          element={
+            <ProtectedRoute requiredRole={["admin", "financeiro"]}>
+              <ContasPagar />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/contasReceber"
+          element={
+            <ProtectedRoute requiredRole={["admin", "financeiro"]}>
+              <ContasReceber />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/flucoCaixa"
+          element={
+            <ProtectedRoute requiredRole={["admin", "financeiro"]}>
+              <FluxoCaixa />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cadastrocontaspagar"
+          element={
+            <ProtectedRoute requiredRole={["admin", "financeiro"]}>
+              <CadastroContasPagar />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Rota de configuração de usuário - apenas para admins */}
         <Route path="/user" element={<ConfigUsers />} />
       </Route>
     </Routes>

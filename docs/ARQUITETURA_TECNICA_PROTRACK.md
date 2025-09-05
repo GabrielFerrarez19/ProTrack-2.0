@@ -92,30 +92,44 @@ src/
 │   ├── components/ui/           # Base components (shadcn/ui)
 │   ├── components/header/       # Header components
 │   ├── components/Sidebar/      # Navigation components
-│   ├── components/ContasPagarMonitoramento/ # Contas a pagar components
+│   ├── components/button.tsx    # Custom button component
+│   ├── components/input.tsx     # Custom input component
+│   ├── components/ProtectedRoute.tsx # Route protection
+│   ├── components/PublicRoute.tsx   # Public routes
 │   └── pages/                  # Page components
-│       ├── ContasPagar/        # Contas a pagar page
+│       ├── Login/              # Autenticação
+│       ├── Status/             # Dashboard principal
+│       ├── CadProduct/         # Cadastro de produtos
+│       ├── CadClient/          # Cadastro de clientes
+│       ├── CadUsers/           # Cadastro de usuários
+│       ├── CadastroContasPagar/ # Cadastro de contas a pagar
+│       ├── Estoque/            # Gestão de estoque
+│       ├── Clientes/           # Gestão de clientes
+│       ├── Vendas/             # Gestão de vendas
+│       ├── TotalVenda/         # Total de vendas
 │       ├── Financeiro/         # Dashboard financeiro
 │       ├── RelatoriosFinanceiros/ # Relatórios financeiros
 │       ├── ConfigFinanceiro/   # Configurações financeiras
+│       ├── ConfigUsers/        # Configurações de usuários
 │       ├── FluxoCaixa/         # Fluxo de caixa
+│       ├── ContasPagar/        # Contas a pagar
 │       ├── ContasReceber/      # Contas a receber
-│       ├── Clientes/           # Gestão de clientes
-│       ├── Estoque/            # Gestão de estoque
-│       ├── Vendas/             # Gestão de vendas
-│       ├── Status/             # Dashboard principal
-│       └── Login/              # Autenticação
+│       ├── MovimentaçõesFinanceitas/ # Movimentações financeiras
+│       ├── ConfirmacaoEmail/   # Confirmação de email
+│       └── RedefirirSenha/     # Redefinição de senha
 ├── 🧠 Business Logic Layer (Hooks)
+│   ├── hooks/useAuth.ts        # Autenticação
+│   ├── hooks/useClientes.ts    # Business logic for clients
 │   ├── hooks/useContasPagar.ts # Business logic for accounts
 │   ├── hooks/useContasPagarVencidas.ts # Monitoramento de vencimentos
 │   ├── hooks/useContasPagarMonitoramento.ts # Status do sistema
+│   ├── hooks/useDashboard.ts   # Dashboard data
+│   ├── hooks/useProdutos.ts    # Business logic for products
+│   ├── hooks/useRelatorios.ts  # Relatórios
+│   ├── hooks/useUsers.ts       # Business logic for users
 │   ├── hooks/useVendas.ts      # Business logic for sales
 │   ├── hooks/useVendasList.ts  # Lista de vendas
 │   ├── hooks/useVendasVencidas.ts # Vendas vencidas
-│   ├── hooks/useClientes.ts    # Business logic for clients
-│   ├── hooks/useProdutos.ts    # Business logic for products
-│   ├── hooks/useDashboard.ts   # Dashboard data
-│   ├── hooks/useRelatorios.ts  # Relatórios
 │   └── hooks/use-mobile.ts     # Mobile detection
 ├── 🔌 Data Access Layer (Services)
 │   ├── services/api.ts         # API service layer
@@ -124,15 +138,20 @@ src/
 │   ├── React Hooks (useState, useEffect)
 │   ├── Custom Hooks for business logic
 │   └── Local component state
-└── 🛠️ Utilities & Types
-    ├── @types/                 # TypeScript type definitions
-    │   ├── types.api.ts        # API types
-    │   ├── types.components.ts # Component types
-    │   ├── types.contasPagar.ts # Contas a pagar types
-    │   └── jspdf.d.ts         # PDF types
-    ├── utils/                  # Utility functions
-    ├── schemas/                # Zod validation schemas
-    └── lib/                    # Library utilities
+├── 🛠️ Utilities & Types
+│   ├── @types/                 # TypeScript type definitions
+│   │   ├── types.api.ts        # API types
+│   │   ├── types.components.ts # Component types
+│   │   ├── types.contasPagar.ts # Contas a pagar types
+│   │   └── jspdf.d.ts         # PDF types
+│   ├── utils/functions.ts      # Utility functions
+│   ├── schemas/                # Zod validation schemas
+│   │   ├── schemaUsers.ts      # User validation
+│   │   └── schemaVendas.ts     # Sales validation
+│   └── lib/utils.ts            # Library utilities
+└── 🎨 Layout & Routing
+    ├── layout/DefaultLayout/   # Default layout component
+    └── Router.tsx              # Application routing
 ```
 
 ### 2. **Component Architecture**
@@ -721,27 +740,49 @@ const [apiState, setApiState] = useState({
 src/
 ├── 🚪 Entry Point (app.ts)
 ├── 🛣️ Routes Layer
-│   ├── index.ts               # Main router
-│   ├── clientRoutes.ts        # Client endpoints
-│   ├── productRoutes.ts       # Product endpoints
-│   ├── vendasRoutes.ts        # Sales endpoints
-│   └── contasPagarRoutes.ts   # Accounts endpoints
+│   ├── index.ts                        # Main router
+│   ├── user.routes.ts                  # User endpoints
+│   ├── userProfile.routes.ts           # User profile endpoints
+│   ├── clientRoutes.ts                 # Client endpoints
+│   ├── productRoutes.ts                # Product endpoints
+│   ├── vendasRoutes.ts                 # Sales endpoints
+│   ├── vendasMonitoramentoRoutes.ts    # Sales monitoring endpoints
+│   ├── contasPagarRoutes.ts            # Accounts payable endpoints
+│   ├── contasPagarMonitoramentoRoutes.ts # Accounts monitoring endpoints
+│   ├── configRoutes.ts                 # Configuration endpoints
+│   ├── relatorioRoutes.ts              # Reports endpoints
+│   └── pagamentoRoutes.ts              # Payment endpoints
 ├── 🎮 Controllers Layer
-│   ├── auth.controller.ts      # Authentication logic
-│   ├── client.controller.ts    # Client operations
-│   ├── product.controller.ts   # Product operations
-│   └── vendas.controller.ts    # Sales operations
+│   ├── auth.controller.ts              # Authentication logic
+│   ├── user.controller.ts              # User operations
+│   ├── client.controller.ts            # Client operations
+│   ├── product.controller.ts           # Product operations
+│   ├── vendas.controller.ts            # Sales operations
+│   ├── vendasMonitoramento.controller.ts # Sales monitoring
+│   ├── contasPagar.controller.ts       # Accounts payable operations
+│   ├── contasPagarMonitoramento.controller.ts # Accounts monitoring
+│   ├── config.controller.ts            # Configuration operations
+│   ├── relatorio.controller.ts         # Reports operations
+│   └── pagamento.controller.ts         # Payment operations
 ├── 🧠 Services Layer
-│   ├── client.service.ts       # Business logic
-│   ├── product.service.ts      # Business logic
-│   └── venda.service.ts        # Business logic
+│   ├── user.service.ts                 # User business logic
+│   ├── client.service.ts               # Client business logic
+│   ├── product.service.ts              # Product business logic
+│   ├── venda.service.ts                # Sales business logic
+│   ├── vendasMonitoramento.service.ts  # Sales monitoring logic
+│   ├── contasPagar.service.ts          # Accounts payable logic
+│   ├── contasPagarMonitoramento.service.ts # Accounts monitoring logic
+│   ├── config.service.ts               # Configuration logic
+│   ├── relatorio.service.ts            # Reports logic
+│   └── pagamento.service.ts            # Payment logic
 ├── 🗄️ Data Access Layer
-│   ├── config/database.ts      # Database connection
-│   └── utils/functions.ts      # Database utilities
-└── 🛡️ Middleware Layer
-    ├── auth.middleware.ts      # Authentication
-    ├── validation.middleware.ts # Input validation
-    └── error.middleware.ts     # Error handling
+│   ├── config/database.ts              # Database connection
+│   ├── config/prisma.ts                # Prisma configuration
+│   └── utils/functions.ts              # Database utilities
+├── 🛡️ Middleware Layer
+│   └── auth.middleware.ts              # Authentication middleware
+└── 📊 Types & Interfaces
+    └── @types/types.service.ts         # Service type definitions
 ```
 
 ### 2. **API Design Pattern**
