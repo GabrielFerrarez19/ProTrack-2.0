@@ -39,7 +39,9 @@ export function AvatarCard({
       <CardHeader className="text-center">
         <Avatar className="w-24 h-24 mx-auto">
           <AvatarImage
-            src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=Gabriel+Ferrarez"
+            src={`https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${encodeURIComponent(
+              user?.name || "User"
+            )}`}
             alt="Avatar"
             className="w-24 h-24 rounded-md"
           />
