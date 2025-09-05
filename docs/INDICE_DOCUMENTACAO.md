@@ -128,6 +128,30 @@ Este índice organiza toda a documentação disponível para o sistema **ProTrac
   - Roadmap futuro
   - Diferenciais competitivos
 
+### **11. Componentes Frontend (NOVO!)**
+
+- **🎨 [COMPONENTES_FRONTEND.md](./COMPONENTES_FRONTEND.md)**
+  - Documentação completa de todos os componentes React
+  - Estrutura de componentes por página
+  - Padrões de implementação
+  - Guia de manutenção e performance
+
+### **12. Hooks Customizados (NOVO!)**
+
+- **🎣 [HOOKS_CUSTOMIZADOS.md](./HOOKS_CUSTOMIZADOS.md)**
+  - Documentação de todos os hooks customizados
+  - Padrões de implementação
+  - Exemplos de uso
+  - Guia de performance e otimização
+
+### **13. Serviços Backend (NOVO!)**
+
+- **⚙️ [SERVICOS_BACKEND.md](./SERVICOS_BACKEND.md)**
+  - Documentação completa de todos os serviços
+  - Padrões de implementação
+  - Transações e performance
+  - Guia de manutenção
+
 ### **11. Sistema de Monitoramento**
 
 - **🔄 [MONITORAMENTO_VENDAS.md](./MONITORAMENTO_VENDAS.md)**
@@ -249,10 +273,13 @@ A documentação foi consolidada por assunto em arquivos únicos e completos:
 - ✅ **Documentação Completa**: `DOCUMENTACAO_COMPLETA_PROTRACK.md`
 - ✅ **Arquitetura Técnica**: `ARQUITETURA_TECNICA_PROTRACK.md`
 - ✅ **Contas a Pagar**: `API_CONTAS_PAGAR.md`
+- ✅ **Componentes Frontend**: `COMPONENTES_FRONTEND.md`
+- ✅ **Hooks Customizados**: `HOOKS_CUSTOMIZADOS.md`
+- ✅ **Serviços Backend**: `SERVICOS_BACKEND.md`
 - ✅ **README Principal**: `README.md`
 - ✅ **Índice**: `INDICE_DOCUMENTACAO.md`
 
-**Total de arquivos consolidados**: 15 arquivos organizados por assunto
+**Total de arquivos consolidados**: 18 arquivos organizados por assunto
 
 ## 📞 Suporte e Contato
 
