@@ -3,6 +3,7 @@ import {
   createUser,
   findUserByEmailAndPassword,
 } from "../services/user.service";
+import { generateToken } from "../middlewares/auth.middleware";
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -14,7 +15,13 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Credenciais inválidas" });
     }
 
-    return res.status(200).json({ message: "Login bem-sucedido", user });
+    const token = generateToken(user.id);
+
+    return res.status(200).json({
+      message: "Login bem-sucedido",
+      user,
+      token,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Erro interno do servidor" });

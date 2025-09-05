@@ -9,6 +9,7 @@ export interface TypeButton {
   Text: string;
   type: "submit" | "button" | "reset";
   onClick?: () => void;
+  disabled?: boolean;
 }
 
 export interface TypeHeader {
@@ -231,15 +232,15 @@ export interface ContasPagarFormData {
 }
 
 export interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
   username?: string;
   role: string;
   status: "ativo" | "inativo" | "bloqueado";
-  empresa_id: number;
-  departamento_id?: number;
-  ultimo_login: string; // ISO date string
+  empresa_id?: string;
+  departamento_id?: string;
+  ultimo_login?: string; // ISO date string
   created_at: string; // ISO date string
   updated_at: string; // ISO date string
 }

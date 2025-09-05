@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Login } from "./pages/Login";
 import { ConfirmacaoEmail } from "./pages/ConfirmacaoEmail";
 import { Status } from "./pages/Status";
@@ -18,15 +18,50 @@ import { ContasReceber } from "./pages/ContasReceber";
 import { FluxoCaixa } from "./pages/FluxoCaixa";
 import { CadastroContasPagar } from "./pages/CadastroContasPagar";
 import { ConfigUsers } from "./pages/ConfigUsers";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { PublicRoute } from "./components/PublicRoute";
 
 export function Router() {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/confirmacaoemail" element={<ConfirmacaoEmail />} />
-      <Route path="/redefinirsenha" element={<RedefinirSenha />} />
-      <Route path="/cadastrocontaspagar" element={<CadastroContasPagar />} />
-      <Route path="/" element={<DefaultLayout />}>
+      {/* Rotas públicas - apenas para usuários não autenticados */}
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/confirmacaoemail"
+        element={
+          <PublicRoute>
+            <ConfirmacaoEmail />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/redefinirsenha"
+        element={
+          <PublicRoute>
+            <RedefinirSenha />
+          </PublicRoute>
+        }
+      />
+
+      {/* Redirecionamento da rota raiz */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
+
+      {/* Rotas protegidas - apenas para usuários autenticados */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <DefaultLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/status" element={<Status />} />
         <Route path="/cadastroprodutos" element={<CadProduct />} />
         <Route path="/cadastrodeclientes" element={<CacUsers />} />
@@ -43,7 +78,17 @@ export function Router() {
         <Route path="/contasPagar" element={<ContasPagar />} />
         <Route path="/contasReceber" element={<ContasReceber />} />
         <Route path="/flucoCaixa" element={<FluxoCaixa />} />
-        <Route path="/user" element={<ConfigUsers />} />
+        <Route path="/cadastrocontaspagar" element={<CadastroContasPagar />} />
+
+        {/* Rota de configuração de usuário - apenas para admins */}
+        <Route
+          path="/user"
+          element={
+            <ProtectedRoute requiredRole={["admin"]}>
+              <ConfigUsers />
+            </ProtectedRoute>
+          }
+        />
       </Route>
     </Routes>
   );

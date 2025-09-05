@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
 } from "../../components/ui/dropdown-menu"; // shadcn/ui
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 type SidebarProps = {
   children: React.ReactNode;
@@ -18,6 +19,18 @@ type SidebarProps = {
 export function Sidebar({ children }: SidebarProps) {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login", { replace: true });
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+      // Mesmo com erro, redireciona para login
+      navigate("/login", { replace: true });
+    }
+  };
 
   return (
     <aside className="h-screen sidebar relative z-1">
@@ -47,7 +60,9 @@ export function Sidebar({ children }: SidebarProps) {
         {/* Footer */}
         <div className="border-t flex p-3 relative">
           <img
-            src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=Gabriel+Ferrarez"
+            src={`https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${encodeURIComponent(
+              user?.name || "User"
+            )}`}
             alt="Avatar"
             className="w-10 h-10 rounded-md"
           />
@@ -57,9 +72,9 @@ export function Sidebar({ children }: SidebarProps) {
             }`}
           >
             <div className="leading-4">
-              <h4 className="font-semibold">Gabriel Ferrarez</h4>
+              <h4 className="font-semibold">{user?.name || "Usuário"}</h4>
               <span className="text-xs text-gray-600">
-                gabrielferrarez@gmail.com
+                {user?.email || "email@exemplo.com"}
               </span>
             </div>
 
@@ -84,7 +99,7 @@ export function Sidebar({ children }: SidebarProps) {
                   Perfil
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => navigate("/")}
+                  onClick={handleLogout}
                   className="text-red-600 cursor-pointer"
                 >
                   Sair

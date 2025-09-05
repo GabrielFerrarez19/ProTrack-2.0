@@ -14,17 +14,17 @@ export interface CreateUserData {
 }
 
 export interface User {
-  id: bigint;
+  id: string;
   name: string;
   email: string;
   username?: string;
   role: string;
   status: string;
-  empresa_id?: bigint;
-  departamento_id?: bigint;
+  empresa_id?: string;
+  departamento_id?: string;
   ultimo_login?: Date;
-  criado_por?: bigint;
-  atualizado_por?: bigint;
+  criado_por?: string;
+  atualizado_por?: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -83,9 +83,18 @@ export const findUserByEmailAndPassword = async (
   // Atualizar último login
   await updateLastLogin(user.id);
 
-  // Remover password_hash da resposta
+  // Remover password_hash da resposta e converter bigint para string
   const { password_hash, ...userWithoutPassword } = user;
-  return userWithoutPassword;
+
+  // Converter bigint para string para compatibilidade com frontend
+  return {
+    ...userWithoutPassword,
+    id: userWithoutPassword.id.toString(),
+    empresa_id: userWithoutPassword.empresa_id?.toString(),
+    departamento_id: userWithoutPassword.departamento_id?.toString(),
+    criado_por: userWithoutPassword.criado_por?.toString(),
+    atualizado_por: userWithoutPassword.atualizado_por?.toString(),
+  };
 };
 
 export const findUserByEmail = async (email: string): Promise<User | null> => {
@@ -97,7 +106,16 @@ export const findUserByEmail = async (email: string): Promise<User | null> => {
   if (rows.length === 0) return null;
 
   const { password_hash, ...user } = rows[0];
-  return user;
+
+  // Converter bigint para string para compatibilidade com frontend
+  return {
+    ...user,
+    id: user.id.toString(),
+    empresa_id: user.empresa_id?.toString(),
+    departamento_id: user.departamento_id?.toString(),
+    criado_por: user.criado_por?.toString(),
+    atualizado_por: user.atualizado_por?.toString(),
+  };
 };
 
 export const findUserById = async (id: bigint): Promise<User | null> => {
@@ -109,7 +127,16 @@ export const findUserById = async (id: bigint): Promise<User | null> => {
   if (rows.length === 0) return null;
 
   const { password_hash, ...user } = rows[0];
-  return user;
+
+  // Converter bigint para string para compatibilidade com frontend
+  return {
+    ...user,
+    id: user.id.toString(),
+    empresa_id: user.empresa_id?.toString(),
+    departamento_id: user.departamento_id?.toString(),
+    criado_por: user.criado_por?.toString(),
+    atualizado_por: user.atualizado_por?.toString(),
+  };
 };
 
 export const updateLastLogin = async (userId: bigint) => {
@@ -136,7 +163,15 @@ export const getAllUsers = async (): Promise<User[]> => {
     "SELECT id, name, email, username, role, status, empresa_id, departamento_id, ultimo_login, criado_por, atualizado_por, created_at, updated_at FROM users ORDER BY created_at DESC"
   );
 
-  return rows;
+  // Converter bigint para string para compatibilidade com frontend
+  return rows.map((user: any) => ({
+    ...user,
+    id: user.id.toString(),
+    empresa_id: user.empresa_id?.toString(),
+    departamento_id: user.departamento_id?.toString(),
+    criado_por: user.criado_por?.toString(),
+    atualizado_por: user.atualizado_por?.toString(),
+  }));
 };
 
 export const updateUser = async (
