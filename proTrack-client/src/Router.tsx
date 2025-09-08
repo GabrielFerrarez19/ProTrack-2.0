@@ -20,6 +20,7 @@ import { CadastroContasPagar } from "./pages/CadastroContasPagar";
 import { ConfigUsers } from "./pages/ConfigUsers";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoute";
+import { DefaultConfigLayout } from "./layout/DefaultConfigLayout";
 
 export function Router() {
   return (
@@ -62,9 +63,9 @@ export function Router() {
           </ProtectedRoute>
         }
       >
-        <Route path="/status" element={<Status />} />
+        <Route path="status" element={<Status />} />
         <Route
-          path="/cadastroprodutos"
+          path="cadastroprodutos"
           element={
             <ProtectedRoute requiredRoute="/cadastroprodutos">
               <CadProduct />
@@ -72,17 +73,17 @@ export function Router() {
           }
         />
         <Route
-          path="/cadastrodeclientes"
+          path="cadastrodeclientes"
           element={
             <ProtectedRoute requiredRoute="/cadastrodeclientes">
               <CacUsers />
             </ProtectedRoute>
           }
         />
-        <Route path="/produtos" element={<Estoque />} />
-        <Route path="/clientes" element={<Cliente />} />
+        <Route path="produtos" element={<Estoque />} />
+        <Route path="clientes" element={<Cliente />} />
         <Route
-          path="/venda"
+          path="venda"
           element={
             <ProtectedRoute requiredRoute="/venda">
               <Vendas />
@@ -90,7 +91,7 @@ export function Router() {
           }
         />
         <Route
-          path="/totalVendas"
+          path="totalVendas"
           element={
             <ProtectedRoute requiredRoute="/totalVendas">
               <TotalVendas />
@@ -98,9 +99,9 @@ export function Router() {
           }
         />
 
-        {/* Rotas de financeiro - apenas para admins e financeiros */}
+        {/* Rotas de financeiro */}
         <Route
-          path="/financeiro"
+          path="financeiro"
           element={
             <ProtectedRoute requiredRoute="/financeiro">
               <DashboardFinanceiro />
@@ -108,7 +109,7 @@ export function Router() {
           }
         />
         <Route
-          path="/relatorio"
+          path="relatorio"
           element={
             <ProtectedRoute requiredRoute="/relatorio">
               <RelatoriosFinanceiros />
@@ -116,15 +117,7 @@ export function Router() {
           }
         />
         <Route
-          path="/configfinanceiro"
-          element={
-            <ProtectedRoute requiredRoute="/configfinanceiro">
-              <ConfiguracoesFinanceiras />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/contasPagar"
+          path="contasPagar"
           element={
             <ProtectedRoute requiredRoute="/contasPagar">
               <ContasPagar />
@@ -132,7 +125,7 @@ export function Router() {
           }
         />
         <Route
-          path="/contasReceber"
+          path="contasReceber"
           element={
             <ProtectedRoute requiredRoute="/contasReceber">
               <ContasReceber />
@@ -140,7 +133,7 @@ export function Router() {
           }
         />
         <Route
-          path="/flucoCaixa"
+          path="flucoCaixa"
           element={
             <ProtectedRoute requiredRoute="/flucoCaixa">
               <FluxoCaixa />
@@ -148,18 +141,36 @@ export function Router() {
           }
         />
         <Route
-          path="/cadastrocontaspagar"
+          path="cadastrocontaspagar"
           element={
             <ProtectedRoute requiredRoute="/cadastrocontaspagar">
               <CadastroContasPagar />
             </ProtectedRoute>
           }
         />
+      </Route>
 
+      {/* Rotas de configurações com layout próprio */}
+      <Route
+        path="/config"
+        element={
+          <ProtectedRoute>
+            <DefaultConfigLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route
-          path="/user"
+          path="financeiro"
           element={
-            <ProtectedRoute requiredRoute="/user">
+            <ProtectedRoute requiredRoute="/config/financeiro">
+              <ConfiguracoesFinanceiras />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="user"
+          element={
+            <ProtectedRoute requiredRoute="/config/user">
               <ConfigUsers />
             </ProtectedRoute>
           }

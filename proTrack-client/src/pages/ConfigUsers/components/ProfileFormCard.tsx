@@ -15,13 +15,6 @@ import {
   FormMessage,
 } from "../../../components/ui/form";
 import { Input } from "../../../components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../components/ui/select";
 import { Separator } from "../../../components/ui/separator";
 import { Label } from "../../../components/ui/label";
 import type { PerfilFormData } from "../../../@types/types.components";
@@ -33,8 +26,6 @@ type ProfileFormCardProps = {
   isEditing: boolean;
   setIsEditing: (value: boolean) => void;
   onSubmit: (data: PerfilFormData) => void;
-  roles: { value: string; label: string }[];
-  departamentos: { value: string; label: string }[];
   user: User;
 };
 
@@ -43,8 +34,6 @@ export function ProfileFormCard({
   isEditing,
   setIsEditing,
   onSubmit,
-  roles,
-  departamentos,
   user,
 }: ProfileFormCardProps) {
   return (
@@ -105,62 +94,6 @@ export function ProfileFormCard({
                     <FormControl>
                       <Input {...field} disabled={!isEditing} />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Função</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      disabled={!isEditing}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a função" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {roles.map((r) => (
-                          <SelectItem key={r.value} value={r.value}>
-                            {r.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="departamento_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Departamento</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      disabled={!isEditing}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o departamento" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {departamentos.map((d) => (
-                          <SelectItem key={d.value} value={d.value}>
-                            {d.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
