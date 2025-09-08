@@ -1,988 +1,1462 @@
-# ⚙️ Serviços Backend - ProTrack 2.0
+# Serviços Backend - ProTrack 2.0
 
-## 📖 Visão Geral
+## Visão Geral
 
-Este documento detalha todos os serviços implementados no backend do ProTrack 2.0, organizados por funcionalidade e responsabilidade.
+Os serviços backend do ProTrack 2.0 são responsáveis pela lógica de negócio, integração com banco de dados e processamento de dados. Eles seguem o padrão de arquitetura em camadas e implementam as melhores práticas de desenvolvimento.
 
-## 🏗️ Estrutura dos Serviços
+## Arquitetura dos Serviços
 
-### **Localização**
-
-Todos os serviços estão localizados em `src/services/` e seguem o padrão de nomenclatura `[nomeFuncionalidade].service.ts`.
-
-## 🎯 Serviços Implementados
-
-### **1. user.service.ts**
-
-**Responsabilidade**: Gestão de usuários
+### Padrão de Estrutura
 
 ```typescript
-export interface CreateUserData {
-  name: string;
-  email: string;
-  password: string;
-  criado_por?: bigint;
-}
+// Estrutura base de um serviço
+export class BaseService {
+  protected prisma: PrismaClient;
 
-export const createUserDb = async (
-  userData: CreateUserData
-): Promise<number> => {
-  const connection = await db.getConnection();
-
-  try {
-    await connection.beginTransaction();
-
-    const hashedPassword = await bcrypt.hash(userData.password, 12);
-
-    const [result] = await connection.execute(
-      "INSERT INTO users (name, email, password, criado_por) VALUES (?, ?, ?, ?)",
-      [userData.name, userData.email, hashedPassword, userData.criado_por]
-    );
-
-    await connection.commit();
-    return (result as any).insertId;
-  } catch (error) {
-    await connection.rollback();
-    throw error;
-  } finally {
-    connection.release();
+  constructor() {
+    this.prisma = new PrismaClient();
   }
-};
 
-export const findUserById = async (id: number): Promise<User | null> => {
-  // Implementação
-};
-
-export const updateUser = async (
-  id: number,
-  userData: Partial<CreateUserData>
-): Promise<void> => {
-  // Implementação
-};
-
-export const updateUserStatus = async (
-  id: number,
-  status: string
-): Promise<void> => {
-  // Implementação
-};
-
-export const getAllUsers = async (): Promise<User[]> => {
-  // Implementação
-};
+  protected async handleError(error: any, context: string) {
+    logger.error(`Erro em ${context}:`, error);
+    throw new Error(`Erro em ${context}: ${error.message}`);
+  }
+}
 ```
 
-**Funcionalidades**:
+## Serviços Principais
 
-- Criação de usuários com hash de senha
-- Busca por ID
-- Atualização de dados
-- Controle de status
-- Listagem de usuários
-- Transações de banco
+### User Service
 
-### **2. client.service.ts**
-
-**Responsabilidade**: Gestão de clientes
+Gerenciamento de usuários e autenticação:
 
 ```typescript
-export interface ClienteData {
-  nome: string;
-  dataNascimento: string;
-  cpf: string;
-  rg?: string;
-  estadoCivil?: string;
-  sexo?: string;
-  telefoneWhatsapp?: string;
-  telefoneCelular?: string;
-  telefoneResidencial?: string;
-  email: string;
-  cep?: string;
-  endereco?: string;
-  numero?: string;
-  complemento?: string;
-  bairro?: string;
-  cidade?: string;
-  valorAPagar?: number;
-}
+// services/user.service.ts
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { PrismaClient } from "@prisma/client";
 
-export const createClienteDb = async (
-  cliente: ClienteData
-): Promise<number> => {
-  const connection = await db.getConnection();
+export class UserService {
+  private prisma: PrismaClient;
 
-  try {
-    await connection.beginTransaction();
-
-    const [result] = await connection.execute(
-      `INSERT INTO clientes (
-        nome, data_nascimento, cpf, rg, estado_civil, sexo,
-        telefone_whatsapp, telefone_celular, telefone_residencial,
-        email, cep, endereco, numero, complemento, bairro, cidade, valor_a_pagar
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        cliente.nome,
-        cliente.dataNascimento,
-        cliente.cpf,
-        cliente.rg,
-        cliente.estadoCivil,
-        cliente.sexo,
-        cliente.telefoneWhatsapp,
-        cliente.telefoneCelular,
-        cliente.telefoneResidencial,
-        cliente.email,
-        cliente.cep,
-        cliente.endereco,
-        cliente.numero,
-        cliente.complemento,
-        cliente.bairro,
-        cliente.cidade,
-        cliente.valorAPagar || 0,
-      ]
-    );
-
-    await connection.commit();
-    return (result as any).insertId;
-  } catch (error) {
-    await connection.rollback();
-    throw error;
-  } finally {
-    connection.release();
+  constructor() {
+    this.prisma = new PrismaClient();
   }
-};
 
-export const updateClienteDb = async (
-  id: number,
-  cliente: ClienteData
-): Promise<void> => {
-  // Implementação
-};
-
-export const getTotalClientesDb = async (): Promise<number> => {
-  // Implementação
-};
-
-export const getAllClientesDb = async (): Promise<Cliente[]> => {
-  // Implementação
-};
-
-export const getVendasByClienteId = async (
-  clienteId: number
-): Promise<Venda[]> => {
-  // Implementação
-};
-
-export const getTotalAPagarGeral = async (): Promise<number> => {
-  // Implementação
-};
-
-export const getClientesEmAbertoCountDb = async (): Promise<number> => {
-  // Implementação
-};
-```
-
-**Funcionalidades**:
-
-- CRUD completo de clientes
-- Validação de dados
-- Busca de vendas por cliente
-- Cálculo de totais
-- Contagem de clientes em aberto
-- Transações de banco
-
-### **3. product.service.ts**
-
-**Responsabilidade**: Gestão de produtos
-
-```typescript
-export interface ProductData {
-  nome: string;
-  descricao?: string;
-  categoria?: string;
-  codigo_barras?: string;
-  quantidade: number;
-  tamanho?: string;
-  preco_custo: number;
-  preco_venda: number;
-}
-
-export const createProductDb = async (
-  product: ProductData
-): Promise<number> => {
-  const connection = await db.getConnection();
-
-  try {
-    await connection.beginTransaction();
-
-    const [result] = await connection.execute(
-      `INSERT INTO produtos (
-        nome, descricao, categoria, codigo_barras, quantidade,
-        tamanho, preco_custo, preco_venda
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        product.nome,
-        product.descricao,
-        product.categoria,
-        product.codigo_barras,
-        product.quantidade,
-        product.tamanho,
-        product.preco_custo,
-        product.preco_venda,
-      ]
-    );
-
-    await connection.commit();
-    return (result as any).insertId;
-  } catch (error) {
-    await connection.rollback();
-    throw error;
-  } finally {
-    connection.release();
-  }
-};
-
-export const getAllProdutosDb = async (): Promise<Product[]> => {
-  // Implementação
-};
-
-export const updateProductDb = async (
-  id: number,
-  product: Partial<ProductData>
-): Promise<void> => {
-  // Implementação
-};
-
-export const getTotalEstoqueDb = async (): Promise<number> => {
-  // Implementação
-};
-
-export const getTotalEstoquePrecoDb = async (): Promise<number> => {
-  // Implementação
-};
-
-export const getGiroEstoqueDb = async (): Promise<number> => {
-  // Implementação
-};
-
-export const getProdutosMaisVendidosDb = async (): Promise<Product[]> => {
-  // Implementação
-};
-
-export const getProdutosMelhorMargemLucroDb = async (): Promise<Product[]> => {
-  // Implementação
-};
-
-export const getMargemLucroTotalDb = async (): Promise<number> => {
-  // Implementação
-};
-
-export const getEvolucaoLucroMensalDb = async (): Promise<any[]> => {
-  // Implementação
-};
-
-export const getValorInvestidoPorCategoriaDb = async (): Promise<any[]> => {
-  // Implementação
-};
-
-export const getDistribuicaoMargemLucroDb = async (): Promise<any[]> => {
-  // Implementação
-};
-
-export const contarProdutosQuantidadeBaixaDb = async (): Promise<number> => {
-  // Implementação
-};
-```
-
-**Funcionalidades**:
-
-- CRUD completo de produtos
-- Controle de estoque
-- Cálculos de margem de lucro
-- Análise de vendas
-- Relatórios de performance
-- Métricas de giro de estoque
-
-### **4. venda.service.ts**
-
-**Responsabilidade**: Gestão de vendas
-
-```typescript
-export interface VendaData {
-  clienteId: string;
-  dataVenda: string;
-  desconto: number;
-  total: number;
-  totalComDesconto: number;
-  status: string;
-  formaPagamento: string;
-  diasVencimento?: number;
-  produtos: Array<{
-    produtoId: string;
-    quantidade: number;
-    precoUnitario: number;
-    desconto?: number;
-  }>;
-}
-
-export const criarVendaDb = async (vendaData: VendaData): Promise<number> => {
-  const connection = await db.getConnection();
-
-  try {
-    await connection.beginTransaction();
-
-    // 1. Inserir venda principal
-    const [vendaResult] = await connection.execute(
-      `INSERT INTO vendas (
-        cliente_id, data_venda, desconto, total, total_com_desconto,
-        status, forma_pagamento, dias_vencimento, data_vencimento
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        vendaData.clienteId,
-        vendaData.dataVenda,
-        vendaData.desconto,
-        vendaData.total,
-        vendaData.totalComDesconto,
-        vendaData.status,
-        vendaData.formaPagamento,
-        vendaData.diasVencimento,
-        vendaData.diasVencimento
-          ? new Date(
-              new Date(vendaData.dataVenda).getTime() +
-                vendaData.diasVencimento * 24 * 60 * 60 * 1000
-            )
-          : null,
-      ]
-    );
-
-    const vendaId = (vendaResult as any).insertId;
-
-    // 2. Inserir itens da venda
-    for (const item of vendaData.produtos) {
-      await connection.execute(
-        `INSERT INTO itens_venda (
-          venda_id, produto_id, quantidade, preco_unitario, desconto
-        ) VALUES (?, ?, ?, ?, ?)`,
-        [
-          vendaId,
-          item.produtoId,
-          item.quantidade,
-          item.precoUnitario,
-          item.desconto || 0,
-        ]
-      );
-
-      // 3. Atualizar estoque
-      await connection.execute(
-        "UPDATE produtos SET quantidade = quantidade - ? WHERE id = ?",
-        [item.quantidade, item.produtoId]
-      );
-    }
-
-    await connection.commit();
-    return vendaId;
-  } catch (error) {
-    await connection.rollback();
-    throw error;
-  } finally {
-    connection.release();
-  }
-};
-
-export const getAllVendasDb = async (): Promise<Venda[]> => {
-  // Implementação
-};
-
-export const getVendaByIdDb = async (id: number): Promise<Venda | null> => {
-  // Implementação
-};
-
-export const updateVendaDb = async (
-  id: number,
-  vendaData: Partial<VendaData>
-): Promise<void> => {
-  // Implementação
-};
-
-export const getTotalVendasDb = async (): Promise<number> => {
-  // Implementação
-};
-
-export const getVendasDashboardDb = async (): Promise<any> => {
-  // Implementação
-};
-
-export const getFormasPagamentoDb = async (): Promise<any[]> => {
-  // Implementação
-};
-
-export const getVendasVencidasDb = async (): Promise<Venda[]> => {
-  // Implementação
-};
-
-export const getTotalVendasVencidasDb = async (): Promise<number> => {
-  // Implementação
-};
-```
-
-**Funcionalidades**:
-
-- Criação de vendas com itens
-- Atualização automática de estoque
-- Controle de vencimentos
-- Relatórios de vendas
-- Análise de formas de pagamento
-- Transações complexas
-
-### **5. contasPagar.service.ts**
-
-**Responsabilidade**: Gestão de contas a pagar
-
-```typescript
-export interface ContaPagarCreate {
-  fornecedor_nome: string;
-  valor: number;
-  data_vencimento: string;
-  categoria_id: string;
-  descricao: string;
-  status?: string;
-  observacoes?: string;
-}
-
-export const criarContaDb = async (
-  contaData: ContaPagarCreate
-): Promise<ContaPagar> => {
-  const connection = await db.getConnection();
-
-  try {
-    await connection.beginTransaction();
-
-    // 1. Verificar se fornecedor existe, senão criar
-    let fornecedorId = await buscarFornecedorPorNome(contaData.fornecedor_nome);
-
-    if (!fornecedorId) {
-      fornecedorId = await criarFornecedorDb({
-        nome: contaData.fornecedor_nome,
+  async createUser(userData: {
+    name: string;
+    email: string;
+    password: string;
+    role: "admin" | "financeiro" | "vendedor" | "operador";
+  }) {
+    try {
+      // Verificar se email já existe
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: userData.email },
       });
+
+      if (existingUser) {
+        throw new Error("Email já cadastrado");
+      }
+
+      // Hash da senha
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+      // Criar usuário
+      const user = await this.prisma.user.create({
+        data: {
+          ...userData,
+          password: hashedPassword,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          active: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return user;
+    } catch (error) {
+      this.handleError(error, "createUser");
     }
-
-    // 2. Inserir conta
-    const [result] = await connection.execute(
-      `INSERT INTO contas_pagar (
-        fornecedor_id, valor, data_vencimento, categoria_id,
-        descricao, status, observacoes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [
-        fornecedorId,
-        contaData.valor,
-        contaData.data_vencimento,
-        contaData.categoria_id,
-        contaData.descricao,
-        contaData.status || "pendente",
-        contaData.observacoes,
-      ]
-    );
-
-    await connection.commit();
-    return await buscarContaPorIdDb((result as any).insertId);
-  } catch (error) {
-    await connection.rollback();
-    throw error;
-  } finally {
-    connection.release();
   }
-};
 
-export const listarContasDb = async (
-  filtros?: ContaPagarFiltros
-): Promise<ContaPagar[]> => {
-  // Implementação
-};
+  async authenticateUser(email: string, password: string) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email },
+      });
 
-export const buscarContaPorIdDb = async (
-  id: string
-): Promise<ContaPagar | null> => {
-  // Implementação
-};
+      if (!user || !user.active) {
+        throw new Error("Credenciais inválidas");
+      }
 
-export const atualizarContaDb = async (
-  id: string,
-  contaData: Partial<ContaPagarCreate>
-): Promise<void> => {
-  // Implementação
-};
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
+        throw new Error("Credenciais inválidas");
+      }
 
-export const excluirContaDb = async (id: string): Promise<void> => {
-  // Implementação
-};
+      // Gerar JWT
+      const token = jwt.sign(
+        { userId: user.id, email: user.email, role: user.role },
+        process.env.JWT_SECRET!,
+        { expiresIn: "7d" }
+      );
 
-export const marcarComoPagaDb = async (
-  id: string,
-  valorPago: number,
-  formaPagamento: string
-): Promise<void> => {
-  // Implementação
-};
+      return {
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      };
+    } catch (error) {
+      this.handleError(error, "authenticateUser");
+    }
+  }
 
-export const obterResumoDb = async (): Promise<ContaPagarResumo> => {
-  // Implementação
-};
+  async getUsers() {
+    try {
+      return await this.prisma.user.findMany({
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          active: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    } catch (error) {
+      this.handleError(error, "getUsers");
+    }
+  }
 
-export const buscarContasVencimentoDb = async (): Promise<ContasVencimento> => {
-  // Implementação
-};
+  async updateUser(
+    id: number,
+    userData: Partial<{
+      name: string;
+      email: string;
+      role: string;
+      active: boolean;
+    }>
+  ) {
+    try {
+      // Verificar se usuário existe
+      const existingUser = await this.prisma.user.findUnique({
+        where: { id },
+      });
 
-export const atualizarStatusContasDb = async (): Promise<void> => {
-  // Implementação
-};
+      if (!existingUser) {
+        throw new Error("Usuário não encontrado");
+      }
 
-// Fornecedores
-export const criarFornecedorDb = async (
-  fornecedorData: FornecedorCreate
-): Promise<number> => {
-  // Implementação
-};
+      // Verificar email único se estiver sendo alterado
+      if (userData.email && userData.email !== existingUser.email) {
+        const emailExists = await this.prisma.user.findUnique({
+          where: { email: userData.email },
+        });
 
-export const listarFornecedoresDb = async (): Promise<Fornecedor[]> => {
-  // Implementação
-};
+        if (emailExists) {
+          throw new Error("Email já cadastrado");
+        }
+      }
 
-export const buscarFornecedorPorIdDb = async (
-  id: string
-): Promise<Fornecedor | null> => {
-  // Implementação
-};
+      const user = await this.prisma.user.update({
+        where: { id },
+        data: userData,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          active: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
 
-export const atualizarFornecedorDb = async (
-  id: string,
-  fornecedorData: Partial<FornecedorCreate>
-): Promise<void> => {
-  // Implementação
-};
+      return user;
+    } catch (error) {
+      this.handleError(error, "updateUser");
+    }
+  }
 
-export const excluirFornecedorDb = async (id: string): Promise<void> => {
-  // Implementação
-};
+  async deleteUser(id: number) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id },
+      });
+
+      if (!user) {
+        throw new Error("Usuário não encontrado");
+      }
+
+      await this.prisma.user.delete({
+        where: { id },
+      });
+
+      return { success: true };
+    } catch (error) {
+      this.handleError(error, "deleteUser");
+    }
+  }
+
+  private handleError(error: any, context: string) {
+    logger.error(`Erro em ${context}:`, error);
+    throw new Error(`Erro em ${context}: ${error.message}`);
+  }
+}
 ```
 
-**Funcionalidades**:
+### Client Service
 
-- CRUD completo de contas a pagar
-- Gestão de fornecedores
-- Cálculo automático de vencimentos
-- Sistema de resumos
-- Atualização de status
-- Transações complexas
-
-### **6. contasPagarMonitoramento.service.ts**
-
-**Responsabilidade**: Monitoramento de contas a pagar
+Gerenciamento de clientes:
 
 ```typescript
-export const executarMonitoramentoContas =
-  async (): Promise<MonitoramentoResult> => {
+// services/client.service.ts
+export class ClientService {
+  private prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
+
+  async createClient(clientData: {
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+  }) {
+    try {
+      // Verificar se email já existe
+      const existingClient = await this.prisma.client.findUnique({
+        where: { email: clientData.email },
+      });
+
+      if (existingClient) {
+        throw new Error("Email já cadastrado");
+      }
+
+      const client = await this.prisma.client.create({
+        data: clientData,
+      });
+
+      return client;
+    } catch (error) {
+      this.handleError(error, "createClient");
+    }
+  }
+
+  async getClients(filters?: {
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    try {
+      const { search, page = 1, limit = 10 } = filters || {};
+      const skip = (page - 1) * limit;
+
+      const where = search
+        ? {
+            OR: [
+              { name: { contains: search, mode: "insensitive" } },
+              { email: { contains: search, mode: "insensitive" } },
+            ],
+          }
+        : {};
+
+      const [clients, total] = await Promise.all([
+        this.prisma.client.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: "desc" },
+        }),
+        this.prisma.client.count({ where }),
+      ]);
+
+      return {
+        clients,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit),
+        },
+      };
+    } catch (error) {
+      this.handleError(error, "getClients");
+    }
+  }
+
+  async updateClient(
+    id: number,
+    clientData: Partial<{
+      name: string;
+      email: string;
+      phone: string;
+      address: string;
+    }>
+  ) {
+    try {
+      const existingClient = await this.prisma.client.findUnique({
+        where: { id },
+      });
+
+      if (!existingClient) {
+        throw new Error("Cliente não encontrado");
+      }
+
+      // Verificar email único se estiver sendo alterado
+      if (clientData.email && clientData.email !== existingClient.email) {
+        const emailExists = await this.prisma.client.findUnique({
+          where: { email: clientData.email },
+        });
+
+        if (emailExists) {
+          throw new Error("Email já cadastrado");
+        }
+      }
+
+      const client = await this.prisma.client.update({
+        where: { id },
+        data: clientData,
+      });
+
+      return client;
+    } catch (error) {
+      this.handleError(error, "updateClient");
+    }
+  }
+
+  async deleteClient(id: number) {
+    try {
+      const client = await this.prisma.client.findUnique({
+        where: { id },
+      });
+
+      if (!client) {
+        throw new Error("Cliente não encontrado");
+      }
+
+      // Verificar se cliente tem vendas
+      const salesCount = await this.prisma.venda.count({
+        where: { clienteId: id },
+      });
+
+      if (salesCount > 0) {
+        throw new Error("Não é possível deletar cliente com vendas associadas");
+      }
+
+      await this.prisma.client.delete({
+        where: { id },
+      });
+
+      return { success: true };
+    } catch (error) {
+      this.handleError(error, "deleteClient");
+    }
+  }
+
+  private handleError(error: any, context: string) {
+    logger.error(`Erro em ${context}:`, error);
+    throw new Error(`Erro em ${context}: ${error.message}`);
+  }
+}
+```
+
+### Product Service
+
+Gerenciamento de produtos:
+
+```typescript
+// services/product.service.ts
+export class ProductService {
+  private prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
+
+  async createProduct(productData: {
+    name: string;
+    description: string;
+    price: number;
+    stock: number;
+    category: string;
+  }) {
+    try {
+      const product = await this.prisma.product.create({
+        data: productData,
+      });
+
+      return product;
+    } catch (error) {
+      this.handleError(error, "createProduct");
+    }
+  }
+
+  async getProducts(filters?: {
+    search?: string;
+    category?: string;
+    lowStock?: boolean;
+    page?: number;
+    limit?: number;
+  }) {
+    try {
+      const {
+        search,
+        category,
+        lowStock,
+        page = 1,
+        limit = 10,
+      } = filters || {};
+      const skip = (page - 1) * limit;
+
+      const where: any = {};
+
+      if (search) {
+        where.OR = [
+          { name: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
+        ];
+      }
+
+      if (category) {
+        where.category = category;
+      }
+
+      if (lowStock) {
+        where.stock = { lte: 10 }; // Estoque baixo
+      }
+
+      const [products, total] = await Promise.all([
+        this.prisma.product.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: "desc" },
+        }),
+        this.prisma.product.count({ where }),
+      ]);
+
+      return {
+        products,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit),
+        },
+      };
+    } catch (error) {
+      this.handleError(error, "getProducts");
+    }
+  }
+
+  async updateProduct(
+    id: number,
+    productData: Partial<{
+      name: string;
+      description: string;
+      price: number;
+      stock: number;
+      category: string;
+    }>
+  ) {
+    try {
+      const existingProduct = await this.prisma.product.findUnique({
+        where: { id },
+      });
+
+      if (!existingProduct) {
+        throw new Error("Produto não encontrado");
+      }
+
+      const product = await this.prisma.product.update({
+        where: { id },
+        data: productData,
+      });
+
+      return product;
+    } catch (error) {
+      this.handleError(error, "updateProduct");
+    }
+  }
+
+  async updateStock(id: number, newStock: number) {
+    try {
+      const product = await this.prisma.product.findUnique({
+        where: { id },
+      });
+
+      if (!product) {
+        throw new Error("Produto não encontrado");
+      }
+
+      if (newStock < 0) {
+        throw new Error("Estoque não pode ser negativo");
+      }
+
+      const updatedProduct = await this.prisma.product.update({
+        where: { id },
+        data: { stock: newStock },
+      });
+
+      return updatedProduct;
+    } catch (error) {
+      this.handleError(error, "updateStock");
+    }
+  }
+
+  async deleteProduct(id: number) {
+    try {
+      const product = await this.prisma.product.findUnique({
+        where: { id },
+      });
+
+      if (!product) {
+        throw new Error("Produto não encontrado");
+      }
+
+      // Verificar se produto tem vendas
+      const salesCount = await this.prisma.vendaProduto.count({
+        where: { produtoId: id },
+      });
+
+      if (salesCount > 0) {
+        throw new Error("Não é possível deletar produto com vendas associadas");
+      }
+
+      await this.prisma.product.delete({
+        where: { id },
+      });
+
+      return { success: true };
+    } catch (error) {
+      this.handleError(error, "deleteProduct");
+    }
+  }
+
+  private handleError(error: any, context: string) {
+    logger.error(`Erro em ${context}:`, error);
+    throw new Error(`Erro em ${context}: ${error.message}`);
+  }
+}
+```
+
+### Venda Service
+
+Gerenciamento de vendas:
+
+```typescript
+// services/venda.service.ts
+export class VendaService {
+  private prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
+
+  async createVenda(vendaData: {
+    clienteId: number;
+    produtos: Array<{
+      produtoId: number;
+      quantity: number;
+    }>;
+    observacoes?: string;
+  }) {
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        // Verificar se cliente existe
+        const cliente = await tx.client.findUnique({
+          where: { id: vendaData.clienteId },
+        });
+
+        if (!cliente) {
+          throw new Error("Cliente não encontrado");
+        }
+
+        // Verificar produtos e estoque
+        const produtos = await tx.product.findMany({
+          where: {
+            id: { in: vendaData.produtos.map((p) => p.produtoId) },
+          },
+        });
+
+        if (produtos.length !== vendaData.produtos.length) {
+          throw new Error("Um ou mais produtos não encontrados");
+        }
+
+        // Verificar estoque disponível
+        for (const produtoVenda of vendaData.produtos) {
+          const produto = produtos.find((p) => p.id === produtoVenda.produtoId);
+          if (produto && produto.stock < produtoVenda.quantity) {
+            throw new Error(
+              `Estoque insuficiente para o produto ${produto.name}`
+            );
+          }
+        }
+
+        // Calcular total
+        let total = 0;
+        for (const produtoVenda of vendaData.produtos) {
+          const produto = produtos.find((p) => p.id === produtoVenda.produtoId);
+          if (produto) {
+            total += produto.price * produtoVenda.quantity;
+          }
+        }
+
+        // Criar venda
+        const venda = await tx.venda.create({
+          data: {
+            clienteId: vendaData.clienteId,
+            total,
+            status: "pendente",
+            observacoes: vendaData.observacoes,
+          },
+        });
+
+        // Criar produtos da venda e atualizar estoque
+        for (const produtoVenda of vendaData.produtos) {
+          const produto = produtos.find((p) => p.id === produtoVenda.produtoId);
+
+          await tx.vendaProduto.create({
+            data: {
+              vendaId: venda.id,
+              produtoId: produtoVenda.produtoId,
+              quantity: produtoVenda.quantity,
+              preco: produto!.price,
+            },
+          });
+
+          // Atualizar estoque
+          await tx.product.update({
+            where: { id: produtoVenda.produtoId },
+            data: {
+              stock: { decrement: produtoVenda.quantity },
+            },
+          });
+        }
+
+        // Retornar venda com dados completos
+        return await tx.venda.findUnique({
+          where: { id: venda.id },
+          include: {
+            cliente: true,
+            produtos: {
+              include: {
+                produto: true,
+              },
+            },
+          },
+        });
+      });
+    } catch (error) {
+      this.handleError(error, "createVenda");
+    }
+  }
+
+  async getVendas(filters?: {
+    status?: string;
+    clienteId?: number;
+    dataInicio?: string;
+    dataFim?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    try {
+      const {
+        status,
+        clienteId,
+        dataInicio,
+        dataFim,
+        page = 1,
+        limit = 10,
+      } = filters || {};
+      const skip = (page - 1) * limit;
+
+      const where: any = {};
+
+      if (status) {
+        where.status = status;
+      }
+
+      if (clienteId) {
+        where.clienteId = clienteId;
+      }
+
+      if (dataInicio || dataFim) {
+        where.createdAt = {};
+        if (dataInicio) {
+          where.createdAt.gte = new Date(dataInicio);
+        }
+        if (dataFim) {
+          where.createdAt.lte = new Date(dataFim);
+        }
+      }
+
+      const [vendas, total] = await Promise.all([
+        this.prisma.venda.findMany({
+          where,
+          skip,
+          take: limit,
+          include: {
+            cliente: true,
+            produtos: {
+              include: {
+                produto: true,
+              },
+            },
+          },
+          orderBy: { createdAt: "desc" },
+        }),
+        this.prisma.venda.count({ where }),
+      ]);
+
+      return {
+        vendas,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit),
+        },
+      };
+    } catch (error) {
+      this.handleError(error, "getVendas");
+    }
+  }
+
+  async updateVendaStatus(id: number, status: string) {
+    try {
+      const venda = await this.prisma.venda.findUnique({
+        where: { id },
+      });
+
+      if (!venda) {
+        throw new Error("Venda não encontrada");
+      }
+
+      const updatedVenda = await this.prisma.venda.update({
+        where: { id },
+        data: { status },
+      });
+
+      return updatedVenda;
+    } catch (error) {
+      this.handleError(error, "updateVendaStatus");
+    }
+  }
+
+  private handleError(error: any, context: string) {
+    logger.error(`Erro em ${context}:`, error);
+    throw new Error(`Erro em ${context}: ${error.message}`);
+  }
+}
+```
+
+## Serviço de Contas a Pagar
+
+### ContasPagar Service
+
+Sistema inteligente de vencimentos:
+
+```typescript
+// services/contasPagar.service.ts
+export class ContasPagarService {
+  private prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
+
+  async getContasVencidasHoje() {
     try {
       const hoje = new Date();
-      const hojeStr = hoje.toISOString().split("T")[0];
+      hoje.setHours(0, 0, 0, 0);
+      const amanha = new Date(hoje);
+      amanha.setDate(amanha.getDate() + 1);
 
-      // 1. Identificar contas vencidas
-      const contasVencidas = await identificarContasVencidas();
+      const contas = await this.prisma.contasPagar.findMany({
+        where: {
+          dataVencimento: {
+            gte: hoje,
+            lt: amanha,
+          },
+          status: "pendente",
+        },
+        include: {
+          fornecedor: true,
+        },
+        orderBy: {
+          dataVencimento: "asc",
+        },
+      });
 
-      // 2. Marcar como vencidas
-      if (contasVencidas.length > 0) {
-        await marcarContasComoVencidas(contasVencidas);
-      }
-
-      // 3. Atualizar status do sistema
-      await atualizarStatusSistema("ativo", new Date());
-
-      return {
-        contasProcessadas: contasVencidas.length,
-        contasAtualizadas: contasVencidas.length,
-        timestamp: new Date(),
-        status: "sucesso",
-      };
+      return contas;
     } catch (error) {
-      console.error("Erro no monitoramento:", error);
-      await atualizarStatusSistema("erro", new Date());
-      throw error;
+      this.handleError(error, "getContasVencidasHoje");
     }
-  };
-
-export const obterStatusSistema = async (): Promise<StatusSistema> => {
-  // Implementação
-};
-
-export const obterDadosMonitoramento =
-  async (): Promise<DadosMonitoramento> => {
-    // Implementação
-  };
-
-const identificarContasVencidas = async (): Promise<ContaPagar[]> => {
-  // Implementação
-};
-
-const marcarContasComoVencidas = async (
-  contas: ContaPagar[]
-): Promise<void> => {
-  // Implementação
-};
-
-const atualizarStatusSistema = async (
-  status: string,
-  timestamp: Date
-): Promise<void> => {
-  // Implementação
-};
-```
-
-**Funcionalidades**:
-
-- Execução de monitoramento automático
-- Identificação de contas vencidas
-- Atualização de status
-- Controle de sistema
-- Logs de execução
-
-### **7. vendasMonitoramento.service.ts**
-
-**Responsabilidade**: Monitoramento de vendas
-
-```typescript
-export const executarMonitoramentoVendas =
-  async (): Promise<MonitoramentoResult> => {
-    try {
-      // 1. Identificar vendas vencidas
-      const vendasVencidas = await identificarVendasVencidas();
-
-      // 2. Marcar como vencidas
-      if (vendasVencidas.length > 0) {
-        await marcarVendasComoVencidas(vendasVencidas);
-      }
-
-      // 3. Retornar estatísticas
-      return {
-        vendasIdentificadas: vendasVencidas.length,
-        vendasProcessadas: vendasVencidas.length,
-        timestamp: new Date(),
-        status: "sucesso",
-      };
-    } catch (error) {
-      console.error("Erro no monitoramento:", error);
-      throw error;
-    }
-  };
-
-export const obterStatusMonitoramentoVendas =
-  async (): Promise<StatusMonitoramento> => {
-    // Implementação
-  };
-
-const identificarVendasVencidas = async (): Promise<Venda[]> => {
-  // Implementação
-};
-
-const marcarVendasComoVencidas = async (vendas: Venda[]): Promise<void> => {
-  // Implementação
-};
-```
-
-**Funcionalidades**:
-
-- Monitoramento de vendas vencidas
-- Atualização de status
-- Controle de execução
-- Estatísticas de processamento
-
-### **8. config.service.ts**
-
-**Responsabilidade**: Configurações do sistema
-
-```typescript
-export const getMetodosPagamento = async (): Promise<MetodoPagamento[]> => {
-  // Implementação
-};
-
-export const toggleMetodoPagamento = async (
-  id: string,
-  ativo: boolean
-): Promise<void> => {
-  // Implementação
-};
-
-export const getMetodosPagamentoAtivos = async (): Promise<
-  MetodoPagamento[]
-> => {
-  // Implementação
-};
-
-export const getCategorias = async (): Promise<Categoria[]> => {
-  // Implementação
-};
-
-export const addCategoria = async (categoria: CategoriaData): Promise<void> => {
-  // Implementação
-};
-
-export const updateCategoria = async (
-  id: string,
-  categoria: Partial<CategoriaData>
-): Promise<void> => {
-  // Implementação
-};
-
-export const removeCategoria = async (id: string): Promise<void> => {
-  // Implementação
-};
-```
-
-**Funcionalidades**:
-
-- Gestão de métodos de pagamento
-- Controle de categorias
-- Configurações do sistema
-- Toggle de status
-
-### **9. relatorio.service.ts**
-
-**Responsabilidade**: Geração de relatórios
-
-```typescript
-export const getRelatorioLucroProduto = async (): Promise<
-  RelatorioLucroProduto[]
-> => {
-  // Implementação
-};
-
-export const getRelatorioLucroCategoria = async (): Promise<
-  RelatorioLucroCategoria[]
-> => {
-  // Implementação
-};
-
-export const getRelatorioLucroPeriodo = async (
-  dataInicio: string,
-  dataFim: string
-): Promise<RelatorioLucroPeriodo[]> => {
-  // Implementação
-};
-
-export const getRelatorioEstoqueInvestimento = async (): Promise<
-  RelatorioEstoqueInvestimento[]
-> => {
-  // Implementação
-};
-
-export const getRelatorioCompleto = async (
-  dataInicio: string,
-  dataFim: string
-): Promise<RelatorioCompleto> => {
-  // Implementação
-};
-
-export const getRelatorioPorTipo = async (
-  tipo: string,
-  dataInicio?: string,
-  dataFim?: string
-): Promise<any> => {
-  // Implementação
-};
-```
-
-**Funcionalidades**:
-
-- Relatórios de lucro por produto
-- Relatórios de lucro por categoria
-- Relatórios por período
-- Análise de estoque vs investimento
-- Relatórios completos
-- Relatórios dinâmicos por tipo
-
-### **10. pagamento.service.ts**
-
-**Responsabilidade**: Gestão de pagamentos
-
-```typescript
-export const getMetodosPagamento = async (): Promise<MetodoPagamento[]> => {
-  // Implementação
-};
-
-export const criarMetodoPagamento = async (
-  metodo: MetodoPagamentoData
-): Promise<number> => {
-  // Implementação
-};
-
-export const atualizarMetodoPagamento = async (
-  id: string,
-  metodo: Partial<MetodoPagamentoData>
-): Promise<void> => {
-  // Implementação
-};
-
-export const toggleMetodoPagamento = async (id: string): Promise<void> => {
-  // Implementação
-};
-
-export const getMetodosPagamentoAtivos = async (): Promise<
-  MetodoPagamento[]
-> => {
-  // Implementação
-};
-```
-
-**Funcionalidades**:
-
-- CRUD de métodos de pagamento
-- Controle de status ativo/inativo
-- Validação de dados
-- Filtros por status
-
-## 🎯 Padrões de Implementação
-
-### **Estrutura Padrão**
-
-```typescript
-export const [nomeFuncao]Db = async (params: Type): Promise<ReturnType> => {
-  const connection = await db.getConnection();
-
-  try {
-    await connection.beginTransaction();
-
-    // Lógica de negócio
-
-    await connection.commit();
-    return result;
-  } catch (error) {
-    await connection.rollback();
-    throw error;
-  } finally {
-    connection.release();
   }
-};
-```
 
-### **Tratamento de Transações**
+  async getProximosVencimentos() {
+    try {
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      const proximos7Dias = new Date(hoje);
+      proximos7Dias.setDate(proximos7Dias.getDate() + 7);
 
-```typescript
-const connection = await db.getConnection();
-try {
-  await connection.beginTransaction();
+      const contas = await this.prisma.contasPagar.findMany({
+        where: {
+          dataVencimento: {
+            gte: hoje,
+            lte: proximos7Dias,
+          },
+          status: "pendente",
+        },
+        include: {
+          fornecedor: true,
+        },
+        orderBy: {
+          dataVencimento: "asc",
+        },
+      });
 
-  // Operações de banco
+      return contas;
+    } catch (error) {
+      this.handleError(error, "getProximosVencimentos");
+    }
+  }
 
-  await connection.commit();
-} catch (error) {
-  await connection.rollback();
-  throw error;
-} finally {
-  connection.release();
+  async getDashboardData() {
+    try {
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      const proximos7Dias = new Date(hoje);
+      proximos7Dias.setDate(proximos7Dias.getDate() + 7);
+
+      const [
+        totalPendente,
+        vencidasHoje,
+        proximosVencimentos,
+        contasVencidas,
+        contasProximas,
+      ] = await Promise.all([
+        this.prisma.contasPagar.aggregate({
+          where: { status: "pendente" },
+          _sum: { valor: true },
+        }),
+        this.prisma.contasPagar.aggregate({
+          where: {
+            dataVencimento: {
+              gte: hoje,
+              lt: new Date(hoje.getTime() + 24 * 60 * 60 * 1000),
+            },
+            status: "pendente",
+          },
+          _sum: { valor: true },
+        }),
+        this.prisma.contasPagar.aggregate({
+          where: {
+            dataVencimento: {
+              gte: hoje,
+              lte: proximos7Dias,
+            },
+            status: "pendente",
+          },
+          _sum: { valor: true },
+        }),
+        this.prisma.contasPagar.count({
+          where: {
+            dataVencimento: {
+              gte: hoje,
+              lt: new Date(hoje.getTime() + 24 * 60 * 60 * 1000),
+            },
+            status: "pendente",
+          },
+        }),
+        this.prisma.contasPagar.count({
+          where: {
+            dataVencimento: {
+              gte: hoje,
+              lte: proximos7Dias,
+            },
+            status: "pendente",
+          },
+        }),
+      ]);
+
+      return {
+        totalPendente: totalPendente._sum.valor || 0,
+        vencidasHoje: vencidasHoje._sum.valor || 0,
+        proximosVencimentos: proximosVencimentos._sum.valor || 0,
+        contasVencidas: contasVencidas,
+        contasProximas: contasProximas,
+      };
+    } catch (error) {
+      this.handleError(error, "getDashboardData");
+    }
+  }
+
+  async createContaPagar(contaData: {
+    fornecedorId: number;
+    description: string;
+    valor: number;
+    dataVencimento: string;
+  }) {
+    try {
+      // Verificar se fornecedor existe
+      const fornecedor = await this.prisma.fornecedor.findUnique({
+        where: { id: contaData.fornecedorId },
+      });
+
+      if (!fornecedor) {
+        throw new Error("Fornecedor não encontrado");
+      }
+
+      const conta = await this.prisma.contasPagar.create({
+        data: {
+          ...contaData,
+          dataVencimento: new Date(contaData.dataVencimento),
+          status: "pendente",
+        },
+        include: {
+          fornecedor: true,
+        },
+      });
+
+      return conta;
+    } catch (error) {
+      this.handleError(error, "createContaPagar");
+    }
+  }
+
+  async updateContaPagar(
+    id: number,
+    contaData: Partial<{
+      description: string;
+      valor: number;
+      dataVencimento: string;
+      status: string;
+    }>
+  ) {
+    try {
+      const existingConta = await this.prisma.contasPagar.findUnique({
+        where: { id },
+      });
+
+      if (!existingConta) {
+        throw new Error("Conta a pagar não encontrada");
+      }
+
+      const updateData = { ...contaData };
+      if (contaData.dataVencimento) {
+        updateData.dataVencimento = new Date(contaData.dataVencimento);
+      }
+
+      const conta = await this.prisma.contasPagar.update({
+        where: { id },
+        data: updateData,
+        include: {
+          fornecedor: true,
+        },
+      });
+
+      return conta;
+    } catch (error) {
+      this.handleError(error, "updateContaPagar");
+    }
+  }
+
+  async markAsPaid(id: number) {
+    try {
+      const conta = await this.prisma.contasPagar.findUnique({
+        where: { id },
+      });
+
+      if (!conta) {
+        throw new Error("Conta a pagar não encontrada");
+      }
+
+      const updatedConta = await this.prisma.contasPagar.update({
+        where: { id },
+        data: { status: "paga" },
+        include: {
+          fornecedor: true,
+        },
+      });
+
+      return updatedConta;
+    } catch (error) {
+      this.handleError(error, "markAsPaid");
+    }
+  }
+
+  private handleError(error: any, context: string) {
+    logger.error(`Erro em ${context}:`, error);
+    throw new Error(`Erro em ${context}: ${error.message}`);
+  }
 }
 ```
 
-### **Validação de Dados**
+## Serviços de Monitoramento
+
+### VendasMonitoramento Service
+
+Monitoramento automático de vendas:
 
 ```typescript
-const validateData = (data: any, requiredFields: string[]) => {
-  for (const field of requiredFields) {
-    if (!data[field]) {
-      throw new Error(`Campo obrigatório: ${field}`);
+// services/vendasMonitoramento.service.ts
+export class VendasMonitoramentoService {
+  private prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
+
+  async updateVendasStatus() {
+    try {
+      const hoje = new Date();
+      const vencimentoLimite = new Date(hoje);
+      vencimentoLimite.setDate(vencimentoLimite.getDate() - 30); // 30 dias atrás
+
+      // Buscar vendas pendentes há mais de 30 dias
+      const vendasVencidas = await this.prisma.venda.findMany({
+        where: {
+          status: "pendente",
+          createdAt: {
+            lte: vencimentoLimite,
+          },
+        },
+      });
+
+      // Atualizar status para 'vencida'
+      const updatePromises = vendasVencidas.map((venda) =>
+        this.prisma.venda.update({
+          where: { id: venda.id },
+          data: { status: "vencida" },
+        })
+      );
+
+      await Promise.all(updatePromises);
+
+      logger.info(
+        `Atualizadas ${vendasVencidas.length} vendas para status 'vencida'`
+      );
+
+      return {
+        success: true,
+        updatedCount: vendasVencidas.length,
+      };
+    } catch (error) {
+      this.handleError(error, "updateVendasStatus");
     }
   }
-};
+
+  private handleError(error: any, context: string) {
+    logger.error(`Erro em ${context}:`, error);
+    throw new Error(`Erro em ${context}: ${error.message}`);
+  }
+}
 ```
 
-### **Tratamento de Erros**
+### ContasPagarMonitoramento Service
+
+Monitoramento automático de contas a pagar:
 
 ```typescript
-const handleError = (error: any, context: string) => {
-  console.error(`Erro em ${context}:`, error);
+// services/contasPagarMonitoramento.service.ts
+export class ContasPagarMonitoramentoService {
+  private prisma: PrismaClient;
 
-  if (error.code === "ER_DUP_ENTRY") {
-    throw new Error("Registro duplicado");
+  constructor() {
+    this.prisma = new PrismaClient();
   }
 
-  if (error.code === "ER_NO_REFERENCED_ROW_2") {
-    throw new Error("Referência inválida");
+  async updateContasStatus() {
+    try {
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+
+      // Buscar contas pendentes vencidas
+      const contasVencidas = await this.prisma.contasPagar.findMany({
+        where: {
+          status: "pendente",
+          dataVencimento: {
+            lt: hoje,
+          },
+        },
+      });
+
+      // Atualizar status para 'vencida'
+      const updatePromises = contasVencidas.map((conta) =>
+        this.prisma.contasPagar.update({
+          where: { id: conta.id },
+          data: { status: "vencida" },
+        })
+      );
+
+      await Promise.all(updatePromises);
+
+      logger.info(
+        `Atualizadas ${contasVencidas.length} contas para status 'vencida'`
+      );
+
+      return {
+        success: true,
+        updatedCount: contasVencidas.length,
+      };
+    } catch (error) {
+      this.handleError(error, "updateContasStatus");
+    }
   }
 
-  throw new Error("Erro interno do servidor");
-};
+  private handleError(error: any, context: string) {
+    logger.error(`Erro em ${context}:`, error);
+    throw new Error(`Erro em ${context}: ${error.message}`);
+  }
+}
 ```
 
-## 🚀 Performance
+## Serviço de Relatórios
 
-### **Otimizações Implementadas**
+### Relatorio Service
 
-- **Connection pooling**: Para reutilização de conexões
-- **Prepared statements**: Para segurança e performance
-- **Transações**: Para consistência de dados
-- **Índices**: Para consultas otimizadas
-- **Batch operations**: Para operações em lote
-
-### **Exemplo de Query Otimizada**
+Geração e exportação de relatórios:
 
 ```typescript
-const getRelatorioCompleto = async (dataInicio: string, dataFim: string) => {
-  const connection = await db.getConnection();
+// services/relatorio.service.ts
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
-  try {
-    const [rows] = await connection.execute(`
-      SELECT 
-        p.id,
-        p.nome,
-        p.categoria,
-        p.preco_custo,
-        p.preco_venda,
-        (p.preco_venda - p.preco_custo) as lucro_unitario,
-        ((p.preco_venda - p.preco_custo) / p.preco_venda * 100) as margem_lucro,
-        p.quantidade,
-        (p.quantidade * p.preco_custo) as valor_investido,
-        (p.quantidade * (p.preco_venda - p.preco_custo)) as lucro_potencial
-      FROM produtos p
-      WHERE p.ativo = 1
-      ORDER BY margem_lucro DESC
-    `);
+export class RelatorioService {
+  private prisma: PrismaClient;
 
-    return rows;
-  } finally {
-    connection.release();
+  constructor() {
+    this.prisma = new PrismaClient();
   }
-};
+
+  async generateVendasRelatorio(filters: {
+    dataInicio?: string;
+    dataFim?: string;
+    clienteId?: number;
+    status?: string;
+  }) {
+    try {
+      const where: any = {};
+
+      if (filters.dataInicio || filters.dataFim) {
+        where.createdAt = {};
+        if (filters.dataInicio) {
+          where.createdAt.gte = new Date(filters.dataInicio);
+        }
+        if (filters.dataFim) {
+          where.createdAt.lte = new Date(filters.dataFim);
+        }
+      }
+
+      if (filters.clienteId) {
+        where.clienteId = filters.clienteId;
+      }
+
+      if (filters.status) {
+        where.status = filters.status;
+      }
+
+      const vendas = await this.prisma.venda.findMany({
+        where,
+        include: {
+          cliente: true,
+          produtos: {
+            include: {
+              produto: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return vendas;
+    } catch (error) {
+      this.handleError(error, "generateVendasRelatorio");
+    }
+  }
+
+  async generateContasPagarRelatorio(filters: {
+    status?: string;
+    fornecedorId?: number;
+    dataInicio?: string;
+    dataFim?: string;
+  }) {
+    try {
+      const where: any = {};
+
+      if (filters.status) {
+        where.status = filters.status;
+      }
+
+      if (filters.fornecedorId) {
+        where.fornecedorId = filters.fornecedorId;
+      }
+
+      if (filters.dataInicio || filters.dataFim) {
+        where.dataVencimento = {};
+        if (filters.dataInicio) {
+          where.dataVencimento.gte = new Date(filters.dataInicio);
+        }
+        if (filters.dataFim) {
+          where.dataVencimento.lte = new Date(filters.dataFim);
+        }
+      }
+
+      const contas = await this.prisma.contasPagar.findMany({
+        where,
+        include: {
+          fornecedor: true,
+        },
+        orderBy: { dataVencimento: "asc" },
+      });
+
+      return contas;
+    } catch (error) {
+      this.handleError(error, "generateContasPagarRelatorio");
+    }
+  }
+
+  async exportToExcel(data: any[], filename: string) {
+    try {
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Relatório");
+
+      return XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    } catch (error) {
+      this.handleError(error, "exportToExcel");
+    }
+  }
+
+  async exportToPDF(data: any[], filename: string) {
+    try {
+      const doc = new jsPDF("landscape", "mm", "a4");
+
+      doc.autoTable({
+        head: [Object.keys(data[0])],
+        body: data.map((row) => Object.values(row)),
+        startY: 20,
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [41, 128, 185] },
+      });
+
+      return doc.output("arraybuffer");
+    } catch (error) {
+      this.handleError(error, "exportToPDF");
+    }
+  }
+
+  private handleError(error: any, context: string) {
+    logger.error(`Erro em ${context}:`, error);
+    throw new Error(`Erro em ${context}: ${error.message}`);
+  }
+}
 ```
 
-## 🔧 Manutenção
+## Serviço de Configuração
 
-### **Logs e Monitoramento**
+### Config Service
+
+Gerenciamento de configurações do sistema:
 
 ```typescript
-const logger = {
-  info: (message: string, data?: any) => {
-    console.log(`[INFO] ${new Date().toISOString()}: ${message}`, data || "");
-  },
-  error: (message: string, error?: any) => {
-    console.error(
-      `[ERROR] ${new Date().toISOString()}: ${message}`,
-      error || ""
-    );
-  },
-  warn: (message: string, data?: any) => {
-    console.warn(`[WARN] ${new Date().toISOString()}: ${message}`, data || "");
-  },
-};
+// services/config.service.ts
+export class ConfigService {
+  private prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
+
+  async getConfig(key: string) {
+    try {
+      const config = await this.prisma.config.findUnique({
+        where: { key },
+      });
+
+      return config?.value || null;
+    } catch (error) {
+      this.handleError(error, "getConfig");
+    }
+  }
+
+  async setConfig(key: string, value: string) {
+    try {
+      const config = await this.prisma.config.upsert({
+        where: { key },
+        update: { value },
+        create: { key, value },
+      });
+
+      return config;
+    } catch (error) {
+      this.handleError(error, "setConfig");
+    }
+  }
+
+  async getAllConfigs() {
+    try {
+      const configs = await this.prisma.config.findMany();
+
+      return configs.reduce((acc, config) => {
+        acc[config.key] = config.value;
+        return acc;
+      }, {} as Record<string, string>);
+    } catch (error) {
+      this.handleError(error, "getAllConfigs");
+    }
+  }
+
+  private handleError(error: any, context: string) {
+    logger.error(`Erro em ${context}:`, error);
+    throw new Error(`Erro em ${context}: ${error.message}`);
+  }
+}
 ```
 
-### **Versionamento**
+## Serviço de Pagamento
 
-- **Semantic versioning**: Para mudanças de API
-- **Migration scripts**: Para mudanças de schema
-- **Backward compatibility**: Quando possível
+### Pagamento Service
 
-### **Testes**
+Gerenciamento de pagamentos:
 
-- **Unit tests**: Para lógica de negócio
-- **Integration tests**: Para operações de banco
-- **Mocking**: Para dependências externas
+```typescript
+// services/pagamento.service.ts
+export class PagamentoService {
+  private prisma: PrismaClient;
 
----
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
 
-**Este documento é atualizado regularmente conforme novos serviços são adicionados ao sistema.**
+  async processarPagamento(pagamentoData: {
+    contaId: number;
+    valor: number;
+    dataPagamento: string;
+    metodo: string;
+    observacoes?: string;
+  }) {
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        // Verificar se conta existe
+        const conta = await tx.contasPagar.findUnique({
+          where: { id: pagamentoData.contaId },
+        });
+
+        if (!conta) {
+          throw new Error("Conta não encontrada");
+        }
+
+        if (conta.status === "paga") {
+          throw new Error("Conta já foi paga");
+        }
+
+        // Criar registro de pagamento
+        const pagamento = await tx.pagamento.create({
+          data: {
+            contaId: pagamentoData.contaId,
+            valor: pagamentoData.valor,
+            dataPagamento: new Date(pagamentoData.dataPagamento),
+            metodo: pagamentoData.metodo,
+            observacoes: pagamentoData.observacoes,
+          },
+        });
+
+        // Atualizar status da conta
+        await tx.contasPagar.update({
+          where: { id: pagamentoData.contaId },
+          data: { status: "paga" },
+        });
+
+        return pagamento;
+      });
+    } catch (error) {
+      this.handleError(error, "processarPagamento");
+    }
+  }
+
+  async getPagamentos(filters?: {
+    contaId?: number;
+    dataInicio?: string;
+    dataFim?: string;
+    metodo?: string;
+  }) {
+    try {
+      const where: any = {};
+
+      if (filters?.contaId) {
+        where.contaId = filters.contaId;
+      }
+
+      if (filters?.metodo) {
+        where.metodo = filters.metodo;
+      }
+
+      if (filters?.dataInicio || filters?.dataFim) {
+        where.dataPagamento = {};
+        if (filters.dataInicio) {
+          where.dataPagamento.gte = new Date(filters.dataInicio);
+        }
+        if (filters.dataFim) {
+          where.dataPagamento.lte = new Date(filters.dataFim);
+        }
+      }
+
+      const pagamentos = await this.prisma.pagamento.findMany({
+        where,
+        include: {
+          conta: {
+            include: {
+              fornecedor: true,
+            },
+          },
+        },
+        orderBy: { dataPagamento: "desc" },
+      });
+
+      return pagamentos;
+    } catch (error) {
+      this.handleError(error, "getPagamentos");
+    }
+  }
+
+  private handleError(error: any, context: string) {
+    logger.error(`Erro em ${context}:`, error);
+    throw new Error(`Erro em ${context}: ${error.message}`);
+  }
+}
+```
+
+## Conclusão
+
+Os serviços backend do ProTrack 2.0 implementam uma arquitetura robusta e escalável, com separação clara de responsabilidades, tratamento de erros consistente e otimizações de performance. O sistema inteligente de vencimentos é uma das principais inovações, proporcionando gestão financeira proativa e eficiente.
+
+Cada serviço é tipado com TypeScript, inclui validações adequadas e implementa transações de banco de dados quando necessário. A estrutura modular permite fácil manutenção e extensão do sistema.
+
+### Características Principais:
+
+- **Arquitetura em Camadas**: Separação clara entre lógica de negócio e acesso a dados
+- **Transações de Banco**: Uso de transações para operações críticas
+- **Tratamento de Erros**: Sistema consistente de tratamento e logging de erros
+- **Validações**: Validações robustas de dados e regras de negócio
+- **Performance**: Otimizações de consultas e uso de índices
+- **Segurança**: Validação de permissões e sanitização de dados
+- **Monitoramento**: Sistema de logs e métricas para acompanhamento

@@ -191,8 +191,8 @@ function calcularStatusVenda(
 export const roles = [
   { value: "admin", label: "Administrador" },
   { value: "financeiro", label: "Financeiro" },
-  { value: "vendas", label: "Vendas" },
-  { value: "user", label: "Usuário" },
+  { value: "vendedor", label: "Vendedor" },
+  { value: "operador", label: "Operador" },
 ];
 
 export const departamentos = [

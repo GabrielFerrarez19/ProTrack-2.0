@@ -11,6 +11,7 @@ import {
 } from "../../components/ui/dropdown-menu"; // shadcn/ui
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { usePermissions } from "../../hooks/usePermissions";
 
 type SidebarProps = {
   children: React.ReactNode;
@@ -20,6 +21,7 @@ export function Sidebar({ children }: SidebarProps) {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { hasPermission } = usePermissions();
 
   const handleLogout = async () => {
     try {
@@ -86,18 +88,22 @@ export function Sidebar({ children }: SidebarProps) {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() => navigate("/configfinanceiro")}
-                  className="cursor-pointer"
-                >
-                  Configurações
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => navigate("/user")}
-                  className="cursor-pointer"
-                >
-                  Perfil
-                </DropdownMenuItem>
+                {hasPermission("/configfinanceiro") && (
+                  <DropdownMenuItem
+                    onClick={() => navigate("/configfinanceiro")}
+                    className="cursor-pointer"
+                  >
+                    Configurações
+                  </DropdownMenuItem>
+                )}
+                {hasPermission("/user") && (
+                  <DropdownMenuItem
+                    onClick={() => navigate("/user")}
+                    className="cursor-pointer"
+                  >
+                    Perfil
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem
                   onClick={handleLogout}
                   className="text-red-600 cursor-pointer"
