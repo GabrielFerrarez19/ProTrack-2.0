@@ -78,9 +78,10 @@ export function ConfigUsers() {
 
   const getRoleLabel = (role: string) =>
     roles.find((r) => r.value === role)?.label || role;
-  const getDepartamentoLabel = (id: string) =>
-    departamentos.find((d) => d.value === id.toString())?.label ||
-    "Não informado";
+  const getDepartamentoLabel = (id: string) => {
+    if (!id) return "Não informado";
+    return departamentos.find((d) => d.value === id)?.label || "Não informado";
+  };
 
   // Loading state
   if (isLoading) {
@@ -160,8 +161,6 @@ export function ConfigUsers() {
           isEditing={isEditing}
           setIsEditing={setIsEditing}
           onSubmit={onSubmit}
-          roles={roles}
-          departamentos={departamentos}
           user={user}
         />
       </div>

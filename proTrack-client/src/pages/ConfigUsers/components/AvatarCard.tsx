@@ -5,7 +5,11 @@ import {
   CardTitle,
   CardDescription,
 } from "../../../components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "../../../components/ui/avatar";
 import { Badge } from "../../../components/ui/badge";
 import { Shield, Building, Clock } from "lucide-react";
 // Removido import User não utilizado
@@ -33,6 +37,7 @@ export function AvatarCard({
   }
 
   console.log("🔍 AvatarCard - Dados do usuário:", user);
+  console.log("🔍 AvatarCard - Departamento ID:", user?.departamento_id);
 
   return (
     <Card className="lg:col-span-1">

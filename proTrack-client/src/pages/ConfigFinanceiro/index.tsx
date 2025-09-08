@@ -22,6 +22,7 @@ import {
   updateCategoriaApi,
 } from "../../services/api";
 import type { MetodoPagamentoConfig } from "../../@types/types.api";
+import { Header } from "../../components/header";
 // service que criamos
 
 export function ConfiguracoesFinanceiras() {
@@ -147,14 +148,10 @@ export function ConfiguracoesFinanceiras() {
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          Configurações Financeiras
-        </h1>
-        <p className="text-muted-foreground">
-          Configure contas, métodos de pagamento, categorias e alertas
-        </p>
-      </div>
+      <Header
+        title="Configurações Financeiras"
+        text="Configure contas, métodos de pagamento, categorias e alertas"
+      />
 
       <ContasBancarias
         contasBancarias={contasBancarias}
