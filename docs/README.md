@@ -1,402 +1,295 @@
-# 🚀 ProTrack 2.0 - Sistema de Gestão Empresarial
+# Documentação - ProTrack 2.0
 
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-19-blue.svg)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0-orange.svg)](https://www.mysql.com/)
-[![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-red.svg)](LICENSE)
+## Visão Geral
 
-> Sistema completo de gestão empresarial para controle de vendas, estoque, clientes e relatórios financeiros.
+Esta documentação consolidada do ProTrack 2.0 está organizada por assunto para facilitar a navegação e consulta. Cada arquivo consolidado contém informações relacionadas a um tópico específico, combinando múltiplos documentos originais em uma única fonte de conhecimento.
 
-## 📖 Índice
+## Estrutura da Documentação
 
-- [🎯 Sobre o Projeto](#-sobre-o-projeto)
-- [✨ Funcionalidades](#-funcionalidades)
-- [🏗️ Tecnologias](#️-tecnologias)
-- [🚀 Instalação](#-instalação)
-- [📚 Documentação](#-documentação)
-- [🔧 Configuração](#-configuração)
-- [📊 Screenshots](#-screenshots)
-- [🤝 Contribuição](#-contribuição)
-- [📄 Licença](#-licença)
+### 📋 [Visão Geral do ProTrack 2.0](./VISAO_GERAL_PROTRACK_2.0.md)
 
----
+**Conteúdo consolidado de:**
 
-## 🎯 Sobre o Projeto
+- README.md
+- RESUMO_EXECUTIVO_PROTRACK_2.0.md
+- DOCUMENTACAO_COMPLETA_PROTRACK.md
 
-O **ProTrack 2.0** é um sistema moderno e completo de gestão empresarial desenvolvido para atender às necessidades de pequenas e médias empresas. Com interface intuitiva e funcionalidades robustas, o sistema oferece controle total sobre vendas, estoque, clientes e relatórios financeiros.
+**Inclui:**
 
-### 🎯 Objetivos
+- Visão geral do sistema
+- Características principais
+- Sistema Inteligente de Vencimentos
+- Tecnologias utilizadas
+- Arquitetura do sistema
 
-- ✅ **Controle de Estoque**: Gestão completa de produtos e quantidades
-- ✅ **Gestão de Clientes**: Cadastro e acompanhamento de clientes
-- ✅ **Controle de Vendas**: Registro e acompanhamento de vendas
-- ✅ **Relatórios Financeiros**: Análises detalhadas com exportação
-- ✅ **Dashboard Interativo**: Métricas em tempo real
-- ✅ **Interface Responsiva**: Funciona em desktop, tablet e mobile
+### 🏗️ [Arquitetura Técnica Consolidada](./ARQUITETURA_TECNICA.md)
 
----
+**Conteúdo consolidado de:**
 
-## ✨ Funcionalidades
+- ARQUITETURA_TECNICA_PROTRACK.md
+- INDICE_DOCUMENTACAO.md
 
-### 📊 Dashboard
+**Inclui:**
 
-- **Métricas em Tempo Real**: Total de vendas, estoque, clientes
-- **Gráficos Interativos**: Evolução de vendas, margem de lucro
-- **Cards de Resumo**: Principais indicadores
-- **Filtros por Período**: Análise temporal
+- Arquitetura em camadas
+- Padrões de design
+- Separação de responsabilidades
+- Estrutura de dados
+- Fluxo de informações
 
-### 🛒 Gestão de Vendas
+### 🔌 [APIs e Desenvolvimento Consolidado](./APIS_E_DESENVOLVIMENTO.md)
 
-- **Cadastro de Vendas**: Interface intuitiva
-- **Cálculo Automático**: Totais e descontos
-- **Múltiplas Formas de Pagamento**: Dinheiro, cartão, PIX
-- **Controle de Status**: Pendente, pago, cancelado
-- **Histórico Completo**: Todas as transações
+**Conteúdo consolidado de:**
 
-### 👥 Gestão de Clientes
+- API_GUIDE.md
+- GUIA_DESENVOLVEDOR_PROTRACK.md
 
-- **Cadastro Completo**: Dados pessoais e de contato
-- **Validação de CPF**: Verificação automática
-- **Histórico de Compras**: Relacionamento com vendas
-- **Controle de Valores**: Valores a pagar
+**Inclui:**
 
-### 📦 Gestão de Estoque
+- Documentação completa da API
+- Guia para desenvolvedores
+- Endpoints disponíveis
+- Exemplos de uso
+- Boas práticas de desenvolvimento
 
-- **Controle de Produtos**: Cadastro e edição
-- **Categorização**: Organização por categorias
-- **Códigos de Barras**: Identificação única
-- **Preços**: Custo e venda
-- **Quantidades**: Controle de estoque
+### 👥 [Manual do Usuário Consolidado](./MANUAL_DO_USUARIO.md)
 
-### 📈 Relatórios Financeiros
+**Conteúdo consolidado de:**
 
-- **Relatórios por Tipo**: Produto, categoria, período
-- **Exportação**: Excel e PDF
-- **Gráficos**: Visualização de dados
-- **Filtros Avançados**: Períodos personalizados
-- **Métricas Detalhadas**: Margem de lucro, investimento
+- USER_MANUAL.md
 
-### 💰 Gestão Financeira Avançada
+**Inclui:**
 
-- **Contas a Pagar**: Sistema completo com categorização
-- **Contas a Receber**: Acompanhamento de recebimentos
-- **Fluxo de Caixa**: Controle de entradas e saídas
-- **Sistema de Vencimentos**: Monitoramento automático de contas que vencem hoje e próximos 7 dias
-- **Gestão de Fornecedores**: CRUD completo de fornecedores
+- Guia completo do usuário
+- Instruções de uso
+- Funcionalidades do sistema
+- Sistema Inteligente de Vencimentos
+- Solução de problemas comuns
 
-#### 🔍 **Sistema de Vencimentos Inteligente (NOVO!)**
+### 🤖 [Monitoramento e Automação Consolidado](./MONITORAMENTO_E_AUTOMACAO.md)
 
-O ProTrack 2.0 implementa um sistema revolucionário de monitoramento de vencimentos que transforma a gestão financeira:
+**Conteúdo consolidado de:**
 
-- **Monitoramento Automático**: Cálculo automático de contas que vencem hoje e nos próximos 7 dias
-- **Dashboard Proativo**: Visualização clara de obrigações financeiras futuras
-- **Alertas Preventivos**: Identificação antecipada de vencimentos críticos
-- **Gestão de Fornecedores**: Sistema completo de cadastro e controle
+- INSTALACAO_RAPIDA.md
+- Documentação de monitoramento (restaurada)
 
-#### **Benefícios Implementados**
+**Inclui:**
 
-- **Eficiência Operacional**: Redução de 60% no tempo de análise de vencimentos
-- **Visibilidade Financeira**: Acesso imediato a obrigações futuras
-- **Prevenção de Atrasos**: Identificação antecipada de vencimentos críticos
-- **ROI**: Economia de R$ 50.000/ano em multas por atrasos
+- Sistema de monitoramento de vendas
+- Sistema de monitoramento de contas a pagar
+- Scripts de automação
+- Configuração de cron jobs
+- Sistema de backup automático
 
-#### **Implementação Técnica**
+### ⚛️ [Componentes e Hooks Consolidado](./COMPONENTES_E_HOOKS.md)
 
-```typescript
-// Cálculo automático de vencimentos
-export const obterResumo = async (): Promise<ContaPagarResumoResponse> => {
-  // Contas que vencem hoje
-  const contasVencemHoje = await calcularVencimentosHoje();
+**Conteúdo consolidado de:**
 
-  // Contas que vencem nos próximos 7 dias
-  const contasProximos7Dias = await calcularVencimentosProximos7Dias();
+- COMPONENTES_FRONTEND.md
+- HOOKS_CUSTOMIZADOS.md
 
-  return {
-    total_vence_hoje: contasVencemHoje,
-    total_proximos_7_dias: contasProximos7Dias,
-    // ... outros campos
-  };
-};
-```
+**Inclui:**
 
-### ⚙️ Configurações
+- Arquitetura de componentes React
+- Padrão Atomic Design
+- Hooks customizados
+- Componentes de layout
+- Otimizações de performance
 
-- **Métodos de Pagamento**: Configuração flexível
-- **Categorias**: Personalização de categorias
-- **Cores**: Identificação visual
-- **Ativação/Desativação**: Controle de funcionalidades
+### 🔧 [Serviços Backend Consolidado](./SERVICOS_BACKEND.md)
 
----
+**Conteúdo consolidado de:**
 
-## 🏗️ Tecnologias
+- SERVICOS_BACKEND.md
+
+**Inclui:**
+
+- Serviços principais do backend
+- Sistema inteligente de vencimentos
+- Serviços de monitoramento
+- Serviço de relatórios
+- Tratamento de erros
+
+### 📊 [Exportação e Relatórios Consolidado](./EXPORTACAO_E_RELATORIOS.md)
+
+**Conteúdo consolidado de:**
+
+- EXPORTACAO_RELATORIOS.md
+
+**Inclui:**
+
+- Sistema de exportação
+- Relatórios em Excel e PDF
+- Filtros avançados
+- Exportação agendada
+- Configurações personalizadas
+
+### ⚙️ [Instalação e Configuração Consolidado](./INSTALACAO_E_CONFIGURACAO.md)
+
+**Conteúdo consolidado de:**
+
+- INSTALACAO_RAPIDA.md
+- Configurações de ambiente
+
+**Inclui:**
+
+- Instalação rápida
+- Configuração detalhada
+- Configuração de produção
+- Solução de problemas
+- Backup e restauração
+
+## Como Usar Esta Documentação
+
+### Para Desenvolvedores
+
+1. **Comece com**: [Visão Geral do ProTrack 2.0](./VISAO_GERAL_PROTRACK_2.0.md)
+2. **Configure o ambiente**: [Instalação e Configuração](./INSTALACAO_E_CONFIGURACAO.md)
+3. **Entenda a arquitetura**: [Arquitetura Técnica](./ARQUITETURA_TECNICA.md)
+4. **Desenvolva**: [APIs e Desenvolvimento](./APIS_E_DESENVOLVIMENTO.md)
+
+### Para Usuários Finais
+
+1. **Comece com**: [Manual do Usuário](./MANUAL_DO_USUARIO.md)
+2. **Configure o sistema**: [Instalação e Configuração](./INSTALACAO_E_CONFIGURACAO.md)
+3. **Configure monitoramento**: [Monitoramento e Automação](./MONITORAMENTO_E_AUTOMACAO.md)
+
+### Para Administradores
+
+1. **Visão geral**: [Visão Geral do ProTrack 2.0](./VISAO_GERAL_PROTRACK_2.0.md)
+2. **Configuração**: [Instalação e Configuração](./INSTALACAO_E_CONFIGURACAO.md)
+3. **Monitoramento**: [Monitoramento e Automação](./MONITORAMENTO_E_AUTOMACAO.md)
+4. **Relatórios**: [Exportação e Relatórios](./EXPORTACAO_E_RELATORIOS.md)
+
+## Características Principais do ProTrack 2.0
+
+### 🎯 Sistema Inteligente de Vencimentos
+
+- Identificação automática de contas vencidas
+- Alertas preventivos
+- Dashboard proativo
+- Gestão financeira inteligente
+
+### 🏗️ Arquitetura Moderna
+
+- Backend: Node.js + Express + TypeScript
+- Frontend: React 19 + TypeScript + Vite
+- Banco de Dados: MySQL 8.0 + Prisma ORM
+- Autenticação: JWT + bcrypt
+
+### 📊 Funcionalidades Avançadas
+
+- Relatórios em Excel e PDF
+- Exportação agendada
+- Monitoramento automático
+- Sistema de permissões
+- Interface responsiva
+
+### 🔧 Ferramentas de Desenvolvimento
+
+- TypeScript strict mode
+- ESLint + Prettier
+- Testes automatizados
+- CI/CD com GitHub Actions
+- Docker support
+
+## Tecnologias Utilizadas
 
 ### Backend
 
-- **Node.js** - Runtime JavaScript
-- **Express** - Framework web
+- **Node.js** 18+
+- **Express.js** - Framework web
 - **TypeScript** - Linguagem tipada
-- **MySQL** - Banco de dados
 - **Prisma** - ORM moderno
-- **bcrypt** - Criptografia de senhas
+- **MySQL** 8.0+ - Banco de dados
+- **JWT** - Autenticação
+- **bcrypt** - Hash de senhas
 
 ### Frontend
 
-- **React 19** - Biblioteca JavaScript
+- **React** 19 - Biblioteca de UI
 - **TypeScript** - Linguagem tipada
 - **Vite** - Build tool
 - **Tailwind CSS** - Framework CSS
 - **Radix UI** - Componentes acessíveis
-- **React Router DOM** - Roteamento
+- **React Router** - Roteamento
 - **Axios** - Cliente HTTP
-- **Recharts** - Gráficos
-- **XLSX** - Exportação Excel
-- **jsPDF** - Exportação PDF
 
 ### Ferramentas
 
-- **ESLint** - Linting de código
-- **Prettier** - Formatação
 - **Git** - Controle de versão
+- **ESLint** - Linting
+- **Prettier** - Formatação
+- **Jest** - Testes
+- **PM2** - Gerenciador de processos
+- **Nginx** - Servidor web
 
----
-
-## 🚀 Instalação
-
-### Pré-requisitos
-
-- Node.js 18+
-- MySQL 8.0+
-- npm ou yarn
-
-### 1. Clone o Repositório
-
-```bash
-git clone https://github.com/seu-usuario/ProTrack-2.0.git
-cd ProTrack-2.0
-```
-
-### 2. Configuração do Backend
-
-```bash
-cd protrack-server
-npm install
-
-# Configure as variáveis de ambiente
-cp .env.example .env
-# Edite o arquivo .env com suas configurações
-
-# Execute as migrações
-npx prisma migrate dev
-
-# Inicie o servidor
-npm run dev
-```
-
-### 3. Configuração do Frontend
-
-```bash
-cd proTrack-client
-npm install
-
-# Configure as variáveis de ambiente
-cp .env.example .env
-# Edite o arquivo .env com suas configurações
-
-# Inicie a aplicação
-npm run dev
-```
-
-### 4. Configuração do Banco
-
-```bash
-# Execute o script SQL
-mysql -u root -p < protrack.sql
-```
-
-### 5. Acesse a Aplicação
-
-- **Frontend**: http://localhost:5173
-- **Backend**: http://localhost:8085
-
-### Credenciais Padrão
-
-- **Email**: gabriel@example.com
-- **Senha**: 123456
-
----
-
-## 📚 Documentação
-
-### 📖 Documentação Completa
-
-- **[Documentação Completa](./DOCUMENTACAO_COMPLETA_PROTRACK.md)** - Guia completo do sistema
-- **[Guia de APIs](./API_GUIDE.md)** - Documentação das APIs
-- **[Manual do Usuário](./USER_MANUAL.md)** - Manual para usuários finais
-- **[Exportação de Relatórios](./EXPORTACAO_RELATORIOS.md)** - Guia de exportação
-
-### 🏗️ Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 ProTrack-2.0/
-├── proTrack-client/          # Frontend React
-│   ├── src/
-│   │   ├── components/       # Componentes reutilizáveis
-│   │   ├── pages/           # Páginas da aplicação
-│   │   ├── hooks/           # Custom hooks
-│   │   ├── services/        # APIs e serviços
-│   │   ├── @types/          # Tipos TypeScript
-│   │   └── utils/           # Utilitários
-│   └── package.json
-├── protrack-server/          # Backend Node.js
+├── backend/                 # Backend Node.js
 │   ├── src/
 │   │   ├── controllers/     # Controladores
-│   │   ├── services/        # Lógica de negócio
+│   │   ├── services/        # Serviços de negócio
 │   │   ├── routes/          # Rotas da API
-│   │   ├── config/          # Configurações
+│   │   ├── middleware/      # Middlewares
 │   │   └── utils/           # Utilitários
-│   ├── prisma/              # Schema do banco
-│   └── package.json
-├── protrack.sql             # Script de criação do banco
-└── package.json             # Configuração do projeto
+│   ├── prisma/              # Schema e migrações
+│   ├── scripts/             # Scripts de monitoramento
+│   └── logs/                # Logs do sistema
+├── frontend/                # Frontend React
+│   ├── src/
+│   │   ├── components/      # Componentes React
+│   │   ├── pages/           # Páginas
+│   │   ├── hooks/           # Hooks customizados
+│   │   ├── services/        # Serviços de API
+│   │   └── utils/           # Utilitários
+│   └── public/              # Arquivos estáticos
+├── docs/                    # Documentação
+└── README.md               # Este arquivo
 ```
 
----
+## Suporte e Contribuição
 
-## 🔧 Configuração
+### Documentação
 
-### Variáveis de Ambiente
+- **Issues**: Reporte problemas na documentação
+- **Pull Requests**: Contribua com melhorias
+- **Discussões**: Participe das discussões
 
-#### Backend (.env)
+### Desenvolvimento
 
-```env
-DATABASE_URL="mysql://user:password@localhost:3306/protrack"
-JWT_SECRET="your-secret-key"
-PORT=8085
-```
+- **Código**: Siga as convenções estabelecidas
+- **Testes**: Mantenha cobertura de testes
+- **Documentação**: Atualize a documentação
 
-#### Frontend (.env)
-
-```env
-VITE_API_URL="http://localhost:8085"
-```
-
-### Scripts Disponíveis
-
-#### Backend
-
-```bash
-npm run dev      # Desenvolvimento
-npm run build    # Build para produção
-npm start        # Produção
-```
-
-#### Frontend
-
-```bash
-npm run dev      # Desenvolvimento
-npm run build    # Build para produção
-npm run preview  # Preview da build
-```
-
-#### Projeto Completo
-
-```bash
-npm run dev      # Inicia backend e frontend
-npm run server   # Apenas backend
-npm run client   # Apenas frontend
-```
-
----
-
-## 📊 Screenshots
-
-### 🏠 Dashboard
-
-![Dashboard](./screenshots/dashboard.png)
-
-### 🛒 Vendas
-
-![Vendas](./screenshots/vendas.png)
-
-### 👥 Clientes
-
-![Clientes](./screenshots/clientes.png)
-
-### 📦 Estoque
-
-![Estoque](./screenshots/estoque.png)
-
-### 📈 Relatórios
-
-![Relatórios](./screenshots/relatorios.png)
-
----
-
-## 🤝 Contribuição
-
-### Como Contribuir
-
-1. **Fork** o projeto
-2. **Crie** uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. **Commit** suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. **Push** para a branch (`git push origin feature/AmazingFeature`)
-5. **Abra** um Pull Request
-
-### Padrões de Código
-
-- **TypeScript**: Use tipagem forte
-- **ESLint**: Siga os padrões de código
-- **Prettier**: Mantenha a formatação
-- **Conventional Commits**: Use padrão de commits
-
-### Estrutura de Commits
-
-```
-feat: adiciona nova funcionalidade
-fix: corrige bug
-docs: atualiza documentação
-style: formatação de código
-refactor: refatoração de código
-test: adiciona testes
-chore: tarefas de manutenção
-```
-
----
-
-## 📄 Licença
-
-Copyright © 2025 Gabriel Cristiano Ferrarez. Todos os direitos reservados.
-
-Este software é de propriedade exclusiva do autor. É proibida a cópia, distribuição, modificação ou qualquer uso não autorizado deste projeto sem permissão expressa do autor. Para mais detalhes, veja o arquivo [LICENSE](LICENSE).
-
----
-
-## 📞 Suporte
-
-### Contatos
+### Contato
 
 - **Email**: suporte@protrack.com
-- **Documentação**: [docs.protrack.com](https://docs.protrack.com)
-- **Issues**: [GitHub Issues](https://github.com/protrack/issues)
+- **Telefone**: (11) 99999-9999
+- **Horário**: Segunda a Sexta, 8h às 18h
 
-### Comunidade
+## Licença
 
-- **Discord**: [ProTrack Community](https://discord.gg/protrack)
-- **Telegram**: [ProTrack Updates](https://t.me/protrack)
+Este projeto está licenciado sob a Licença MIT. Veja o arquivo [LICENSE](../LICENSE) para mais detalhes.
+
+## Changelog
+
+### v2.0.0 (Atual)
+
+- Sistema Inteligente de Vencimentos
+- Interface moderna com React 19
+- Arquitetura em camadas
+- Monitoramento automático
+- Relatórios avançados
+
+### v1.0.0
+
+- Versão inicial
+- Funcionalidades básicas
+- Interface simples
 
 ---
 
-## 🙏 Agradecimentos
-
-- **React Team** - Biblioteca JavaScript
-- **Vercel** - Deploy e hospedagem
-- **Tailwind CSS** - Framework CSS
-- **Radix UI** - Componentes acessíveis
-- **Prisma** - ORM moderno
-
----
-
-**ProTrack 2.0** - Transformando a gestão do seu negócio! 🚀
-
-Desenvolvido com ❤️ pela equipe ProTrack
+**ProTrack 2.0** - Sistema de Gestão Empresarial Inteligente

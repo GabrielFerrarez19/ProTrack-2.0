@@ -1,17 +1,21 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { usePermissions } from "../hooks/usePermissions";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: string[];
+  requiredRoute?: string; // rota específica para verificar permissão
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requiredRole = [],
+  requiredRoute,
 }) => {
   const { isAuthenticated, user, isLoading } = useAuth();
+  const { hasPermission } = usePermissions();
   const location = useLocation();
 
   // Mostra loading enquanto verifica autenticação
@@ -31,7 +35,32 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Se precisar de role específica e usuário não tiver, redireciona
+  // Verifica permissão por rota específica (prioridade sobre requiredRole)
+  if (requiredRoute && !hasPermission(requiredRoute)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="text-red-500 text-6xl mb-4">🚫</div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            Acesso Negado
+          </h1>
+          <p className="text-gray-600 mb-4">
+            Você não tem permissão para acessar esta página.
+          </p>
+          <p className="text-sm text-gray-500">Rota: {requiredRoute}</p>
+          <p className="text-sm text-gray-500">Sua role: {user?.role}</p>
+          <button
+            onClick={() => window.history.back()}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Voltar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Se precisar de role específica e usuário não tiver, redireciona (fallback)
   if (requiredRole.length > 0 && user && !requiredRole.includes(user.role)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
