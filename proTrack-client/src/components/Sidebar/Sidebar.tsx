@@ -33,7 +33,7 @@ export function Sidebar({ children }: SidebarProps) {
   };
 
   return (
-    <aside className="h-screen sidebar relative z-1">
+    <aside className="h-screen sidebar relative z-1 overflow-y-auto overflow-x-hidden">
       <nav className="h-full flex flex-col bg-white border-r shadow-sm">
         {/* Header */}
         <div className="p-4 pb-2 flex justify-between items-center">
