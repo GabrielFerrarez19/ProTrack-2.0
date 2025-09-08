@@ -23,13 +23,7 @@ interface MenuItem {
 export const DefaultConfigLayout = () => {
   const navigate = useNavigate();
   const menuConfiguracoes: MenuItem[] = [
-    {
-      id: "financeiras",
-      titulo: "Financeiras",
-      icone: CreditCard,
-      descricao: "Contas, métodos de pagamento e categorias",
-      path: "/config/financeiro",
-    },
+    // Configurações de usuário – alto uso e prioridade
     {
       id: "user",
       titulo: "Usuário",
@@ -37,6 +31,17 @@ export const DefaultConfigLayout = () => {
       descricao: "Perfil, preferências e dados pessoais",
       path: "/config/user",
     },
+
+    // Configurações financeiras – normalmente segunda prioridade
+    {
+      id: "financeiras",
+      titulo: "Financeiras",
+      icone: CreditCard,
+      descricao: "Contas, métodos de pagamento e categorias",
+      path: "/config/financeiro",
+    },
+
+    // Sistema e segurança – itens administrativos
     {
       id: "sistema",
       titulo: "Sistema",
@@ -51,6 +56,8 @@ export const DefaultConfigLayout = () => {
       descricao: "Senhas, autenticação e permissões",
       path: "/config/seguranca",
     },
+
+    // Backup e integrações – ações avançadas
     {
       id: "backup",
       titulo: "Backup",
@@ -59,12 +66,14 @@ export const DefaultConfigLayout = () => {
       path: "/config/backup",
     },
     {
-      id: "notificacoes",
-      titulo: "Notificações",
-      icone: Mail,
-      descricao: "E-mail, alertas e comunicações",
-      path: "/config/notificacoes",
+      id: "integracao",
+      titulo: "Integrações",
+      icone: Globe,
+      descricao: "APIs externas e conectores",
+      path: "/config/integracao",
     },
+
+    // Aparência e notificações – customização e alertas
     {
       id: "aparencia",
       titulo: "Aparência",
@@ -73,11 +82,11 @@ export const DefaultConfigLayout = () => {
       path: "/config/aparencia",
     },
     {
-      id: "integracao",
-      titulo: "Integrações",
-      icone: Globe,
-      descricao: "APIs externas e conectores",
-      path: "/config/integracao",
+      id: "notificacoes",
+      titulo: "Notificações",
+      icone: Mail,
+      descricao: "E-mail, alertas e comunicações",
+      path: "/config/notificacoes",
     },
   ];
 
