@@ -37,12 +37,14 @@ export function DefaultLayout() {
           text="Cadastrar produto"
           router="/cadastroprodutos"
           active={currentPath === "/cadastroprodutos"}
+          requiredRoles={["admin", "operador"]}
         />
         <SidebarItem
           icon={<UserPlus size={20} />}
           text="Cadastrar cliente"
           router="/cadastrodeclientes"
           active={currentPath === "/cadastrodeclientes"}
+          requiredRoles={["admin", "operador"]}
         />
 
         {/* Área de gestão */}
@@ -65,12 +67,14 @@ export function DefaultLayout() {
           text="Nova venda"
           router="/venda"
           active={currentPath === "/venda"}
+          requiredRoles={["admin", "vendedor"]}
         />
         <SidebarItem
           icon={<ShoppingCart size={20} />}
           text="Histórico de vendas"
           router="/totalVendas"
           active={currentPath === "/totalVendas"}
+          requiredRoles={["admin", "financeiro", "vendedor"]}
         />
 
         {/* Área de análise e gestão financeira */}
@@ -80,30 +84,35 @@ export function DefaultLayout() {
           router="/relatorio"
           alert
           active={currentPath === "/relatorio"}
+          requiredRoles={["admin", "financeiro"]}
         />
         <SidebarItem
           icon={<Calculator size={20} />}
           text="Financeiro"
           router="/financeiro"
           active={currentPath === "/financeiro"}
+          requiredRoles={["admin", "financeiro"]}
         />
         <SidebarItem
           icon={<BanknoteArrowUp size={20} />}
           text="Contas a pagar"
           router="/contasPagar"
           active={currentPath === "/contasPagar"}
+          requiredRoles={["admin", "financeiro"]}
         />
         <SidebarItem
           icon={<BanknoteArrowDown size={20} />}
           text="Contas a receber"
           router="/contasReceber"
           active={currentPath === "/contasReceber"}
+          requiredRoles={["admin", "financeiro"]}
         />
         <SidebarItem
           icon={<TrendingUp size={20} />}
           text="Fluxo de caixa"
           router="/flucoCaixa"
           active={currentPath === "/flucoCaixa"}
+          requiredRoles={["admin", "financeiro"]}
         />
       </Sidebar>
 

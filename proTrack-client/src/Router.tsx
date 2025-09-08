@@ -63,18 +63,46 @@ export function Router() {
         }
       >
         <Route path="/status" element={<Status />} />
-        <Route path="/cadastroprodutos" element={<CadProduct />} />
-        <Route path="/cadastrodeclientes" element={<CacUsers />} />
+        <Route
+          path="/cadastroprodutos"
+          element={
+            <ProtectedRoute requiredRoute="/cadastroprodutos">
+              <CadProduct />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cadastrodeclientes"
+          element={
+            <ProtectedRoute requiredRoute="/cadastrodeclientes">
+              <CacUsers />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/produtos" element={<Estoque />} />
         <Route path="/clientes" element={<Cliente />} />
-        <Route path="/venda" element={<Vendas />} />
-        <Route path="/totalVendas" element={<TotalVendas />} />
+        <Route
+          path="/venda"
+          element={
+            <ProtectedRoute requiredRoute="/venda">
+              <Vendas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/totalVendas"
+          element={
+            <ProtectedRoute requiredRoute="/totalVendas">
+              <TotalVendas />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Rotas de financeiro - apenas para admins e financeiros */}
         <Route
           path="/financeiro"
           element={
-            <ProtectedRoute requiredRole={["admin", "financeiro"]}>
+            <ProtectedRoute requiredRoute="/financeiro">
               <DashboardFinanceiro />
             </ProtectedRoute>
           }
@@ -82,7 +110,7 @@ export function Router() {
         <Route
           path="/relatorio"
           element={
-            <ProtectedRoute requiredRole={["admin", "financeiro"]}>
+            <ProtectedRoute requiredRoute="/relatorio">
               <RelatoriosFinanceiros />
             </ProtectedRoute>
           }
@@ -90,7 +118,7 @@ export function Router() {
         <Route
           path="/configfinanceiro"
           element={
-            <ProtectedRoute requiredRole={["admin", "financeiro"]}>
+            <ProtectedRoute requiredRoute="/configfinanceiro">
               <ConfiguracoesFinanceiras />
             </ProtectedRoute>
           }
@@ -98,7 +126,7 @@ export function Router() {
         <Route
           path="/contasPagar"
           element={
-            <ProtectedRoute requiredRole={["admin", "financeiro"]}>
+            <ProtectedRoute requiredRoute="/contasPagar">
               <ContasPagar />
             </ProtectedRoute>
           }
@@ -106,7 +134,7 @@ export function Router() {
         <Route
           path="/contasReceber"
           element={
-            <ProtectedRoute requiredRole={["admin", "financeiro"]}>
+            <ProtectedRoute requiredRoute="/contasReceber">
               <ContasReceber />
             </ProtectedRoute>
           }
@@ -114,7 +142,7 @@ export function Router() {
         <Route
           path="/flucoCaixa"
           element={
-            <ProtectedRoute requiredRole={["admin", "financeiro"]}>
+            <ProtectedRoute requiredRoute="/flucoCaixa">
               <FluxoCaixa />
             </ProtectedRoute>
           }
@@ -122,13 +150,20 @@ export function Router() {
         <Route
           path="/cadastrocontaspagar"
           element={
-            <ProtectedRoute requiredRole={["admin", "financeiro"]}>
+            <ProtectedRoute requiredRoute="/cadastrocontaspagar">
               <CadastroContasPagar />
             </ProtectedRoute>
           }
         />
 
-        <Route path="/user" element={<ConfigUsers />} />
+        <Route
+          path="/user"
+          element={
+            <ProtectedRoute requiredRoute="/user">
+              <ConfigUsers />
+            </ProtectedRoute>
+          }
+        />
       </Route>
     </Routes>
   );

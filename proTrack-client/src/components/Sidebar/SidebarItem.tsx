@@ -1,5 +1,6 @@
 import { useSidebar } from "./SidebarContext";
 import { Link } from "react-router-dom";
+import { usePermissions } from "../../hooks/usePermissions";
 
 type SidebarItemProps = {
   active?: boolean;
@@ -7,6 +8,7 @@ type SidebarItemProps = {
   text: string;
   alert?: boolean;
   router?: string; // rota para navegação
+  requiredRoles?: string[]; // roles necessárias para exibir o item
 };
 
 export function SidebarItem({
@@ -15,8 +17,15 @@ export function SidebarItem({
   text,
   alert = false,
   router,
+  requiredRoles = [],
 }: SidebarItemProps) {
   const { expanded } = useSidebar();
+  const { hasRole } = usePermissions();
+
+  // Se o item tem roles específicas e o usuário não tem permissão, não renderiza
+  if (requiredRoles.length > 0 && !hasRole(requiredRoles as any)) {
+    return null;
+  }
 
   const content = (
     <>
