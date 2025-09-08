@@ -23,7 +23,7 @@ export function DefaultLayout() {
   return (
     <div className="flex h-screen">
       <Sidebar>
-        {/* Área de visão geral */}
+        {/* 📊 Visão Geral */}
         <SidebarItem
           icon={<ChartPie size={20} />}
           text="Status"
@@ -31,23 +31,23 @@ export function DefaultLayout() {
           active={currentPath === "/status"}
         />
 
-        {/* Área de cadastros */}
+        {/* 🗂️ Cadastros */}
         <SidebarItem
           icon={<PackagePlus size={20} />}
-          text="Cadastrar produto"
+          text="Novo Produto"
           router="/cadastroprodutos"
           active={currentPath === "/cadastroprodutos"}
           requiredRoles={["admin", "operador"]}
         />
         <SidebarItem
           icon={<UserPlus size={20} />}
-          text="Cadastrar cliente"
+          text="Novo Cliente"
           router="/cadastrodeclientes"
           active={currentPath === "/cadastrodeclientes"}
           requiredRoles={["admin", "operador"]}
         />
 
-        {/* Área de gestão */}
+        {/* 📦 Gestão */}
         <SidebarItem
           icon={<PackageSearch size={20} />}
           text="Produtos"
@@ -61,31 +61,23 @@ export function DefaultLayout() {
           active={currentPath === "/clientes"}
         />
 
-        {/* Área de vendas */}
+        {/* 🛒 Vendas */}
         <SidebarItem
           icon={<Store size={20} />}
-          text="Nova venda"
+          text="Nova Venda"
           router="/venda"
           active={currentPath === "/venda"}
           requiredRoles={["admin", "vendedor"]}
         />
         <SidebarItem
           icon={<ShoppingCart size={20} />}
-          text="Histórico de vendas"
+          text="Histórico de Vendas"
           router="/totalVendas"
           active={currentPath === "/totalVendas"}
           requiredRoles={["admin", "financeiro", "vendedor"]}
         />
 
-        {/* Área de análise e gestão financeira */}
-        <SidebarItem
-          icon={<BarChart3 size={20} />}
-          text="Relatórios"
-          router="/relatorio"
-          alert
-          active={currentPath === "/relatorio"}
-          requiredRoles={["admin", "financeiro"]}
-        />
+        {/* 💰 Financeiro */}
         <SidebarItem
           icon={<Calculator size={20} />}
           text="Financeiro"
@@ -95,23 +87,31 @@ export function DefaultLayout() {
         />
         <SidebarItem
           icon={<BanknoteArrowUp size={20} />}
-          text="Contas a pagar"
+          text="Contas a Pagar"
           router="/contasPagar"
           active={currentPath === "/contasPagar"}
           requiredRoles={["admin", "financeiro"]}
         />
         <SidebarItem
           icon={<BanknoteArrowDown size={20} />}
-          text="Contas a receber"
+          text="Contas a Receber"
           router="/contasReceber"
           active={currentPath === "/contasReceber"}
           requiredRoles={["admin", "financeiro"]}
         />
         <SidebarItem
           icon={<TrendingUp size={20} />}
-          text="Fluxo de caixa"
+          text="Fluxo de Caixa"
           router="/flucoCaixa"
           active={currentPath === "/flucoCaixa"}
+          requiredRoles={["admin", "financeiro"]}
+        />
+        <SidebarItem
+          icon={<BarChart3 size={20} />}
+          text="Relatórios"
+          router="/relatorio"
+          alert
+          active={currentPath === "/relatorio"}
           requiredRoles={["admin", "financeiro"]}
         />
       </Sidebar>
