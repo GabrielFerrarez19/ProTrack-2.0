@@ -16,9 +16,51 @@ Bem-vindo ao ProTrack 2.0! Este manual irá guiá-lo através de todas as funcio
 
 A interface do ProTrack 2.0 é intuitiva e responsiva, adaptando-se a diferentes tamanhos de tela:
 
-- **Menu Lateral**: Navegação principal do sistema
-- **Barra Superior**: Informações do usuário e notificações
+- **Menu Lateral (Sidebar)**: Navegação principal do sistema com ícones e permissões por role
+- **Barra Superior (Header)**: Informações do usuário, notificações e logout
 - **Área de Trabalho**: Conteúdo principal de cada módulo
+- **Sistema de Notificações**: Toast notifications com Sonner para feedback do usuário
+- **Design Responsivo**: Interface adaptável para desktop, tablet e mobile
+
+## Sistema de Permissões
+
+O ProTrack 2.0 possui um sistema robusto de permissões baseado em roles (funções):
+
+### Tipos de Usuário
+
+#### **Administrador (Admin)**
+
+- Acesso completo a todas as funcionalidades
+- Gerenciamento de usuários e configurações
+- Relatórios e análises avançadas
+
+#### **Financeiro**
+
+- Acesso ao módulo financeiro
+- Gestão de contas a pagar e receber
+- Relatórios financeiros
+- Dashboard com métricas financeiras
+
+#### **Vendedor**
+
+- Acesso ao módulo de vendas
+- Criação e gestão de vendas
+- Visualização de relatórios de vendas
+- Acesso ao dashboard de vendas
+
+#### **Operador**
+
+- Cadastro de produtos e clientes
+- Gestão de estoque
+- Visualização de relatórios básicos
+- Acesso limitado ao dashboard
+
+### Controle de Acesso
+
+- **Rotas Protegidas**: Cada página verifica as permissões do usuário
+- **Menu Dinâmico**: Apenas funcionalidades permitidas aparecem no menu
+- **Validação de Ações**: Operações são validadas no backend
+- **Sessão Segura**: Autenticação JWT com renovação automática
 
 ## Módulos do Sistema
 
@@ -26,19 +68,22 @@ A interface do ProTrack 2.0 é intuitiva e responsiva, adaptando-se a diferentes
 
 O Dashboard é sua central de informações, fornecendo uma visão geral do negócio:
 
-#### Visão Geral
+#### Visão Geral (Status)
 
-- **Resumo de Vendas**: Total de vendas do período
+- **Resumo de Vendas**: Total de vendas do período com vendas em aberto
 - **Clientes Ativos**: Número de clientes cadastrados
-- **Produtos em Estoque**: Quantidade de produtos disponíveis
-- **Contas a Pagar**: Resumo financeiro
+- **Produtos em Estoque**: Valor total investido em estoque
+- **Contas a Pagar**: Resumo financeiro com vencimentos
+- **Giro de Estoque**: Análise de rotatividade de produtos
+- **Margem de Lucro**: Produtos com melhor margem e distribuição
 
 #### Gráficos e Relatórios
 
-- **Vendas por Período**: Gráfico de vendas mensais
-- **Top Produtos**: Produtos mais vendidos
-- **Status de Vendas**: Distribuição por status
-- **Fluxo de Caixa**: Entradas e saídas
+- **Evolução de Lucro Mensal**: Gráfico de lucros por mês
+- **Valor Investido por Categoria**: Distribuição de investimento
+- **Distribuição de Margem de Lucro**: Análise de rentabilidade
+- **Top Produtos**: Produtos mais vendidos e com melhor margem
+- **Vendas em Aberto**: Controle de vendas pendentes
 
 ### 2. Módulo de Vendas
 
@@ -126,24 +171,33 @@ O Dashboard é sua central de informações, fornecendo uma visão geral do neg�
 
 O ProTrack 2.0 inclui um sistema inovador para gestão de contas a pagar:
 
+##### Dashboard de Contas
+
+- **Cards de Resumo**: Total pendente, vencido, agendado e total geral
+- **Monitoramento de Vencimentos**: Contas que vencem hoje e nos próximos 7 dias
+- **Status de Monitoramento**: Sistema automático de atualização de status
+- **Filtros Avançados**: Por status, categoria, fornecedor e período
+
 ##### Contas Vencidas Hoje
 
 - **Identificação Automática**: Sistema identifica contas vencidas hoje
 - **Alertas Visuais**: Destaque especial para contas vencidas
 - **Ações Rápidas**: Marcar como paga ou reagendar
+- **Cálculo de Dias de Atraso**: Contagem automática de dias em atraso
 
 ##### Próximos Vencimentos (7 dias)
 
-- **Prevenção**: Visualize contas que vencem nos próximos 7 dias
-- **Planejamento**: Organize pagamentos antecipadamente
-- **Alertas**: Notificações automáticas
+- **Prevenção**: Identifica contas que vencem nos próximos 7 dias
+- **Planejamento**: Permite planejamento antecipado de pagamentos
+- **Alertas**: Notificações automáticas de vencimentos próximos
+- **Projeções**: Análise de fluxo de caixa futuro
 
-##### Dashboard Financeiro
+##### Dashboard Proativo
 
-- **Resumo Total**: Valor total de contas pendentes
-- **Distribuição**: Contas vencidas vs. próximas
-- **Fornecedores**: Resumo por fornecedor
+- **Visão Consolidada**: Resumo de todas as obrigações financeiras
+- **Métricas em Tempo Real**: Valores atualizados automaticamente
 - **Tendências**: Gráficos de vencimentos
+- **Exportação**: Relatórios em PDF e Excel
 
 #### Gerenciar Contas a Pagar
 

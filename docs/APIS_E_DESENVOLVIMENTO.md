@@ -11,7 +11,7 @@ A API do ProTrack 2.0 é uma API RESTful moderna, construída com Node.js, Expre
 #### Base URL
 
 ```
-http://localhost:3001/api
+http://localhost:8085/api
 ```
 
 #### Headers Padrão
@@ -271,13 +271,17 @@ POST /produtos
 ### Listar Contas a Pagar
 
 ```http
-GET /contas-pagar
+GET /contas-pagar/contas
 ```
 
 **Query Parameters:**
 
-- `status`: Filtrar por status
-- `fornecedorId`: Filtrar por fornecedor
+- `status`: Filtrar por status (pendente, pago, vencido, agendado)
+- `categoria_id`: Filtrar por categoria
+- `fornecedor_id`: Filtrar por fornecedor
+- `data_inicio`: Data de início do período
+- `data_fim`: Data de fim do período
+- `search`: Busca por descrição ou fornecedor
 - `vencimento`: Filtrar por data de vencimento
 
 **Response:**
@@ -377,10 +381,147 @@ GET /contas-pagar/proximos-vencimentos
 }
 ```
 
-### Dashboard de Contas a Pagar
+### Obter Resumo das Contas
 
 ```http
-GET /contas-pagar/dashboard
+GET /contas-pagar/contas/resumo
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "total_contas": 150,
+    "total_pendente": 120,
+    "total_pago": 30,
+    "total_vence_hoje": 2500.0,
+    "total_proximos_7_dias": 8500.0,
+    "total_valor": 15000.0,
+    "total_vencidas": 3500.0,
+    "total_agendado": 2000.0
+  }
+}
+```
+
+### Buscar Contas por Vencimento
+
+```http
+GET /contas-pagar/contas/vencimentos
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "contasVencemHoje": [
+      {
+        "id": "uuid-1",
+        "fornecedor_nome": "Fornecedor A",
+        "valor": 1000.0,
+        "data_vencimento": "2024-01-15",
+        "status": "pendente"
+      }
+    ],
+    "contasProximos7Dias": [
+      {
+        "id": "uuid-2",
+        "fornecedor_nome": "Fornecedor B",
+        "valor": 2000.0,
+        "data_vencimento": "2024-01-20",
+        "status": "pendente"
+      }
+    ]
+  }
+}
+```
+
+### Criar Conta
+
+```http
+POST /contas-pagar/contas
+```
+
+**Request Body:**
+
+```json
+{
+  "fornecedor_nome": "Fornecedor ABC Ltda",
+  "valor": 1500.0,
+  "data_vencimento": "2024-12-31",
+  "categoria_id": "uuid-da-categoria",
+  "descricao": "Compra de materiais",
+  "data_agendamento": "2024-12-30",
+  "forma_pagamento": "pix",
+  "observacoes": "Pagamento antecipado com desconto"
+}
+```
+
+### Marcar como Paga
+
+```http
+PUT /contas-pagar/contas/:id/pagar
+```
+
+**Request Body:**
+
+```json
+{
+  "valor_pago": 1500.0,
+  "forma_pagamento": "pix",
+  "data_pagamento": "2024-01-15",
+  "observacoes": "Pagamento realizado via PIX"
+}
+```
+
+### Fornecedores
+
+#### Criar Fornecedor
+
+```http
+POST /contas-pagar/fornecedores
+```
+
+**Request Body:**
+
+```json
+{
+  "nome": "Fornecedor ABC Ltda",
+  "cnpj": "12.345.678/0001-90",
+  "email": "contato@fornecedor.com",
+  "telefone": "(11) 99999-9999",
+  "endereco": "Rua das Flores, 123",
+  "observacoes": "Fornecedor preferencial"
+}
+```
+
+#### Listar Fornecedores
+
+```http
+GET /contas-pagar/fornecedores
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid-fornecedor",
+      "nome": "Fornecedor ABC Ltda",
+      "cnpj": "12.345.678/0001-90",
+      "email": "contato@fornecedor.com",
+      "telefone": "(11) 99999-9999",
+      "total_contas": 15,
+      "valor_total": 25000.0,
+      "created_at": "2024-01-15T10:30:00.000Z"
+    }
+  ]
+}
 ```
 
 **Response:**

@@ -198,22 +198,26 @@ Esta documentação consolidada do ProTrack 2.0 está organizada por assunto par
 ### Backend
 
 - **Node.js** 18+
-- **Express.js** - Framework web
-- **TypeScript** - Linguagem tipada
-- **Prisma** - ORM moderno
+- **Express.js** 4.18.2 - Framework web
+- **TypeScript** 5.8.3 - Linguagem tipada
 - **MySQL** 8.0+ - Banco de dados
-- **JWT** - Autenticação
-- **bcrypt** - Hash de senhas
+- **mysql2** 3.14.3 - Driver MySQL
+- **JWT** 9.0.2 - Autenticação
+- **bcrypt** 6.0.0 - Hash de senhas
+- **CORS** 2.8.5 - Cross-Origin Resource Sharing
 
 ### Frontend
 
-- **React** 19 - Biblioteca de UI
-- **TypeScript** - Linguagem tipada
-- **Vite** - Build tool
-- **Tailwind CSS** - Framework CSS
-- **Radix UI** - Componentes acessíveis
-- **React Router** - Roteamento
-- **Axios** - Cliente HTTP
+- **React** 19.1.0 - Biblioteca de UI
+- **TypeScript** 5.8.3 - Linguagem tipada
+- **Vite** 4.6.0 - Build tool
+- **Tailwind CSS** 4.1.11 - Framework CSS
+- **Radix UI** 3.2.1 - Componentes acessíveis
+- **React Router** 7.7.1 - Roteamento
+- **Axios** 1.11.0 - Cliente HTTP
+- **Sonner** 2.0.7 - Sistema de notificações
+- **React Hook Form** 7.62.0 - Gerenciamento de formulários
+- **Zod** 4.0.17 - Validação de esquemas
 
 ### Ferramentas
 
@@ -228,26 +232,42 @@ Esta documentação consolidada do ProTrack 2.0 está organizada por assunto par
 
 ```
 ProTrack-2.0/
-├── backend/                 # Backend Node.js
+├── proTrack-client/          # Frontend React
+│   ├── src/
+│   │   ├── components/       # Componentes reutilizáveis
+│   │   │   ├── ui/          # Componentes base (Radix UI)
+│   │   │   ├── Sidebar/     # Navegação lateral
+│   │   │   └── header/      # Cabeçalho
+│   │   ├── pages/           # Páginas da aplicação
+│   │   │   ├── Status/      # Dashboard principal
+│   │   │   ├── Vendas/      # Gestão de vendas
+│   │   │   ├── ContasPagar/ # Contas a pagar
+│   │   │   ├── Financeiro/  # Módulo financeiro
+│   │   │   └── ConfigUsers/ # Configurações
+│   │   ├── hooks/           # Hooks customizados
+│   │   │   ├── useAuth.ts   # Autenticação
+│   │   │   ├── useDashboard.ts # Dashboard
+│   │   │   └── useContasPagar.ts # Contas a pagar
+│   │   ├── services/        # Serviços de API
+│   │   ├── layout/          # Layouts da aplicação
+│   │   ├── @types/          # Definições de tipos
+│   │   └── utils/           # Utilitários
+│   └── package.json
+├── protrack-server/          # Backend Node.js
 │   ├── src/
 │   │   ├── controllers/     # Controladores
-│   │   ├── services/        # Serviços de negócio
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── user.controller.ts
+│   │   │   ├── product.controller.ts
+│   │   │   └── contasPagar.controller.ts
+│   │   ├── services/        # Lógica de negócio
 │   │   ├── routes/          # Rotas da API
-│   │   ├── middleware/      # Middlewares
-│   │   └── utils/           # Utilitários
-│   ├── prisma/              # Schema e migrações
+│   │   ├── middlewares/     # Middlewares
+│   │   └── config/          # Configurações
 │   ├── scripts/             # Scripts de monitoramento
-│   └── logs/                # Logs do sistema
-├── frontend/                # Frontend React
-│   ├── src/
-│   │   ├── components/      # Componentes React
-│   │   ├── pages/           # Páginas
-│   │   ├── hooks/           # Hooks customizados
-│   │   ├── services/        # Serviços de API
-│   │   └── utils/           # Utilitários
-│   └── public/              # Arquivos estáticos
+│   └── package.json
 ├── docs/                    # Documentação
-└── README.md               # Este arquivo
+└── protrack.sql            # Script do banco de dados
 ```
 
 ## Suporte e Contribuição

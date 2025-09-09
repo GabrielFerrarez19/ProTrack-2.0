@@ -39,21 +39,25 @@ O ProTrack 2.0 é um sistema completo de gestão empresarial desenvolvido com te
 
 **Frontend:**
 
-- React 19 + TypeScript
-- Vite (build tool)
-- Tailwind CSS + Radix UI
-- React Router DOM
-- Axios (HTTP client)
-- Recharts (gráficos)
-- XLSX + jsPDF (exportação)
+- React 19.1.0 + TypeScript 5.8.3
+- Vite 4.6.0 (build tool)
+- Tailwind CSS 4.1.11 + Radix UI 3.2.1
+- React Router DOM 7.7.1
+- Axios 1.11.0 (HTTP client)
+- Recharts 3.1.2 (gráficos)
+- XLSX 0.18.5 + jsPDF 2.5.1 (exportação)
+- Sonner 2.0.7 (notificações)
+- React Hook Form 7.62.0 (formulários)
+- Zod 4.0.17 (validação)
 
 **Backend:**
 
-- Node.js + Express.js
-- TypeScript (strict mode)
-- MySQL 8.0+ com Prisma ORM
-- JWT (autenticação)
-- bcrypt (hash de senhas)
+- Node.js 18+ + Express.js 4.18.2
+- TypeScript 5.8.3 (strict mode)
+- MySQL 8.0+ com mysql2 3.14.3
+- JWT 9.0.2 (autenticação)
+- bcrypt 6.0.0 (hash de senhas)
+- CORS 2.8.5 (cross-origin)
 
 ---
 
@@ -66,19 +70,39 @@ ProTrack-2.0/
 ├── proTrack-client/          # Frontend React
 │   ├── src/
 │   │   ├── components/       # Componentes reutilizáveis
+│   │   │   ├── ui/          # Componentes base (Radix UI)
+│   │   │   ├── Sidebar/     # Navegação lateral
+│   │   │   └── header/      # Cabeçalho
 │   │   ├── pages/           # Páginas da aplicação
+│   │   │   ├── Status/      # Dashboard principal
+│   │   │   ├── Vendas/      # Gestão de vendas
+│   │   │   ├── ContasPagar/ # Contas a pagar
+│   │   │   ├── Financeiro/  # Módulo financeiro
+│   │   │   └── ConfigUsers/ # Configurações
 │   │   ├── hooks/           # Hooks customizados
+│   │   │   ├── useAuth.ts   # Autenticação
+│   │   │   ├── useDashboard.ts # Dashboard
+│   │   │   └── useContasPagar.ts # Contas a pagar
 │   │   ├── services/        # Serviços de API
+│   │   ├── layout/          # Layouts da aplicação
+│   │   ├── @types/          # Definições de tipos
 │   │   └── utils/           # Utilitários
 │   └── package.json
 ├── protrack-server/          # Backend Node.js
 │   ├── src/
 │   │   ├── controllers/     # Controladores
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── user.controller.ts
+│   │   │   ├── product.controller.ts
+│   │   │   └── contasPagar.controller.ts
 │   │   ├── services/        # Lógica de negócio
 │   │   ├── routes/          # Rotas da API
+│   │   ├── middlewares/     # Middlewares
 │   │   └── config/          # Configurações
+│   ├── scripts/             # Scripts de monitoramento
 │   └── package.json
-└── docs/                    # Documentação
+├── docs/                    # Documentação
+└── protrack.sql            # Script do banco de dados
 ```
 
 ### 🎨 Padrões Arquiteturais
@@ -275,26 +299,71 @@ interface ComponentNameProps {
 #### **1. useAuth.ts**
 
 ```typescript
-export const useAuth = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export const useAuth = (): AuthState & AuthActions => {
+  const [state, setState] = useState<AuthState>({
+    user: null,
+    isLoading: true,
+    isAuthenticated: false,
+    error: null,
+  });
 
-  const login = async (email: string, password: string) => {
-    // Implementação do login
-  };
+  const login = useCallback(
+    async (email: string, password: string): Promise<LoginResponse> => {
+      try {
+        setState((prev) => ({ ...prev, isLoading: true, error: null }));
+        const response = await loginUser(email, password);
 
-  const logout = () => {
-    // Implementação do logout
-  };
+        if (response.user && response.token) {
+          saveUserToStorage(response.user, response.token);
+          setState((prev) => ({
+            ...prev,
+            user: response.user,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          }));
+        }
+        return response;
+      } catch (error: any) {
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: error.error || "Erro ao fazer login",
+        }));
+        throw error;
+      }
+    },
+    [saveUserToStorage]
+  );
+
+  const logout = useCallback(async (): Promise<void> => {
+    try {
+      await logoutUser();
+      clearUserFromStorage();
+      setState({
+        user: null,
+        isLoading: false,
+        isAuthenticated: false,
+        error: null,
+      });
+    } catch (error) {
+      clearUserFromStorage();
+      setState({
+        user: null,
+        isLoading: false,
+        isAuthenticated: false,
+        error: null,
+      });
+    }
+  }, [clearUserFromStorage]);
 
   return {
-    user,
-    loading,
-    error,
+    ...state,
     login,
     logout,
-    isAuthenticated: !!user,
+    updateUser,
+    refreshUser,
+    clearError,
   };
 };
 ```
@@ -310,30 +379,149 @@ export const useContasPagar = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Métodos de CRUD
+  // Métodos de CRUD para Contas
   const listarContas = async (filtros: ContaPagarFiltros = {}) => {
-    /* ... */
-  };
-  const criarConta = async (contaData: ContaPagarCreate) => {
-    /* ... */
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await listarContasPagar(filtros);
+      if (response.success) {
+        setContas(response.data);
+      } else {
+        setError(response.message || "Erro ao listar contas");
+      }
+    } catch (error: any) {
+      setError(error.message || "Erro ao conectar com o servidor");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const criarConta = async (
+    contaData: ContaPagarCreate
+  ): Promise<ContaPagar | null> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await criarContaPagar(contaData);
+      if (response.success) {
+        await listarContas();
+        return response.data;
+      } else {
+        setError(response.message || "Erro ao criar conta");
+        return null;
+      }
+    } catch (error: any) {
+      setError(error.message || "Erro ao conectar com o servidor");
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const obterResumo = async () => {
+    try {
+      const response = await obterResumoContasPagar();
+      if (response.success) {
+        setResumo(response.data);
+      } else {
+        setError(response.message || "Erro ao obter resumo");
+      }
+    } catch (error: any) {
+      setError(error.message || "Erro ao conectar com o servidor");
+    }
+  };
+
+  // Métodos para Fornecedores
+  const listarFornecedoresHook = async () => {
+    try {
+      const response = await listarFornecedores();
+      if (response.success) {
+        setFornecedores(response.data);
+      } else {
+        setError(response.message || "Erro ao listar fornecedores");
+      }
+    } catch (error: any) {
+      setError(error.message || "Erro ao conectar com o servidor");
+    }
+  };
+
+  // Métodos para Categorias
+  const listarCategorias = async () => {
+    try {
+      const response = await listarCategoriasDespesas();
+      if (response.success) {
+        const categoriasConvertidas: Categoria[] = response.data.map(
+          (cat: any) => ({
+            id: cat.id,
+            nome: cat.nome,
+            tipo: cat.tipo,
+            cor: cat.cor,
+            criado_em: cat.criado_em || new Date().toISOString(),
+            atualizado_em: cat.atualizado_em || new Date().toISOString(),
+          })
+        );
+        setCategorias(categoriasConvertidas);
+      } else {
+        setError("Erro ao listar categorias");
+      }
+    } catch (error: any) {
+      setError(error.message || "Erro ao conectar com o servidor");
+    }
+  };
+
+  // Utilitários
+  const formatarMoeda = (valor: number): string => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(valor);
+  };
+
+  const calcularDiasAtraso = (dataVencimento: string): number => {
+    const hoje = new Date();
+    const vencimento = new Date(dataVencimento);
+    const diffTime = hoje.getTime() - vencimento.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  };
+
+  useEffect(() => {
+    listarContas();
+    obterResumo();
+    listarCategorias();
+    listarFornecedoresHook();
+  }, []);
+
   return {
+    // Estados
     contas,
     categorias,
     fornecedores,
     resumo,
     loading,
     error,
+    // Métodos de contas
     listarContas,
     criarConta,
     atualizarConta,
     excluirConta,
     marcarComoPaga,
     obterResumo,
-    obterEstatisticas,
-    obterProjecaoPagamentos,
-    obterAlertas,
+    // Métodos de fornecedores
+    listarFornecedores: listarFornecedoresHook,
+    criarFornecedor,
+    atualizarFornecedor,
+    excluirFornecedor,
+    // Métodos de categorias
+    listarCategorias,
+    criarCategoria,
+    atualizarCategoria,
+    excluirCategoria,
+    // Utilitários
+    formatarMoeda,
+    calcularDiasAtraso,
+    limparErro,
   };
 };
 ```
@@ -354,8 +542,9 @@ export const useDashboard = () => {
     distribuicaoMargemLucro: null,
     vendasEmAberto: null,
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Carrega todos os dados do dashboard em paralelo
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -413,6 +602,86 @@ export const useDashboard = () => {
 
   return { dados, loading, error };
 };
+```
+
+#### **4. usePermissions.ts**
+
+```typescript
+export const usePermissions = () => {
+  const { user } = useAuth();
+
+  const hasPermission = (route: string): boolean => {
+    if (!user) return false;
+
+    const rolePermissions = {
+      admin: ["*"], // Admin tem acesso a tudo
+      financeiro: ["/status", "/financeiro", "/contasPagar", "/relatorio"],
+      vendedor: ["/status", "/venda", "/totalVendas"],
+      operador: [
+        "/status",
+        "/cadastroprodutos",
+        "/cadastrodeclientes",
+        "/produtos",
+        "/clientes",
+      ],
+    };
+
+    const userPermissions =
+      rolePermissions[user.role as keyof typeof rolePermissions] || [];
+    return userPermissions.includes("*") || userPermissions.includes(route);
+  };
+
+  const hasRole = (roles: string[]): boolean => {
+    return user ? roles.includes(user.role) : false;
+  };
+
+  const isAdmin = (): boolean => {
+    return user?.role === "admin";
+  };
+
+  const hasFinancialAccess = (): boolean => {
+    return hasRole(["admin", "financeiro"]);
+  };
+
+  const canSell = (): boolean => {
+    return hasRole(["admin", "vendedor"]);
+  };
+
+  return {
+    hasPermission,
+    hasRole,
+    isAdmin,
+    hasFinancialAccess,
+    canSell,
+    getAccessibleRoutes: () => {
+      // Retorna todas as rotas acessíveis para o usuário atual
+    },
+  };
+};
+```
+
+#### **5. useIsMobile.ts**
+
+```typescript
+const MOBILE_BREAKPOINT = 768;
+
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(
+    undefined
+  );
+
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    const onChange = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+    mql.addEventListener("change", onChange);
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+
+  return !!isMobile;
+}
 ```
 
 ---
@@ -527,7 +796,7 @@ export const [nomeFuncao]Db = async (params: Type): Promise<ReturnType> => {
 ### 🔌 Base URL
 
 ```
-http://localhost:3000/api
+http://localhost:8085/api
 ```
 
 ### 📊 Contas a Pagar
@@ -764,15 +1033,19 @@ mysql -u usuario -p protrack < protrack.sql
 # Backend (.env)
 DATABASE_URL="mysql://usuario:senha@localhost:3306/protrack"
 JWT_SECRET="seu-jwt-secret"
-PORT=3000
+PORT=8085
 
 # Frontend (.env)
-VITE_API_URL="http://localhost:3000/api"
+VITE_API_URL="http://localhost:8085/api"
 ```
 
 #### **5. Executar Aplicação**
 
 ```bash
+# Opção 1: Executar ambos simultaneamente (raiz do projeto)
+npm run dev
+
+# Opção 2: Executar separadamente
 # Backend
 cd protrack-server
 npm run dev
