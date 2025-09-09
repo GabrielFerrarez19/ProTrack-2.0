@@ -16,7 +16,7 @@ import { useFluxoCaixa } from "../../hooks/useFluxoCaixa";
 export function FluxoCaixa() {
   const [periodo, setPeriodo] = useState<
     "7dias" | "30dias" | "90dias" | "1ano"
-  >("30dias");
+  >("7dias");
   const [tipoVisualizacao, setTipoVisualizacao] = useState<
     "diario" | "semanal" | "mensal"
   >("diario");
@@ -27,72 +27,8 @@ export function FluxoCaixa() {
     tipoVisualizacao
   );
 
-  // Dados de fallback caso a API não esteja disponível
-  const dadosFallback = {
-    historico: [
-      { data: "01/12", entradas: 4500, saidas: 2300, saldo: 2200 },
-      { data: "02/12", entradas: 3200, saidas: 1800, saldo: 3600 },
-      { data: "03/12", entradas: 5400, saidas: 3100, saldo: 5900 },
-      { data: "04/12", entradas: 6200, saidas: 2900, saldo: 9200 },
-      { data: "05/12", entradas: 4800, saidas: 3500, saldo: 10500 },
-    ],
-    projecao: [
-      {
-        data: "11/12",
-        entradas: 5500,
-        saidas: 3200,
-        saldo: 23500,
-        tipo: "projecao" as const,
-      },
-      {
-        data: "12/12",
-        entradas: 4800,
-        saidas: 2800,
-        saldo: 25500,
-        tipo: "projecao" as const,
-      },
-      {
-        data: "13/12",
-        entradas: 6200,
-        saidas: 3900,
-        saldo: 27800,
-        tipo: "projecao" as const,
-      },
-    ],
-    categorias: {
-      entradas: [
-        { categoria: "Vendas à Vista", valor: 45200, percentual: 65 },
-        { categoria: "Recebimentos", valor: 18400, percentual: 26.5 },
-        { categoria: "Outros", valor: 5900, percentual: 8.5 },
-      ],
-      saidas: [
-        { categoria: "Fornecedores", valor: 28500, percentual: 55 },
-        { categoria: "Salários", valor: 12800, percentual: 25 },
-        { categoria: "Despesas Operacionais", valor: 8200, percentual: 16 },
-        { categoria: "Impostos", valor: 2100, percentual: 4 },
-      ],
-    },
-    comparativo: [
-      { periodo: "Este Mês", entradas: 69500, saidas: 51600, saldo: 17900 },
-      { periodo: "Mês Anterior", entradas: 58200, saidas: 45800, saldo: 12400 },
-      {
-        periodo: "Mesmo Mês Ano Anterior",
-        entradas: 52100,
-        saidas: 41200,
-        saldo: 10900,
-      },
-    ],
-    resumo: {
-      saldo_atual: 21200,
-      total_entradas: 69500,
-      total_saidas: 51600,
-      projecao_30_dias: 15000,
-      crescimento_percentual: 15.2,
-    },
-  };
-
   // Usar dados da API ou fallback
-  const dadosExibicao = dados || dadosFallback;
+  const dadosExibicao = dados;
 
   return (
     <div className="p-6 space-y-6">
@@ -158,19 +94,19 @@ export function FluxoCaixa() {
       {!loading && !error && (
         <>
           <ResumoCards
-            fluxoCaixaHistorico={dadosExibicao.historico}
-            projecaoFutura={dadosExibicao.projecao}
-            resumo={dadosExibicao.resumo}
+            fluxoCaixaHistorico={dadosExibicao?.historico ?? []}
+            projecaoFutura={dadosExibicao?.projecao ?? []}
+            resumo={dadosExibicao?.resumo}
           />
           <GraficoFluxo
-            fluxoCaixaHistorico={dadosExibicao.historico}
-            projecaoFutura={dadosExibicao.projecao}
+            fluxoCaixaHistorico={dadosExibicao?.historico ?? []}
+            projecaoFutura={dadosExibicao?.projecao ?? []}
           />
           <Categorias
-            entradas={dadosExibicao.categorias.entradas}
-            saidas={dadosExibicao.categorias.saidas}
+            entradas={dadosExibicao?.categorias.entradas ?? []}
+            saidas={dadosExibicao?.categorias.saidas ?? []}
           />
-          <ComparativoPeriodos dados={dadosExibicao.comparativo} />
+          <ComparativoPeriodos dados={dadosExibicao?.comparativo ?? []} />
         </>
       )}
     </div>
