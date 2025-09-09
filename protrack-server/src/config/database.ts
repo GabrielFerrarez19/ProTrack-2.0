@@ -1,14 +1,16 @@
 import mysql from "mysql2/promise";
 
 export const db = mysql.createPool({
-  host: "localhost",
+  host: "caboose.proxy.rlwy.net",
   user: "root",
-  password: "gabri1234",
+  password: "BOwuyhBlulgOsPBiNVszpLGGmPQceMaH",
   database: "protrack",
-  port: 3306,
-  authPlugins: {
-    mysql_clear_password: () => () => Buffer.from("gabri1234\0"),
-  },
+  port: 44969,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0,
 });
 
 // Teste a conexão
