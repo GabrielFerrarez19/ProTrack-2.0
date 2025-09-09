@@ -1,6 +1,6 @@
-import { Filter, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "../../../components/ui/input";
-import { Button } from "../../../components/ui/button";
+import { Card } from "../../../components/ui/card";
 
 interface SearchBarProps {
   searchTerm: string;
@@ -9,23 +9,18 @@ interface SearchBarProps {
 
 export function SearchBar({ searchTerm, onChange }: SearchBarProps) {
   return (
-    <div className="flex gap-3 items-center">
-      <div className="relative flex-1 max-w-md">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-        <Input
-          placeholder="Pesquise um cliente..."
-          value={searchTerm}
-          onChange={(e) => onChange(e.target.value)}
-          className="pl-10 bg-input border-border"
-        />
+    <Card className="p-4">
+      <div className="flex gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nome, CPF, email, telefone, endereço, cidade ou bairro..."
+            value={searchTerm}
+            onChange={(e) => onChange(e.target.value)}
+            className="pl-10"
+          />
+        </div>
       </div>
-      <Button
-        variant="outline"
-        className="flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600 border-blue-500"
-      >
-        <Filter className="w-4 h-4" />
-        Filtro
-      </Button>
-    </div>
+    </Card>
   );
 }
