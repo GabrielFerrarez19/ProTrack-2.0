@@ -36,7 +36,6 @@ export function ContasPagar() {
     errorVencidas,
     monitoramentoExecutado,
     executarMonitoramento,
-    reload: reloadVencidas,
   } = useContasPagarVencidas();
   const navigate = useNavigate();
 
@@ -131,7 +130,7 @@ export function ContasPagar() {
         <StatusMonitoramento
           monitoramentoExecutado={monitoramentoExecutado}
           executarMonitoramento={executarMonitoramento}
-          reload={reloadVencidas}
+          recarregarDados={recarregarDados}
         />
       </div>
 

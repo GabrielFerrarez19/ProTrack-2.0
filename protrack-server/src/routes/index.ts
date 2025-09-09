@@ -10,6 +10,7 @@ import vendasMonitoramentoRoutes from "./vendasMonitoramentoRoutes";
 import contasPagarRoutes from "./contasPagarRoutes";
 import contasPagarMonitoramentoRoutes from "./contasPagarMonitoramentoRoutes";
 import pagamentoRoutes from "./pagamentoRoutes";
+import fluxoCaixaRoutes from "./fluxoCaixaRoutes";
 
 const router = Router();
 
@@ -29,5 +30,6 @@ router.use("/monitoramento", vendasMonitoramentoRoutes);
 router.use("/contas-pagar", contasPagarRoutes);
 router.use("/monitoramento-contas", contasPagarMonitoramentoRoutes);
 router.use("/pagamentos", pagamentoRoutes);
+router.use("/fluxo-caixa", fluxoCaixaRoutes);
 
 export default router;

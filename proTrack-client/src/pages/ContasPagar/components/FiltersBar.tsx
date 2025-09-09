@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select";
-import { Search, Filter, Download, X, RotateCcw, Calendar } from "lucide-react";
+import { Search, Filter, X, RotateCcw, Calendar } from "lucide-react";
 
 interface CategoriaOption {
   value: string;
@@ -172,11 +172,6 @@ export function FiltersBar({
         <Button variant="outline" size="sm" disabled={loading}>
           <Filter className="h-4 w-4 mr-2" />
           Filtros Avançados
-        </Button>
-
-        <Button variant="outline" size="sm" disabled={loading}>
-          <Download className="h-4 w-4 mr-2" />
-          Exportar
         </Button>
       </div>
 

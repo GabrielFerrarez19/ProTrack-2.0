@@ -372,3 +372,32 @@ export interface ContaPagarFiltros {
   data_fim?: string;
   fornecedor_id?: string;
 }
+
+export interface FluxoCaixaItem {
+  data: string;
+  entradas: number;
+  saidas: number;
+  saldo: number;
+  tipo?: "historico" | "projecao";
+}
+
+export interface CategoriaFluxo {
+  categoria: string;
+  valor: number;
+  percentual: number;
+}
+
+export interface ComparativoPeriodo {
+  periodo: string;
+  entradas: number;
+  saidas: number;
+  saldo: number;
+}
+
+export interface ResumoFluxoCaixa {
+  saldo_atual: number;
+  total_entradas: number;
+  total_saidas: number;
+  projecao_30_dias: number;
+  crescimento_percentual: number;
+}
