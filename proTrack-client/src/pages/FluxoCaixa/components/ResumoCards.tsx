@@ -11,29 +11,43 @@ import {
 interface Props {
   fluxoCaixaHistorico: { entradas: number; saidas: number }[];
   projecaoFutura: { entradas: number; saidas: number }[];
+  resumo?: {
+    saldo_atual: number;
+    total_entradas: number;
+    total_saidas: number;
+    projecao_30_dias: number;
+    crescimento_percentual: number;
+  };
 }
 
-export function ResumoCards({ fluxoCaixaHistorico, projecaoFutura }: Props) {
+export function ResumoCards({
+  fluxoCaixaHistorico,
+  projecaoFutura,
+  resumo,
+}: Props) {
+  // Usar dados do resumo se disponível, senão calcular dos arrays
   const saldoAtual =
+    resumo?.saldo_atual ??
     fluxoCaixaHistorico.reduce((sum, item) => sum + item.entradas, 0) -
+      fluxoCaixaHistorico.reduce((sum, item) => sum + item.saidas, 0);
+
+  const totalEntradas =
+    resumo?.total_entradas ??
+    fluxoCaixaHistorico.reduce((sum, item) => sum + item.entradas, 0);
+
+  const totalSaidas =
+    resumo?.total_saidas ??
     fluxoCaixaHistorico.reduce((sum, item) => sum + item.saidas, 0);
 
-  const totalEntradas = fluxoCaixaHistorico.reduce(
-    (sum, item) => sum + item.entradas,
-    0
-  );
+  const projecao30Dias =
+    resumo?.projecao_30_dias ??
+    projecaoFutura.reduce(
+      (sum, item) => sum + (item.entradas - item.saidas),
+      0
+    );
 
-  const totalSaidas = fluxoCaixaHistorico.reduce(
-    (sum, item) => sum + item.saidas,
-    0
-  );
-
-  const projecao30Dias = projecaoFutura.reduce(
-    (sum, item) => sum + (item.entradas - item.saidas),
-    0
-  );
-
-  const crescimento = ((saldoAtual - 12400) / 12400) * 100;
+  const crescimento =
+    resumo?.crescimento_percentual ?? ((saldoAtual - 12400) / 12400) * 100;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

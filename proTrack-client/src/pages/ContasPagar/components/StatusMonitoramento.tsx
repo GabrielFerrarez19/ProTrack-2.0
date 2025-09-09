@@ -3,13 +3,13 @@ import { Button } from "../../../components/ui/button";
 interface StatusMonitoramentoProps {
   monitoramentoExecutado: boolean;
   executarMonitoramento: () => void;
-  reload: () => void;
+  recarregarDados: () => void;
 }
 
 export function StatusMonitoramento({
   monitoramentoExecutado,
   executarMonitoramento,
-  reload,
+  recarregarDados,
 }: StatusMonitoramentoProps) {
   return (
     <div className="flex flex-col items-end space-y-2">
@@ -36,7 +36,7 @@ export function StatusMonitoramento({
           🔄 Executar Monitoramento
         </Button>
         <Button
-          onClick={reload}
+          onClick={recarregarDados}
           variant="outline"
           size="sm"
           className="text-xs cursor-pointer"

@@ -719,3 +719,35 @@ export const atualizarConfiguracoesContasPagar = async (configuracoes: {
   const response = await api.put("/contas-pagar/configuracoes", configuracoes);
   return response.data;
 };
+
+// 🔹 FLUXO DE CAIXA
+
+export const getFluxoCaixaHistorico = async (
+  periodo: string = "30dias",
+  tipoVisualizacao: string = "diario"
+) => {
+  const response = await api.get(
+    `/fluxo-caixa/historico?periodo=${periodo}&tipoVisualizacao=${tipoVisualizacao}`
+  );
+  return response.data;
+};
+
+export const getFluxoCaixaProjecao = async (dias: number = 30) => {
+  const response = await api.get(`/fluxo-caixa/projecao?dias=${dias}`);
+  return response.data;
+};
+
+export const getCategoriasFluxoCaixa = async (periodo: string = "30dias") => {
+  const response = await api.get(`/fluxo-caixa/categorias?periodo=${periodo}`);
+  return response.data;
+};
+
+export const getComparativoPeriodosFluxoCaixa = async () => {
+  const response = await api.get("/fluxo-caixa/comparativo");
+  return response.data;
+};
+
+export const getResumoFluxoCaixa = async (periodo: string = "30dias") => {
+  const response = await api.get(`/fluxo-caixa/resumo?periodo=${periodo}`);
+  return response.data;
+};
