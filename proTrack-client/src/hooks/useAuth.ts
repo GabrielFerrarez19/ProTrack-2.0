@@ -36,14 +36,8 @@ export const useAuth = (): AuthState & AuthActions => {
       const storedUser = localStorage.getItem("user");
       const token = localStorage.getItem("authToken");
 
-      console.log("🔍 useAuth - Carregando do localStorage:", {
-        storedUser: !!storedUser,
-        token: !!token,
-      });
-
       if (storedUser && token) {
         const user = JSON.parse(storedUser);
-        console.log("🔍 useAuth - Usuário carregado:", user);
         setState((prev) => ({
           ...prev,
           user,
@@ -51,7 +45,6 @@ export const useAuth = (): AuthState & AuthActions => {
           isLoading: false,
         }));
       } else {
-        console.log("🔍 useAuth - Nenhum usuário encontrado no localStorage");
         setState((prev) => ({
           ...prev,
           isLoading: false,
@@ -83,14 +76,11 @@ export const useAuth = (): AuthState & AuthActions => {
   const login = useCallback(
     async (email: string, password: string): Promise<LoginResponse> => {
       try {
-        console.log("🔍 useAuth - Iniciando login para:", email);
         setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
         const response = await loginUser(email, password);
-        console.log("🔍 useAuth - Resposta do login:", response);
 
         if (response.user && response.token) {
-          console.log("🔍 useAuth - Salvando dados no localStorage");
           saveUserToStorage(response.user, response.token);
           setState((prev) => ({
             ...prev,
@@ -99,12 +89,11 @@ export const useAuth = (): AuthState & AuthActions => {
             isLoading: false,
             error: null,
           }));
-          console.log("🔍 useAuth - Estado atualizado com sucesso");
         }
 
         return response;
       } catch (error: any) {
-        console.error("🔍 useAuth - Erro no login:", error);
+        console.error("Erro no login:", error);
         setState((prev) => ({
           ...prev,
           isLoading: false,
@@ -154,21 +143,26 @@ export const useAuth = (): AuthState & AuthActions => {
 
         const response = await updateCurrentUser(userData);
 
-        if (response.success && state.user) {
-          // Atualiza o usuário no estado
-          const updatedUser = { ...state.user, ...userData };
-          setState((prev) => ({
-            ...prev,
-            user: updatedUser,
-            isLoading: false,
-            error: null,
-          }));
+        if (response.success) {
+          setState((prev) => {
+            if (!prev.user) return prev;
 
-          // Atualiza o localStorage
-          const token = localStorage.getItem("authToken");
-          if (token) {
-            saveUserToStorage(updatedUser, token);
-          }
+            // Atualiza o usuário no estado
+            const updatedUser = { ...prev.user, ...userData } as User;
+
+            // Atualiza o localStorage
+            const token = localStorage.getItem("authToken");
+            if (token) {
+              saveUserToStorage(updatedUser, token);
+            }
+
+            return {
+              ...prev,
+              user: updatedUser,
+              isLoading: false,
+              error: null,
+            };
+          });
         }
       } catch (error: any) {
         setState((prev) => ({
@@ -179,7 +173,7 @@ export const useAuth = (): AuthState & AuthActions => {
         throw error;
       }
     },
-    [state.user, saveUserToStorage]
+    [saveUserToStorage]
   );
 
   // Função para atualizar dados do usuário do servidor
@@ -236,17 +230,8 @@ export const useAuth = (): AuthState & AuthActions => {
     loadUserFromStorage();
   }, [loadUserFromStorage]);
 
-  // Verifica se o usuário está autenticado e atualiza dados periodicamente
-  useEffect(() => {
-    if (state.isAuthenticated && state.user) {
-      // Atualiza dados do usuário a cada 5 minutos
-      const interval = setInterval(() => {
-        refreshUser();
-      }, 5 * 60 * 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [state.isAuthenticated, state.user, refreshUser]);
+  // Removido auto-refresh periódico para evitar atualizações desnecessárias
+  // O refreshUser pode ser chamado manualmente quando necessário
 
   return {
     ...state,
