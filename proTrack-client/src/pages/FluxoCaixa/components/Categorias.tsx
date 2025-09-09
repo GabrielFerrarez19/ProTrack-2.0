@@ -42,7 +42,9 @@ export function Categorias({ entradas, saidas }: Props) {
                   style={{ width: `${c.percentual}%` }}
                 />
               </div>
-              <span className="text-xs text-slate-500">{c.percentual}%</span>
+              <span className="text-xs text-slate-500">
+                {Number(c.percentual).toFixed(2)}%
+              </span>
             </div>
           ))}
         </CardContent>
@@ -71,7 +73,9 @@ export function Categorias({ entradas, saidas }: Props) {
                   style={{ width: `${c.percentual}%` }}
                 />
               </div>
-              <span className="text-xs text-slate-500">{c.percentual}%</span>
+              <span className="text-xs text-slate-500">
+                {Number(c.percentual).toFixed(2)}%
+              </span>
             </div>
           ))}
         </CardContent>
