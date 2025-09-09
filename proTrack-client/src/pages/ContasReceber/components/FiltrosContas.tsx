@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select";
-import { Search, Filter, Download } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 
 interface Props {
   searchTerm: string;
@@ -63,10 +63,6 @@ export function FiltrosContas({
           <Button variant="outline" className="bg-pastel-yellow/20">
             <Filter className="h-4 w-4 mr-2" />
             Mais Filtros
-          </Button>
-          <Button variant="outline" className="bg-pastel-purple/20">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar
           </Button>
         </div>
       </CardContent>
