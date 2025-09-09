@@ -67,7 +67,7 @@ export function Vendas() {
         desconto: data.desconto,
         total: data.total,
         totalComDesconto: data.totalComDesconto,
-        status: "pendente",
+        status: data.formaPagamento === "aprazo" ? "pendente" : "pago",
         diasVencimento: data.diasVencimento,
         produtos: data.produtos.map((p) => ({
           produtoId: p.produtoId,
@@ -116,63 +116,63 @@ export function Vendas() {
 
   return (
     <div className="p-6 space-y-6">
-        <Header
-          title="Bem vindo a página Venda!"
-          text="Aqui você pode registar suas vendas"
-        />
+      <Header
+        title="Bem vindo a página Venda!"
+        text="Aqui você pode registar suas vendas"
+      />
 
-        <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InformacoesVenda control={methods.control} />
-              <ResumoVenda
-                produtos={watchedProdutos}
-                onChangeResumo={({ totalPreco, valorComDesconto }) => {
-                  setTotalGeral(totalPreco);
-                  setTotalComDesconto(valorComDesconto);
-                }}
-              />
-            </div>
-
-            <ProdutosTable
-              fields={fields}
-              append={append}
-              remove={remove}
-              control={methods.control}
-              atualizarPrecoProduto={atualizarPrecoProduto}
-              produtos={products}
+      <FormProvider {...methods}>
+        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <InformacoesVenda control={methods.control} />
+            <ResumoVenda
+              produtos={watchedProdutos}
+              onChangeResumo={({ totalPreco, valorComDesconto }) => {
+                setTotalGeral(totalPreco);
+                setTotalComDesconto(valorComDesconto);
+              }}
             />
+          </div>
 
-            <div className="flex justify-end space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  methods.reset({
-                    clienteId: "",
-                    dataVenda: new Date().toISOString().split("T")[0],
-                    desconto: 0,
-                    total: 0,
-                    totalComDesconto: 0,
-                    status: "Pendente",
-                    produtos: [],
-                  });
-                  setTotalGeral(0);
-                  setTotalComDesconto(0);
-                }}
-                className="cursor-pointer"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                className="bg-green-600 hover:bg-green-500 cursor-pointer"
-              >
-                Cadastrar Venda
-              </Button>
-            </div>
-          </form>
-        </FormProvider>
-      </div>
+          <ProdutosTable
+            fields={fields}
+            append={append}
+            remove={remove}
+            control={methods.control}
+            atualizarPrecoProduto={atualizarPrecoProduto}
+            produtos={products}
+          />
+
+          <div className="flex justify-end space-x-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                methods.reset({
+                  clienteId: "",
+                  dataVenda: new Date().toISOString().split("T")[0],
+                  desconto: 0,
+                  total: 0,
+                  totalComDesconto: 0,
+                  status: "Pendente",
+                  produtos: [],
+                });
+                setTotalGeral(0);
+                setTotalComDesconto(0);
+              }}
+              className="cursor-pointer"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              className="bg-green-600 hover:bg-green-500 cursor-pointer"
+            >
+              Cadastrar Venda
+            </Button>
+          </div>
+        </form>
+      </FormProvider>
+    </div>
   );
 }
