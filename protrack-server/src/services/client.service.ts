@@ -5,6 +5,23 @@ import {
   getTotalPagoVenda,
 } from "./pagamento.service";
 
+// Função utilitária para formatar data para o formato aceito pelo MySQL (YYYY-MM-DD)
+const formatarDataParaMySQL = (data: string | Date | null): string | null => {
+  if (!data) return null;
+
+  try {
+    const dataObj = new Date(data);
+    // Verificar se a data é válida
+    if (isNaN(dataObj.getTime())) return null;
+
+    // Retornar no formato YYYY-MM-DD
+    return dataObj.toISOString().split("T")[0];
+  } catch (error) {
+    console.error("Erro ao formatar data:", error);
+    return null;
+  }
+};
+
 export interface ClienteData {
   nome: string;
   dataNascimento: string; // YYYY-MM-DD
@@ -38,7 +55,7 @@ export const createClienteDb = async (
 
   const values = [
     cliente.nome,
-    cliente.dataNascimento,
+    formatarDataParaMySQL(cliente.dataNascimento),
     cliente.cpf,
     cliente.rg || null,
     cliente.estadoCivil || null,
@@ -112,7 +129,7 @@ export const updateClienteDb = async (
   `;
   const values = [
     cliente.nome,
-    cliente.dataNascimento,
+    formatarDataParaMySQL(cliente.dataNascimento),
     cliente.cpf,
     cliente.rg || null,
     cliente.estadoCivil || null,

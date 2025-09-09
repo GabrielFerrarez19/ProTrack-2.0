@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Users } from "lucide-react";
 import {
   CreditCard,
   User,
@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { usePermissions, type UserRole } from "../../hooks/usePermissions";
 
 interface MenuItem {
   id: string;
@@ -18,36 +19,42 @@ interface MenuItem {
   icone: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   descricao: string;
   path: string;
+  requiredRoles?: UserRole[]; // Roles necessárias para acessar este item
 }
 
 export const DefaultConfigLayout = () => {
   const navigate = useNavigate();
+  const { hasRole } = usePermissions();
+
   const menuConfiguracoes: MenuItem[] = [
-    // Configurações de usuário – alto uso e prioridade
+    // Configurações de usuário – todos os usuários autenticados
     {
       id: "user",
       titulo: "Usuário",
       icone: User,
       descricao: "Perfil, preferências e dados pessoais",
       path: "/config/user",
+      requiredRoles: ["admin", "financeiro", "vendedor", "operador"],
     },
 
-    // Configurações financeiras – normalmente segunda prioridade
+    // Configurações financeiras – apenas admin e financeiro
     {
       id: "financeiras",
       titulo: "Financeiras",
       icone: CreditCard,
       descricao: "Contas, métodos de pagamento e categorias",
       path: "/config/financeiro",
+      requiredRoles: ["admin", "financeiro"],
     },
 
-    // Sistema e segurança – itens administrativos
+    // Sistema e segurança – apenas admin
     {
       id: "sistema",
       titulo: "Sistema",
       icone: Settings,
       descricao: "Configurações gerais do sistema",
       path: "/config/sistema",
+      requiredRoles: ["admin"],
     },
     {
       id: "seguranca",
@@ -55,15 +62,25 @@ export const DefaultConfigLayout = () => {
       icone: Shield,
       descricao: "Senhas, autenticação e permissões",
       path: "/config/seguranca",
+      requiredRoles: ["admin"],
+    },
+    {
+      id: "usuarios",
+      titulo: "Usuarios",
+      icone: Users,
+      descricao: "Gerenciar usuários do sistema",
+      path: "/config/usuarios",
+      requiredRoles: ["admin"],
     },
 
-    // Backup e integrações – ações avançadas
+    // Backup e integrações – apenas admin
     {
       id: "backup",
       titulo: "Backup",
       icone: Database,
       descricao: "Backup automático e exportação de dados",
       path: "/config/backup",
+      requiredRoles: ["admin"],
     },
     {
       id: "integracao",
@@ -71,15 +88,17 @@ export const DefaultConfigLayout = () => {
       icone: Globe,
       descricao: "APIs externas e conectores",
       path: "/config/integracao",
+      requiredRoles: ["admin"],
     },
 
-    // Aparência e notificações – customização e alertas
+    // Aparência e notificações – todos os usuários autenticados
     {
       id: "aparencia",
       titulo: "Aparência",
       icone: Palette,
       descricao: "Tema, cores e personalização",
       path: "/config/aparencia",
+      requiredRoles: ["admin", "financeiro", "vendedor", "operador"],
     },
     {
       id: "notificacoes",
@@ -87,6 +106,7 @@ export const DefaultConfigLayout = () => {
       icone: Mail,
       descricao: "E-mail, alertas e comunicações",
       path: "/config/notificacoes",
+      requiredRoles: ["admin", "financeiro", "vendedor", "operador"],
     },
   ];
 
@@ -114,38 +134,47 @@ export const DefaultConfigLayout = () => {
         </div>
 
         <div className="space-y-2">
-          {menuConfiguracoes.map((item) => {
-            const IconeComponente = item.icone;
-            return (
-              <NavLink
-                key={item.id}
-                to={item.path}
-                className={({ isActive }) =>
-                  `w-full block text-left p-3 rounded-lg transition-colors ${
-                    isActive
-                      ? "bg-gradient-to-r from-[#628DFD] to-[#6F31FF] text-white"
-                      : "hover:bg-muted text-foreground"
-                  }`
-                }
-              >
-                {({ isActive }) => (
-                  <div className="flex items-center gap-3">
-                    <IconeComponente className="h-5 w-5" />
-                    <div className="flex-1">
-                      <p className="font-medium">{item.titulo}</p>
-                      <p
-                        className={`text-xs ${
-                          isActive ? "text-white" : "text-muted-foreground"
-                        }`}
-                      >
-                        {item.descricao}
-                      </p>
+          {menuConfiguracoes
+            .filter((item) => {
+              // Se o item não tem roles específicas, permite acesso
+              if (!item.requiredRoles || item.requiredRoles.length === 0) {
+                return true;
+              }
+              // Verifica se o usuário tem uma das roles necessárias
+              return hasRole(item.requiredRoles);
+            })
+            .map((item) => {
+              const IconeComponente = item.icone;
+              return (
+                <NavLink
+                  key={item.id}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `w-full block text-left p-3 rounded-lg transition-colors ${
+                      isActive
+                        ? "bg-gradient-to-r from-[#628DFD] to-[#6F31FF] text-white"
+                        : "hover:bg-muted text-foreground"
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <div className="flex items-center gap-3">
+                      <IconeComponente className="h-5 w-5" />
+                      <div className="flex-1">
+                        <p className="font-medium">{item.titulo}</p>
+                        <p
+                          className={`text-xs ${
+                            isActive ? "text-white" : "text-muted-foreground"
+                          }`}
+                        >
+                          {item.descricao}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </NavLink>
-            );
-          })}
+                  )}
+                </NavLink>
+              );
+            })}
         </div>
       </div>
 
