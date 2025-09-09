@@ -14,7 +14,7 @@ export const ROUTE_PERMISSIONS = {
   // Rotas financeiras - apenas admin e financeiro
   "/relatorio": ["admin", "financeiro"],
   "/financeiro": ["admin", "financeiro"],
-  "/configfinanceiro": ["admin", "financeiro"],
+  "/configfinanceiro": ["admin", "financeiro", "vendedor", "operador"],
   "/contasPagar": ["admin", "financeiro"],
   "/contasReceber": ["admin", "financeiro"],
   "/flucoCaixa": ["admin", "financeiro"],

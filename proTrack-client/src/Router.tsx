@@ -21,6 +21,7 @@ import { ConfigUsers } from "./pages/ConfigUsers";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoute";
 import { DefaultConfigLayout } from "./layout/DefaultConfigLayout";
+import Usuarios from "./pages/Usuarios";
 
 export function Router() {
   return (
@@ -172,6 +173,14 @@ export function Router() {
           element={
             <ProtectedRoute requiredRoute="/config/user">
               <ConfigUsers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="usuarios"
+          element={
+            <ProtectedRoute requiredRoute="/config/usuarios">
+              <Usuarios />
             </ProtectedRoute>
           }
         />
