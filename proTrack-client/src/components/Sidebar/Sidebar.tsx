@@ -90,7 +90,7 @@ export function Sidebar({ children }: SidebarProps) {
               <DropdownMenuContent align="end">
                 {hasPermission("/configfinanceiro") && (
                   <DropdownMenuItem
-                    onClick={() => navigate("/config/financeiro")}
+                    onClick={() => navigate("/config/user")}
                     className="cursor-pointer"
                   >
                     Configurações
