@@ -27,7 +27,7 @@
 
     // JSX (para projetos React)
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
 
     // Tipos adicionais
     "types": []

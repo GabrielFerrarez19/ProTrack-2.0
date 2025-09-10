@@ -15,7 +15,9 @@ const formatarDataParaMySQL = (data: string | Date | null): string | null => {
     if (isNaN(dataObj.getTime())) return null;
 
     // Retornar no formato YYYY-MM-DD
-    return dataObj.toISOString().split("T")[0];
+    const isoString = dataObj.toISOString();
+    const datePart = isoString.split("T")[0];
+    return datePart || null;
   } catch (error) {
     console.error("Erro ao formatar data:", error);
     return null;
