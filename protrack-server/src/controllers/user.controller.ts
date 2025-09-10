@@ -25,6 +25,11 @@ export const getCurrentUser = async (req: Request, res: Response) => {
 export const getUserById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "ID do usuário é obrigatório" });
+    }
+
     const user = await findUserById(BigInt(id));
 
     if (!user) {
@@ -50,14 +55,20 @@ export const updateCurrentUser = async (req: Request, res: Response) => {
     const { name, email, username, role, empresa_id, departamento_id } =
       req.body;
 
-    const updateData = {
+    const updateData: any = {
       name,
       email,
       username,
       role,
-      empresa_id: empresa_id ? BigInt(empresa_id) : undefined,
-      departamento_id: departamento_id ? BigInt(departamento_id) : undefined,
     };
+
+    if (empresa_id !== undefined) {
+      updateData.empresa_id = BigInt(empresa_id);
+    }
+
+    if (departamento_id !== undefined) {
+      updateData.departamento_id = BigInt(departamento_id);
+    }
 
     const result = await updateUser(
       BigInt(req.user.id),
@@ -78,17 +89,28 @@ export const updateCurrentUser = async (req: Request, res: Response) => {
 export const updateUserById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "ID do usuário é obrigatório" });
+    }
+
     const { name, email, username, role, empresa_id, departamento_id } =
       req.body;
 
-    const updateData = {
+    const updateData: any = {
       name,
       email,
       username,
       role,
-      empresa_id: empresa_id ? BigInt(empresa_id) : undefined,
-      departamento_id: departamento_id ? BigInt(departamento_id) : undefined,
     };
+
+    if (empresa_id !== undefined) {
+      updateData.empresa_id = BigInt(empresa_id);
+    }
+
+    if (departamento_id !== undefined) {
+      updateData.departamento_id = BigInt(departamento_id);
+    }
 
     const result = await updateUser(
       BigInt(id),
@@ -109,6 +131,11 @@ export const updateUserById = async (req: Request, res: Response) => {
 export const changeUserStatus = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "ID do usuário é obrigatório" });
+    }
+
     const { status } = req.body;
 
     if (!["ativo", "inativo", "bloqueado"].includes(status)) {
