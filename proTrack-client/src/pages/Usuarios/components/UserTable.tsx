@@ -5,13 +5,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { User } from "../index";
+import type { User } from "@/@types/types.api";
 import UserRow from "./UserRow";
 
 interface UserTableProps {
   users: User[];
   openDialog: (user: User) => void;
-  toggleUserStatus: (userId: number) => void;
+  toggleUserStatus: (userId: string) => void;
 }
 
 export default function UserTable({

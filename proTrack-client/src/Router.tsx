@@ -22,6 +22,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoute";
 import { DefaultConfigLayout } from "./layout/DefaultConfigLayout";
 import Usuarios from "./pages/Usuarios";
+import { NotFound } from "./pages/NotFound";
 
 export function Router() {
   return (
@@ -185,6 +186,9 @@ export function Router() {
           }
         />
       </Route>
+
+      {/* Rota 404 - deve ser a última */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
