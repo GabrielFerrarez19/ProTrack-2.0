@@ -107,6 +107,46 @@ export const changeUserStatus = async (
   return response.data;
 };
 
+// Novas funções para gerenciamento completo de usuários
+export const createUser = async (userData: {
+  name: string;
+  email: string;
+  password: string;
+  username?: string;
+  role?: string;
+  departamento_id?: string;
+}) => {
+  const response = await api.post("/user/create", userData);
+  return response.data;
+};
+
+export const deleteUser = async (id: string) => {
+  const response = await api.delete(`/user/${id}`);
+  return response.data;
+};
+
+export const searchUsers = async (searchTerm: string) => {
+  const response = await api.get(
+    `/user/search?q=${encodeURIComponent(searchTerm)}`
+  );
+  return response.data;
+};
+
+export const getUsersByStatus = async (status: string) => {
+  const response = await api.get(`/user/status/${status}`);
+  return response.data;
+};
+
+export const getUsersByRole = async (role: string) => {
+  const response = await api.get(`/user/role/${role}`);
+  return response.data;
+};
+
+export const getUsersByDepartment = async (departamento_id: string) => {
+  const response = await api.get(`/user/department/${departamento_id}`);
+  return response.data;
+};
+
 export const cadastrarProduto = async (produto: Produto) => {
   const response = await api.post("/product/produtos", produto);
   return response.data;

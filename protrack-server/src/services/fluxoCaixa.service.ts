@@ -108,6 +108,8 @@ export const getFluxoCaixaHistoricoDb = async (
       data.setDate(data.getDate() + i);
       const dataStr = data.toISOString().split("T")[0];
 
+      if (!dataStr) continue;
+
       const entradasDia = entradas[dataStr] || 0;
       const saidasDia = saidas[dataStr] || 0;
       saldoAcumulado += entradasDia - saidasDia;
@@ -229,6 +231,8 @@ export const getFluxoCaixaProjecaoDb = async (
       const data = new Date(hoje);
       data.setDate(data.getDate() + i);
       const dataStr = data.toISOString().split("T")[0];
+
+      if (!dataStr) continue;
 
       // Usar dados reais se existirem, senão usar médias históricas
       let entradasDia = entradas[dataStr] || 0;

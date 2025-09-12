@@ -78,11 +78,16 @@ export const atualizarCategoria = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { nome, tipo, cor } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: "ID da categoria é obrigatório" });
+    }
+
     if (!nome || !tipo || !cor) {
       return res.status(400).json({ message: "Dados incompletos" });
     }
 
-    await updateCategoria({ id, nome, tipo, cor });
+    await updateCategoria({ id: id as string, nome, tipo, cor });
     res.json({ message: "Categoria atualizada com sucesso" });
   } catch (error) {
     console.error(error);
@@ -94,7 +99,12 @@ export const atualizarCategoria = async (req: Request, res: Response) => {
 export const removerCategoria = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await deleteCategoria(id);
+
+    if (!id) {
+      return res.status(400).json({ message: "ID da categoria é obrigatório" });
+    }
+
+    await deleteCategoria(id as string);
     res.json({ message: "Categoria removida com sucesso" });
   } catch (error) {
     console.error(error);

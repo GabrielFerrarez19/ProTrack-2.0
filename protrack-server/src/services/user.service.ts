@@ -210,3 +210,99 @@ export const updateUser = async (
 
   return { message: "Usuário atualizado com sucesso!" };
 };
+
+export const deleteUser = async (userId: bigint, deletado_por?: bigint) => {
+  // Verificar se o usuário existe
+  const user = await findUserById(userId);
+  if (!user) {
+    throw new Error("Usuário não encontrado");
+  }
+
+  // Soft delete - marcar como inativo em vez de deletar fisicamente
+  await db.execute(
+    "UPDATE users SET status = 'inativo', atualizado_por = ?, updated_at = NOW() WHERE id = ?",
+    [deletado_por || null, userId]
+  );
+
+  return { message: "Usuário removido com sucesso!" };
+};
+
+export const searchUsers = async (searchTerm: string): Promise<User[]> => {
+  const searchPattern = `%${searchTerm}%`;
+
+  const [rows]: any = await db.execute(
+    `SELECT id, name, email, username, role, status, empresa_id, departamento_id, ultimo_login, criado_por, atualizado_por, created_at, updated_at 
+     FROM users 
+     WHERE (name LIKE ? OR email LIKE ? OR username LIKE ?) 
+     ORDER BY created_at DESC`,
+    [searchPattern, searchPattern, searchPattern]
+  );
+
+  return rows.map((user: any) => ({
+    ...user,
+    id: user.id.toString(),
+    empresa_id: user.empresa_id?.toString(),
+    departamento_id: user.departamento_id?.toString(),
+    criado_por: user.criado_por?.toString(),
+    atualizado_por: user.atualizado_por?.toString(),
+  }));
+};
+
+export const getUsersByStatus = async (status: string): Promise<User[]> => {
+  const [rows]: any = await db.execute(
+    `SELECT id, name, email, username, role, status, empresa_id, departamento_id, ultimo_login, criado_por, atualizado_por, created_at, updated_at 
+     FROM users 
+     WHERE status = ? 
+     ORDER BY created_at DESC`,
+    [status]
+  );
+
+  return rows.map((user: any) => ({
+    ...user,
+    id: user.id.toString(),
+    empresa_id: user.empresa_id?.toString(),
+    departamento_id: user.departamento_id?.toString(),
+    criado_por: user.criado_por?.toString(),
+    atualizado_por: user.atualizado_por?.toString(),
+  }));
+};
+
+export const getUsersByRole = async (role: string): Promise<User[]> => {
+  const [rows]: any = await db.execute(
+    `SELECT id, name, email, username, role, status, empresa_id, departamento_id, ultimo_login, criado_por, atualizado_por, created_at, updated_at 
+     FROM users 
+     WHERE role = ? 
+     ORDER BY created_at DESC`,
+    [role]
+  );
+
+  return rows.map((user: any) => ({
+    ...user,
+    id: user.id.toString(),
+    empresa_id: user.empresa_id?.toString(),
+    departamento_id: user.departamento_id?.toString(),
+    criado_por: user.criado_por?.toString(),
+    atualizado_por: user.atualizado_por?.toString(),
+  }));
+};
+
+export const getUsersByDepartment = async (
+  departamento_id: bigint
+): Promise<User[]> => {
+  const [rows]: any = await db.execute(
+    `SELECT id, name, email, username, role, status, empresa_id, departamento_id, ultimo_login, criado_por, atualizado_por, created_at, updated_at 
+     FROM users 
+     WHERE departamento_id = ? 
+     ORDER BY created_at DESC`,
+    [departamento_id]
+  );
+
+  return rows.map((user: any) => ({
+    ...user,
+    id: user.id.toString(),
+    empresa_id: user.empresa_id?.toString(),
+    departamento_id: user.departamento_id?.toString(),
+    criado_por: user.criado_por?.toString(),
+    atualizado_por: user.atualizado_por?.toString(),
+  }));
+};
