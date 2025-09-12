@@ -1,27 +1,32 @@
-use protrack
+USE protrack;
 
-CREATE TABLE users (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,        -- Melhor que INT, suporta mais registros
-  name VARCHAR(150) NOT NULL,                  -- Nome completo do usuário
-  email VARCHAR(150) NOT NULL UNIQUE,          -- Login único
-  username VARCHAR(50) UNIQUE,                 -- Opcional: apelido/login
-  password_hash VARCHAR(255) NOT NULL,         -- Hash seguro da senha
-  role VARCHAR(50) NOT NULL DEFAULT 'user',    -- Ex: admin, financeiro, vendas
+-- =======================
+-- TABELA USERS
+-- =======================
+CREATE TABLE IF NOT EXISTS users (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  username VARCHAR(50) UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  role VARCHAR(50) NOT NULL DEFAULT 'user',
   status ENUM('ativo', 'inativo', 'bloqueado') DEFAULT 'ativo',
-  empresa_id BIGINT NULL,                      -- Relacionar usuário a uma empresa
-  departamento_id BIGINT NULL,                 -- Relacionar a um setor (financeiro, estoque...)
-  ultimo_login DATETIME NULL,                  -- Último login
-  criado_por BIGINT NULL,                      -- Usuário que cadastrou
-  atualizado_por BIGINT NULL,                  -- Último que alterou
+  empresa_id BIGINT NULL,
+  departamento_id BIGINT NULL,
+  ultimo_login DATETIME NULL,
+  criado_por BIGINT NULL,
+  atualizado_por BIGINT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-
 INSERT INTO users (name, email, password_hash, username, role, status, created_at)
 VALUES ('Gabriel Ferrarez', 'gabriel@example.com', '$2b$10$dbbAkbWW0DrPFxLQQjE8R.EHB7z7j/LHqYLtNAaSQr465iPl14yki', 'gabriel', 'admin', 'ativo', '2025-07-30 17:50:52');
 
-CREATE TABLE produtos (
+-- =======================
+-- TABELA PRODUTOS
+-- =======================
+CREATE TABLE IF NOT EXISTS produtos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
   descricao TEXT,
@@ -30,11 +35,9 @@ CREATE TABLE produtos (
   quantidade INT DEFAULT 0,
   tamanho VARCHAR(50),
   preco_custo DECIMAL(10,2),
-  preco_venda DECIMAL(10,2)
+  preco_venda DECIMAL(10,2),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-ALTER TABLE produtos
-ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
 INSERT INTO produtos (nome, descricao, categoria, codigo_barras, quantidade, tamanho, preco_custo, preco_venda)
 VALUES 
@@ -54,7 +57,10 @@ VALUES
 ('Chinelo Slide', 'Chinelo estilo slide', 'Calçados', '789123456014', 40, '39', 18.00, 39.90),
 ('Camisa Polo', 'Camisa polo masculina', 'Vestuário', '789123456015', 32, 'G', 28.00, 59.90);
 
-CREATE TABLE clientes (
+-- =======================
+-- TABELA CLIENTES
+-- =======================
+CREATE TABLE IF NOT EXISTS clientes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
   data_nascimento DATE NOT NULL,
@@ -72,11 +78,9 @@ CREATE TABLE clientes (
   complemento VARCHAR(50),
   bairro VARCHAR(50),
   cidade VARCHAR(50),
+  valor_a_pagar DECIMAL(10,2) DEFAULT 0,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-ALTER TABLE clientes
-ADD COLUMN valor_a_pagar DECIMAL(10,2) DEFAULT 0;
 
 INSERT INTO clientes (nome, data_nascimento, cpf, rg, estado_civil, sexo, telefone_whatsapp, telefone_celular, telefone_residencial, email, cep, endereco, numero, complemento, bairro, cidade)
 VALUES 
@@ -91,57 +95,46 @@ VALUES
 ('Juliana Mendes', '1983-04-27', '741.852.963-00', 'DF-74.185.296', 'Casada', 'Feminino', '61999997766', '61888885555', '61333334444', 'juliana.mendes@email.com', '70040-010', 'SQS 308 Bloco A', '101', 'Apto 301', 'Asa Sul', 'Brasília'),
 ('Thiago Oliveira', '1998-08-14', '852.963.741-00', 'GO-85.296.374', 'Solteiro', 'Masculino', '62999996655', '62888884444', '62333333333', 'thiago.oliveira@email.com', '74000-000', 'Rua 9', '369', '', 'Setor Oeste', 'Goiânia');
 
-CREATE TABLE vendas (
+-- =======================
+-- TABELA VENDAS
+-- =======================
+CREATE TABLE IF NOT EXISTS vendas (
   id INT AUTO_INCREMENT PRIMARY KEY,
   cliente_id INT NOT NULL,
   data_venda DATE NOT NULL,
-  desconto DECIMAL(5, 2) DEFAULT 0, -- desconto total percentual da venda
-  total DECIMAL(10, 2) NOT NULL, -- total antes do desconto
-  total_com_desconto DECIMAL(10, 2) NOT NULL, -- total após desconto
+  desconto DECIMAL(5, 2) DEFAULT 0,
+  total DECIMAL(10, 2) NOT NULL,
+  total_com_desconto DECIMAL(10, 2) NOT NULL,
+  dias_vencimento INT DEFAULT NULL,
+  forma_pagamento ENUM('dinheiro', 'cartao', 'pix', 'transferencia', 'aprazo') DEFAULT 'dinheiro',
+  status ENUM('pendente', 'pago', 'cancelado','vencido') DEFAULT 'pendente',
   data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (cliente_id) REFERENCES clientes(id)
 );
 
-ALTER TABLE vendas
-ADD COLUMN dias_vencimento INT DEFAULT NULL AFTER total_com_desconto;
-
-SET SQL_SAFE_UPDATES = 0;
-
-UPDATE vendas
-SET forma_pagamento = 'dinheiro'
-WHERE forma_pagamento IS NULL;
-
-SET SQL_SAFE_UPDATES = 1;
-
-ALTER TABLE vendas
-MODIFY COLUMN forma_pagamento ENUM(
-    'dinheiro', 'cartao', 'pix', 'transferencia', "aprazo"
-);
-
-ALTER TABLE vendas
-MODIFY COLUMN status ENUM('pendente', 'pago', 'cancelado','vencido');
-
-CREATE TABLE itens_venda (
+-- =======================
+-- TABELA ITENS_VENDA
+-- =======================
+CREATE TABLE IF NOT EXISTS itens_venda (
   id INT AUTO_INCREMENT PRIMARY KEY,
   venda_id INT NOT NULL,
   produto_id INT NOT NULL,
   quantidade INT NOT NULL,
   preco_unitario DECIMAL(10, 2) NOT NULL,
-  desconto DECIMAL(5, 2) DEFAULT 0, -- desconto percentual no item
+  desconto DECIMAL(5, 2) DEFAULT 0,
   FOREIGN KEY (venda_id) REFERENCES vendas(id),
   FOREIGN KEY (produto_id) REFERENCES produtos(id)
 );
 
-CREATE TABLE metodos_pagamento (
+-- =======================
+-- TABELA METODOS_PAGAMENTO
+-- =======================
+CREATE TABLE IF NOT EXISTS metodos_pagamento (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    tipo ENUM('dinheiro', 'cartao', 'pix', 'transferencia', 'outro') NOT NULL,
+    tipo ENUM('dinheiro', 'cartao', 'pix', 'transferencia', 'outro', 'aprazo') NOT NULL,
     ativo BOOLEAN NOT NULL DEFAULT TRUE
 );
-
-ALTER TABLE metodos_pagamento
-MODIFY COLUMN tipo ENUM('dinheiro', 'cartao', 'pix', 'transferencia', 'outro', 'aprazo') NOT NULL;
-
 
 INSERT INTO metodos_pagamento (nome, tipo, ativo) VALUES
 ('Dinheiro em espécie', 'dinheiro', TRUE),
@@ -149,11 +142,12 @@ INSERT INTO metodos_pagamento (nome, tipo, ativo) VALUES
 ('Cartão de Débito', 'cartao', TRUE),
 ('PIX', 'pix', TRUE),
 ('Transferência Bancária', 'transferencia', FALSE),
-('À Prazo', 'aprazo', TRUE); -- ⬅ novo método
+('À Prazo', 'aprazo', TRUE);
 
-
--- Tabela de categorias
-CREATE TABLE categorias (
+-- =======================
+-- TABELA CATEGORIAS
+-- =======================
+CREATE TABLE IF NOT EXISTS categorias (
     id VARCHAR(36) PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     tipo ENUM('receita', 'despesa') NOT NULL,
@@ -162,7 +156,6 @@ CREATE TABLE categorias (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Inserir categorias padrão para despesas
 INSERT INTO categorias (id, nome, tipo, cor) VALUES
 (UUID(), 'Mercadoria', 'despesa', '#FF6B6B'),
 (UUID(), 'Utilidades', 'despesa', '#4ECDC4'),
@@ -172,8 +165,10 @@ INSERT INTO categorias (id, nome, tipo, cor) VALUES
 (UUID(), 'Transporte', 'despesa', '#DDA0DD'),
 (UUID(), 'Outros', 'despesa', '#F8BBD9');
 
--- Tabela de fornecedores
-CREATE TABLE fornecedores (
+-- =======================
+-- TABELA FORNECEDORES
+-- =======================
+CREATE TABLE IF NOT EXISTS fornecedores (
     id VARCHAR(36) PRIMARY KEY,
     nome VARCHAR(200) NOT NULL,
     cnpj VARCHAR(18),
@@ -185,8 +180,17 @@ CREATE TABLE fornecedores (
     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Tabela principal de contas a pagar
-CREATE TABLE contas_pagar (
+INSERT INTO fornecedores (id, nome, cnpj, email, telefone, endereco) VALUES
+(UUID(), 'Fornecedor ABC Ltda', '12.345.678/0001-90', 'contato@abc.com', '(11) 99999-9999', 'Rua das Flores, 123 - São Paulo/SP'),
+(UUID(), 'Energia Elétrica SA', '98.765.432/0001-10', 'fatura@energia.com', '(11) 88888-8888', 'Av. Paulista, 1000 - São Paulo/SP'),
+(UUID(), 'Internet Provider', '11.222.333/0001-44', 'suporte@internet.com', '(11) 77777-7777', 'Rua Augusta, 500 - São Paulo/SP'),
+(UUID(), 'Distribuidora XYZ', '55.666.777/0001-88', 'vendas@xyz.com', '(11) 66666-6666', 'Rua Consolação, 200 - São Paulo/SP'),
+(UUID(), 'Banco Central', '00.000.000/0001-91', 'atendimento@banco.com', '(11) 55555-5555', 'SBS Quadra 3 - Brasília/DF');
+
+-- =======================
+-- TABELA CONTAS_PAGAR
+-- =======================
+CREATE TABLE IF NOT EXISTS contas_pagar (
     id VARCHAR(36) PRIMARY KEY,
     fornecedor_id VARCHAR(36),
     fornecedor_nome VARCHAR(200) NOT NULL,
@@ -206,59 +210,28 @@ CREATE TABLE contas_pagar (
     FOREIGN KEY (fornecedor_id) REFERENCES fornecedores(id)
 );
 
--- Índices para melhor performance
 CREATE INDEX idx_contas_pagar_status ON contas_pagar(status);
 CREATE INDEX idx_contas_pagar_vencimento ON contas_pagar(data_vencimento);
 CREATE INDEX idx_contas_pagar_fornecedor ON contas_pagar(fornecedor_id);
 CREATE INDEX idx_contas_pagar_categoria ON contas_pagar(categoria_id);
 
--- Inserir alguns fornecedores de exemplo
-INSERT INTO fornecedores (id, nome, cnpj, email, telefone, endereco) VALUES
-(UUID(), 'Fornecedor ABC Ltda', '12.345.678/0001-90', 'contato@abc.com', '(11) 99999-9999', 'Rua das Flores, 123 - São Paulo/SP'),
-(UUID(), 'Energia Elétrica SA', '98.765.432/0001-10', 'fatura@energia.com', '(11) 88888-8888', 'Av. Paulista, 1000 - São Paulo/SP'),
-(UUID(), 'Internet Provider', '11.222.333/0001-44', 'suporte@internet.com', '(11) 77777-7777', 'Rua Augusta, 500 - São Paulo/SP'),
-(UUID(), 'Distribuidora XYZ', '55.666.777/0001-88', 'vendas@xyz.com', '(11) 66666-6666', 'Rua Consolação, 200 - São Paulo/SP'),
-(UUID(), 'Banco Central', '00.000.000/0001-91', 'atendimento@banco.com', '(11) 55555-5555', 'SBS Quadra 3 - Brasília/DF');
-
--- Inserir algumas contas a pagar de exemplo
+-- Exemplos de contas a pagar
 INSERT INTO contas_pagar (id, fornecedor_nome, valor, data_vencimento, status, categoria_id, descricao, data_agendamento) 
-SELECT 
-    UUID(),
-    'Fornecedor ABC Ltda',
-    3500.00,
-    '2024-12-15',
-    'vencido',
-    c.id,
-    'Compra de estoque',
-    NULL
+SELECT UUID(), 'Fornecedor ABC Ltda', 3500.00, '2024-12-15', 'vencido', c.id, 'Compra de estoque', NULL
 FROM categorias c WHERE c.nome = 'Mercadoria' LIMIT 1;
 
 INSERT INTO contas_pagar (id, fornecedor_nome, valor, data_vencimento, status, categoria_id, descricao, data_agendamento) 
-SELECT 
-    UUID(),
-    'Energia Elétrica SA',
-    850.75,
-    '2024-12-20',
-    'pendente',
-    c.id,
-    'Conta de luz',
-    NULL
+SELECT UUID(), 'Energia Elétrica SA', 850.75, '2024-12-20', 'pendente', c.id, 'Conta de luz', NULL
 FROM categorias c WHERE c.nome = 'Utilidades' LIMIT 1;
 
 INSERT INTO contas_pagar (id, fornecedor_nome, valor, data_vencimento, status, categoria_id, descricao, data_agendamento) 
-SELECT 
-    UUID(),
-    'Internet Provider',
-    199.90,
-    '2024-12-25',
-    'agendado',
-    c.id,
-    'Internet empresarial',
-    '2024-12-24'
+SELECT UUID(), 'Internet Provider', 199.90, '2024-12-25', 'agendado', c.id, 'Internet empresarial', '2024-12-24'
 FROM categorias c WHERE c.nome = 'Tecnologia' LIMIT 1;
 
--- Tabela de histórico de pagamentos
-CREATE TABLE historico_pagamentos (
+-- =======================
+-- TABELA HISTORICO_PAGAMENTOS
+-- =======================
+CREATE TABLE IF NOT EXISTS historico_pagamentos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   cliente_id INT NOT NULL,
   venda_id INT,
@@ -269,7 +242,6 @@ CREATE TABLE historico_pagamentos (
   FOREIGN KEY (venda_id) REFERENCES vendas(id) ON DELETE SET NULL
 );
 
--- Índices para melhor performance
 CREATE INDEX idx_historico_cliente ON historico_pagamentos(cliente_id);
 CREATE INDEX idx_historico_venda ON historico_pagamentos(venda_id);
 CREATE INDEX idx_historico_data ON historico_pagamentos(data_pagamento);
