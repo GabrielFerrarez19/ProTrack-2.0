@@ -2,14 +2,14 @@ import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Edit, UserX, UserCheck } from "lucide-react";
-import type { User } from "../index";
+import type { User } from "@/@types/types.api";
 import { roles, departamentos } from "@/utils/functions";
 import { Badge } from "@/components/ui/badge";
 
 interface UserRowProps {
   user: User;
   openDialog: (user: User) => void;
-  toggleUserStatus: (userId: number) => void;
+  toggleUserStatus: (userId: string) => void;
 }
 
 export default function UserRow({
@@ -23,7 +23,11 @@ export default function UserRow({
       inativo: "bg-gray-100 text-gray-800 hover:bg-gray-100",
       bloqueado: "bg-red-100 text-red-800 hover:bg-red-100",
     };
-    return <Badge className={variants[status]}>{status}</Badge>;
+    return (
+      <Badge className={variants[status as keyof typeof variants]}>
+        {status}
+      </Badge>
+    );
   };
 
   const getRoleLabel = (role: string) =>
@@ -61,7 +65,11 @@ export default function UserRow({
       </TableCell>
       <TableCell>{user.email}</TableCell>
       <TableCell>{getRoleLabel(user.role)}</TableCell>
-      <TableCell>{getDepartamentoLabel(user.departamento_id)}</TableCell>
+      <TableCell>
+        {getDepartamentoLabel(
+          user.departamento_id ? parseInt(user.departamento_id) : null
+        )}
+      </TableCell>
       <TableCell>{getStatusBadge(user.status)}</TableCell>
       <TableCell>
         {user.ultimo_login

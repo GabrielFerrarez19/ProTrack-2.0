@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import type { UseFormReturn } from "react-hook-form";
-import type { User } from "../index";
+import type { User } from "@/@types/types.api";
 import { roles, departamentos } from "@/utils/functions";
 
 interface UserDialogProps {
@@ -30,6 +30,7 @@ interface UserDialogProps {
     name: string;
     email: string;
     username: string;
+    password?: string;
     role: string;
     status: string;
     departamento_id?: string;
@@ -41,6 +42,7 @@ interface UserDialogProps {
     name: string;
     email: string;
     username: string;
+    password?: string;
     role: string;
     status: string;
     departamento_id?: string;
@@ -101,6 +103,23 @@ export default function UserDialog({
                   <FormLabel>Username</FormLabel>
                   <FormControl>
                     <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Senha{" "}
+                    {editingUser ? "(deixe em branco para manter a atual)" : ""}
+                  </FormLabel>
+                  <FormControl>
+                    <Input type="password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

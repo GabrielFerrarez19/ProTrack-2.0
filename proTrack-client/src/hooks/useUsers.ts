@@ -4,6 +4,12 @@ import {
   getUserById,
   updateUserById,
   changeUserStatus,
+  createUser,
+  deleteUser,
+  searchUsers,
+  getUsersByStatus,
+  getUsersByRole,
+  getUsersByDepartment,
 } from "../services/api";
 import type {
   User,
@@ -27,6 +33,19 @@ interface UsersActions {
     id: string,
     status: "ativo" | "inativo" | "bloqueado"
   ) => Promise<void>;
+  createNewUser: (userData: {
+    name: string;
+    email: string;
+    password: string;
+    username?: string;
+    role?: string;
+    departamento_id?: string;
+  }) => Promise<void>;
+  removeUser: (id: string) => Promise<void>;
+  searchUsersByTerm: (searchTerm: string) => Promise<User[]>;
+  filterUsersByStatus: (status: string) => Promise<User[]>;
+  filterUsersByRole: (role: string) => Promise<User[]>;
+  filterUsersByDepartment: (departamento_id: string) => Promise<User[]>;
   clearError: () => void;
 }
 
@@ -147,6 +166,176 @@ export const useUsers = (): UsersState & UsersActions => {
     []
   );
 
+  // Função para criar novo usuário
+  const createNewUser = useCallback(
+    async (userData: {
+      name: string;
+      email: string;
+      password: string;
+      username?: string;
+      role?: string;
+      departamento_id?: string;
+    }): Promise<void> => {
+      try {
+        setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+        await createUser(userData);
+
+        // Recarrega a lista de usuários
+        await fetchUsers();
+      } catch (error: any) {
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: error.error || "Erro ao criar usuário",
+        }));
+        throw error;
+      }
+    },
+    [fetchUsers]
+  );
+
+  // Função para remover usuário
+  const removeUser = useCallback(async (id: string): Promise<void> => {
+    try {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+      await deleteUser(id);
+
+      // Remove o usuário da lista local
+      setState((prev) => ({
+        ...prev,
+        users: prev.users.filter((user) => user.id !== id),
+        total: prev.total - 1,
+        isLoading: false,
+        error: null,
+      }));
+    } catch (error: any) {
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: error.error || "Erro ao remover usuário",
+      }));
+      throw error;
+    }
+  }, []);
+
+  // Função para buscar usuários por termo
+  const searchUsersByTerm = useCallback(
+    async (searchTerm: string): Promise<User[]> => {
+      try {
+        setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+        const response = await searchUsers(searchTerm);
+
+        setState((prev) => ({
+          ...prev,
+          users: response.users,
+          total: response.total,
+          isLoading: false,
+          error: null,
+        }));
+
+        return response.users;
+      } catch (error: any) {
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: error.error || "Erro ao buscar usuários",
+        }));
+        throw error;
+      }
+    },
+    []
+  );
+
+  // Função para filtrar usuários por status
+  const filterUsersByStatus = useCallback(
+    async (status: string): Promise<User[]> => {
+      try {
+        setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+        const response = await getUsersByStatus(status);
+
+        setState((prev) => ({
+          ...prev,
+          users: response.users,
+          total: response.total,
+          isLoading: false,
+          error: null,
+        }));
+
+        return response.users;
+      } catch (error: any) {
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: error.error || "Erro ao filtrar usuários por status",
+        }));
+        throw error;
+      }
+    },
+    []
+  );
+
+  // Função para filtrar usuários por role
+  const filterUsersByRole = useCallback(
+    async (role: string): Promise<User[]> => {
+      try {
+        setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+        const response = await getUsersByRole(role);
+
+        setState((prev) => ({
+          ...prev,
+          users: response.users,
+          total: response.total,
+          isLoading: false,
+          error: null,
+        }));
+
+        return response.users;
+      } catch (error: any) {
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: error.error || "Erro ao filtrar usuários por role",
+        }));
+        throw error;
+      }
+    },
+    []
+  );
+
+  // Função para filtrar usuários por departamento
+  const filterUsersByDepartment = useCallback(
+    async (departamento_id: string): Promise<User[]> => {
+      try {
+        setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+        const response = await getUsersByDepartment(departamento_id);
+
+        setState((prev) => ({
+          ...prev,
+          users: response.users,
+          total: response.total,
+          isLoading: false,
+          error: null,
+        }));
+
+        return response.users;
+      } catch (error: any) {
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: error.error || "Erro ao filtrar usuários por departamento",
+        }));
+        throw error;
+      }
+    },
+    []
+  );
+
   // Função para limpar erros
   const clearError = useCallback(() => {
     setState((prev) => ({ ...prev, error: null }));
@@ -158,6 +347,12 @@ export const useUsers = (): UsersState & UsersActions => {
     fetchUserById,
     updateUser,
     changeStatus,
+    createNewUser,
+    removeUser,
+    searchUsersByTerm,
+    filterUsersByStatus,
+    filterUsersByRole,
+    filterUsersByDepartment,
     clearError,
   };
 };

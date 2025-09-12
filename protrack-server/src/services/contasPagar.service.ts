@@ -42,7 +42,7 @@ const formatarContaPagarResponse = (conta: any): ContaPagarResponse => {
     descricao: conta.descricao,
     data_agendamento: conta.data_agendamento,
     data_pagamento: conta.data_pagamento,
-    valor_pago: conta.valor_pago ? Number(conta.valor_pago) : undefined,
+    valor_pago: conta.valor_pago ? Number(conta.valor_pago) : 0,
     forma_pagamento: conta.forma_pagamento,
     observacoes: conta.observacoes,
     dias_atraso: diasAtraso,
