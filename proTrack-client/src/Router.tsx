@@ -23,6 +23,8 @@ import { PublicRoute } from "./components/PublicRoute";
 import { DefaultConfigLayout } from "./layout/DefaultConfigLayout";
 import Usuarios from "./pages/Usuarios";
 import { NotFound } from "./pages/NotFound";
+import { Seguranca } from "./pages/ConfigSeguranca";
+import { Aparencia } from "./pages/ConfigAparencia";
 
 export function Router() {
   return (
@@ -183,6 +185,22 @@ export function Router() {
           element={
             <ProtectedRoute requiredRoute="/config/usuarios">
               <Usuarios />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="seguranca"
+          element={
+            <ProtectedRoute requiredRoute="/config/seguranca">
+              <Seguranca />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="aparencia"
+          element={
+            <ProtectedRoute requiredRoute="/config/aparencia">
+              <Aparencia />
             </ProtectedRoute>
           }
         />
