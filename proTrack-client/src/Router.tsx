@@ -56,6 +56,15 @@ export function Router() {
       {/* Redirecionamento da rota raiz */}
       <Route path="/" element={<Navigate to="/login" replace />} />
 
+      <Route
+        path="cadastrocontaspagar"
+        element={
+          <ProtectedRoute requiredRoute="/cadastrocontaspagar">
+            <CadastroContasPagar />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Rotas protegidas - apenas para usuários autenticados */}
       <Route
         path="/"
@@ -139,14 +148,6 @@ export function Router() {
           element={
             <ProtectedRoute requiredRoute="/flucoCaixa">
               <FluxoCaixa />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="cadastrocontaspagar"
-          element={
-            <ProtectedRoute requiredRoute="/cadastrocontaspagar">
-              <CadastroContasPagar />
             </ProtectedRoute>
           }
         />
