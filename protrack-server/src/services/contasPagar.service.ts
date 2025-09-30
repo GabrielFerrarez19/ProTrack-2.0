@@ -8,7 +8,7 @@ import {
   ContaPagarResponse,
   FornecedorResponse,
   ContaPagarResumoResponse,
-} from "../@types/types.service";
+} from "../@types/contasPagar.types";
 
 // ===== UTILITÁRIOS =====
 

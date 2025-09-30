@@ -1,14 +1,15 @@
 import {
-  EvolucaoLucroMensal,
-  FormaPagamentoCount,
-  MargemLucroTotal,
   ProdutoData,
-  ProdutoMaisVendido,
   ProdutoMargemLucro,
   ValorInvestidoPorCategoria,
+  MargemLucroTotal,
+} from "../@types/product.types";
+import { ProdutoMaisVendido, FormaPagamentoCount } from "../@types/venda.types";
+import {
+  EvolucaoLucroMensal,
   DistribuicaoMargemLucro,
   DistribuicaoMargemLucroResponse,
-} from "../@types/types.service";
+} from "../@types/relatorio.types";
 import { db } from "../config/database";
 
 export const createProductDb = async (

@@ -21,7 +21,7 @@ import {
   ContaPagarFiltros,
   FornecedorCreateRequest,
   FornecedorUpdateRequest,
-} from "../@types/types.service";
+} from "../@types/contasPagar.types";
 
 // ===== CONTAS A PAGAR =====
 
