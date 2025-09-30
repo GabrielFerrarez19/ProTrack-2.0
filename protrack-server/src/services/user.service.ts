@@ -1,33 +1,7 @@
 // userService.ts
 import bcrypt from "bcrypt";
 import { db } from "../config/database";
-
-export interface CreateUserData {
-  name: string;
-  email: string;
-  password: string;
-  username?: string;
-  role?: string;
-  empresa_id?: bigint;
-  departamento_id?: bigint;
-  criado_por?: bigint;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  username?: string;
-  role: string;
-  status: string;
-  empresa_id?: string;
-  departamento_id?: string;
-  ultimo_login?: Date;
-  criado_por?: string;
-  atualizado_por?: string;
-  created_at: Date;
-  updated_at: Date;
-}
+import { CreateUserData, User } from "../@types/user.types";
 
 export const createUser = async (userData: CreateUserData) => {
   const {

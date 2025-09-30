@@ -2,8 +2,8 @@ import {
   FluxoCaixaItem,
   CategoriaFluxo,
   ComparativoPeriodo,
-  ResumoFluxoCaixa,
-} from "../@types/types.service";
+  ResumoFluxoCaixaResponse,
+} from "../@types/fluxoCaixa.types";
 import { db } from "../config/database";
 
 const calcularDiasPeriodo = (periodo: string): number => {
@@ -466,7 +466,7 @@ export const getComparativoPeriodosDb = async (): Promise<
 
 export const getResumoFluxoCaixaDb = async (
   periodo: string
-): Promise<ResumoFluxoCaixa> => {
+): Promise<ResumoFluxoCaixaResponse> => {
   try {
     const dias = calcularDiasPeriodo(periodo);
     const dataInicio = new Date();
@@ -539,9 +539,6 @@ export const getResumoFluxoCaixaDb = async (
       saldo_atual: saldoAtual,
       total_entradas: totalEntradas,
       total_saidas: totalSaidas,
-      total_entradas_periodo: totalEntradas,
-      total_saidas_periodo: totalSaidas,
-      saldo_periodo: saldoAtual,
       projecao_30_dias: projecaoTotal,
       crescimento_percentual: crescimento,
     };

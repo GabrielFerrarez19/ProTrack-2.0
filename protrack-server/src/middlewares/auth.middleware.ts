@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { findUserById } from "../services/user.service";
+import { User } from "../@types/user.types";
 
 // Estender a interface Request para incluir user
 declare global {
@@ -15,6 +16,11 @@ declare global {
         status: string;
         empresa_id?: string;
         departamento_id?: string;
+        ultimo_login?: Date;
+        criado_por?: string;
+        atualizado_por?: string;
+        created_at: Date;
+        updated_at: Date;
       };
     }
   }
@@ -37,7 +43,7 @@ export const authenticateToken = async (
     }
 
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-    const user = await findUserById(BigInt(decoded.userId));
+    const user = (await findUserById(BigInt(decoded.userId))) as User | null;
 
     if (!user) {
       return res.status(401).json({ error: "Usuário não encontrado" });

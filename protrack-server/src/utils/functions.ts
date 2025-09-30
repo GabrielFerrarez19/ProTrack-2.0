@@ -1,4 +1,4 @@
-import { VendaResponse } from "../@types/types.service";
+import { VendaResponse } from "../@types/venda.types";
 
 export function mapVendasComItensF(rows: any[]): VendaResponse[] {
   const vendasMap = new Map<number, VendaResponse>();

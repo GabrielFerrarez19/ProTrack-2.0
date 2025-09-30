@@ -2,9 +2,9 @@ import { ResultSetHeader } from "mysql2";
 import { db } from "../config/database";
 import {
   CriarVendaData,
-  FormaPagamentoCount,
   VendasDashboard,
-} from "../@types/types.service";
+  FormaPagamentoCount,
+} from "../@types/venda.types";
 
 export const atualizarVendaDb = async (
   vendaId: number,
