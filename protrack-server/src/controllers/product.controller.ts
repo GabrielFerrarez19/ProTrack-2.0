@@ -14,7 +14,7 @@ import {
   getValorInvestidoPorCategoria,
   getDistribuicaoMargemLucro,
 } from "../services/product.service";
-import { ProdutoData } from "../@types/types.service";
+import { ProdutoData } from "../@types/product.types";
 
 export const createProduct = async (req: Request, res: Response) => {
   const produto: ProdutoData = req.body;

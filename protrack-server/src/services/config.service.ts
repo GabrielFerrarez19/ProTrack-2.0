@@ -1,4 +1,4 @@
-import { MetodoPagamentoConfig } from "../@types/types.service";
+import { MetodoPagamentoConfig } from "../@types/config.types";
 import { db } from "../config/database";
 
 // Retorna todos os métodos de pagamento

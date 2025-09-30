@@ -5,7 +5,7 @@ import {
   RelatorioContasDetalhadas,
   RelatorioEstoqueInvestimento,
   RelatorioCompleto,
-} from "../@types/types.service";
+} from "../@types/relatorio.types";
 import { db } from "../config/database";
 
 // Relatório de Lucro por Produto
@@ -279,4 +279,3 @@ const getDistribuicaoMargemLucro = async () => {
     margem_media_geral: Number(margemMediaGeral.toFixed(2)),
   };
 };
-
