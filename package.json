@@ -3,12 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "server": "npm run dev --prefix protrack-server",
     "client": "npm run dev --prefix proTrack-client",
-    "dev": "npm-run-all --parallel server client"
-  },
-  "devDependencies": {
-    "npm-run-all": "^4.1.5",
-    "nodemon": "^3.1.0"
+    "dev": "npm run dev --prefix proTrack-client"
   }
 }

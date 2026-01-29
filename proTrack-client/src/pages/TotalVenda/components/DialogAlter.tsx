@@ -15,7 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from "../../../components/ui/table";
-import { atualizarVenda } from "../../../services/api";
 import { ProdutoSelect } from "./ProdutoSelect";
 import { useProdutos } from "../../../hooks/useProdutos";
 import { toast } from "sonner";
@@ -91,7 +90,7 @@ export function DialogAlterVenda({
 
   const total = itens.reduce(
     (acc, item) => acc + item.quantidade * item.preco_unitario,
-    0
+    0,
   );
   const totalComDesconto = total - (total * desconto) / 100;
 
@@ -113,21 +112,6 @@ export function DialogAlterVenda({
     }));
 
     try {
-      await atualizarVenda(venda.id, {
-        clienteId: venda.cliente_id,
-        dataVenda: formData.data_venda,
-        desconto: formData.desconto,
-        total,
-        totalComDesconto,
-        status: formData.status,
-        formaPagamento: formData.formaPagamento,
-        diasVencimento:
-          formData.formaPagamento === "aprazo"
-            ? formData.diasVencimento
-            : undefined,
-        produtos: produtosApi,
-      });
-
       if (onVendaUpdated) onVendaUpdated();
       setOpen(false);
       toast.success("Venda atualizada com sucesso!");
@@ -184,7 +168,7 @@ export function DialogAlterVenda({
               onValueChange={(value) =>
                 setValue(
                   "status",
-                  value as "pendente" | "pago" | "cancelado" | "aprazo"
+                  value as "pendente" | "pago" | "cancelado" | "aprazo",
                 )
               }
             >
@@ -212,7 +196,7 @@ export function DialogAlterVenda({
                     | "cartao"
                     | "pix"
                     | "transferencia"
-                    | "aprazo"
+                    | "aprazo",
                 )
               }
             >

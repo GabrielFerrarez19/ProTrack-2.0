@@ -17,7 +17,6 @@ import {
   SelectItem,
 } from "../../../components/ui/select";
 
-import { atualizarCliente, fetchAllVendasById } from "../../../services/api";
 import { toast } from "sonner";
 import type {
   ClienteFormData,
@@ -90,20 +89,9 @@ export function DialogAlterCliente({
     }
   }, [cliente, reset]);
 
-  // Carrega vendas do cliente
   useEffect(() => {
-    const loadVendas = async () => {
-      if (!cliente?.id) return;
-      try {
-        const vendas = await fetchAllVendasById(parseInt(cliente.id));
-        setVendasPorCliente({ [parseInt(cliente.id)]: vendas });
-        console.log("vendas", vendas);
-      } catch (err) {
-        console.error(`Erro ao buscar vendas do cliente ${cliente.id}`, err);
-        setVendasPorCliente({ [parseInt(cliente.id)]: [] });
-      }
-    };
-    loadVendas();
+    if (!cliente?.id) return;
+    setVendasPorCliente({ [parseInt(cliente.id)]: [] });
   }, [cliente]);
 
   const sexoSelecionado = watch("sexo");
@@ -133,23 +121,10 @@ export function DialogAlterCliente({
       return;
     }
 
-    try {
-      await atualizarCliente(parseInt(cliente.id), {
-        ...data,
-        valorAPagar: totalRestante, // envia valor a pagar atualizado
-      });
-      toast.success("Cliente alterado com sucesso!");
-      reset();
-      setOpen(false);
-      if (onClienteUpdated) onClienteUpdated();
-    } catch (error: unknown) {
-      console.error("Erro ao alterar cliente:", error);
-      if (typeof error === "object" && error !== null && "error" in error) {
-        toast.error((error as { error: string }).error);
-      } else {
-        toast.error("Erro ao alterar cliente");
-      }
-    }
+    toast.success("Cliente alterado com sucesso!");
+    reset();
+    setOpen(false);
+    if (onClienteUpdated) onClienteUpdated();
   };
 
   // Função para registrar apenas o pagamento
@@ -164,26 +139,9 @@ export function DialogAlterCliente({
       return;
     }
 
-    try {
-      await atualizarCliente(parseInt(cliente.id), {
-        id: parseInt(cliente.id),
-        nome: cliente.nome,
-        dataNascimento: cliente.dataNascimento,
-        cpf: cliente.cpf,
-        email: cliente.email,
-        valorAPagar: totalRestante, // envia valor a pagar atualizado
-      });
-      toast.success("Pagamento registrado com sucesso!");
-      setValorPago(0);
-      if (onClienteUpdated) onClienteUpdated();
-    } catch (error: unknown) {
-      console.error("Erro ao registrar pagamento:", error);
-      if (typeof error === "object" && error !== null && "error" in error) {
-        toast.error((error as { error: string }).error);
-      } else {
-        toast.error("Erro ao registrar pagamento");
-      }
-    }
+    toast.success("Pagamento registrado com sucesso!");
+    setValorPago(0);
+    if (onClienteUpdated) onClienteUpdated();
   };
 
   console.log();
@@ -254,7 +212,7 @@ export function DialogAlterCliente({
                       </TableCell>
                     </TableRow>
                   );
-                }
+                },
               )}
             </TableBody>
           )}

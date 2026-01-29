@@ -8,33 +8,10 @@ import {
 import { Button } from "../../../components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import type { Alerta } from "../../../@types/types.components";
-import { fetchProdutosQuantidadeBaixa } from "../../../services/api";
 
 export function AlertasDashboard() {
-  const [alertas, setAlertas] = useState<Alerta[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadAlertas = async () => {
-      try {
-        const data = await fetchProdutosQuantidadeBaixa();
-
-        const estoqueAlerta: Alerta = {
-          tipo: "estoque",
-          mensagem: `${data.total} produtos com estoque crítico`,
-          urgencia: data.total > 0 ? "media" : "alta",
-        };
-
-        setAlertas([estoqueAlerta]);
-      } catch (error) {
-        console.error("Erro ao carregar alertas:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadAlertas();
-  }, []);
+  const [alertas] = useState<Alerta[]>([]);
+  const loading = false;
 
   return (
     <Card className="bg-white shadow-sm">

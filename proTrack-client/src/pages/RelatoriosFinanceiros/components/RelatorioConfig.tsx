@@ -16,10 +16,7 @@ import {
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Filter, BarChart3, Download } from "lucide-react";
-import {
-  getRelatorioPorTipo,
-  getRelatorioCompleto,
-} from "../../../services/api";
+import { useRelatorios } from "../../../hooks/useRelatorios";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -49,7 +46,7 @@ const getTipoRelatorioNome = (tipo: string): string => {
 
 // Preparar dados para Excel
 const prepararDadosParaExcel = (
-  relatorio: RelatorioItem[]
+  relatorio: RelatorioItem[],
 ): Record<string, unknown>[] => {
   return relatorio.map((item) => {
     const obj: Record<string, unknown> = {};
@@ -59,8 +56,8 @@ const prepararDadosParaExcel = (
         value === null || value === undefined
           ? ""
           : typeof value === "object"
-          ? JSON.stringify(value)
-          : value;
+            ? JSON.stringify(value)
+            : value;
     });
     return obj;
   });
@@ -68,7 +65,7 @@ const prepararDadosParaExcel = (
 
 // Preparar dados para PDF
 const prepararDadosParaPDF = (
-  relatorio: RelatorioItem[]
+  relatorio: RelatorioItem[],
 ): { headers: string[]; data: string[][] } => {
   if (!relatorio || relatorio.length === 0)
     return { headers: ["Nenhum dado disponível"], data: [] };
@@ -80,9 +77,9 @@ const prepararDadosParaPDF = (
       return value === null || value === undefined
         ? ""
         : typeof value === "object"
-        ? JSON.stringify(value)
-        : String(value);
-    })
+          ? JSON.stringify(value)
+          : String(value);
+    }),
   );
 
   return { headers, data };
@@ -97,35 +94,32 @@ export function RelatorioConfig({
   periodoFim,
   setPeriodoFim,
 }: RelatorioConfigProps) {
-  const [loading, setLoading] = useState(false);
+  const { loading, gerarRelatorioCompleto, gerarRelatorioPorTipo } =
+    useRelatorios();
 
   const fetchRelatorio = async (): Promise<RelatorioItem[]> => {
     const res =
       tipoRelatorio === "completo"
-        ? await getRelatorioCompleto(periodoInicio, periodoFim)
-        : await getRelatorioPorTipo(tipoRelatorio, periodoInicio, periodoFim);
+        ? await gerarRelatorioCompleto(periodoInicio, periodoFim)
+        : await gerarRelatorioPorTipo(tipoRelatorio, periodoInicio, periodoFim);
 
-    if ("relatorio" in res) return res.relatorio;
-    if (Array.isArray(res)) return res;
+    if (res && typeof res === "object" && "relatorio" in res)
+      return (res as { relatorio: RelatorioItem[] }).relatorio;
+    if (Array.isArray(res)) return res as RelatorioItem[];
     return [];
   };
 
   const gerarRelatorio = async () => {
-    setLoading(true);
     try {
       const relatorio = await fetchRelatorio();
-      console.log("Relatório gerado:", relatorio);
       toast.success("Relatório gerado com sucesso!");
     } catch (error) {
       console.error("Erro ao gerar relatório:", error);
       toast.error("Erro ao gerar relatório");
-    } finally {
-      setLoading(false);
     }
   };
 
   const exportarExcel = async () => {
-    setLoading(true);
     try {
       const relatorio = await fetchRelatorio();
       const dadosParaExcel = prepararDadosParaExcel(relatorio);
@@ -136,19 +130,16 @@ export function RelatorioConfig({
 
       XLSX.writeFile(
         workbook,
-        `relatorio-${tipoRelatorio}-${periodoInicio}-${periodoFim}.xlsx`
+        `relatorio-${tipoRelatorio}-${periodoInicio}-${periodoFim}.xlsx`,
       );
       toast.success("Relatório exportado para Excel com sucesso!");
     } catch (error) {
       console.error("Erro ao exportar Excel:", error);
       toast.error("Erro ao exportar Excel");
-    } finally {
-      setLoading(false);
     }
   };
 
   const exportarPDF = async () => {
-    setLoading(true);
     try {
       const relatorio = await fetchRelatorio();
       const { headers, data } = prepararDadosParaPDF(relatorio);
@@ -179,10 +170,8 @@ export function RelatorioConfig({
       toast.error(
         `Erro ao exportar PDF: ${
           error instanceof Error ? error.message : "Erro desconhecido"
-        }`
+        }`,
       );
-    } finally {
-      setLoading(false);
     }
   };
 
