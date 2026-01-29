@@ -55,8 +55,8 @@ export function Router() {
         }
       />
 
-      {/* Redirecionamento da rota raiz */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* Redirecionamento da rota raiz - shell sem login */}
+      <Route path="/" element={<Navigate to="/status" replace />} />
 
       <Route
         path="cadastrocontaspagar"

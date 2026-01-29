@@ -8,11 +8,6 @@ import {
 } from "../../../components/ui/card";
 import { Switch } from "../../../components/ui/switch";
 import { CreditCard } from "lucide-react";
-import {
-  fetchMetodosPagamento,
-  toggleMetodoPagamentoApi,
-} from "../../../services/api";
-
 interface Props {
   metodosPagamento: MetodoPagamento[];
   setMetodosPagamento: React.Dispatch<React.SetStateAction<MetodoPagamento[]>>;
@@ -23,39 +18,13 @@ export function MetodosPagamento({
   setMetodosPagamento,
 }: Props) {
   useEffect(() => {
-    const loadMetodos = async () => {
-      try {
-        const dados = await fetchMetodosPagamento();
-
-        console.log("dados", dados);
-
-        // filtra só os tipos aceitos
-        const metodosValidos = dados as MetodoPagamento[];
-
-        setMetodosPagamento(metodosValidos);
-      } catch (error) {
-        console.error("Erro ao carregar métodos de pagamento:", error);
-      }
-    };
-    loadMetodos();
+    setMetodosPagamento([]);
   }, [setMetodosPagamento]);
 
   const handleToggleMetodo = async (id: string, ativo: boolean) => {
-    // Atualiza estado local imediatamente
     setMetodosPagamento((metodos) =>
-      metodos.map((m) => (m.id === id ? { ...m, ativo } : m))
+      metodos.map((m) => (m.id === id ? { ...m, ativo } : m)),
     );
-
-    try {
-      // Atualiza no backend
-      await toggleMetodoPagamentoApi(id, ativo);
-    } catch (error) {
-      console.error("Erro ao atualizar método:", error);
-      // Reverte se der erro
-      setMetodosPagamento((metodos) =>
-        metodos.map((m) => (m.id === id ? { ...m, ativo: !ativo } : m))
-      );
-    }
   };
 
   const getTipoMetodoIcon = (tipo: string) => {

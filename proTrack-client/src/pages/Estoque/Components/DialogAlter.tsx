@@ -23,7 +23,6 @@ import type {
   ProductFormData,
   Product,
 } from "../../../@types/types.components";
-import { atualizarProduto } from "../../../services/api"; // ajuste o caminho se necessário
 import { toast } from "sonner";
 
 const categorias = [
@@ -91,17 +90,13 @@ export function DialogAlter({
         preco_venda: data.precoVenda,
       };
 
-      await atualizarProduto(updatedProduct);
       setOpen(false);
-      // Chama o callback para atualizar os dados da tabela
       toast.success("Produto alterado com sucesso!");
-      if (onProductUpdated) {
-        onProductUpdated();
-      }
+      if (onProductUpdated) onProductUpdated();
     } catch (error: unknown) {
       console.error("Erro ao atualizar produto:", error);
       toast.error(
-        error instanceof Error ? error.message : "Erro ao atualizar produto"
+        error instanceof Error ? error.message : "Erro ao atualizar produto",
       );
     }
   };

@@ -17,7 +17,6 @@ import {
   SelectValue,
 } from "../../../components/ui/select";
 import { Package } from "lucide-react";
-import { cadastrarProduto } from "../../../services/api";
 import type { ProductFormData } from "../../../@types/types.components";
 
 // Sonner Toast
@@ -51,17 +50,6 @@ export function ProductForm() {
 
   const onSubmit = async (data: ProductFormData) => {
     try {
-      await cadastrarProduto({
-        nome: data.nome,
-        descricao: data.descricao,
-        categoria: data.categoria,
-        codigo_barras: data.codigoBarras,
-        quantidade: data.quantidade,
-        tamanho: data.tamanho,
-        preco_custo: data.precoCusto,
-        preco_venda: data.precoVenda,
-      });
-
       toast.success("Produto cadastrado com sucesso!", {
         style: { background: "#4ade80", color: "#065f46" }, // verde pastel
       });

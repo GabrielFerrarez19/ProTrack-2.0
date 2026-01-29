@@ -7,8 +7,8 @@ import { ResumoVenda } from "./components/ResumoVenda";
 import { ProdutosTable } from "./components/ProdutosTable";
 import { Header } from "../../components/header";
 import { useProdutos } from "../../hooks/useProdutos";
+import { useVendas } from "../../hooks/useVendas";
 import { useState, useEffect } from "react";
-import { criarVenda } from "../../services/api";
 import type { VendaData } from "../../@types/types.api";
 
 // Sonner Toast
@@ -35,6 +35,7 @@ export function Vendas() {
 
   const watchedProdutos = methods.watch("produtos");
   const { products } = useProdutos();
+  const { submitVenda } = useVendas();
   const [totalGeral, setTotalGeral] = useState(0);
   const [totalComDesconto, setTotalComDesconto] = useState(0);
 
@@ -43,7 +44,7 @@ export function Vendas() {
     if (produto) {
       methods.setValue(
         `produtos.${index}.precoUnitario`,
-        Number(produto.preco_venda) || 0
+        Number(produto.preco_venda) || 0,
       );
     } else {
       methods.setValue(`produtos.${index}.precoUnitario`, 0);
@@ -80,7 +81,7 @@ export function Vendas() {
 
       console.log("Venda a enviar para API:", vendaParaEnviar);
 
-      const resposta = await criarVenda(vendaParaEnviar);
+      const resposta = await submitVenda(vendaParaEnviar);
       console.log("Venda cadastrada com sucesso:", resposta);
 
       toast.success("Venda cadastrada com sucesso!", {

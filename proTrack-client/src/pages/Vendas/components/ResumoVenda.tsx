@@ -15,8 +15,6 @@ import {
   SelectValue,
 } from "../../../components/ui/select";
 import type { VendaForm } from "../../../schemas/schemaVendas";
-import { fetchMetodosPagamentoAtivos } from "../../../services/api";
-
 type Produto = {
   produtoId: string;
   quantidade: number;
@@ -40,7 +38,7 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
   const totalQuantidade = produtos.reduce((acc, p) => acc + p.quantidade, 0);
   const totalPreco = produtos.reduce(
     (acc, p) => acc + p.quantidade * p.precoUnitario,
-    0
+    0,
   );
   const valorComDesconto = totalPreco * (1 - desconto / 100);
 
@@ -50,17 +48,7 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
     }
   }, [totalPreco, valorComDesconto, onChangeResumo]);
 
-  const [metodos, setMetodos] = useState<
-    { nome: string; tipo: string; id: number }[]
-  >([]);
-
-  useEffect(() => {
-    const loadMetodos = async () => {
-      const ativos = await fetchMetodosPagamentoAtivos();
-      setMetodos(ativos);
-    };
-    loadMetodos();
-  }, []);
+  const [metodos] = useState<{ nome: string; tipo: string; id: number }[]>([]);
 
   // Dias de vencimento disponíveis
   const diasVencimentoOpcoes = [1, 3, 5, 9, 11, 15];
@@ -101,7 +89,7 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
                 className="w-20"
                 onChange={(e) =>
                   field.onChange(
-                    e.target.value === "" ? undefined : Number(e.target.value)
+                    e.target.value === "" ? undefined : Number(e.target.value),
                   )
                 }
                 value={field.value ?? ""}
