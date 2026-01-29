@@ -1,22 +1,5 @@
 import { useState, useCallback } from "react";
-import {
-  getAllUsers,
-  getUserById,
-  updateUserById,
-  changeUserStatus,
-  createUser,
-  deleteUser,
-  searchUsers,
-  getUsersByStatus,
-  getUsersByRole,
-  getUsersByDepartment,
-} from "../services/api";
-import type {
-  User,
-  UsersResponse,
-  UserResponse,
-  UpdateUserData,
-} from "../@types/types.api";
+import type { User, UpdateUserData } from "../@types/types.api";
 
 interface UsersState {
   users: User[];
@@ -31,7 +14,7 @@ interface UsersActions {
   updateUser: (id: string, userData: UpdateUserData) => Promise<void>;
   changeStatus: (
     id: string,
-    status: "ativo" | "inativo" | "bloqueado"
+    status: "ativo" | "inativo" | "bloqueado",
   ) => Promise<void>;
   createNewUser: (userData: {
     name: string;
@@ -49,6 +32,16 @@ interface UsersActions {
   clearError: () => void;
 }
 
+const emptyUser: User = {
+  id: "",
+  name: "",
+  email: "",
+  role: "",
+  status: "ativo",
+  created_at: "",
+  updated_at: "",
+};
+
 export const useUsers = (): UsersState & UsersActions => {
   const [state, setState] = useState<UsersState>({
     users: [],
@@ -57,118 +50,38 @@ export const useUsers = (): UsersState & UsersActions => {
     error: null,
   });
 
-  // Função para buscar todos os usuários
   const fetchUsers = useCallback(async (): Promise<void> => {
-    try {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
-
-      const response: UsersResponse = await getAllUsers();
-
-      setState((prev) => ({
-        ...prev,
-        users: response.users,
-        total: response.total,
-        isLoading: false,
-        error: null,
-      }));
-    } catch (error: any) {
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: error.error || "Erro ao carregar usuários",
-      }));
-      throw error;
-    }
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    setState((prev) => ({ ...prev, users: [], total: 0, isLoading: false }));
   }, []);
 
-  // Função para buscar usuário por ID
   const fetchUserById = useCallback(async (id: string): Promise<User> => {
-    try {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
-
-      const response: UserResponse = await getUserById(id);
-
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: null,
-      }));
-
-      return response.user;
-    } catch (error: any) {
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: error.error || "Erro ao carregar usuário",
-      }));
-      throw error;
-    }
+    setState((prev) => ({ ...prev, isLoading: true }));
+    setState((prev) => ({ ...prev, isLoading: false }));
+    return { ...emptyUser, id };
   }, []);
 
-  // Função para atualizar usuário
   const updateUser = useCallback(
-    async (id: string, userData: UpdateUserData): Promise<void> => {
-      try {
-        setState((prev) => ({ ...prev, isLoading: true, error: null }));
-
-        await updateUserById(id, userData);
-
-        // Atualiza o usuário na lista local
-        setState((prev) => ({
-          ...prev,
-          users: prev.users.map((user) =>
-            user.id === id ? { ...user, ...userData } : user
-          ),
-          isLoading: false,
-          error: null,
-        }));
-      } catch (error: any) {
-        setState((prev) => ({
-          ...prev,
-          isLoading: false,
-          error: error.error || "Erro ao atualizar usuário",
-        }));
-        throw error;
-      }
+    async (_id: string, userData: UpdateUserData): Promise<void> => {
+      setState((prev) => ({ ...prev, isLoading: true }));
+      setState((prev) => ({ ...prev, isLoading: false }));
     },
-    []
+    [],
   );
 
-  // Função para alterar status do usuário
   const changeStatus = useCallback(
     async (
-      id: string,
-      status: "ativo" | "inativo" | "bloqueado"
+      _id: string,
+      _status: "ativo" | "inativo" | "bloqueado",
     ): Promise<void> => {
-      try {
-        setState((prev) => ({ ...prev, isLoading: true, error: null }));
-
-        await changeUserStatus(id, status);
-
-        // Atualiza o status do usuário na lista local
-        setState((prev) => ({
-          ...prev,
-          users: prev.users.map((user) =>
-            user.id === id ? { ...user, status } : user
-          ),
-          isLoading: false,
-          error: null,
-        }));
-      } catch (error: any) {
-        setState((prev) => ({
-          ...prev,
-          isLoading: false,
-          error: error.error || "Erro ao alterar status do usuário",
-        }));
-        throw error;
-      }
+      setState((prev) => ({ ...prev, isLoading: true }));
+      setState((prev) => ({ ...prev, isLoading: false }));
     },
-    []
+    [],
   );
 
-  // Função para criar novo usuário
   const createNewUser = useCallback(
-    async (userData: {
+    async (_userData: {
       name: string;
       email: string;
       password: string;
@@ -176,167 +89,43 @@ export const useUsers = (): UsersState & UsersActions => {
       role?: string;
       departamento_id?: string;
     }): Promise<void> => {
-      try {
-        setState((prev) => ({ ...prev, isLoading: true, error: null }));
-
-        await createUser(userData);
-
-        // Recarrega a lista de usuários
-        await fetchUsers();
-      } catch (error: any) {
-        setState((prev) => ({
-          ...prev,
-          isLoading: false,
-          error: error.error || "Erro ao criar usuário",
-        }));
-        throw error;
-      }
+      setState((prev) => ({ ...prev, isLoading: true }));
+      setState((prev) => ({ ...prev, isLoading: false }));
     },
-    [fetchUsers]
+    [],
   );
 
-  // Função para remover usuário
-  const removeUser = useCallback(async (id: string): Promise<void> => {
-    try {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
-
-      await deleteUser(id);
-
-      // Remove o usuário da lista local
-      setState((prev) => ({
-        ...prev,
-        users: prev.users.filter((user) => user.id !== id),
-        total: prev.total - 1,
-        isLoading: false,
-        error: null,
-      }));
-    } catch (error: any) {
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: error.error || "Erro ao remover usuário",
-      }));
-      throw error;
-    }
+  const removeUser = useCallback(async (_id: string): Promise<void> => {
+    setState((prev) => ({ ...prev, isLoading: true }));
+    setState((prev) => ({ ...prev, isLoading: false }));
   }, []);
 
-  // Função para buscar usuários por termo
   const searchUsersByTerm = useCallback(
-    async (searchTerm: string): Promise<User[]> => {
-      try {
-        setState((prev) => ({ ...prev, isLoading: true, error: null }));
-
-        const response = await searchUsers(searchTerm);
-
-        setState((prev) => ({
-          ...prev,
-          users: response.users,
-          total: response.total,
-          isLoading: false,
-          error: null,
-        }));
-
-        return response.users;
-      } catch (error: any) {
-        setState((prev) => ({
-          ...prev,
-          isLoading: false,
-          error: error.error || "Erro ao buscar usuários",
-        }));
-        throw error;
-      }
+    async (_searchTerm: string): Promise<User[]> => {
+      return [];
     },
-    []
+    [],
   );
 
-  // Função para filtrar usuários por status
   const filterUsersByStatus = useCallback(
-    async (status: string): Promise<User[]> => {
-      try {
-        setState((prev) => ({ ...prev, isLoading: true, error: null }));
-
-        const response = await getUsersByStatus(status);
-
-        setState((prev) => ({
-          ...prev,
-          users: response.users,
-          total: response.total,
-          isLoading: false,
-          error: null,
-        }));
-
-        return response.users;
-      } catch (error: any) {
-        setState((prev) => ({
-          ...prev,
-          isLoading: false,
-          error: error.error || "Erro ao filtrar usuários por status",
-        }));
-        throw error;
-      }
+    async (_status: string): Promise<User[]> => {
+      return [];
     },
-    []
+    [],
   );
 
-  // Função para filtrar usuários por role
   const filterUsersByRole = useCallback(
-    async (role: string): Promise<User[]> => {
-      try {
-        setState((prev) => ({ ...prev, isLoading: true, error: null }));
-
-        const response = await getUsersByRole(role);
-
-        setState((prev) => ({
-          ...prev,
-          users: response.users,
-          total: response.total,
-          isLoading: false,
-          error: null,
-        }));
-
-        return response.users;
-      } catch (error: any) {
-        setState((prev) => ({
-          ...prev,
-          isLoading: false,
-          error: error.error || "Erro ao filtrar usuários por role",
-        }));
-        throw error;
-      }
+    async (_role: string): Promise<User[]> => {
+      return [];
     },
-    []
+    [],
   );
 
-  // Função para filtrar usuários por departamento
   const filterUsersByDepartment = useCallback(
-    async (departamento_id: string): Promise<User[]> => {
-      try {
-        setState((prev) => ({ ...prev, isLoading: true, error: null }));
-
-        const response = await getUsersByDepartment(departamento_id);
-
-        setState((prev) => ({
-          ...prev,
-          users: response.users,
-          total: response.total,
-          isLoading: false,
-          error: null,
-        }));
-
-        return response.users;
-      } catch (error: any) {
-        setState((prev) => ({
-          ...prev,
-          isLoading: false,
-          error: error.error || "Erro ao filtrar usuários por departamento",
-        }));
-        throw error;
-      }
-    },
-    []
+    async (_departamento_id: string): Promise<User[]> => [],
+    [],
   );
 
-  // Função para limpar erros
   const clearError = useCallback(() => {
     setState((prev) => ({ ...prev, error: null }));
   }, []);

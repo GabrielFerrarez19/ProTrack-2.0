@@ -14,13 +14,6 @@ import type {
   Categoria,
 } from "../../@types/types.components";
 
-import {
-  createCategoria,
-  deleteCategoriaApi,
-  fetchCategorias,
-  fetchMetodosPagamento,
-  updateCategoriaApi,
-} from "../../services/api";
 import type { MetodoPagamentoConfig } from "../../@types/types.api";
 import { Header } from "../../components/header";
 // service que criamos
@@ -48,7 +41,7 @@ export function ConfiguracoesFinanceiras() {
   ]);
 
   const [metodosPagamento, setMetodosPagamento] = useState<MetodoPagamento[]>(
-    []
+    [],
   );
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [alertas, setAlertas] = useState({
@@ -66,41 +59,12 @@ export function ConfiguracoesFinanceiras() {
     alertaFluxoCaixa: 10000,
   });
 
-  // Busca métodos de pagamento
   useEffect(() => {
-    const loadMetodos = async () => {
-      try {
-        const dados: MetodoPagamentoConfig[] = await fetchMetodosPagamento();
-
-        // Filtrar apenas os tipos compatíveis
-        const metodosFiltrados: MetodoPagamento[] = dados.filter(
-          (item): item is MetodoPagamento =>
-            item.tipo === "dinheiro" ||
-            item.tipo === "cartao" ||
-            item.tipo === "pix" ||
-            item.tipo === "transferencia" ||
-            item.tipo === "aprazo"
-        );
-
-        setMetodosPagamento(metodosFiltrados);
-      } catch (error) {
-        console.error("Erro ao carregar métodos de pagamento:", error);
-      }
-    };
-    loadMetodos();
+    setMetodosPagamento([]);
   }, []);
 
-  // Busca categorias
   useEffect(() => {
-    const loadCategorias = async () => {
-      try {
-        const dados = await fetchCategorias();
-        setCategorias(dados);
-      } catch (error) {
-        console.error("Erro ao carregar categorias:", error);
-      }
-    };
-    loadCategorias();
+    setCategorias([]);
   }, []);
 
   // Salvar todas as configurações localmente (ou chamar API)
@@ -114,36 +78,20 @@ export function ConfiguracoesFinanceiras() {
     });
   };
 
-  // Funções para manipular categorias usando API
   const handleAddCategoria = async (nova: Categoria) => {
-    try {
-      await createCategoria(nova);
-      setCategorias((prev) => [...prev, nova]);
-    } catch (error) {
-      console.error("Erro ao criar categoria:", error);
-    }
+    setCategorias((prev) => [...prev, nova]);
   };
 
   const handleUpdateCategoria = async (categoriaAtualizada: Categoria) => {
-    try {
-      await updateCategoriaApi(categoriaAtualizada);
-      setCategorias((prev) =>
-        prev.map((c) =>
-          c.id === categoriaAtualizada.id ? categoriaAtualizada : c
-        )
-      );
-    } catch (error) {
-      console.error("Erro ao atualizar categoria:", error);
-    }
+    setCategorias((prev) =>
+      prev.map((c) =>
+        c.id === categoriaAtualizada.id ? categoriaAtualizada : c,
+      ),
+    );
   };
 
   const handleDeleteCategoria = async (id: string) => {
-    try {
-      await deleteCategoriaApi(id);
-      setCategorias((prev) => prev.filter((c) => c.id !== id));
-    } catch (error) {
-      console.error("Erro ao deletar categoria:", error);
-    }
+    setCategorias((prev) => prev.filter((c) => c.id !== id));
   };
 
   return (

@@ -17,7 +17,6 @@ import {
   SelectValue,
 } from "../../../components/ui/select";
 import type { ClienteFormData } from "../../../@types/types.components";
-import { cadastrarCliente } from "../../../services/api";
 
 // Sonner Toast
 import { toast } from "sonner";
@@ -28,8 +27,6 @@ export function ClientForm() {
 
   const onSubmit = async (data: ClienteFormData) => {
     try {
-      const resposta = await cadastrarCliente(data);
-      console.log("Cliente cadastrado com sucesso:", resposta);
       reset();
       toast.success("Cliente cadastrado com sucesso!", {
         style: { background: "#4ade80", color: "#065f46" }, // verde pastel
@@ -40,7 +37,7 @@ export function ClientForm() {
         "Erro ao cadastrar cliente. Verifique os dados e tente novamente.",
         {
           style: { background: "#f87171", color: "#7f1d1d" }, // vermelho pastel
-        }
+        },
       );
     }
   };

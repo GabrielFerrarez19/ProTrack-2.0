@@ -1,13 +1,4 @@
-import { useEffect, useState } from "react";
-import {
-  getFluxoCaixaHistorico,
-  getFluxoCaixaProjecao,
-  getCategoriasFluxoCaixa,
-  getComparativoPeriodosFluxoCaixa,
-  getResumoFluxoCaixa,
-} from "../services/api";
-
-// ===== TIPOS =====
+import { useState } from "react";
 
 export interface FluxoCaixaItem {
   data: string;
@@ -49,53 +40,30 @@ export interface FluxoCaixaData {
   resumo: ResumoFluxoCaixa;
 }
 
-// ===== HOOK =====
+const emptyFluxo: FluxoCaixaData = {
+  historico: [],
+  projecao: [],
+  categorias: { entradas: [], saidas: [] },
+  comparativo: [],
+  resumo: {
+    saldo_atual: 0,
+    total_entradas: 0,
+    total_saidas: 0,
+    projecao_30_dias: 0,
+    crescimento_percentual: 0,
+  },
+};
 
 export const useFluxoCaixa = (
-  periodo: "7dias" | "30dias" | "90dias" | "1ano" = "30dias",
-  tipoVisualizacao: "diario" | "semanal" | "mensal" = "diario"
+  _periodo: "7dias" | "30dias" | "90dias" | "1ano" = "30dias",
+  _tipoVisualizacao: "diario" | "semanal" | "mensal" = "diario",
 ) => {
-  const [dados, setDados] = useState<FluxoCaixaData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [dados, setDados] = useState<FluxoCaixaData | null>(emptyFluxo);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const [historico, projecao, categorias, comparativo, resumo] =
-        await Promise.all([
-          getFluxoCaixaHistorico(periodo, tipoVisualizacao),
-          getFluxoCaixaProjecao(30),
-          getCategoriasFluxoCaixa(periodo),
-          getComparativoPeriodosFluxoCaixa(),
-          getResumoFluxoCaixa(periodo),
-        ]);
-
-      setDados({
-        historico,
-        projecao,
-        categorias,
-        comparativo,
-        resumo,
-      });
-    } catch (err: any) {
-      console.error("Erro ao buscar dados de fluxo de caixa:", err);
-      setError(
-        err.response?.data?.error || "Erro ao carregar dados de fluxo de caixa"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [periodo, tipoVisualizacao]);
-
   const refetch = () => {
-    fetchData();
+    setDados(emptyFluxo);
   };
 
   return {

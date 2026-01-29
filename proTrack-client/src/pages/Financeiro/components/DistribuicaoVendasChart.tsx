@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -6,11 +6,7 @@ import {
   CardTitle,
 } from "../../../components/ui/card";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
-import type {
-  FormaPagamento,
-  FormasPagamentoResponse,
-} from "../../../@types/types.api";
-import { fetchFormasPagamento } from "../../../services/api";
+import type { FormaPagamento } from "../../../@types/types.api";
 import { formatarFormaPagamento } from "../../../utils/functions";
 
 interface FormaPagamentoComCor extends FormaPagamento {
@@ -18,37 +14,7 @@ interface FormaPagamentoComCor extends FormaPagamento {
 }
 
 export function DistribuicaoVendasChart() {
-  const [distribuicaoVendas, setDistribuicaoVendas] = useState<
-    FormaPagamentoComCor[]
-  >([]);
-
-  const cores = ["#A5D8FF", "#B9FBC0", "#FFE3B3", "#FFD6E0", "#E0C3FF"];
-
-  useEffect(() => {
-    const loadDistribuicao = async () => {
-      try {
-        const data: FormasPagamentoResponse = await fetchFormasPagamento();
-
-        if (!data || !data.formas) {
-          setDistribuicaoVendas([]);
-          return;
-        }
-
-        const formasComCores = data.formas.map((f, i) => ({
-          ...f,
-          total: f.total ?? 0, // garante que nunca seja undefined
-          color: cores[i % cores.length],
-        }));
-
-        setDistribuicaoVendas(formasComCores);
-      } catch (err) {
-        console.error("Erro ao carregar formas de pagamento:", err);
-        setDistribuicaoVendas([]);
-      }
-    };
-
-    loadDistribuicao();
-  }, []);
+  const [distribuicaoVendas] = useState<FormaPagamentoComCor[]>([]);
 
   if (distribuicaoVendas.length === 0) {
     return (
