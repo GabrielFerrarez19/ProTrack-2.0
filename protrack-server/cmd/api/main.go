@@ -11,6 +11,9 @@ import (
 	"github.com/GabrielFerrarez19/ProTrack-2.0/internal/config"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/internal/database"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/internal/logger"
+	usersHandler "github.com/GabrielFerrarez19/ProTrack-2.0/internal/users/handler"
+	usersRepository "github.com/GabrielFerrarez19/ProTrack-2.0/internal/users/repository"
+	usersService "github.com/GabrielFerrarez19/ProTrack-2.0/internal/users/service"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
@@ -31,6 +34,15 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to connect to database")
 	}
 	defer db.Close()
+
+	usersRepository := usersRepository.NewRepository(db.Pool)
+
+	usersService := usersService.NewService(usersRepository)
+
+	usersHandler := usersHandler.NewHandler(usersService)
+
+	api := r.Group("/api/v1")
+	usersHandler.RegisterRoutes(api)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
