@@ -9,20 +9,20 @@ import (
 )
 
 //
-// TIMESTAMP (without timezone)
+// TIMESTAMPTZ (with timezone)
 //
 
-func TimeToPgTimestamp(value time.Time) pgtype.Timestamp {
+func TimeToPgTimestamptz(value time.Time) pgtype.Timestamptz {
 	if value.IsZero() {
-		return pgtype.Timestamp{Valid: false}
+		return pgtype.Timestamptz{Valid: false}
 	}
-	return pgtype.Timestamp{
+	return pgtype.Timestamptz{
 		Time:  value,
 		Valid: true,
 	}
 }
 
-func PgTimestampToTime(value pgtype.Timestamp) time.Time {
+func PgTimestamptzToTime(value pgtype.Timestamptz) time.Time {
 	if !value.Valid {
 		return time.Time{}
 	}

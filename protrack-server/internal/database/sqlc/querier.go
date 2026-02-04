@@ -11,11 +11,18 @@ import (
 )
 
 type Querier interface {
+	CreateCompany(ctx context.Context, arg CreateCompanyParams) (Company, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteCompany(ctx context.Context, arg DeleteCompanyParams) error
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
+	GetCompanyByDocument(ctx context.Context, document pgtype.Text) (Company, error)
+	GetCompanyByID(ctx context.Context, id pgtype.UUID) (Company, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
+	ListCompanies(ctx context.Context) ([]Company, error)
 	ListUsers(ctx context.Context) ([]User, error)
+	SetCompanyStatus(ctx context.Context, arg SetCompanyStatusParams) (int64, error)
+	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) (Company, error)
 	UpdatePasswordHash(ctx context.Context, arg UpdatePasswordHashParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 }

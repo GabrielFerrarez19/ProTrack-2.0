@@ -8,21 +8,48 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Company struct {
+	ID                  pgtype.UUID        `json:"id"`
+	Name                string             `json:"name"`
+	TradeName           pgtype.Text        `json:"trade_name"`
+	Document            pgtype.Text        `json:"document"`
+	DocumentType        pgtype.Text        `json:"document_type"`
+	Email               pgtype.Text        `json:"email"`
+	Phone               pgtype.Text        `json:"phone"`
+	Website             pgtype.Text        `json:"website"`
+	AddressStreet       pgtype.Text        `json:"address_street"`
+	AddressNumber       pgtype.Text        `json:"address_number"`
+	AddressComplement   pgtype.Text        `json:"address_complement"`
+	AddressNeighborhood pgtype.Text        `json:"address_neighborhood"`
+	AddressCity         pgtype.Text        `json:"address_city"`
+	AddressState        pgtype.Text        `json:"address_state"`
+	AddressZipcode      pgtype.Text        `json:"address_zipcode"`
+	AddressCountry      pgtype.Text        `json:"address_country"`
+	Status              interface{}        `json:"status"`
+	Timezone            pgtype.Text        `json:"timezone"`
+	CreatedBy           pgtype.UUID        `json:"created_by"`
+	UpdatedBy           pgtype.UUID        `json:"updated_by"`
+	DeletedBy           pgtype.UUID        `json:"deleted_by"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt           pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type User struct {
-	ID           pgtype.UUID      `json:"id"`
-	Name         string           `json:"name"`
-	Email        string           `json:"email"`
-	Username     pgtype.Text      `json:"username"`
-	PasswordHash string           `json:"password_hash"`
-	Role         string           `json:"role"`
-	Status       interface{}      `json:"status"`
-	CompanyID    pgtype.UUID      `json:"company_id"`
-	DepartmentID pgtype.UUID      `json:"department_id"`
-	LastLoginAt  pgtype.Timestamp `json:"last_login_at"`
-	CreatedBy    pgtype.UUID      `json:"created_by"`
-	UpdatedBy    pgtype.UUID      `json:"updated_by"`
-	DeletedBy    pgtype.UUID      `json:"deleted_by"`
-	CreatedAt    pgtype.Timestamp `json:"created_at"`
-	UpdatedAt    pgtype.Timestamp `json:"updated_at"`
-	DeletedAt    pgtype.Timestamp `json:"deleted_at"`
+	ID           pgtype.UUID        `json:"id"`
+	Name         string             `json:"name"`
+	Email        string             `json:"email"`
+	Username     pgtype.Text        `json:"username"`
+	PasswordHash string             `json:"password_hash"`
+	Role         string             `json:"role"`
+	Status       interface{}        `json:"status"`
+	CompanyID    pgtype.UUID        `json:"company_id"`
+	DepartmentID pgtype.UUID        `json:"department_id"`
+	LastLoginAt  pgtype.Timestamptz `json:"last_login_at"`
+	CreatedBy    pgtype.UUID        `json:"created_by"`
+	UpdatedBy    pgtype.UUID        `json:"updated_by"`
+	DeletedBy    pgtype.UUID        `json:"deleted_by"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt    pgtype.Timestamptz `json:"deleted_at"`
 }

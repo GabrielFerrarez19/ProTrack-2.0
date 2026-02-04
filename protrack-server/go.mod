@@ -1,4 +1,4 @@
-module github.com/GabrielFerrarez19/ProTrack-2.0
+module github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server
 
 go 1.25.2
 

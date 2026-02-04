@@ -8,12 +8,16 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/GabrielFerrarez19/ProTrack-2.0/internal/config"
-	"github.com/GabrielFerrarez19/ProTrack-2.0/internal/database"
-	"github.com/GabrielFerrarez19/ProTrack-2.0/internal/logger"
-	usersHandler "github.com/GabrielFerrarez19/ProTrack-2.0/internal/users/handler"
-	usersRepository "github.com/GabrielFerrarez19/ProTrack-2.0/internal/users/repository"
-	usersService "github.com/GabrielFerrarez19/ProTrack-2.0/internal/users/service"
+	companiesHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/companies/handler"
+	companiesRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/companies/repository"
+	companiesService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/companies/service"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/config"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/logger"
+	usersHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/handler"
+	usersRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/repository"
+	usersService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/service"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
@@ -36,13 +40,17 @@ func main() {
 	defer db.Close()
 
 	usersRepository := usersRepository.NewRepository(db.Pool)
+	companiesRepository := companiesRepository.NewRepository(db.Pool)
 
 	usersService := usersService.NewService(usersRepository)
+	companiesService := companiesService.NewService(companiesRepository)
 
 	usersHandler := usersHandler.NewHandler(usersService)
+	companiesHandler := companiesHandler.NewHandler(companiesService)
 
 	api := r.Group("/api/v1")
 	usersHandler.RegisterRoutes(api)
+	companiesHandler.RegisterRoutes(api)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})

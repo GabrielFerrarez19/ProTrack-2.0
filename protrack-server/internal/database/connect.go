@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/GabrielFerrarez19/ProTrack-2.0/internal/config"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
