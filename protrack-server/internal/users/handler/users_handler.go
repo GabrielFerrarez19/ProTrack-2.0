@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/GabrielFerrarez19/ProTrack-2.0/internal/users/domain"
-	"github.com/GabrielFerrarez19/ProTrack-2.0/internal/users/service"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/domain"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/service"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -71,13 +71,11 @@ func (h *Handler) GetUserByEmail(c *gin.Context) {
 func (h *Handler) GetUserById(c *gin.Context) {
 	idStr := c.Param("id")
 
-	idUUID, err := uuid.Parse(idStr)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	id := pgtype.UUID{Bytes: idUUID, Valid: true}
 
 	user, err := h.service.GetUserByID(c.Request.Context(), id)
 	if err != nil {
@@ -116,13 +114,11 @@ func (h *Handler) UpdatePasswordHash(c *gin.Context) {
 func (h *Handler) UpdateUser(c *gin.Context) {
 	idStr := c.Param("id")
 
-	idUUID, err := uuid.Parse(idStr)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	id := pgtype.UUID{Bytes: idUUID, Valid: true}
 
 	var req domain.UpdateUserParams
 

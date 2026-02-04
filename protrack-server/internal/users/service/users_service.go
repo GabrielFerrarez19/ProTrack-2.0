@@ -5,14 +5,15 @@ import (
 	"errors"
 	"fmt"
 
-	db "github.com/GabrielFerrarez19/ProTrack-2.0/internal/database/sqlc"
-	"github.com/GabrielFerrarez19/ProTrack-2.0/internal/users/domain"
-	"github.com/GabrielFerrarez19/ProTrack-2.0/internal/users/repository"
-	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/pkg/pgtype"
-	"github.com/GabrielFerrarez19/ProTrack-2.0/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+
+	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/domain"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/repository"
+	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/pkg/pgtype"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/pkg/utils"
 )
 
 type RepositoryInterface interface {
@@ -56,7 +57,7 @@ func (s *Service) CreateUser(ctx context.Context, req domain.CreateUserParams) (
 		DepartmentID: pgconv.ParseUUIDToPgType(req.DepartmentID),
 		CreatedBy:    pgconv.ParseUUIDToPgType(req.CreatedBy),
 		UpdatedBy:    pgconv.ParseUUIDToPgType(req.UpdatedBy),
-		CreatedAt:    pgconv.TimeToPgTimestamp(req.CreatedAt),
+		CreatedAt:    pgconv.TimeToPgTimestamptz(req.CreatedAt),
 	})
 	if err != nil {
 		return domain.UserResponse{}, err
@@ -71,13 +72,13 @@ func (s *Service) CreateUser(ctx context.Context, req domain.CreateUserParams) (
 		Status:       user.Status,
 		CompanyID:    pgconv.PgUUIDToUUID(user.CompanyID),
 		DepartmentID: pgconv.PgUUIDToUUID(user.DepartmentID),
-		LastLoginAt:  pgconv.PgTimestampToTime(user.LastLoginAt),
+		LastLoginAt:  pgconv.PgTimestamptzToTime(user.LastLoginAt),
 		CreatedBy:    pgconv.PgUUIDToUUID(user.CreatedBy),
 		UpdatedBy:    pgconv.PgUUIDToUUID(user.UpdatedBy),
 		DeletedBy:    pgconv.PgUUIDToUUID(user.DeletedBy),
-		CreatedAt:    pgconv.PgTimestampToTime(user.CreatedAt),
-		UpdatedAt:    pgconv.PgTimestampToTime(user.UpdatedAt),
-		DeletedAt:    pgconv.PgTimestampToTime(user.DeletedAt),
+		CreatedAt:    pgconv.PgTimestamptzToTime(user.CreatedAt),
+		UpdatedAt:    pgconv.PgTimestamptzToTime(user.UpdatedAt),
+		DeletedAt:    pgconv.PgTimestamptzToTime(user.DeletedAt),
 	}, nil
 }
 
@@ -100,18 +101,18 @@ func (s *Service) GetUserByEmail(ctx context.Context, email string) (domain.User
 		Status:       user.Status,
 		CompanyID:    pgconv.PgUUIDToUUID(user.CompanyID),
 		DepartmentID: pgconv.PgUUIDToUUID(user.DepartmentID),
-		LastLoginAt:  pgconv.PgTimestampToTime(user.LastLoginAt),
+		LastLoginAt:  pgconv.PgTimestamptzToTime(user.LastLoginAt),
 		CreatedBy:    pgconv.PgUUIDToUUID(user.CreatedBy),
 		UpdatedBy:    pgconv.PgUUIDToUUID(user.UpdatedBy),
 		DeletedBy:    pgconv.PgUUIDToUUID(user.DeletedBy),
-		CreatedAt:    pgconv.PgTimestampToTime(user.CreatedAt),
-		UpdatedAt:    pgconv.PgTimestampToTime(user.UpdatedAt),
-		DeletedAt:    pgconv.PgTimestampToTime(user.DeletedAt),
+		CreatedAt:    pgconv.PgTimestamptzToTime(user.CreatedAt),
+		UpdatedAt:    pgconv.PgTimestamptzToTime(user.UpdatedAt),
+		DeletedAt:    pgconv.PgTimestamptzToTime(user.DeletedAt),
 	}, nil
 }
 
-func (s *Service) GetUserByID(ctx context.Context, id pgtype.UUID) (domain.UserResponse, error) {
-	user, err := s.repo.GetUserById(ctx, id)
+func (s *Service) GetUserByID(ctx context.Context, id uuid.UUID) (domain.UserResponse, error) {
+	user, err := s.repo.GetUserById(ctx, pgconv.ParseUUIDToPgType(id))
 	if err != nil {
 		return domain.UserResponse{}, err
 	}
@@ -125,13 +126,13 @@ func (s *Service) GetUserByID(ctx context.Context, id pgtype.UUID) (domain.UserR
 		Status:       user.Status,
 		CompanyID:    pgconv.PgUUIDToUUID(user.CompanyID),
 		DepartmentID: pgconv.PgUUIDToUUID(user.DepartmentID),
-		LastLoginAt:  pgconv.PgTimestampToTime(user.LastLoginAt),
+		LastLoginAt:  pgconv.PgTimestamptzToTime(user.LastLoginAt),
 		CreatedBy:    pgconv.PgUUIDToUUID(user.CreatedBy),
 		UpdatedBy:    pgconv.PgUUIDToUUID(user.UpdatedBy),
 		DeletedBy:    pgconv.PgUUIDToUUID(user.DeletedBy),
-		CreatedAt:    pgconv.PgTimestampToTime(user.CreatedAt),
-		UpdatedAt:    pgconv.PgTimestampToTime(user.UpdatedAt),
-		DeletedAt:    pgconv.PgTimestampToTime(user.DeletedAt),
+		CreatedAt:    pgconv.PgTimestamptzToTime(user.CreatedAt),
+		UpdatedAt:    pgconv.PgTimestamptzToTime(user.UpdatedAt),
+		DeletedAt:    pgconv.PgTimestamptzToTime(user.DeletedAt),
 	}, nil
 }
 
@@ -153,13 +154,13 @@ func (s *Service) ListUsers(ctx context.Context) ([]domain.UserResponse, error) 
 			Status:       user.Status,
 			CompanyID:    pgconv.PgUUIDToUUID(user.CompanyID),
 			DepartmentID: pgconv.PgUUIDToUUID(user.DepartmentID),
-			LastLoginAt:  pgconv.PgTimestampToTime(user.LastLoginAt),
+			LastLoginAt:  pgconv.PgTimestamptzToTime(user.LastLoginAt),
 			CreatedBy:    pgconv.PgUUIDToUUID(user.CreatedBy),
 			UpdatedBy:    pgconv.PgUUIDToUUID(user.UpdatedBy),
 			DeletedBy:    pgconv.PgUUIDToUUID(user.DeletedBy),
-			CreatedAt:    pgconv.PgTimestampToTime(user.CreatedAt),
-			UpdatedAt:    pgconv.PgTimestampToTime(user.UpdatedAt),
-			DeletedAt:    pgconv.PgTimestampToTime(user.DeletedAt),
+			CreatedAt:    pgconv.PgTimestamptzToTime(user.CreatedAt),
+			UpdatedAt:    pgconv.PgTimestamptzToTime(user.UpdatedAt),
+			DeletedAt:    pgconv.PgTimestamptzToTime(user.DeletedAt),
 		})
 	}
 
@@ -177,8 +178,8 @@ func (s *Service) UpdatePasswordHash(ctx context.Context, req domain.UpdatePassw
 	})
 }
 
-func (s *Service) UpdateUser(ctx context.Context, id pgtype.UUID, req domain.UpdateUserParams) (domain.UserResponse, error) {
-	user, err := s.repo.GetUserById(ctx, id)
+func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, req domain.UpdateUserParams) (domain.UserResponse, error) {
+	user, err := s.repo.GetUserById(ctx, pgconv.ParseUUIDToPgType(id))
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return domain.UserResponse{}, fmt.Errorf("user not found")
@@ -191,13 +192,13 @@ func (s *Service) UpdateUser(ctx context.Context, id pgtype.UUID, req domain.Upd
 			return domain.UserResponse{}, errors.New("invalid email format")
 		}
 		existingUser, errEmail := s.repo.GetUserByEmail(ctx, req.Email)
-		if errEmail == nil && existingUser.ID.Bytes != id.Bytes {
+		if errEmail == nil && existingUser.ID.Bytes != id {
 			return domain.UserResponse{}, fmt.Errorf("email already in use")
 		}
 	}
 
 	arg := db.UpdateUserParams{
-		ID:           id,
+		ID:           pgconv.ParseUUIDToPgType(id),
 		Name:         user.Name,
 		Email:        user.Email,
 		Username:     user.Username,
@@ -242,12 +243,12 @@ func (s *Service) UpdateUser(ctx context.Context, id pgtype.UUID, req domain.Upd
 		Status:       updatedUser.Status,
 		CompanyID:    pgconv.PgUUIDToUUID(updatedUser.CompanyID),
 		DepartmentID: pgconv.PgUUIDToUUID(updatedUser.DepartmentID),
-		LastLoginAt:  pgconv.PgTimestampToTime(updatedUser.LastLoginAt),
+		LastLoginAt:  pgconv.PgTimestamptzToTime(updatedUser.LastLoginAt),
 		CreatedBy:    pgconv.PgUUIDToUUID(updatedUser.CreatedBy),
 		UpdatedBy:    pgconv.PgUUIDToUUID(updatedUser.UpdatedBy),
 		DeletedBy:    pgconv.PgUUIDToUUID(updatedUser.DeletedBy),
-		CreatedAt:    pgconv.PgTimestampToTime(updatedUser.CreatedAt),
-		UpdatedAt:    pgconv.PgTimestampToTime(updatedUser.UpdatedAt),
-		DeletedAt:    pgconv.PgTimestampToTime(updatedUser.DeletedAt),
+		CreatedAt:    pgconv.PgTimestamptzToTime(updatedUser.CreatedAt),
+		UpdatedAt:    pgconv.PgTimestamptzToTime(updatedUser.UpdatedAt),
+		DeletedAt:    pgconv.PgTimestamptzToTime(updatedUser.DeletedAt),
 	}, nil
 }

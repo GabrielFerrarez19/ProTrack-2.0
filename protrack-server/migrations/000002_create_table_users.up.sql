@@ -5,14 +5,14 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(50) UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL DEFAULT 'USER',
-    status user_status_enum NOT NULL DEFAULT 'ACTIVE',
+    status status_enum NOT NULL DEFAULT 'ACTIVE',
     company_id UUID NULL,
     department_id UUID NULL,
-    last_login_at TIMESTAMP NULL,
+    last_login_at TIMESTAMPTZ NULL,
     created_by UUID NULL,
     updated_by UUID NULL,
     deleted_by UUID NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ NULL
 );

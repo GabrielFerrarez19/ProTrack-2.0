@@ -2,14 +2,14 @@ package handler
 
 import "github.com/gin-gonic/gin"
 
-func (h *Handler) RegisterRoutes(c *gin.RouterGroup) {
-	c.Group("/users")
+func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
+	users := r.Group("/users")
 	{
-		c.POST("", h.CreateUser)
-		c.DELETE("/:id", h.DeleteUser)
-		c.GET("/email/:email", h.GetUserByEmail)
-		c.GET("/:id", h.GetUserById)
-		c.PUT("/password", h.UpdatePasswordHash)
-		c.PUT("/:id", h.UpdateUser)
+		users.POST("", h.CreateUser)
+		users.DELETE("/:id", h.DeleteUser)
+		users.GET("/email/:email", h.GetUserByEmail)
+		users.GET("/:id", h.GetUserById)
+		users.PUT("/password", h.UpdatePasswordHash)
+		users.PUT("/:id", h.UpdateUser)
 	}
 }

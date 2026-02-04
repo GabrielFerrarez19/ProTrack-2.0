@@ -31,17 +31,17 @@ RETURNING id, name, email, username, password_hash, role, status, company_id, de
 `
 
 type CreateUserParams struct {
-	Name         string           `json:"name"`
-	Email        string           `json:"email"`
-	Username     pgtype.Text      `json:"username"`
-	PasswordHash string           `json:"password_hash"`
-	Role         string           `json:"role"`
-	Status       interface{}      `json:"status"`
-	CompanyID    pgtype.UUID      `json:"company_id"`
-	DepartmentID pgtype.UUID      `json:"department_id"`
-	CreatedBy    pgtype.UUID      `json:"created_by"`
-	UpdatedBy    pgtype.UUID      `json:"updated_by"`
-	CreatedAt    pgtype.Timestamp `json:"created_at"`
+	Name         string             `json:"name"`
+	Email        string             `json:"email"`
+	Username     pgtype.Text        `json:"username"`
+	PasswordHash string             `json:"password_hash"`
+	Role         string             `json:"role"`
+	Status       interface{}        `json:"status"`
+	CompanyID    pgtype.UUID        `json:"company_id"`
+	DepartmentID pgtype.UUID        `json:"department_id"`
+	CreatedBy    pgtype.UUID        `json:"created_by"`
+	UpdatedBy    pgtype.UUID        `json:"updated_by"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
