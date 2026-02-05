@@ -9,11 +9,12 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
+	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/validate"
+
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/domain"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/repository"
-	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/pkg/pgtype"
-	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/pkg/utils"
 )
 
 type RepositoryInterface interface {
@@ -37,11 +38,11 @@ func NewService(repo *repository.Repository) *Service {
 }
 
 func (s *Service) CreateUser(ctx context.Context, req domain.CreateUserParams) (domain.UserResponse, error) {
-	if err := utils.ValidPassword(req.PasswordHash); err != nil {
+	if err := validate.ValidPassword(req.PasswordHash); err != nil {
 		return domain.UserResponse{}, err
 	}
 
-	is := utils.IsValidEmail(req.Email)
+	is := validate.IsValidEmail(req.Email)
 	if is == false {
 		return domain.UserResponse{}, errors.New("invalid email")
 	}
@@ -168,7 +169,7 @@ func (s *Service) ListUsers(ctx context.Context) ([]domain.UserResponse, error) 
 }
 
 func (s *Service) UpdatePasswordHash(ctx context.Context, req domain.UpdatePasswordHashParams) error {
-	if err := utils.ValidPassword(req.PasswordHash); err != nil {
+	if err := validate.ValidPassword(req.PasswordHash); err != nil {
 		return err
 	}
 
@@ -178,7 +179,7 @@ func (s *Service) UpdatePasswordHash(ctx context.Context, req domain.UpdatePassw
 	})
 }
 
-func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, req domain.UpdateUserParams) (domain.UserResponse, error) {
+func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, req domain.UpdateUserRequest) (domain.UserResponse, error) {
 	user, err := s.repo.GetUserById(ctx, pgconv.ParseUUIDToPgType(id))
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -188,7 +189,7 @@ func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, req domain.Updat
 	}
 
 	if req.Email != "" {
-		if !utils.IsValidEmail(req.Email) {
+		if !validate.IsValidEmail(req.Email) {
 			return domain.UserResponse{}, errors.New("invalid email format")
 		}
 		existingUser, errEmail := s.repo.GetUserByEmail(ctx, req.Email)
@@ -207,27 +208,8 @@ func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, req domain.Updat
 		DepartmentID: user.DepartmentID,
 		UpdatedBy:    user.UpdatedBy,
 	}
-	if req.Name != "" {
-		arg.Name = req.Name
-	}
-	if req.Email != "" {
-		arg.Email = req.Email
-	}
-	if req.Username != "" {
-		arg.Username = pgconv.ParseStringToPgText(req.Username)
-	}
-	if req.Role != "" {
-		arg.Role = req.Role
-	}
-	if req.Status != nil {
-		arg.Status = req.Status
-	}
-	if req.DepartmentID != (uuid.UUID{}) {
-		arg.DepartmentID = pgconv.ParseUUIDToPgType(req.DepartmentID)
-	}
-	if req.UpdatedBy != (uuid.UUID{}) {
-		arg.UpdatedBy = pgconv.ParseUUIDToPgType(req.UpdatedBy)
-	}
+
+	domain.ApplyUpdateUserParams(req, &arg)
 
 	updatedUser, err := s.repo.UpdateUser(ctx, arg)
 	if err != nil {

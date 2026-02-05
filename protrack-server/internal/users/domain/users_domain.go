@@ -3,6 +3,8 @@ package domain
 import (
 	"time"
 
+	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
+	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
 	"github.com/google/uuid"
 )
 
@@ -44,7 +46,7 @@ type UpdatePasswordHashParams struct {
 	PasswordHash string    `json:"password_hash"`
 }
 
-type UpdateUserParams struct {
+type UpdateUserRequest struct {
 	Name         string    `json:"name"`
 	Email        string    `json:"email"`
 	Username     string    `json:"username"`
@@ -70,4 +72,34 @@ type UserResponse struct {
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 	DeletedAt    time.Time `json:"deleted_at"`
+}
+
+func ApplyUpdateUserParams(req UpdateUserRequest, arg *db.UpdateUserParams) {
+	if req.Name != "" {
+		arg.Name = req.Name
+	}
+
+	if req.Email != "" {
+		arg.Email = req.Email
+	}
+
+	if req.Username != "" {
+		arg.Username = pgconv.ParseStringToPgText(req.Username)
+	}
+
+	if req.Role != "" {
+		arg.Role = req.Role
+	}
+
+	if req.Status != nil {
+		arg.Status = req.Status
+	}
+
+	if req.DepartmentID != (uuid.UUID{}) {
+		arg.DepartmentID = pgconv.ParseUUIDToPgType(req.DepartmentID)
+	}
+
+	if req.UpdatedBy != (uuid.UUID{}) {
+		arg.UpdatedBy = pgconv.ParseUUIDToPgType(req.UpdatedBy)
+	}
 }
