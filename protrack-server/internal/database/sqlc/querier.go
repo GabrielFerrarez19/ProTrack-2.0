@@ -12,17 +12,23 @@ import (
 
 type Querier interface {
 	CreateCompany(ctx context.Context, arg CreateCompanyParams) (Company, error)
+	CreateDepartment(ctx context.Context, arg CreateDepartmentParams) (Department, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteCompany(ctx context.Context, arg DeleteCompanyParams) error
+	DeleteDepartment(ctx context.Context, arg DeleteDepartmentParams) error
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
 	GetCompanyByDocument(ctx context.Context, document pgtype.Text) (Company, error)
 	GetCompanyByID(ctx context.Context, id pgtype.UUID) (Company, error)
+	GetDepartmentById(ctx context.Context, id pgtype.UUID) (Department, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 	ListCompanies(ctx context.Context) ([]Company, error)
+	ListDepartmentsByCompanyId(ctx context.Context, companyID pgtype.UUID) ([]Department, error)
 	ListUsers(ctx context.Context) ([]User, error)
 	SetCompanyStatus(ctx context.Context, arg SetCompanyStatusParams) (int64, error)
+	SetStatusDepartment(ctx context.Context, arg SetStatusDepartmentParams) (int64, error)
 	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) (Company, error)
+	UpdateDepartment(ctx context.Context, arg UpdateDepartmentParams) (Department, error)
 	UpdatePasswordHash(ctx context.Context, arg UpdatePasswordHashParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 }

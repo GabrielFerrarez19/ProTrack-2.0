@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 
+	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/validate"
+
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/companies/domain"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/companies/repository"
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
-	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/pkg/pgtype"
-	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/pkg/utils"
-	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/pkg/utils/assign"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -35,12 +36,12 @@ func NewService(repo *repository.Repository) *Service {
 }
 
 func (s *Service) CreateCompany(ctx context.Context, req domain.CreateCompanyParams) (domain.CompanyResponse, error) {
-	docType, err := utils.ValidateDocument(req.Document)
+	docType, err := validate.ValidateDocument(req.Document)
 	if err != nil {
 		return domain.CompanyResponse{}, err
 	}
 
-	if !utils.IsValidEmail(req.Email) {
+	if !validate.IsValidEmail(req.Email) {
 		return domain.CompanyResponse{}, errors.New("invalid email")
 	}
 
@@ -62,8 +63,6 @@ func (s *Service) CreateCompany(ctx context.Context, req domain.CreateCompanyPar
 		AddressCountry:      pgconv.ParseStringToPgText(req.AddressCountry),
 		Timezone:            pgconv.ParseStringToPgText(req.Timezone),
 		CreatedBy:           pgconv.ParseUUIDToPgType(req.CreatedBy),
-		UpdatedBy:           pgconv.ParseUUIDToPgType(req.UpdatedBy),
-		DeletedBy:           pgconv.ParseUUIDToPgType(req.DeletedBy),
 	})
 
 	return domain.CompanyResponse{
@@ -97,7 +96,7 @@ func (s *Service) DeleteCompany(ctx context.Context, req domain.DeleteCompanyPar
 }
 
 func (s *Service) GetCompanyByDocument(ctx context.Context, document string) (domain.CompanyResponse, error) {
-	_, err := utils.ValidateDocument(document)
+	_, err := validate.ValidateDocument(document)
 	if err != nil {
 		return domain.CompanyResponse{}, err
 	}
@@ -208,8 +207,8 @@ func (s *Service) ListCompanies(ctx context.Context) ([]domain.CompanyResponse, 
 
 func (s *Service) SetCompanyStatus(ctx context.Context, req domain.SetCompanyStatusParams) (int64, error) {
 	count, err := s.repo.SetCompanyStatus(ctx, db.SetCompanyStatusParams{
-		ID:     pgconv.ParseUUIDToPgType(req.ID),
-		Status: req.Status,
+		ID:      pgconv.ParseUUIDToPgType(req.ID),
+		Column2: req.Status,
 	})
 	if err != nil {
 		return 0, err
@@ -218,30 +217,14 @@ func (s *Service) SetCompanyStatus(ctx context.Context, req domain.SetCompanySta
 	return count, nil
 }
 
-func (s *Service) UpdateCompany(ctx context.Context, id uuid.UUID, req domain.UpdateCompanyParams) (domain.CompanyResponse, error) {
+func (s *Service) UpdateCompany(ctx context.Context, id uuid.UUID, req domain.UpdateCompanyRequest) (domain.CompanyResponse, error) {
 	currentCompany, err := s.repo.GetCompanyByID(ctx, pgconv.ParseUUIDToPgType(id))
 	if err != nil {
 		return domain.CompanyResponse{}, err
 	}
 
-	assign.SetIfNotEmpty(&currentCompany.Name, req.Name)
-	assign.SetPgTextIfNotEmpty(&currentCompany.TradeName, req.TradeName)
-	assign.SetPgTextIfNotEmpty(&currentCompany.Document, req.Document)
-	assign.SetPgTextIfNotEmpty(&currentCompany.DocumentType, req.DocumentType)
-	assign.SetPgTextIfNotEmpty(&currentCompany.Email, req.Email)
-	assign.SetPgTextIfNotEmpty(&currentCompany.Phone, req.Phone)
-	assign.SetPgTextIfNotEmpty(&currentCompany.Website, req.Website)
-	assign.SetPgTextIfNotEmpty(&currentCompany.AddressStreet, req.AddressStreet)
-	assign.SetPgTextIfNotEmpty(&currentCompany.AddressNumber, req.AddressNumber)
-	assign.SetPgTextIfNotEmpty(&currentCompany.AddressComplement, req.AddressComplement)
-	assign.SetPgTextIfNotEmpty(&currentCompany.AddressNeighborhood, req.AddressNeighborhood)
-	assign.SetPgTextIfNotEmpty(&currentCompany.AddressCity, req.AddressCity)
-	assign.SetPgTextIfNotEmpty(&currentCompany.AddressState, req.AddressState)
-	assign.SetPgTextIfNotEmpty(&currentCompany.AddressZipcode, req.AddressZipcode)
-	assign.SetPgTextIfNotEmpty(&currentCompany.AddressCountry, req.AddressCountry)
-	assign.SetPgTextIfNotEmpty(&currentCompany.Timezone, req.Timezone)
-
-	company, err := s.repo.UpdateCompany(ctx, db.UpdateCompanyParams{
+	arg := db.UpdateCompanyParams{
+		ID:                  pgconv.ParseUUIDToPgType(id),
 		Name:                currentCompany.Name,
 		TradeName:           currentCompany.TradeName,
 		Document:            currentCompany.Document,
@@ -258,7 +241,15 @@ func (s *Service) UpdateCompany(ctx context.Context, id uuid.UUID, req domain.Up
 		AddressZipcode:      currentCompany.AddressZipcode,
 		AddressCountry:      currentCompany.AddressCountry,
 		Timezone:            currentCompany.Timezone,
-	})
+		UpdatedBy:           currentCompany.UpdatedBy,
+	}
+
+	domain.ApplyUpdateCompanyParams(req, &arg)
+
+	company, err := s.repo.UpdateCompany(ctx, arg)
+	if err != nil {
+		return domain.CompanyResponse{}, err
+	}
 
 	return domain.CompanyResponse{
 		ID:                  pgconv.PgUUIDToUUID(company.ID),

@@ -122,7 +122,7 @@ func (h *Handler) UpdateCompany(c *gin.Context) {
 		return
 	}
 
-	var req domain.UpdateCompanyParams
+	var req domain.UpdateCompanyRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

@@ -13,6 +13,9 @@ import (
 	companiesService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/companies/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/config"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database"
+	departmentsHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/departments/handler"
+	departmentsRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/departments/repository"
+	departmentsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/departments/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/logger"
 	usersHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/handler"
 	usersRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/repository"
@@ -41,16 +44,20 @@ func main() {
 
 	usersRepository := usersRepository.NewRepository(db.Pool)
 	companiesRepository := companiesRepository.NewRepository(db.Pool)
+	departmentsRepository := departmentsRepository.NewRepository(db.Pool)
 
 	usersService := usersService.NewService(usersRepository)
 	companiesService := companiesService.NewService(companiesRepository)
+	departmentsService := departmentsService.NewService(departmentsRepository)
 
 	usersHandler := usersHandler.NewHandler(usersService)
 	companiesHandler := companiesHandler.NewHandler(companiesService)
+	departmentsHandler := departmentsHandler.NewHandler(departmentsService)
 
 	api := r.Group("/api/v1")
 	usersHandler.RegisterRoutes(api)
 	companiesHandler.RegisterRoutes(api)
+	departmentsHandler.RegisterRoutes(api)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})

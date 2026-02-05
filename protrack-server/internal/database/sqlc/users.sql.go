@@ -23,10 +23,9 @@ INSERT INTO users(
         department_id,
         created_by,
         updated_by,
-        created_at,
-        updated_at
+        created_at
     )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 12)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 RETURNING id, name, email, username, password_hash, role, status, company_id, department_id, last_login_at, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at
 `
 
