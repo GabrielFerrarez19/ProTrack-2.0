@@ -35,6 +35,20 @@ type Company struct {
 	DeletedAt           pgtype.Timestamptz `json:"deleted_at"`
 }
 
+type Department struct {
+	ID          pgtype.UUID        `json:"id"`
+	CompanyID   pgtype.UUID        `json:"company_id"`
+	Name        string             `json:"name"`
+	Description pgtype.Text        `json:"description"`
+	Status      string             `json:"status"`
+	CreatedBy   pgtype.UUID        `json:"created_by"`
+	UpdatedBy   pgtype.UUID        `json:"updated_by"`
+	DeletedBy   pgtype.UUID        `json:"deleted_by"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type User struct {
 	ID           pgtype.UUID        `json:"id"`
 	Name         string             `json:"name"`

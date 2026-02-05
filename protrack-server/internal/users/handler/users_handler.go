@@ -120,7 +120,7 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	var req domain.UpdateUserParams
+	var req domain.UpdateUserRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

@@ -16,9 +16,7 @@ INSERT INTO companies(
         address_zipcode,
         address_country,
         timezone,
-        created_by,
-        updated_by,
-        deleted_by
+        created_by
     )
 VALUES (
         $1,
@@ -37,9 +35,7 @@ VALUES (
         $14,
         $15,
         $16,
-        $17,
-        $18,
-        $19
+        $17
     )
 RETURNING *;
 -- name: GetCompanyByID :one

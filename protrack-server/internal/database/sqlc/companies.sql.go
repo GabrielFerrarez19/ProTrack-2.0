@@ -29,9 +29,7 @@ INSERT INTO companies(
         address_zipcode,
         address_country,
         timezone,
-        created_by,
-        updated_by,
-        deleted_by
+        created_by
     )
 VALUES (
         $1,
@@ -50,9 +48,7 @@ VALUES (
         $14,
         $15,
         $16,
-        $17,
-        $18,
-        $19
+        $17
     )
 RETURNING id, name, trade_name, document, document_type, email, phone, website, address_street, address_number, address_complement, address_neighborhood, address_city, address_state, address_zipcode, address_country, status, timezone, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at
 `
@@ -75,8 +71,6 @@ type CreateCompanyParams struct {
 	AddressCountry      pgtype.Text `json:"address_country"`
 	Timezone            pgtype.Text `json:"timezone"`
 	CreatedBy           pgtype.UUID `json:"created_by"`
-	UpdatedBy           pgtype.UUID `json:"updated_by"`
-	DeletedBy           pgtype.UUID `json:"deleted_by"`
 }
 
 func (q *Queries) CreateCompany(ctx context.Context, arg CreateCompanyParams) (Company, error) {
@@ -98,8 +92,6 @@ func (q *Queries) CreateCompany(ctx context.Context, arg CreateCompanyParams) (C
 		arg.AddressCountry,
 		arg.Timezone,
 		arg.CreatedBy,
-		arg.UpdatedBy,
-		arg.DeletedBy,
 	)
 	var i Company
 	err := row.Scan(
@@ -286,12 +278,12 @@ WHERE id = $1
 `
 
 type SetCompanyStatusParams struct {
-	ID     pgtype.UUID `json:"id"`
-	Status interface{} `json:"column_2"`
+	ID      pgtype.UUID `json:"id"`
+	Column2 interface{} `json:"column_2"`
 }
 
 func (q *Queries) SetCompanyStatus(ctx context.Context, arg SetCompanyStatusParams) (int64, error) {
-	result, err := q.db.Exec(ctx, setCompanyStatus, arg.ID, arg.Status)
+	result, err := q.db.Exec(ctx, setCompanyStatus, arg.ID, arg.Column2)
 	if err != nil {
 		return 0, err
 	}
