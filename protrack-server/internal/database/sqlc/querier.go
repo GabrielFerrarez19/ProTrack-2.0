@@ -13,23 +13,36 @@ import (
 type Querier interface {
 	CreateCompany(ctx context.Context, arg CreateCompanyParams) (Company, error)
 	CreateDepartment(ctx context.Context, arg CreateDepartmentParams) (Department, error)
+	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
+	CreateProductCategory(ctx context.Context, arg CreateProductCategoryParams) (ProductCategory, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteCompany(ctx context.Context, arg DeleteCompanyParams) error
 	DeleteDepartment(ctx context.Context, arg DeleteDepartmentParams) error
+	DeleteProduct(ctx context.Context, arg DeleteProductParams) error
+	DeleteProductCategory(ctx context.Context, arg DeleteProductCategoryParams) error
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
 	GetCompanyByDocument(ctx context.Context, document pgtype.Text) (Company, error)
 	GetCompanyByID(ctx context.Context, id pgtype.UUID) (Company, error)
 	GetDepartmentById(ctx context.Context, id pgtype.UUID) (Department, error)
+	GetProductByBarcode(ctx context.Context, barcode pgtype.Text) (Product, error)
+	GetProductById(ctx context.Context, id pgtype.UUID) (Product, error)
+	GetProductCategoryById(ctx context.Context, id pgtype.UUID) (ProductCategory, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 	ListCompanies(ctx context.Context) ([]Company, error)
 	ListDepartmentsByCompanyId(ctx context.Context, companyID pgtype.UUID) ([]Department, error)
+	ListProductCategoryByCompanyId(ctx context.Context, id pgtype.UUID) ([]ProductCategory, error)
+	ListProductsByCategoryId(ctx context.Context, arg ListProductsByCategoryIdParams) ([]Product, error)
+	ListProductsByCompany(ctx context.Context, categoryID pgtype.UUID) (Product, error)
 	ListUsers(ctx context.Context) ([]User, error)
 	SetCompanyStatus(ctx context.Context, arg SetCompanyStatusParams) (int64, error)
+	SetProductCategoryStatus(ctx context.Context, arg SetProductCategoryStatusParams) (int64, error)
 	SetStatusDepartment(ctx context.Context, arg SetStatusDepartmentParams) (int64, error)
 	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) (Company, error)
 	UpdateDepartment(ctx context.Context, arg UpdateDepartmentParams) (Department, error)
 	UpdatePasswordHash(ctx context.Context, arg UpdatePasswordHashParams) error
+	UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error)
+	UpdateProductCategory(ctx context.Context, arg UpdateProductCategoryParams) (ProductCategory, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 }
 

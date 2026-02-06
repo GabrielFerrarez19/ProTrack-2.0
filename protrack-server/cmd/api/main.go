@@ -17,6 +17,9 @@ import (
 	departmentsRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/departments/repository"
 	departmentsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/departments/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/logger"
+	productsCategoriesHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/handler"
+	productsCategoriesRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/repository"
+	productsCategoriesService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/service"
 	usersHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/handler"
 	usersRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/repository"
 	usersService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/service"
@@ -45,19 +48,23 @@ func main() {
 	usersRepository := usersRepository.NewRepository(db.Pool)
 	companiesRepository := companiesRepository.NewRepository(db.Pool)
 	departmentsRepository := departmentsRepository.NewRepository(db.Pool)
+	productsCategoriesRepository := productsCategoriesRepository.NewRepository(db.Pool)
 
 	usersService := usersService.NewService(usersRepository)
 	companiesService := companiesService.NewService(companiesRepository)
 	departmentsService := departmentsService.NewService(departmentsRepository)
+	productsCategoriesService := productsCategoriesService.NewService(productsCategoriesRepository)
 
 	usersHandler := usersHandler.NewHandler(usersService)
 	companiesHandler := companiesHandler.NewHandler(companiesService)
 	departmentsHandler := departmentsHandler.NewHandler(departmentsService)
+	productsCategoriesHandler := productsCategoriesHandler.NewHandler(productsCategoriesService)
 
 	api := r.Group("/api/v1")
 	usersHandler.RegisterRoutes(api)
 	companiesHandler.RegisterRoutes(api)
 	departmentsHandler.RegisterRoutes(api)
+	productsCategoriesHandler.RegisterRoutes(api)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
