@@ -3,6 +3,8 @@ package domain
 import (
 	"time"
 
+	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
+	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/domain/enums"
 	"github.com/google/uuid"
 )
@@ -58,4 +60,17 @@ type DepartmentResponse struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	DeletedAt   time.Time `json:"deleted_at"`
+}
+
+func ApplyUpdateProductCategoryParams(
+	req UpdateDepartmentParams,
+	arg *db.UpdateDepartmentParams,
+) {
+	if req.Name != "" {
+		arg.Name = req.Name
+	}
+
+	if req.Description != "" {
+		arg.Description = pgconv.ParseStringToPgText(req.Description)
+	}
 }

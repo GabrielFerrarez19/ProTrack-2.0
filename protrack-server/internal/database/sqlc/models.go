@@ -49,6 +49,39 @@ type Department struct {
 	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
 }
 
+type Product struct {
+	ID          pgtype.UUID        `json:"id"`
+	CompanyID   pgtype.UUID        `json:"company_id"`
+	CategoryID  pgtype.UUID        `json:"category_id"`
+	Name        string             `json:"name"`
+	Description pgtype.Text        `json:"description"`
+	Barcode     pgtype.Text        `json:"barcode"`
+	Quantity    int32              `json:"quantity"`
+	Size        pgtype.Text        `json:"size"`
+	CostPrice   pgtype.Numeric     `json:"cost_price"`
+	SalePrice   pgtype.Numeric     `json:"sale_price"`
+	CreatedBy   pgtype.UUID        `json:"created_by"`
+	UpdatedBy   pgtype.UUID        `json:"updated_by"`
+	DeletedBy   pgtype.UUID        `json:"deleted_by"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type ProductCategory struct {
+	ID        pgtype.UUID        `json:"id"`
+	CompanyID pgtype.UUID        `json:"company_id"`
+	Name      string             `json:"name"`
+	Color     pgtype.Text        `json:"color"`
+	Status    interface{}        `json:"status"`
+	CreatedBy pgtype.UUID        `json:"created_by"`
+	UpdatedBy pgtype.UUID        `json:"updated_by"`
+	DeletedBy pgtype.UUID        `json:"deleted_by"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type User struct {
 	ID           pgtype.UUID        `json:"id"`
 	Name         string             `json:"name"`

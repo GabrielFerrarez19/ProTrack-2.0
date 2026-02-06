@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 
-	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/assign"
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/departments/domain"
@@ -127,14 +126,16 @@ func (s *Service) UpdateDepartment(ctx context.Context, id uuid.UUID, req domain
 		return domain.DepartmentResponse{}, err
 	}
 
-	assign.SetIfNotEmpty(&currentDepartment.Name, req.Name)
-	assign.SetPgTextIfNotEmpty(&currentDepartment.Description, req.Description)
-
-	department, err := s.repo.UpdateDepartment(ctx, db.UpdateDepartmentParams{
+	arg := db.UpdateDepartmentParams{
+		ID:          currentDepartment.ID,
 		Name:        currentDepartment.Name,
 		Description: currentDepartment.Description,
-		UpdatedBy:   pgconv.ParseUUIDToPgType(req.UpdatedBy),
-	})
+		UpdatedBy:   currentDepartment.UpdatedBy,
+	}
+
+	domain.ApplyUpdateProductCategoryParams(req, &arg)
+
+	department, err := s.repo.UpdateDepartment(ctx, arg)
 
 	return domain.DepartmentResponse{
 		ID:          pgconv.PgUUIDToUUID(department.ID),
