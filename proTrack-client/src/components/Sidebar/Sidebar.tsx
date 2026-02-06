@@ -26,11 +26,8 @@ export function Sidebar({ children }: SidebarProps) {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
-      // Mesmo com erro, redireciona para login
-      navigate("/login", { replace: true });
     }
   };
 
