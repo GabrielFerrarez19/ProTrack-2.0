@@ -37,7 +37,7 @@ type DeleteProductCategoryRequest struct {
 
 type SetProductCategoryStatusRequest struct {
 	ID     uuid.UUID    `json:"id"`
-	Status enums.Status `json:"column_2"`
+	Status enums.Status `json:"status"`
 }
 
 type UpdateProductCategoryRequest struct {

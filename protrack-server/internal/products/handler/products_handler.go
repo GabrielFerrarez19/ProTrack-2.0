@@ -1,0 +1,147 @@
+package handler
+
+import (
+	"net/http"
+
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/domain"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/service"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+)
+
+type Handler struct {
+	service *service.Service
+}
+
+func NewHandler(service *service.Service) *Handler {
+	return &Handler{
+		service: service,
+	}
+}
+
+func (h *Handler) CreateProduct(c *gin.Context) {
+	var req domain.CreateProductRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	product, err := h.service.CreateProduct(c.Request.Context(), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"product": product})
+}
+
+func (h *Handler) DeleteProduct(c *gin.Context) {
+	idStr := c.Param("id")
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.service.DeleteProduct(c.Request.Context(), domain.DeleteProductRequest{
+		ID:        id,
+		DeletedBy: uuid.Nil,
+	}); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
+func (h *Handler) GetProductByBarcode(c *gin.Context) {
+	barcode := c.Param("barcode")
+
+	product, err := h.service.GetProductByBarcode(c.Request.Context(), barcode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"product": product})
+}
+
+func (h *Handler) GetProductById(c *gin.Context) {
+	idStr := c.Param("id")
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	product, err := h.service.GetProductById(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"product": product})
+}
+
+func (h *Handler) ListProductsByCategoryId(c *gin.Context) {
+	var req domain.ListProductsByCategoryIdRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	products, err := h.service.ListProductsByCategoryId(c.Request.Context(), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"products": products})
+}
+
+func (h *Handler) ListProductsByCompany(c *gin.Context) {
+	companyIdStr := c.Param("companyId")
+
+	companyId, err := uuid.Parse(companyIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	products, err := h.service.ListProductsByCompany(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"products": products})
+}
+
+func (h *Handler) UpdateProduct(c *gin.Context) {
+	idStr := c.Param("id")
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var req domain.UpdateProductRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	product, err := h.service.UpdateProduct(c.Request.Context(), id, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"product": product})
+}

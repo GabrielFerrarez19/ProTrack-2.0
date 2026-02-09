@@ -216,35 +216,48 @@ func (q *Queries) ListProductsByCategoryId(ctx context.Context, arg ListProducts
 	return items, nil
 }
 
-const listProductsByCompany = `-- name: ListProductsByCompany :one
+const listProductsByCompany = `-- name: ListProductsByCompany :many
 SELECT id, company_id, category_id, name, description, barcode, quantity, size, cost_price, sale_price, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at
 FROM products
-WHERE category_id = $1
+WHERE company_id = $1
     AND deleted_at IS NULL
 `
 
-func (q *Queries) ListProductsByCompany(ctx context.Context, categoryID pgtype.UUID) (Product, error) {
-	row := q.db.QueryRow(ctx, listProductsByCompany, categoryID)
-	var i Product
-	err := row.Scan(
-		&i.ID,
-		&i.CompanyID,
-		&i.CategoryID,
-		&i.Name,
-		&i.Description,
-		&i.Barcode,
-		&i.Quantity,
-		&i.Size,
-		&i.CostPrice,
-		&i.SalePrice,
-		&i.CreatedBy,
-		&i.UpdatedBy,
-		&i.DeletedBy,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.DeletedAt,
-	)
-	return i, err
+func (q *Queries) ListProductsByCompany(ctx context.Context, companyID pgtype.UUID) ([]Product, error) {
+	rows, err := q.db.Query(ctx, listProductsByCompany, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Product{}
+	for rows.Next() {
+		var i Product
+		if err := rows.Scan(
+			&i.ID,
+			&i.CompanyID,
+			&i.CategoryID,
+			&i.Name,
+			&i.Description,
+			&i.Barcode,
+			&i.Quantity,
+			&i.Size,
+			&i.CostPrice,
+			&i.SalePrice,
+			&i.CreatedBy,
+			&i.UpdatedBy,
+			&i.DeletedBy,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateProduct = `-- name: UpdateProduct :one

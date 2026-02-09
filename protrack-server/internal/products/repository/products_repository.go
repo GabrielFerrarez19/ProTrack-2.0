@@ -40,7 +40,7 @@ func (r *Repository) ListProductsByCategoryId(ctx context.Context, arg db.ListPr
 	return r.q.ListProductsByCategoryId(ctx, arg)
 }
 
-func (r *Repository) ListProductsByCompany(ctx context.Context, categoryID pgtype.UUID) (db.Product, error) {
+func (r *Repository) ListProductsByCompany(ctx context.Context, categoryID pgtype.UUID) ([]db.Product, error) {
 	return r.q.ListProductsByCompany(ctx, categoryID)
 }
 

@@ -17,6 +17,9 @@ import (
 	departmentsRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/departments/repository"
 	departmentsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/departments/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/logger"
+	productsHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/handler"
+	productsRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/repository"
+	productsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/service"
 	productsCategoriesHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/handler"
 	productsCategoriesRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/repository"
 	productsCategoriesService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/service"
@@ -49,22 +52,26 @@ func main() {
 	companiesRepository := companiesRepository.NewRepository(db.Pool)
 	departmentsRepository := departmentsRepository.NewRepository(db.Pool)
 	productsCategoriesRepository := productsCategoriesRepository.NewRepository(db.Pool)
+	productsRepository := productsRepository.NewRepository(db.Pool)
 
 	usersService := usersService.NewService(usersRepository)
 	companiesService := companiesService.NewService(companiesRepository)
 	departmentsService := departmentsService.NewService(departmentsRepository)
 	productsCategoriesService := productsCategoriesService.NewService(productsCategoriesRepository)
+	productsService := productsService.NewService(productsRepository)
 
 	usersHandler := usersHandler.NewHandler(usersService)
 	companiesHandler := companiesHandler.NewHandler(companiesService)
 	departmentsHandler := departmentsHandler.NewHandler(departmentsService)
 	productsCategoriesHandler := productsCategoriesHandler.NewHandler(productsCategoriesService)
+	productsHandler := productsHandler.NewHandler(productsService)
 
 	api := r.Group("/api/v1")
 	usersHandler.RegisterRoutes(api)
 	companiesHandler.RegisterRoutes(api)
 	departmentsHandler.RegisterRoutes(api)
 	productsCategoriesHandler.RegisterRoutes(api)
+	productsHandler.RegisterRoute(api)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
