@@ -20,7 +20,7 @@ WHERE id = $1
 -- name: ListProductCategoryByCompanyId :many
 SELECT *
 FROM product_categories
-WHERE id = $1
+WHERE company_id = $1
     AND deleted_at IS NULL;
 -- name: UpdateProductCategory :one
 UPDATE product_categories

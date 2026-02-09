@@ -1,0 +1,233 @@
+package service
+
+import (
+	"context"
+
+	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
+	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/domain"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/repository"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
+type RepositoryInterface interface {
+	CreateProduct(ctx context.Context, arg db.CreateProductParams) (db.Product, error)
+	DeleteProduct(ctx context.Context, arg db.DeleteProductParams) error
+	GetProductByBarcode(ctx context.Context, barcode pgtype.Text) (db.Product, error)
+	GetProductById(ctx context.Context, id pgtype.UUID) (db.Product, error)
+	ListProductsByCategoryId(ctx context.Context, arg db.ListProductsByCategoryIdParams) ([]db.Product, error)
+	ListProductsByCompany(ctx context.Context, categoryID pgtype.UUID) ([]db.Product, error)
+	UpdateProduct(ctx context.Context, arg db.UpdateProductParams) (db.Product, error)
+}
+
+type Service struct {
+	repo RepositoryInterface
+}
+
+func NewService(repo *repository.Repository) *Service {
+	return &Service{
+		repo: repo,
+	}
+}
+
+func (s *Service) CreateProduct(ctx context.Context, req domain.CreateProductRequest) (domain.ProductResponse, error) {
+	product, err := s.repo.CreateProduct(ctx, db.CreateProductParams{
+		CompanyID:   pgconv.ParseUUIDToPgType(req.CompanyID),
+		Name:        req.Name,
+		Description: pgconv.ParseStringToPgText(req.Description),
+		CategoryID:  pgconv.ParseUUIDToPgType(req.CategoryID),
+		Barcode:     pgconv.ParseStringToPgText(req.Barcode),
+		Quantity:    req.Quantity,
+		Size:        pgconv.ParseStringToPgText(req.Size),
+		CostPrice:   pgconv.Float64ToPgNumeric(req.CostPrice),
+		SalePrice:   pgconv.Float64ToPgNumeric(req.SalePrice),
+		CreatedBy:   pgconv.ParseUUIDToPgType(req.CreatedBy),
+	})
+	if err != nil {
+		return domain.ProductResponse{}, err
+	}
+
+	return domain.ProductResponse{
+		ID:          pgconv.PgUUIDToUUID(product.ID),
+		CompanyID:   pgconv.PgUUIDToUUID(product.CompanyID),
+		CategoryID:  pgconv.PgUUIDToUUID(product.CategoryID),
+		Name:        product.Name,
+		Description: pgconv.ParsePgTextToString(product.Description),
+		Barcode:     pgconv.ParsePgTextToString(product.Barcode),
+		Quantity:    product.Quantity,
+		Size:        pgconv.ParsePgTextToString(product.Size),
+		CostPrice:   pgconv.PgNumericToFloat64(product.CostPrice),
+		SalePrice:   pgconv.PgNumericToFloat64(product.SalePrice),
+		CreatedBy:   pgconv.PgUUIDToUUID(product.CreatedBy),
+		CreatedAt:   pgconv.PgTimestamptzToTime(product.CreatedAt),
+	}, nil
+}
+
+func (s *Service) DeleteProduct(ctx context.Context, req domain.DeleteProductRequest) error {
+	return s.repo.DeleteProduct(ctx, db.DeleteProductParams{
+		ID:        pgconv.ParseUUIDToPgType(req.ID),
+		DeletedBy: pgconv.ParseUUIDToPgType(req.DeletedBy),
+	})
+}
+
+func (s *Service) GetProductByBarcode(ctx context.Context, barcode string) (domain.ProductResponse, error) {
+	product, err := s.repo.GetProductByBarcode(ctx, pgconv.ParseStringToPgText(barcode))
+	if err != nil {
+		return domain.ProductResponse{}, err
+	}
+
+	return domain.ProductResponse{
+		ID:          pgconv.PgUUIDToUUID(product.ID),
+		CompanyID:   pgconv.PgUUIDToUUID(product.CompanyID),
+		CategoryID:  pgconv.PgUUIDToUUID(product.CategoryID),
+		Name:        product.Name,
+		Description: pgconv.ParsePgTextToString(product.Description),
+		Barcode:     pgconv.ParsePgTextToString(product.Barcode),
+		Quantity:    product.Quantity,
+		Size:        pgconv.ParsePgTextToString(product.Size),
+		CostPrice:   pgconv.PgNumericToFloat64(product.CostPrice),
+		SalePrice:   pgconv.PgNumericToFloat64(product.SalePrice),
+		CreatedBy:   pgconv.PgUUIDToUUID(product.CreatedBy),
+		UpdatedBy:   pgconv.PgUUIDToUUID(product.UpdatedBy),
+		DeletedBy:   pgconv.PgUUIDToUUID(product.DeletedBy),
+		CreatedAt:   pgconv.PgTimestamptzToTime(product.CreatedAt),
+		UpdatedAt:   pgconv.PgTimestamptzToTime(product.UpdatedAt),
+		DeletedAt:   pgconv.PgTimestamptzToTime(product.DeletedAt),
+	}, nil
+}
+
+func (s *Service) GetProductById(ctx context.Context, id uuid.UUID) (domain.ProductResponse, error) {
+	product, err := s.repo.GetProductById(ctx, pgconv.ParseUUIDToPgType(id))
+	if err != nil {
+		return domain.ProductResponse{}, err
+	}
+
+	return domain.ProductResponse{
+		ID:          pgconv.PgUUIDToUUID(product.ID),
+		CompanyID:   pgconv.PgUUIDToUUID(product.CompanyID),
+		CategoryID:  pgconv.PgUUIDToUUID(product.CategoryID),
+		Name:        product.Name,
+		Description: pgconv.ParsePgTextToString(product.Description),
+		Barcode:     pgconv.ParsePgTextToString(product.Barcode),
+		Quantity:    product.Quantity,
+		Size:        pgconv.ParsePgTextToString(product.Size),
+		CostPrice:   pgconv.PgNumericToFloat64(product.CostPrice),
+		SalePrice:   pgconv.PgNumericToFloat64(product.SalePrice),
+		CreatedBy:   pgconv.PgUUIDToUUID(product.CreatedBy),
+		UpdatedBy:   pgconv.PgUUIDToUUID(product.UpdatedBy),
+		DeletedBy:   pgconv.PgUUIDToUUID(product.DeletedBy),
+		CreatedAt:   pgconv.PgTimestamptzToTime(product.CreatedAt),
+		UpdatedAt:   pgconv.PgTimestamptzToTime(product.UpdatedAt),
+		DeletedAt:   pgconv.PgTimestamptzToTime(product.DeletedAt),
+	}, nil
+}
+
+func (s *Service) ListProductsByCategoryId(ctx context.Context, req domain.ListProductsByCategoryIdRequest) ([]domain.ProductResponse, error) {
+	products, err := s.repo.ListProductsByCategoryId(ctx, db.ListProductsByCategoryIdParams{
+		CategoryID: pgconv.ParseUUIDToPgType(req.CategoryID),
+		CompanyID:  pgconv.ParseUUIDToPgType(req.CompanyID),
+	})
+	if err != nil {
+		return []domain.ProductResponse{}, err
+	}
+
+	var response []domain.ProductResponse
+
+	for _, product := range products {
+		response = append(response, domain.ProductResponse{
+			ID:          pgconv.PgUUIDToUUID(product.ID),
+			CompanyID:   pgconv.PgUUIDToUUID(product.CompanyID),
+			CategoryID:  pgconv.PgUUIDToUUID(product.CategoryID),
+			Name:        product.Name,
+			Description: pgconv.ParsePgTextToString(product.Description),
+			Barcode:     pgconv.ParsePgTextToString(product.Barcode),
+			Quantity:    product.Quantity,
+			Size:        pgconv.ParsePgTextToString(product.Size),
+			CostPrice:   pgconv.PgNumericToFloat64(product.CostPrice),
+			SalePrice:   pgconv.PgNumericToFloat64(product.SalePrice),
+			CreatedBy:   pgconv.PgUUIDToUUID(product.CreatedBy),
+			UpdatedBy:   pgconv.PgUUIDToUUID(product.UpdatedBy),
+			DeletedBy:   pgconv.PgUUIDToUUID(product.DeletedBy),
+			CreatedAt:   pgconv.PgTimestamptzToTime(product.CreatedAt),
+			UpdatedAt:   pgconv.PgTimestamptzToTime(product.UpdatedAt),
+			DeletedAt:   pgconv.PgTimestamptzToTime(product.DeletedAt),
+		})
+	}
+
+	return response, nil
+}
+
+func (s *Service) ListProductsByCompany(ctx context.Context, companyId uuid.UUID) ([]domain.ProductResponse, error) {
+	products, err := s.repo.ListProductsByCompany(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return []domain.ProductResponse{}, err
+	}
+
+	var response []domain.ProductResponse
+
+	for _, product := range products {
+		response = append(response, domain.ProductResponse{
+			ID:          pgconv.PgUUIDToUUID(product.ID),
+			CompanyID:   pgconv.PgUUIDToUUID(product.CompanyID),
+			CategoryID:  pgconv.PgUUIDToUUID(product.CategoryID),
+			Name:        product.Name,
+			Description: pgconv.ParsePgTextToString(product.Description),
+			Barcode:     pgconv.ParsePgTextToString(product.Barcode),
+			Quantity:    product.Quantity,
+			Size:        pgconv.ParsePgTextToString(product.Size),
+			CostPrice:   pgconv.PgNumericToFloat64(product.CostPrice),
+			SalePrice:   pgconv.PgNumericToFloat64(product.SalePrice),
+			CreatedBy:   pgconv.PgUUIDToUUID(product.CreatedBy),
+			UpdatedBy:   pgconv.PgUUIDToUUID(product.UpdatedBy),
+			DeletedBy:   pgconv.PgUUIDToUUID(product.DeletedBy),
+			CreatedAt:   pgconv.PgTimestamptzToTime(product.CreatedAt),
+			UpdatedAt:   pgconv.PgTimestamptzToTime(product.UpdatedAt),
+			DeletedAt:   pgconv.PgTimestamptzToTime(product.DeletedAt),
+		})
+	}
+
+	return response, nil
+}
+
+func (s *Service) UpdateProduct(ctx context.Context, id uuid.UUID, req domain.UpdateProductRequest) (domain.ProductResponse, error) {
+	currentProduct, err := s.repo.GetProductById(ctx, pgconv.ParseUUIDToPgType(id))
+	if err != nil {
+		return domain.ProductResponse{}, err
+	}
+
+	arg := db.UpdateProductParams{
+		ID:          currentProduct.ID,
+		Name:        currentProduct.Name,
+		Description: currentProduct.Description,
+		CategoryID:  currentProduct.CategoryID,
+		Barcode:     currentProduct.Barcode,
+		Quantity:    currentProduct.Quantity,
+		Size:        currentProduct.Size,
+		CostPrice:   currentProduct.CostPrice,
+		SalePrice:   currentProduct.SalePrice,
+		UpdatedBy:   currentProduct.UpdatedBy,
+	}
+
+	domain.ApplyUpdateProductCategoryParams(req, &arg)
+
+	product, err := s.repo.UpdateProduct(ctx, arg)
+	if err != nil {
+		return domain.ProductResponse{}, err
+	}
+
+	return domain.ProductResponse{
+		ID:          pgconv.PgUUIDToUUID(product.ID),
+		CompanyID:   pgconv.PgUUIDToUUID(product.CompanyID),
+		CategoryID:  pgconv.PgUUIDToUUID(product.CategoryID),
+		Name:        product.Name,
+		Description: pgconv.ParsePgTextToString(product.Description),
+		Barcode:     pgconv.ParsePgTextToString(product.Barcode),
+		Quantity:    product.Quantity,
+		Size:        pgconv.ParsePgTextToString(product.Size),
+		CostPrice:   pgconv.PgNumericToFloat64(product.CostPrice),
+		SalePrice:   pgconv.PgNumericToFloat64(product.SalePrice),
+		UpdatedBy:   pgconv.PgUUIDToUUID(product.UpdatedBy),
+		UpdatedAt:   pgconv.PgTimestamptzToTime(product.UpdatedAt),
+	}, nil
+}

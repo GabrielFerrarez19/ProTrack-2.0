@@ -34,10 +34,10 @@ SELECT *
 FROM products
 WHERE barcode = $1
     AND deleted_at IS NULL;
--- name: ListProductsByCompany :one
+-- name: ListProductsByCompany :many
 SELECT *
 FROM products
-WHERE category_id = $1
+WHERE company_id = $1
     AND deleted_at IS NULL;
 -- name: ListProductsByCategoryId :many
 SELECT *
