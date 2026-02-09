@@ -104,12 +104,12 @@ func (q *Queries) GetProductCategoryById(ctx context.Context, id pgtype.UUID) (P
 const listProductCategoryByCompanyId = `-- name: ListProductCategoryByCompanyId :many
 SELECT id, company_id, name, color, status, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at
 FROM product_categories
-WHERE id = $1
+WHERE company_id = $1
     AND deleted_at IS NULL
 `
 
-func (q *Queries) ListProductCategoryByCompanyId(ctx context.Context, id pgtype.UUID) ([]ProductCategory, error) {
-	rows, err := q.db.Query(ctx, listProductCategoryByCompanyId, id)
+func (q *Queries) ListProductCategoryByCompanyId(ctx context.Context, companyID pgtype.UUID) ([]ProductCategory, error) {
+	rows, err := q.db.Query(ctx, listProductCategoryByCompanyId, companyID)
 	if err != nil {
 		return nil, err
 	}

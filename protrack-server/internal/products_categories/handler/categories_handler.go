@@ -75,7 +75,7 @@ func (h *Handler) GetProductCategoryById(c *gin.Context) {
 }
 
 func (h *Handler) ListProductCategoryByCompanyId(c *gin.Context) {
-	companyIdStr := c.Param("categoryId")
+	companyIdStr := c.Param("companyId")
 
 	companyId, err := uuid.Parse(companyIdStr)
 	if err != nil {

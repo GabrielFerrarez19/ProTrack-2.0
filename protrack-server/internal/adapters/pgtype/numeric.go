@@ -1,6 +1,7 @@
 package pgconv
 
 import (
+	"fmt"
 	"math/big"
 	"strings"
 
@@ -72,4 +73,29 @@ func PgNumericToString(n pgtype.Numeric) string {
 		scale = 0
 	}
 	return rat.FloatString(scale)
+}
+
+func Float64ToPgNumeric(v float64) pgtype.Numeric {
+	var n pgtype.Numeric
+
+	// converte para string (respeita casas decimais)
+	err := n.Scan(fmt.Sprintf("%.2f", v))
+	if err != nil {
+		return pgtype.Numeric{}
+	}
+
+	return n
+}
+
+func PgNumericToFloat64(n pgtype.Numeric) float64 {
+	if !n.Valid {
+		return 0
+	}
+
+	f, err := n.Float64Value()
+	if err != nil {
+		return 0
+	}
+
+	return f.Float64
 }
