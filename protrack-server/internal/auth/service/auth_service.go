@@ -1,0 +1,75 @@
+package service
+
+import (
+	"context"
+	"errors"
+
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/adapters/jwt"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/domain"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/service"
+	"github.com/rs/zerolog/log"
+)
+
+type Service struct {
+	userService *service.Service
+	jwtManager  *jwt.JWTManager
+}
+
+func NewService(userService *service.Service, jwtManager *jwt.JWTManager) *Service {
+	return &Service{
+		userService: userService,
+		jwtManager:  jwtManager,
+	}
+}
+
+func (s *Service) Login(ctx context.Context, req domain.LoginRequest) (*domain.LoginResponse, error) {
+	if req.Aud == "" {
+		return &domain.LoginResponse{}, errors.New("invalid aud")
+	}
+
+	user, err := s.userService.ValidatePassword(ctx, req.Email, req.Password)
+	if err != nil {
+		return &domain.LoginResponse{}, err
+	}
+
+	tokenPair, err := s.jwtManager.GenerateTokenPair(user.ID, user.CompanyID, user.Role, req.Aud)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to generate tokens")
+		return nil, err
+	}
+
+	return &domain.LoginResponse{
+		AccessToken:  tokenPair.AccessToken,
+		RefreshToken: tokenPair.RefreshToken,
+		ExpiresIn:    tokenPair.ExpireIn,
+		TokenType:    "Bearer",
+	}, nil
+}
+
+func (s *Service) RefreshToken(ctx context.Context, refreshToken string) (*domain.LoginResponse, error) {
+	tokenPair, err := s.jwtManager.RefreshToken(refreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.LoginResponse{
+		AccessToken:  tokenPair.AccessToken,
+		RefreshToken: tokenPair.RefreshToken,
+		ExpiresIn:    tokenPair.ExpireIn,
+		TokenType:    "Bearer",
+	}, nil
+}
+
+/* func (s *Service) Logout(ctx context.Context, token string) error {
+	claims, err := s.jwtManager.ValidateToken(token)
+	if err != nil {
+		return err
+	}
+
+	expiresIn := time.Until(claims.ExpiresAt.Time)
+	if expiresIn <= 0 {
+		return nil
+	}
+
+	return nil
+} */

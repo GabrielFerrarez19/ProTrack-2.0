@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"golang.org/x/crypto/bcrypt"
 
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/validate"
@@ -232,5 +233,23 @@ func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, req domain.Updat
 		CreatedAt:    pgconv.PgTimestamptzToTime(updatedUser.CreatedAt),
 		UpdatedAt:    pgconv.PgTimestamptzToTime(updatedUser.UpdatedAt),
 		DeletedAt:    pgconv.PgTimestamptzToTime(updatedUser.DeletedAt),
+	}, nil
+}
+
+func (s *Service) ValidatePassword(ctx context.Context, email string, password string) (domain.UserResponse, error) {
+	user, err := s.repo.GetUserByEmail(ctx, email)
+	if err != nil {
+		return domain.UserResponse{}, errors.New("invalid credentials")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+	if err != nil {
+		return domain.UserResponse{}, errors.New("invalid credentials")
+	}
+
+	return domain.UserResponse{
+		ID:        pgconv.PgUUIDToUUID(user.ID),
+		CompanyID: pgconv.PgUUIDToUUID(user.CompanyID),
+		Role:      user.Role,
 	}, nil
 }
