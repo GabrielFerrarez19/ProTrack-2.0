@@ -15,6 +15,8 @@ type Config struct {
 	DBName     string
 
 	ApiPort string
+
+	SecretKey string
 }
 
 func LoadConfig() (*Config, error) {
@@ -28,6 +30,7 @@ func LoadConfig() (*Config, error) {
 		DBPassword: getEnv("DB_PASSWORD"),
 		DBName:     getEnv("DB_NAME"),
 		ApiPort:    getEnv("API_PORT"),
+		SecretKey:  getEnv("JWT_SECRET"),
 	}
 
 	return config, nil
