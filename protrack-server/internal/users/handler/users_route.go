@@ -1,15 +1,24 @@
 package handler
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/http/middleware"
+	"github.com/gin-gonic/gin"
+)
 
 func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
+	protected := r.Group("/")
+	protected.Use(middleware.AuthMiddleware(h.jwtManager))
+	{
+
+		protected.GET("/:id", h.GetUserById)
+		protected.PUT("/:id", h.UpdateUser)
+		protected.DELETE("/:id", h.DeleteUser)
+	}
+
 	users := r.Group("/users")
 	{
 		users.POST("", h.CreateUser)
-		users.DELETE("/:id", h.DeleteUser)
-		users.GET("/email/:email", h.GetUserByEmail)
-		users.GET("/:id", h.GetUserById)
 		users.PUT("/password", h.UpdatePasswordHash)
-		users.PUT("/:id", h.UpdateUser)
+		users.GET("/email/:email", h.GetUserByEmail)
 	}
 }

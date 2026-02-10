@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/adapters/jwt"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/domain"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/service"
 	"github.com/gin-gonic/gin"
@@ -11,12 +12,14 @@ import (
 )
 
 type Handler struct {
-	service *service.Service
+	service    *service.Service
+	jwtManager *jwt.JWTManager
 }
 
-func NewHandler(service *service.Service) *Handler {
+func NewHandler(service *service.Service, jwtManager *jwt.JWTManager) *Handler {
 	return &Handler{
-		service: service,
+		service:    service,
+		jwtManager: jwtManager,
 	}
 }
 

@@ -3,18 +3,22 @@ package handler
 import (
 	"net/http"
 
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/adapters/jwt"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/domain"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/service"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
-	service *service.Service
+	service    *service.Service
+	jwtManager *jwt.JWTManager
 }
 
-func NewHandler(service *service.Service) *Handler {
+func NewHandler(service *service.Service, jwtManager *jwt.JWTManager) *Handler {
 	return &Handler{
-		service: service,
+		service:    service,
+		jwtManager: jwtManager,
 	}
 }
 
@@ -99,3 +103,31 @@ func (h *Handler) RefreshToken(c *gin.Context) {
 /* func (h *Handler) Me(c *gin.Context){
 	user, err := h.service.
 } */
+
+func (h *Handler) GetUserFromContext(c *gin.Context) {
+	idAny, exists := c.Get("sub")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+		return
+	}
+
+	idStr, ok := idAny.(string)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "error parse any to string"})
+		return
+	}
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := h.service.GetUserFromContext(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user": user})
+}
