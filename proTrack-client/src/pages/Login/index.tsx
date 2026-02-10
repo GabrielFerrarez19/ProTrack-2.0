@@ -3,34 +3,44 @@ import img from "../../assets/mesh-gradient.svg";
 import { Button } from "../../components/button";
 import { Input } from "../../components/input";
 import { Checkbox } from "../../components/ui/checkbox";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { login } from "@/services/auth";
 
 export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [aud] = useState("protrack");
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
-  const location = useLocation();
-  const { login, isLoading, error, clearError } = useAuth();
 
   const handleCheckboxChange = () => {
     setMostrarSenha(!mostrarSenha);
   };
 
-  const handleClickLogin = async () => {
-    try {
-      clearError(); // Limpa erros anteriores
-      const result = await login(email, password);
-      console.log("Login sucesso:", result);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
 
-      // Redireciona para a página que o usuário tentou acessar ou para status
-      const from = location.state?.from?.pathname || "/status";
-      navigate(from, { replace: true });
-    } catch (error) {
-      console.error("Erro no login", error);
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const { access_token } = await login({
+        email,
+        password,
+        aud,
+      });
+
+      localStorage.setItem("access_token", access_token);
+
+      navigate("/status");
+    } catch {
+      setError("Email ou senha inválidos");
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }
 
   return (
     <div className="flex justify-center gap-9">
@@ -63,12 +73,7 @@ export function Login() {
               Insira suas credenciais para acessar sua conta.
             </span>
           </div>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleClickLogin();
-            }}
-          >
+          <form onSubmit={handleSubmit}>
             <Input
               TextLabel="Email"
               type="text"
