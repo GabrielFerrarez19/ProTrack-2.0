@@ -17,21 +17,14 @@ import {
   SelectValue,
 } from "../../../components/ui/select";
 import { Package } from "lucide-react";
-import type { ProductFormData } from "../../../@types/types.components";
 
 // Sonner Toast
 import { toast } from "sonner";
-
-const categorias = [
-  "Roupas",
-  "Calçados",
-  "Acessórios",
-  "Eletrônicos",
-  "Casa e Decoração",
-  "Esportes",
-  "Beleza",
-  "Livros",
-];
+import type { ProductRequest } from "@/@types/product";
+import { useEffect, useState } from "react";
+import { CreateProduct } from "@/services/product";
+import type { ProductCategoryResponse } from "@/@types/product_categories";
+import { getProductCategories } from "@/services/product_categories";
 
 const tamanhos = ["PP", "P", "M", "G", "GG", "XG", "Único"];
 
@@ -43,13 +36,40 @@ export function ProductForm() {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<ProductFormData>();
+  } = useForm<ProductRequest>();
 
-  const precoCusto = watch("precoCusto");
-  const precoVenda = watch("precoVenda");
+  const [categories, setCategories] = useState<ProductCategoryResponse[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
-  const onSubmit = async (data: ProductFormData) => {
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const data = await getProductCategories();
+        console.log("CATEGORIES:", data);
+        setCategories(data);
+      } catch (err) {
+        console.error("Erro ao buscar categorias", err);
+        toast.error("Erro ao carregar categorias");
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    }
+    loadCategories();
+  }, []);
+
+  const precoCusto = watch("cost_price");
+  const precoVenda = watch("sale_price");
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const onSubmit = async (formData: ProductRequest) => {
+    setError("");
+    setIsLoading(true);
+
     try {
+      await CreateProduct(formData);
+
       toast.success("Produto cadastrado com sucesso!", {
         style: { background: "#4ade80", color: "#065f46" }, // verde pastel
       });
@@ -60,6 +80,8 @@ export function ProductForm() {
       toast.error("Erro ao cadastrar produto. Verifique os dados!", {
         style: { background: "#f87171", color: "#7f1d1d" }, // vermelho pastel
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -80,11 +102,11 @@ export function ProductForm() {
                 <Label htmlFor="nome">Nome do Produto *</Label>
                 <Input
                   id="nome"
-                  {...register("nome", { required: true })}
+                  {...register("name", { required: true })}
                   placeholder="Ex: Camiseta Polo Azul"
                   className="h-11 bg-input border-border"
                 />
-                {errors.nome && (
+                {errors.name && (
                   <span className="text-red-500 text-sm">
                     Nome é obrigatório
                   </span>
@@ -96,7 +118,7 @@ export function ProductForm() {
                 <Label htmlFor="codigoBarras">Código de Barras *</Label>
                 <Input
                   id="codigoBarras"
-                  {...register("codigoBarras", { required: true })}
+                  {...register("barcode", { required: true })}
                   placeholder="1234567890123"
                   className="h-11 bg-input border-border"
                 />
@@ -108,7 +130,7 @@ export function ProductForm() {
                 <Input
                   id="quantidade"
                   type="number"
-                  {...register("quantidade", { valueAsNumber: true })}
+                  {...register("quantity", { valueAsNumber: true })}
                   placeholder="0"
                   min="0"
                   className="h-11 bg-input border-border"
@@ -118,7 +140,7 @@ export function ProductForm() {
               {/* Tamanho */}
               <div className="space-y-2 w-auto">
                 <Label htmlFor="tamanho">Tamanho</Label>
-                <Select onValueChange={(val) => setValue("tamanho", val)}>
+                <Select onValueChange={(val) => setValue("size", val)}>
                   <SelectTrigger className="h-11 bg-input border-border">
                     <SelectValue placeholder="Selecione o tamanho" />
                   </SelectTrigger>
@@ -135,14 +157,21 @@ export function ProductForm() {
               {/* Categoria */}
               <div className="space-y-2">
                 <Label htmlFor="categoria">Categoria *</Label>
-                <Select onValueChange={(val) => setValue("categoria", val)}>
+                <Select onValueChange={(val) => setValue("category_id", val)}>
                   <SelectTrigger className="h-11 bg-input border-border">
                     <SelectValue placeholder="Selecione uma categoria" />
                   </SelectTrigger>
+
                   <SelectContent>
-                    {categorias.map((categoria) => (
-                      <SelectItem key={categoria} value={categoria}>
-                        {categoria}
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: category.color }}
+                          />
+                          {category.name}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -157,7 +186,7 @@ export function ProductForm() {
                   id="precoCusto"
                   type="number"
                   step="0.01"
-                  {...register("precoCusto", { valueAsNumber: true })}
+                  {...register("cost_price", { valueAsNumber: true })}
                   placeholder="0,00"
                   min="0"
                   className="h-11 bg-input border-border"
@@ -171,7 +200,7 @@ export function ProductForm() {
                   id="precoVenda"
                   type="number"
                   step="0.01"
-                  {...register("precoVenda", { valueAsNumber: true })}
+                  {...register("sale_price", { valueAsNumber: true })}
                   placeholder="0,00"
                   min="0"
                   className="h-11 bg-input border-border"
@@ -185,7 +214,7 @@ export function ProductForm() {
             <Label htmlFor="descricao">Descrição do Produto</Label>
             <Textarea
               id="descricao"
-              {...register("descricao")}
+              {...register("description")}
               placeholder="Descreva as características, materiais, cores disponíveis..."
               className="min-h-[100px] bg-input border-border resize-none"
             />
