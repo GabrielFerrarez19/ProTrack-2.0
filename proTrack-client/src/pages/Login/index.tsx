@@ -5,8 +5,10 @@ import { Input } from "../../components/input";
 import { Checkbox } from "../../components/ui/checkbox";
 import { useNavigate } from "react-router-dom";
 import { login } from "@/services/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 export function Login() {
+  const { setHasCompany } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [aud] = useState("protrack");
@@ -26,13 +28,15 @@ export function Login() {
     setIsLoading(true);
 
     try {
-      const { access_token } = await login({
+      const response = await login({
         email,
         password,
         aud,
       });
 
-      localStorage.setItem("access_token", access_token);
+      localStorage.setItem("access_token", response.access_token);
+      localStorage.setItem("has_company", String(response.has_company));
+      setHasCompany(response.has_company);
 
       navigate("/status");
     } catch {
