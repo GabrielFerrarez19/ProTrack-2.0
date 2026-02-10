@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
@@ -48,11 +49,13 @@ func (s *Service) CreateUser(ctx context.Context, req domain.CreateUserParams) (
 		return domain.UserResponse{}, errors.New("invalid email")
 	}
 
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(req.PasswordHash), 12)
+
 	user, err := s.repo.CreateUsers(ctx, db.CreateUserParams{
 		Name:         req.Name,
 		Email:        req.Email,
 		Username:     pgconv.ParseStringToPgText(req.Username),
-		PasswordHash: req.PasswordHash,
+		PasswordHash: string(hashPassword),
 		Role:         req.Role,
 		Status:       req.Status,
 		CompanyID:    pgconv.ParseUUIDToPgType(req.CompanyID),
@@ -239,11 +242,13 @@ func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, req domain.Updat
 func (s *Service) ValidatePassword(ctx context.Context, email string, password string) (domain.UserResponse, error) {
 	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil {
+		log.Error().Err(err).Msg("caiu no primeiro if")
 		return domain.UserResponse{}, errors.New("invalid credentials")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if err != nil {
+		log.Error().Err(err).Msg("caiu no segundo if")
 		return domain.UserResponse{}, errors.New("invalid credentials")
 	}
 

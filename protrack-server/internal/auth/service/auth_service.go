@@ -6,7 +6,9 @@ import (
 
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/adapters/jwt"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/domain"
+	userDomain "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/domain"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/service"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
 
@@ -73,3 +75,28 @@ func (s *Service) RefreshToken(ctx context.Context, refreshToken string) (*domai
 
 	return nil
 } */
+
+func (s *Service) GetUserFromContext(ctx context.Context, id uuid.UUID) (userDomain.UserResponse, error) {
+	user, err := s.userService.GetUserByID(ctx, id)
+	if err != nil {
+		return userDomain.UserResponse{}, err
+	}
+
+	return userDomain.UserResponse{
+		ID:           user.ID,
+		Name:         user.Name,
+		Email:        user.Email,
+		Username:     user.Username,
+		Role:         user.Role,
+		Status:       user.Status,
+		CompanyID:    user.CompanyID,
+		DepartmentID: user.DepartmentID,
+		LastLoginAt:  user.LastLoginAt,
+		CreatedBy:    user.CreatedBy,
+		UpdatedBy:    user.UpdatedBy,
+		DeletedBy:    user.DeletedBy,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
+		DeletedAt:    user.DeletedAt,
+	}, nil
+}

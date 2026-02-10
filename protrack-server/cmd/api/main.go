@@ -8,6 +8,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/adapters/jwt"
+	authHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/handler"
+	authService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/service"
 	companiesHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/companies/handler"
 	companiesRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/companies/repository"
 	companiesService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/companies/service"
@@ -48,6 +51,8 @@ func main() {
 	}
 	defer db.Close()
 
+	jwtManager := jwt.NewJWTManager(cfg.SecretKey)
+
 	usersRepository := usersRepository.NewRepository(db.Pool)
 	companiesRepository := companiesRepository.NewRepository(db.Pool)
 	departmentsRepository := departmentsRepository.NewRepository(db.Pool)
@@ -59,12 +64,14 @@ func main() {
 	departmentsService := departmentsService.NewService(departmentsRepository)
 	productsCategoriesService := productsCategoriesService.NewService(productsCategoriesRepository)
 	productsService := productsService.NewService(productsRepository)
+	authService := authService.NewService(usersService, jwtManager)
 
-	usersHandler := usersHandler.NewHandler(usersService)
+	usersHandler := usersHandler.NewHandler(usersService, jwtManager)
 	companiesHandler := companiesHandler.NewHandler(companiesService)
 	departmentsHandler := departmentsHandler.NewHandler(departmentsService)
 	productsCategoriesHandler := productsCategoriesHandler.NewHandler(productsCategoriesService)
 	productsHandler := productsHandler.NewHandler(productsService)
+	authHandler := authHandler.NewHandler(authService, jwtManager)
 
 	api := r.Group("/api/v1")
 	usersHandler.RegisterRoutes(api)
@@ -72,6 +79,7 @@ func main() {
 	departmentsHandler.RegisterRoutes(api)
 	productsCategoriesHandler.RegisterRoutes(api)
 	productsHandler.RegisterRoute(api)
+	authHandler.RegisterRoute(api)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
