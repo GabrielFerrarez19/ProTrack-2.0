@@ -20,12 +20,22 @@ func NewHandler(service *service.Service) *Handler {
 }
 
 func (h *Handler) CreateCompany(c *gin.Context) {
+	idStr := c.GetString("sub")
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	var req domain.CreateCompanyParams
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	req.CreatedBy = id
 
 	company, err := h.service.CreateCompany(c.Request.Context(), req)
 	if err != nil {
