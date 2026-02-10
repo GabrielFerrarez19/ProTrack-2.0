@@ -7,4 +7,5 @@ export interface LoginRequest {
 export interface LoginResponse {
   access_token: string;
   refresh_token?: string;
+  has_company: boolean;
 }
