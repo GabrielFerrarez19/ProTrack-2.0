@@ -34,6 +34,14 @@ func (s *Service) Login(ctx context.Context, req domain.LoginRequest) (*domain.L
 		return &domain.LoginResponse{}, err
 	}
 
+	var hasCompany bool
+
+	if user.CompanyID != uuid.Nil {
+		hasCompany = true
+	} else {
+		hasCompany = false
+	}
+
 	tokenPair, err := s.jwtManager.GenerateTokenPair(user.ID, user.CompanyID, user.Role, req.Aud)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate tokens")
@@ -43,6 +51,7 @@ func (s *Service) Login(ctx context.Context, req domain.LoginRequest) (*domain.L
 	return &domain.LoginResponse{
 		AccessToken:  tokenPair.AccessToken,
 		RefreshToken: tokenPair.RefreshToken,
+		HasCompany:   hasCompany,
 		ExpiresIn:    tokenPair.ExpireIn,
 		TokenType:    "Bearer",
 	}, nil
