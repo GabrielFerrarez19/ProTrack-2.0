@@ -47,7 +47,7 @@ func main() {
 			"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS",
 		},
 		AllowHeaders: []string{
-			"Origin", "Content-Type", "Authorization",
+			"Origin", "Content-Type", "Authorization", "Access-Control-Allow-Origin",
 		},
 		ExposeHeaders: []string{
 			"Content-Length",
@@ -77,15 +77,15 @@ func main() {
 	productsCategoriesRepository := productsCategoriesRepository.NewRepository(db.Pool)
 	productsRepository := productsRepository.NewRepository(db.Pool)
 
-	usersService := usersService.NewService(usersRepository)
-	companiesService := companiesService.NewService(companiesRepository)
+	usersService := usersService.NewService(usersRepository, db.Pool)
+	companiesService := companiesService.NewService(db.Pool, companiesRepository, usersRepository)
 	departmentsService := departmentsService.NewService(departmentsRepository)
 	productsCategoriesService := productsCategoriesService.NewService(productsCategoriesRepository)
 	productsService := productsService.NewService(productsRepository)
 	authService := authService.NewService(usersService, jwtManager)
 
 	usersHandler := usersHandler.NewHandler(usersService, jwtManager)
-	companiesHandler := companiesHandler.NewHandler(companiesService)
+	companiesHandler := companiesHandler.NewHandler(companiesService, jwtManager)
 	departmentsHandler := departmentsHandler.NewHandler(departmentsService)
 	productsCategoriesHandler := productsCategoriesHandler.NewHandler(productsCategoriesService)
 	productsHandler := productsHandler.NewHandler(productsService)
