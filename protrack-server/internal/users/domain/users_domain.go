@@ -103,3 +103,9 @@ func ApplyUpdateUserParams(req UpdateUserRequest, arg *db.UpdateUserParams) {
 		arg.UpdatedBy = pgconv.ParseUUIDToPgType(req.UpdatedBy)
 	}
 }
+
+type UpdateUserCompanyAndRoleParams struct {
+	ID        uuid.UUID `json:"id"`
+	CompanyID uuid.UUID `json:"company_id"`
+	Role      string    `json:"role"`
+}
