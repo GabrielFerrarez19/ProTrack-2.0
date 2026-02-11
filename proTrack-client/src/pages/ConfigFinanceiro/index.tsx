@@ -4,6 +4,7 @@ import { Save } from "lucide-react";
 
 import { Alertas } from "./components/Alertas";
 import { Categorias } from "./components/Categorias";
+import { CategoriasProduto } from "../CategoriasProduto";
 import { ContasBancarias } from "./components/ContasBancarias";
 import { MetodosPagamento } from "./components/MetodosPagamento";
 import { LimitesFluxo } from "./components/LimitesFluxoCaixa";
@@ -13,8 +14,6 @@ import type {
   MetodoPagamento,
   Categoria,
 } from "../../@types/types.components";
-
-import type { MetodoPagamentoConfig } from "../../@types/types.api";
 import { Header } from "../../components/header";
 // service que criamos
 
@@ -117,6 +116,8 @@ export function ConfiguracoesFinanceiras() {
         onUpdateCategoria={handleUpdateCategoria}
         onDeleteCategoria={handleDeleteCategoria}
       />
+
+      <CategoriasProduto />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <LimitesFluxo limites={limites} setLimites={setLimites} />

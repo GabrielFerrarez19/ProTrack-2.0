@@ -15,6 +15,7 @@ export const ROUTE_PERMISSIONS = {
   "/relatorio": ["ADMIN", "financeiro"],
   "/financeiro": ["ADMIN", "financeiro"],
   "/configfinanceiro": ["ADMIN", "financeiro", "vendedor", "operador"],
+  "/config/categorias-produto": ["ADMIN", "financeiro", "vendedor", "operador"],
   "/contasPagar": ["ADMIN", "financeiro"],
   "/contasReceber": ["ADMIN", "financeiro"],
   "/flucoCaixa": ["ADMIN", "financeiro"],
