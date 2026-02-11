@@ -7,7 +7,7 @@ import { ProfileFormCard } from "./components/ProfileFormCard";
 import { Header } from "../../components/header";
 import { useAuth } from "../../hooks/useAuth";
 import { perfilSchema, type PerfilFormData } from "../../schemas/schemaUsers";
-import { roles, departamentos } from "../../utils/functions";
+import { departamentos, getRoleLabel } from "../../utils/functions";
 
 export function ConfigUsers() {
   const [isEditing, setIsEditing] = useState(false);
@@ -76,8 +76,6 @@ export function ConfigUsers() {
     }
   };
 
-  const getRoleLabel = (role: string) =>
-    roles.find((r) => r.value === role)?.label || role;
   const getDepartamentoLabel = (id: string) => {
     if (!id) return "Não informado";
     return departamentos.find((d) => d.value === id)?.label || "Não informado";

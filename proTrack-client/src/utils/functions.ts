@@ -195,6 +195,10 @@ export const roles = [
   { value: "operador", label: "Operador" },
 ];
 
+/** Retorna o label da role (case-insensitive - aceita ADMIN, admin, etc.) */
+export const getRoleLabel = (role: string) =>
+  roles.find((r) => r.value.toLowerCase() === role?.toLowerCase())?.label || role;
+
 export const departamentos = [
   { value: "1", label: "Administrativo" },
   { value: "2", label: "Financeiro" },

@@ -163,7 +163,7 @@ export function ProductForm() {
                   </SelectTrigger>
 
                   <SelectContent>
-                    {categories.map((category) => (
+                    {(categories ?? []).map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         <div className="flex items-center gap-2">
                           <span
