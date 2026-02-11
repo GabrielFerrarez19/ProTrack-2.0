@@ -3,7 +3,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Edit, UserX, UserCheck } from "lucide-react";
 import type { User } from "@/@types/types.api";
-import { roles, departamentos } from "@/utils/functions";
+import { roles, departamentos, getRoleLabel } from "@/utils/functions";
 import { Badge } from "@/components/ui/badge";
 
 interface UserRowProps {
@@ -30,8 +30,6 @@ export default function UserRow({
     );
   };
 
-  const getRoleLabel = (role: string) =>
-    roles.find((r) => r.value === role)?.label || role;
 
   const getDepartamentoLabel = (id: number | null) => {
     if (!id) return "-";

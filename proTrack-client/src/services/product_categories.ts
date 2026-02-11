@@ -9,7 +9,7 @@ export async function getProductCategories(): Promise<
   ProductCategoryResponse[]
 > {
   const response = await api.get<GetCategoriesResponse>(
-    "/products-categories/list/company/fa03ef88-9549-4948-9a97-11abecfbd8e2",
+    "/products-categories/list/company",
   );
-  return response.data.categories;
+  return response.data.categories ?? [];
 }

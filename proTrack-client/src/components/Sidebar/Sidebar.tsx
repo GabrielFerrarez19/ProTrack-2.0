@@ -32,8 +32,8 @@ export function Sidebar({ children }: SidebarProps) {
   };
 
   return (
-    <aside className="h-screen sidebar relative z-1 overflow-y-auto overflow-x-hidden">
-      <nav className="h-full flex flex-col bg-white border-r shadow-sm">
+    <aside className="h-screen sidebar relative z-1 flex flex-col overflow-hidden">
+      <nav className="h-full min-h-0 flex flex-col bg-white border-r shadow-sm">
         {/* Header */}
         <div className="p-4 pb-2 flex justify-between items-center">
           <img
@@ -51,9 +51,11 @@ export function Sidebar({ children }: SidebarProps) {
           </button>
         </div>
 
-        {/* Items */}
+        {/* Items - min-h-0 permite scroll no flex; overflow-y-auto habilita rolagem */}
         <SidebarContext.Provider value={{ expanded }}>
-          <ul className="flex-1 px-3">{children}</ul>
+          <ul className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-3 py-2">
+            {children}
+          </ul>
         </SidebarContext.Provider>
 
         {/* Footer */}

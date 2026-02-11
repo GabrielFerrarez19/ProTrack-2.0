@@ -87,7 +87,7 @@ func main() {
 	usersHandler := usersHandler.NewHandler(usersService, jwtManager)
 	companiesHandler := companiesHandler.NewHandler(companiesService, jwtManager)
 	departmentsHandler := departmentsHandler.NewHandler(departmentsService)
-	productsCategoriesHandler := productsCategoriesHandler.NewHandler(productsCategoriesService)
+	productsCategoriesHandler := productsCategoriesHandler.NewHandler(productsCategoriesService, jwtManager)
 	productsHandler := productsHandler.NewHandler(productsService)
 	authHandler := authHandler.NewHandler(authService, jwtManager)
 
