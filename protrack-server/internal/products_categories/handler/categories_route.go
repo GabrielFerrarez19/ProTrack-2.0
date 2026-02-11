@@ -8,7 +8,7 @@ import (
 func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	category := r.Group("/products-categories").Use(middleware.AuthMiddleware(h.jwtManager))
 	{
-		category.POST("/", h.CreateProductCategory)
+		category.POST("", h.CreateProductCategory)
 		category.DELETE("/:id", h.DeleteProductCategory)
 		category.GET("/:id", h.GetProductCategoryById)
 		category.GET("/list/company", h.ListProductCategoryByCompanyId)

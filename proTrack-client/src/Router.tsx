@@ -13,6 +13,7 @@ import { TotalVendas } from "./pages/TotalVenda";
 import { DashboardFinanceiro } from "./pages/Financeiro";
 import { RelatoriosFinanceiros } from "./pages/RelatoriosFinanceiros";
 import { ConfiguracoesFinanceiras } from "./pages/ConfigFinanceiro";
+import { CategoriasProduto } from "./pages/CategoriasProduto";
 import { ContasPagar } from "./pages/ContasPagar";
 import { ContasReceber } from "./pages/ContasReceber";
 import { FluxoCaixa } from "./pages/FluxoCaixa";
@@ -168,6 +169,14 @@ export function Router() {
           element={
             <ProtectedRoute requiredRoute="/config/financeiro">
               <ConfiguracoesFinanceiras />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="categorias-produto"
+          element={
+            <ProtectedRoute requiredRoute="/config/categorias-produto">
+              <CategoriasProduto />
             </ProtectedRoute>
           }
         />

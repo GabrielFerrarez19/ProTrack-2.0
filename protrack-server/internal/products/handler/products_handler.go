@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/adapters/jwt"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/domain"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/service"
 	"github.com/gin-gonic/gin"
@@ -10,17 +11,43 @@ import (
 )
 
 type Handler struct {
-	service *service.Service
+	service    *service.Service
+	jwtManager *jwt.JWTManager
 }
 
-func NewHandler(service *service.Service) *Handler {
+func NewHandler(service *service.Service, jwtManager *jwt.JWTManager) *Handler {
 	return &Handler{
-		service: service,
+		service:    service,
+		jwtManager: jwtManager,
 	}
 }
 
 func (h *Handler) CreateProduct(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "company_id null"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	userIdStr := c.GetString("sub")
+	if userIdStr == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization required"})
+		return
+	}
+
+	userId, err := uuid.Parse(userIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	var req domain.CreateProductRequest
+
+	req.CompanyID = companyId
+
+	req.CreatedBy = userId
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

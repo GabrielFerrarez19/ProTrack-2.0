@@ -8,6 +8,7 @@ import {
   Mail,
   Palette,
   Globe,
+  Package,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
@@ -45,6 +46,15 @@ export const DefaultConfigLayout = () => {
       descricao: "Contas, métodos de pagamento e categorias",
       path: "/config/financeiro",
       requiredRoles: ["admin", "financeiro"],
+    },
+    // Categorias de produto – admin, financeiro, vendedor, operador
+    {
+      id: "categorias-produto",
+      titulo: "Categorias de Produto",
+      icone: Package,
+      descricao: "Cadastre e gerencie categorias dos produtos",
+      path: "/config/categorias-produto",
+      requiredRoles: ["admin", "financeiro", "vendedor", "operador"],
     },
 
     // Sistema e segurança – apenas admin
