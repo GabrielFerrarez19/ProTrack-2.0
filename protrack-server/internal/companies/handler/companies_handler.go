@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/adapters/jwt"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/companies/domain"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/companies/service"
 	"github.com/gin-gonic/gin"
@@ -10,21 +11,27 @@ import (
 )
 
 type Handler struct {
-	service *service.Service
+	service    *service.Service
+	jwtManager *jwt.JWTManager
 }
 
-func NewHandler(service *service.Service) *Handler {
+func NewHandler(service *service.Service, jwtManager *jwt.JWTManager) *Handler {
 	return &Handler{
-		service: service,
+		service:    service,
+		jwtManager: jwtManager,
 	}
 }
 
 func (h *Handler) CreateCompany(c *gin.Context) {
 	idStr := c.GetString("sub")
+	if idStr == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization required"})
+		return
+	}
 
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -37,7 +44,7 @@ func (h *Handler) CreateCompany(c *gin.Context) {
 
 	req.CreatedBy = id
 
-	company, err := h.service.CreateCompany(c.Request.Context(), req)
+	company, err := h.service.CreateCompany(c.Request.Context(), id, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 
@@ -27,15 +28,18 @@ type RepositoryInterface interface {
 	ListUsers(ctx context.Context) ([]db.User, error)
 	UpdatePasswordHash(ctx context.Context, arg db.UpdatePasswordHashParams) error
 	UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.User, error)
+	UpdateUserCompanyAndRole(ctx context.Context, arg db.UpdateUserCompanyAndRoleParams) error
 }
 
 type Service struct {
 	repo RepositoryInterface
+	pool *pgxpool.Pool
 }
 
-func NewService(repo *repository.Repository) *Service {
+func NewService(repo *repository.Repository, pool *pgxpool.Pool) *Service {
 	return &Service{
 		repo: repo,
+		pool: pool,
 	}
 }
 
@@ -257,4 +261,12 @@ func (s *Service) ValidatePassword(ctx context.Context, email string, password s
 		CompanyID: pgconv.PgUUIDToUUID(user.CompanyID),
 		Role:      user.Role,
 	}, nil
+}
+
+func (s *Service) UpdateUserCompanyAndRole(ctx context.Context, req domain.UpdateUserCompanyAndRoleParams) error {
+	return s.repo.UpdateUserCompanyAndRole(ctx, db.UpdateUserCompanyAndRoleParams{
+		ID:        pgconv.ParseUUIDToPgType(req.ID),
+		CompanyID: pgconv.ParseUUIDToPgType(req.CompanyID),
+		Role:      req.Role,
+	})
 }

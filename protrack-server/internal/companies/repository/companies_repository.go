@@ -5,45 +5,49 @@ import (
 
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Repository struct {
-	pool *pgxpool.Pool
-	q    *db.Queries
+	db db.DBTX
 }
 
-func NewRepository(pool *pgxpool.Pool) *Repository {
+func NewRepository(dbtx db.DBTX) *Repository {
 	return &Repository{
-		pool: pool,
-		q:    db.New(pool),
+		db: dbtx,
 	}
 }
 
 func (r *Repository) CreateCompany(ctx context.Context, arg db.CreateCompanyParams) (db.Company, error) {
-	return r.q.CreateCompany(ctx, arg)
+	q := db.New(r.db)
+	return q.CreateCompany(ctx, arg)
 }
 
 func (r *Repository) DeleteCompany(ctx context.Context, arg db.DeleteCompanyParams) error {
-	return r.q.DeleteCompany(ctx, arg)
+	q := db.New(r.db)
+	return q.DeleteCompany(ctx, arg)
 }
 
 func (r *Repository) GetCompanyByDocument(ctx context.Context, document pgtype.Text) (db.Company, error) {
-	return r.q.GetCompanyByDocument(ctx, document)
+	q := db.New(r.db)
+	return q.GetCompanyByDocument(ctx, document)
 }
 
 func (r *Repository) GetCompanyByID(ctx context.Context, id pgtype.UUID) (db.Company, error) {
-	return r.q.GetCompanyByID(ctx, id)
+	q := db.New(r.db)
+	return q.GetCompanyByID(ctx, id)
 }
 
 func (r *Repository) ListCompanies(ctx context.Context) ([]db.Company, error) {
-	return r.q.ListCompanies(ctx)
+	q := db.New(r.db)
+	return q.ListCompanies(ctx)
 }
 
 func (r *Repository) SetCompanyStatus(ctx context.Context, arg db.SetCompanyStatusParams) (int64, error) {
-	return r.q.SetCompanyStatus(ctx, arg)
+	q := db.New(r.db)
+	return q.SetCompanyStatus(ctx, arg)
 }
 
 func (r *Repository) UpdateCompany(ctx context.Context, arg db.UpdateCompanyParams) (db.Company, error) {
-	return r.q.UpdateCompany(ctx, arg)
+	q := db.New(r.db)
+	return q.UpdateCompany(ctx, arg)
 }

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/validate"
@@ -10,9 +9,11 @@ import (
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/companies/domain"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/companies/repository"
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
+	usersRepo "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/repository"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type RepositoryInterface interface {
@@ -26,65 +27,72 @@ type RepositoryInterface interface {
 }
 
 type Service struct {
-	repo RepositoryInterface
+	repo      RepositoryInterface
+	usersRepo *usersRepo.Repository
+	pool      *pgxpool.Pool
 }
 
-func NewService(repo *repository.Repository) *Service {
+func NewService(pool *pgxpool.Pool, repo *repository.Repository, usersRepo *usersRepo.Repository) *Service {
 	return &Service{
-		repo: repo,
+		repo:      repo,
+		usersRepo: usersRepo,
+		pool:      pool,
 	}
 }
 
-func (s *Service) CreateCompany(ctx context.Context, req domain.CreateCompanyParams) (domain.CompanyResponse, error) {
-	docType, err := validate.ValidateDocument(req.Document)
+func (s *Service) CreateCompany(
+	ctx context.Context,
+	userId uuid.UUID,
+	req domain.CreateCompanyParams,
+) (domain.CompanyResponse, error) {
+	typeDocument, err := validate.ValidateDocument(req.Document)
 	if err != nil {
 		return domain.CompanyResponse{}, err
 	}
 
-	if !validate.IsValidEmail(req.Email) {
-		return domain.CompanyResponse{}, errors.New("invalid email")
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return domain.CompanyResponse{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	companyRepo := repository.NewRepository(tx)
+	userRepo := usersRepo.NewRepository(tx)
+
+	company, err := companyRepo.CreateCompany(ctx, db.CreateCompanyParams{
+		Name:         req.Name,
+		TradeName:    pgconv.ParseStringToPgText(req.TradeName),
+		Document:     pgconv.ParseStringToPgText(req.Document),
+		DocumentType: pgconv.ParseStringToPgText(typeDocument),
+		Email:        pgconv.ParseStringToPgText(req.Email),
+		Phone:        pgconv.ParseStringToPgText(req.Phone),
+		Website:      pgconv.ParseStringToPgText(req.Website),
+		CreatedBy:    pgconv.ParseUUIDToPgType(userId),
+	})
+	if err != nil {
+		return domain.CompanyResponse{}, err
 	}
 
-	company, err := s.repo.CreateCompany(ctx, db.CreateCompanyParams{
-		Name:                req.Name,
-		TradeName:           pgconv.ParseStringToPgText(req.TradeName),
-		Document:            pgconv.ParseStringToPgText(req.Document),
-		DocumentType:        pgconv.ParseStringToPgText(docType),
-		Email:               pgconv.ParseStringToPgText(req.Email),
-		Phone:               pgconv.ParseStringToPgText(req.Phone),
-		Website:             pgconv.ParseStringToPgText(req.Website),
-		AddressStreet:       pgconv.ParseStringToPgText(req.AddressStreet),
-		AddressNumber:       pgconv.ParseStringToPgText(req.AddressNumber),
-		AddressComplement:   pgconv.ParseStringToPgText(req.AddressComplement),
-		AddressNeighborhood: pgconv.ParseStringToPgText(req.AddressNeighborhood),
-		AddressCity:         pgconv.ParseStringToPgText(req.AddressCity),
-		AddressState:        pgconv.ParseStringToPgText(req.AddressState),
-		AddressZipcode:      pgconv.ParseStringToPgText(req.AddressZipcode),
-		AddressCountry:      pgconv.ParseStringToPgText(req.AddressCountry),
-		Timezone:            pgconv.ParseStringToPgText(req.Timezone),
-		CreatedBy:           pgconv.ParseUUIDToPgType(req.CreatedBy),
+	err = userRepo.UpdateUserCompanyAndRole(ctx, db.UpdateUserCompanyAndRoleParams{
+		ID:        pgconv.ParseUUIDToPgType(userId),
+		CompanyID: company.ID,
+		Role:      "ADMIN",
 	})
+	if err != nil {
+		return domain.CompanyResponse{}, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return domain.CompanyResponse{}, err
+	}
 
 	return domain.CompanyResponse{
-		ID:                  pgconv.PgUUIDToUUID(company.ID),
-		Name:                company.Name,
-		TradeName:           pgconv.ParsePgTextToString(company.TradeName),
-		Document:            pgconv.ParsePgTextToString(company.Document),
-		DocumentType:        pgconv.ParsePgTextToString(company.DocumentType),
-		Email:               pgconv.ParsePgTextToString(company.Email),
-		Phone:               pgconv.ParsePgTextToString(company.Phone),
-		Website:             pgconv.ParsePgTextToString(company.Website),
-		AddressStreet:       pgconv.ParsePgTextToString(company.AddressStreet),
-		AddressNumber:       pgconv.ParsePgTextToString(company.AddressNumber),
-		AddressComplement:   pgconv.ParsePgTextToString(company.AddressComplement),
-		AddressNeighborhood: pgconv.ParsePgTextToString(company.AddressNeighborhood),
-		AddressCity:         pgconv.ParsePgTextToString(company.AddressCity),
-		AddressState:        pgconv.ParsePgTextToString(company.AddressState),
-		AddressZipcode:      pgconv.ParsePgTextToString(company.AddressZipcode),
-		AddressCountry:      pgconv.ParsePgTextToString(company.AddressCountry),
-		Status:              company.Status,
-		CreatedBy:           pgconv.PgUUIDToUUID(company.CreatedBy),
-		CreatedAt:           pgconv.PgTimestamptzToTime(company.CreatedAt),
+		ID:        pgconv.PgUUIDToUUID(company.ID),
+		Name:      company.Name,
+		Document:  pgconv.ParsePgTextToString(company.Document),
+		Status:    company.Status,
+		CreatedBy: pgconv.PgUUIDToUUID(company.CreatedBy),
+		CreatedAt: pgconv.PgTimestamptzToTime(company.CreatedAt),
 	}, nil
 }
 
