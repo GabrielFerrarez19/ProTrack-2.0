@@ -2,7 +2,6 @@ export interface CompanyRequest {
   name: string;
   trade_name: string;
   document: string;
-  document_type: string;
   email: string;
   phone: string;
   website: string;
