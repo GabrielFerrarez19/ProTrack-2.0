@@ -88,7 +88,7 @@ func main() {
 	companiesHandler := companiesHandler.NewHandler(companiesService, jwtManager)
 	departmentsHandler := departmentsHandler.NewHandler(departmentsService)
 	productsCategoriesHandler := productsCategoriesHandler.NewHandler(productsCategoriesService, jwtManager)
-	productsHandler := productsHandler.NewHandler(productsService)
+	productsHandler := productsHandler.NewHandler(productsService, jwtManager)
 	authHandler := authHandler.NewHandler(authService, jwtManager)
 
 	api := r.Group("/api/v1")
