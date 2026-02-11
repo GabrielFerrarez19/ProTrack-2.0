@@ -3,22 +3,22 @@ import { useAuth } from "./useAuth";
 // Definição das permissões por rota
 export const ROUTE_PERMISSIONS = {
   // Rotas básicas - todos os usuários autenticados
-  "/status": ["admin", "financeiro", "vendedor", "operador"],
-  "/cadastroprodutos": ["admin", "operador"],
-  "/cadastrodeclientes": ["admin", "operador"],
-  "/produtos": ["admin", "financeiro", "vendedor", "operador"],
-  "/clientes": ["admin", "financeiro", "vendedor", "operador"],
-  "/venda": ["admin", "vendedor"],
-  "/totalVendas": ["admin", "financeiro", "vendedor"],
+  "/status": ["ADMIN", "financeiro", "vendedor", "operador"],
+  "/cadastroprodutos": ["ADMIN", "operador"],
+  "/cadastrodeclientes": ["ADMIN", "operador"],
+  "/produtos": ["ADMIN", "financeiro", "vendedor", "operador"],
+  "/clientes": ["ADMIN", "financeiro", "vendedor", "operador"],
+  "/venda": ["ADMIN", "vendedor"],
+  "/totalVendas": ["ADMIN", "financeiro", "vendedor"],
 
-  // Rotas financeiras - apenas admin e financeiro
-  "/relatorio": ["admin", "financeiro"],
-  "/financeiro": ["admin", "financeiro"],
-  "/configfinanceiro": ["admin", "financeiro", "vendedor", "operador"],
-  "/contasPagar": ["admin", "financeiro"],
-  "/contasReceber": ["admin", "financeiro"],
-  "/flucoCaixa": ["admin", "financeiro"],
-  "/cadastrocontaspagar": ["admin", "financeiro"],
+  // Rotas financeiras - apenas ADMIN e financeiro
+  "/relatorio": ["ADMIN", "financeiro"],
+  "/financeiro": ["ADMIN", "financeiro"],
+  "/configfinanceiro": ["ADMIN", "financeiro", "vendedor", "operador"],
+  "/contasPagar": ["ADMIN", "financeiro"],
+  "/contasReceber": ["ADMIN", "financeiro"],
+  "/flucoCaixa": ["ADMIN", "financeiro"],
+  "/cadastrocontaspagar": ["ADMIN", "financeiro"],
 } as const;
 
 export type RoutePath = keyof typeof ROUTE_PERMISSIONS;
@@ -27,9 +27,12 @@ export type UserRole = "admin" | "financeiro" | "vendedor" | "operador";
 export const usePermissions = () => {
   const { user, isAuthenticated } = useAuth();
 
+  // Normaliza role para comparação (backend pode retornar ADMIN, frontend usa admin)
+  const normalizedUserRole = user?.role?.toLowerCase() as UserRole | undefined;
+
   // Verifica se o usuário tem permissão para acessar uma rota específica
   const hasPermission = (route: string): boolean => {
-    if (!isAuthenticated || !user) {
+    if (!isAuthenticated || !user || !normalizedUserRole) {
       return false;
     }
 
@@ -39,18 +42,20 @@ export const usePermissions = () => {
       return true;
     }
 
-    return (allowedRoles as readonly UserRole[]).includes(
-      user.role as UserRole
+    const normalizedAllowed = (allowedRoles as readonly string[]).map((r) =>
+      r.toLowerCase(),
     );
+    return normalizedAllowed.includes(normalizedUserRole);
   };
 
   // Verifica se o usuário tem uma das roles especificadas
   const hasRole = (roles: UserRole[]): boolean => {
-    if (!isAuthenticated || !user) {
+    if (!isAuthenticated || !user || !normalizedUserRole) {
       return false;
     }
 
-    return roles.includes(user.role as UserRole);
+    const normalizedRequired = roles.map((r) => r.toLowerCase());
+    return normalizedRequired.includes(normalizedUserRole);
   };
 
   // Verifica se o usuário é admin
@@ -75,7 +80,7 @@ export const usePermissions = () => {
     }
 
     return Object.keys(ROUTE_PERMISSIONS).filter((route) =>
-      hasPermission(route)
+      hasPermission(route),
     );
   };
 
