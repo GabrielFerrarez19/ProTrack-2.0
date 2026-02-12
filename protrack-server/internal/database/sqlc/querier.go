@@ -33,7 +33,7 @@ type Querier interface {
 	ListDepartmentsByCompanyId(ctx context.Context, companyID pgtype.UUID) ([]Department, error)
 	ListProductCategoryByCompanyId(ctx context.Context, companyID pgtype.UUID) ([]ProductCategory, error)
 	ListProductsByCategoryId(ctx context.Context, arg ListProductsByCategoryIdParams) ([]Product, error)
-	ListProductsByCompany(ctx context.Context, companyID pgtype.UUID) ([]Product, error)
+	ListProductsByCompany(ctx context.Context, companyID pgtype.UUID) ([]ListProductsByCompanyRow, error)
 	ListUsers(ctx context.Context) ([]User, error)
 	SetCompanyStatus(ctx context.Context, arg SetCompanyStatusParams) (int64, error)
 	SetProductCategoryStatus(ctx context.Context, arg SetProductCategoryStatusParams) (int64, error)
