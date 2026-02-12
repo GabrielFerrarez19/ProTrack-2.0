@@ -108,3 +108,42 @@ CREATE TABLE IF NOT EXISTS product_categories (
     CONSTRAINT fk_product_categories_company FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
     CONSTRAINT uq_product_category_name_per_company UNIQUE (company_id, name)
 );
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_type
+    WHERE typname = 'gender_enum'
+) THEN CREATE TYPE gender_enum AS ENUM ('MALE', 'FEMALE', 'OTHER', 'NOT_SAY');
+END IF;
+END $$;
+CREATE TABLE IF NOT EXISTS customers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    company_id UUID NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    birth_date DATE NOT NULL,
+    cpf VARCHAR(14) NOT NULL,
+    rg VARCHAR(20),
+    marital_status VARCHAR(20),
+    gender gender_enum DEFAULT 'NOT_SAY',
+    whatsapp VARCHAR(20),
+    mobile_phone VARCHAR(20),
+    home_phone VARCHAR(20),
+    email VARCHAR(100) NOT NULL,
+    address_street VARCHAR(150),
+    address_number VARCHAR(20),
+    address_complement VARCHAR(100),
+    address_neighborhood VARCHAR(100),
+    address_city VARCHAR(100),
+    address_state VARCHAR(2),
+    address_zipcode VARCHAR(20),
+    address_country VARCHAR(50) DEFAULT 'BR',
+    balance_due DECIMAL(10, 2) DEFAULT 0,
+    created_by UUID NULL,
+    updated_by UUID NULL,
+    deleted_by UUID NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ NULL,
+    CONSTRAINT fk_customers_company FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
+    CONSTRAINT uq_customer_cpf_company UNIQUE (company_id, cpf),
+    CONSTRAINT uq_customer_email_company UNIQUE (company_id, email)
+);
