@@ -18,7 +18,6 @@ import {
 } from "../../../components/ui/select";
 import { Package } from "lucide-react";
 
-// Sonner Toast
 import { toast } from "sonner";
 import type { ProductRequest } from "@/@types/product";
 import { useEffect, useState } from "react";
@@ -45,7 +44,6 @@ export function ProductForm() {
     async function loadCategories() {
       try {
         const data = await getProductCategories();
-        console.log("CATEGORIES:", data);
         setCategories(data);
       } catch (err) {
         console.error("Erro ao buscar categorias", err);
@@ -59,12 +57,12 @@ export function ProductForm() {
 
   const precoCusto = watch("cost_price");
   const precoVenda = watch("sale_price");
+  const categoriaSelecionada = watch("category_id");
+  const tamanhoSelecionado = watch("size");
 
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const onSubmit = async (formData: ProductRequest) => {
-    setError("");
     setIsLoading(true);
 
     try {
@@ -140,7 +138,10 @@ export function ProductForm() {
               {/* Tamanho */}
               <div className="space-y-2 w-auto">
                 <Label htmlFor="tamanho">Tamanho</Label>
-                <Select onValueChange={(val) => setValue("size", val)}>
+                <Select
+                  value={tamanhoSelecionado}
+                  onValueChange={(val) => setValue("size", val)}
+                >
                   <SelectTrigger className="h-11 bg-input border-border">
                     <SelectValue placeholder="Selecione o tamanho" />
                   </SelectTrigger>
@@ -157,9 +158,19 @@ export function ProductForm() {
               {/* Categoria */}
               <div className="space-y-2">
                 <Label htmlFor="categoria">Categoria *</Label>
-                <Select onValueChange={(val) => setValue("category_id", val)}>
+                <Select
+                  value={categoriaSelecionada}
+                  onValueChange={(val) => setValue("category_id", val)}
+                  disabled={isLoadingCategories}
+                >
                   <SelectTrigger className="h-11 bg-input border-border">
-                    <SelectValue placeholder="Selecione uma categoria" />
+                    <SelectValue
+                      placeholder={
+                        isLoadingCategories
+                          ? "Carregando..."
+                          : "Selecione uma categoria"
+                      }
+                    />
                   </SelectTrigger>
 
                   <SelectContent>
@@ -235,9 +246,10 @@ export function ProductForm() {
           <div className="flex gap-4 pt-4">
             <Button
               type="submit"
-              className="cursor-pointer text-primary-foreground font-medium px-8 h-11 shadow-soft bg-gradient-to-r from-[#628DFD] to-[#6F31FF] hover:from-[#7A9BFD] hover:to-[#B597F9]"
+              disabled={isLoading}
+              className="cursor-pointer text-primary-foreground font-medium px-8 h-11 shadow-soft bg-gradient-to-r from-[#628DFD] to-[#6F31FF] hover:from-[#7A9BFD] hover:to-[#B597F9] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Cadastrar Produto
+              {isLoading ? "Cadastrando..." : "Cadastrar Produto"}
             </Button>
             <Button
               type="button"
