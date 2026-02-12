@@ -1,4 +1,3 @@
-import type { Product } from "../../../@types/types.components";
 import {
   Table,
   TableBody,
@@ -12,9 +11,10 @@ import { useState, useMemo } from "react";
 import { Dialog } from "../../../components/ui/dialog";
 import { Button } from "../../../components/ui/button";
 import { DialogAlter } from "./DialogAlter";
+import type { ProductResponse } from "@/@types/product";
 
 interface ProductTableProps {
-  products: Product[];
+  products: ProductResponse[];
   onProductUpdated?: () => void; // Nova prop para callback de atualização
 }
 
@@ -29,7 +29,8 @@ export function ProductTable({
   products,
   onProductUpdated,
 }: ProductTableProps) {
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] =
+    useState<ProductResponse | null>(null);
   const [open, setOpen] = useState(false);
 
   // Estados de paginação
@@ -96,27 +97,27 @@ export function ProductTable({
         <TableBody>
           {currentProducts.map((product, index) => (
             <TableRow
-              key={product.codigo_barras ?? index}
+              key={product.barcode ?? index}
               className="hover:bg-gray-200 cursor-pointer"
               onClick={() => {
                 setSelectedProduct(product);
                 setOpen(true);
               }}
             >
-              <TableCell className="font-medium">{product.nome}</TableCell>
-              <TableCell>{product.codigo_barras ?? "—"}</TableCell>
-              <TableCell>{product.categoria ?? "—"}</TableCell>
-              <TableCell>{product.tamanho ?? "—"}</TableCell>
+              <TableCell className="font-medium">{product.name}</TableCell>
+              <TableCell>{product.barcode ?? "—"}</TableCell>
+              <TableCell>{product.category_id ?? "—"}</TableCell>
+              <TableCell>{product.size ?? "—"}</TableCell>
               <TableCell>
-                {product.preco_venda != null
-                  ? `R$ ${Number(product.preco_venda)
+                {product.sale_price != null
+                  ? `R$ ${Number(product.sale_price)
                       .toFixed(2)
                       .replace(".", ",")}`
                   : "0,00"}
               </TableCell>
               <TableCell>
-                <Badge className={getQuantityColor(product.quantidade)}>
-                  {product.quantidade ?? 0}
+                <Badge className={getQuantityColor(product.quantity)}>
+                  {product.quantity ?? 0}
                 </Badge>
               </TableCell>
             </TableRow>
@@ -157,7 +158,7 @@ export function ProductTable({
                   >
                     {page}
                   </Button>
-                )
+                ),
               )}
             </div>
 

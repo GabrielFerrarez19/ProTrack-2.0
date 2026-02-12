@@ -19,11 +19,8 @@ import {
   SelectItem,
 } from "../../../components/ui/select";
 
-import type {
-  ProductFormData,
-  Product,
-} from "../../../@types/types.components";
-import { toast } from "sonner";
+/* import { toast } from "sonner"; */
+import type { ProductRequest, ProductResponse } from "@/@types/product";
 
 const categorias = [
   "Roupas",
@@ -40,54 +37,54 @@ const tamanhos = ["PP", "P", "M", "G", "GG", "XG", "Único"];
 
 interface DialogAlterProps {
   setOpen: (value: boolean) => void;
-  product: Product;
+  product: ProductResponse;
   onProductUpdated?: () => void; // Nova prop para callback
 }
 
 export function DialogAlter({
   product,
-  setOpen,
-  onProductUpdated,
+  /*   setOpen,
+  onProductUpdated, */
 }: DialogAlterProps) {
   const {
     register,
     reset,
     setValue,
     watch,
-    handleSubmit,
+    /* handleSubmit, */
     formState: { errors },
-  } = useForm<ProductFormData>();
+  } = useForm<ProductRequest>();
 
-  const precoCusto = watch("precoCusto");
-  const precoVenda = watch("precoVenda");
+  const precoCusto = watch("cost_price");
+  const precoVenda = watch("sale_price");
 
   useEffect(() => {
     if (product) {
       reset({
-        nome: product.nome,
-        descricao: product.descricao || "",
-        categoria: product.categoria || "",
-        codigoBarras: product.codigo_barras || "",
-        quantidade: product.quantidade ?? 0,
-        tamanho: product.tamanho || "",
-        precoCusto: product.preco_custo ?? 0,
-        precoVenda: product.preco_venda ?? 0,
+        name: product.name,
+        description: product.description || "",
+        category_id: product.category_id || "",
+        barcode: product.barcode || "",
+        quantity: product.quantity ?? 0,
+        size: product.size || "",
+        cost_price: product.cost_price ?? 0,
+        sale_price: product.sale_price ?? 0,
       });
     }
   }, [product, reset]);
 
-  const onSubmit = async (data: ProductFormData) => {
+  /*   const onSubmit = async (data: ProductRequest) => {
     try {
-      const updatedProduct: Product = {
+      const updatedProduct: ProductResponse = {
         id: product.id,
-        nome: data.nome,
-        descricao: data.descricao,
-        categoria: data.categoria,
-        codigo_barras: data.codigoBarras,
-        quantidade: data.quantidade,
-        tamanho: data.tamanho,
-        preco_custo: data.precoCusto,
-        preco_venda: data.precoVenda,
+        name: data.name,
+        description: data.description,
+        category_id: data.category_id,
+        barcode: data.barcode,
+        quantity: data.quantity,
+        size: data.size,
+        cost_price: data.cost_price,
+        sale_price: data.sale_price,
       };
 
       setOpen(false);
@@ -99,10 +96,10 @@ export function DialogAlter({
         error instanceof Error ? error.message : "Erro ao atualizar produto",
       );
     }
-  };
+  }; */
 
-  const categoriaSelecionada = watch("categoria");
-  const tamanhoSelecionado = watch("tamanho");
+  const categoriaSelecionada = watch("category_id");
+  const tamanhoSelecionado = watch("size");
 
   return (
     <DialogContent
@@ -118,18 +115,18 @@ export function DialogAlter({
       </DialogHeader>
 
       <CardContent className="p-8">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form /* onSubmit={handleSubmit(onSubmit)} */ className="space-y-6">
           <div className="grid grid-cols-1 md:grid-rows-1 gap-6">
             <div className="grid grid-cols-3 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="nome">Nome do Produto * </Label>
                 <Input
                   id="nome"
-                  {...register("nome", { required: true })}
+                  {...register("name", { required: true })}
                   placeholder="Ex: Camiseta Polo Azul"
                   className="h-11 bg-input border-border"
                 />
-                {errors.nome && (
+                {errors.name && (
                   <span className="text-red-500 text-sm">
                     Nome é obrigatório
                   </span>
@@ -140,7 +137,7 @@ export function DialogAlter({
                 <Label htmlFor="codigoBarras">Código de Barras *</Label>
                 <Input
                   id="codigoBarras"
-                  {...register("codigoBarras", { required: true })}
+                  {...register("barcode", { required: true })}
                   placeholder="1234567890123"
                   className="h-11 bg-input border-border"
                 />
@@ -151,7 +148,7 @@ export function DialogAlter({
                 <Input
                   id="quantidade"
                   type="number"
-                  {...register("quantidade", { valueAsNumber: true })}
+                  {...register("quantity", { valueAsNumber: true })}
                   placeholder="0"
                   min="0"
                   className="h-11 bg-input border-border"
@@ -162,7 +159,7 @@ export function DialogAlter({
                 <Label htmlFor="tamanho">Tamanho</Label>
                 <Select
                   value={tamanhoSelecionado}
-                  onValueChange={(val) => setValue("tamanho", val)}
+                  onValueChange={(val) => setValue("size", val)}
                 >
                   <SelectTrigger className="h-11 bg-input border-border">
                     <SelectValue placeholder="Selecione o tamanho" />
@@ -181,7 +178,7 @@ export function DialogAlter({
                 <Label htmlFor="categoria">Categoria *</Label>
                 <Select
                   value={categoriaSelecionada}
-                  onValueChange={(val) => setValue("categoria", val)}
+                  onValueChange={(val) => setValue("category_id", val)}
                 >
                   <SelectTrigger className="h-11 bg-input border-border">
                     <SelectValue placeholder="Selecione uma categoria" />
@@ -204,7 +201,7 @@ export function DialogAlter({
                   id="precoCusto"
                   type="number"
                   step="0.01"
-                  {...register("precoCusto", { valueAsNumber: true })}
+                  {...register("cost_price", { valueAsNumber: true })}
                   placeholder="0,00"
                   min="0"
                   className="h-11 bg-input border-border"
@@ -217,7 +214,7 @@ export function DialogAlter({
                   id="precoVenda"
                   type="number"
                   step="0.01"
-                  {...register("precoVenda", { valueAsNumber: true })}
+                  {...register("sale_price", { valueAsNumber: true })}
                   placeholder="0,00"
                   min="0"
                   className="h-11 bg-input border-border"
@@ -230,7 +227,7 @@ export function DialogAlter({
             <Label htmlFor="descricao">Descrição do Produto</Label>
             <Textarea
               id="descricao"
-              {...register("descricao")}
+              {...register("description")}
               placeholder="Descreva as características, materiais, cores disponíveis..."
               className="min-h-[100px] bg-input border-border resize-none"
             />
