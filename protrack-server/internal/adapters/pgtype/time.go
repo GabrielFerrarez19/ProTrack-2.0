@@ -84,3 +84,19 @@ func PgTimeToString(value pgtype.Time) (string, error) {
 
 	return fmt.Sprintf("%02d:%02d:%02d", h, m, s), nil
 }
+
+// ToPgDate: Go time.Time -> pgtype.Date
+func ToPgDate(t time.Time) pgtype.Date {
+	return pgtype.Date{
+		Time:  t,
+		Valid: !t.IsZero(),
+	}
+}
+
+// FromPgDate: pgtype.Date -> Go time.Time
+func FromPgDate(pgDate pgtype.Date) time.Time {
+	if !pgDate.Valid {
+		return time.Time{}
+	}
+	return pgDate.Time
+}
