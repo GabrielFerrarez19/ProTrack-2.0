@@ -35,10 +35,12 @@ FROM products
 WHERE barcode = $1
     AND deleted_at IS NULL;
 -- name: ListProductsByCompany :many
-SELECT *
-FROM products
-WHERE company_id = $1
-    AND deleted_at IS NULL;
+SELECT p.*,
+    c.name AS category_name
+FROM products p
+    INNER JOIN product_categories c ON p.category_id = c.id
+WHERE p.company_id = $1
+    AND p.deleted_at IS NULL;
 -- name: ListProductsByCategoryId :many
 SELECT *
 FROM products

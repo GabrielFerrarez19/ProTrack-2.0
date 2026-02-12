@@ -217,21 +217,43 @@ func (q *Queries) ListProductsByCategoryId(ctx context.Context, arg ListProducts
 }
 
 const listProductsByCompany = `-- name: ListProductsByCompany :many
-SELECT id, company_id, category_id, name, description, barcode, quantity, size, cost_price, sale_price, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at
-FROM products
-WHERE company_id = $1
-    AND deleted_at IS NULL
+SELECT p.id, p.company_id, p.category_id, p.name, p.description, p.barcode, p.quantity, p.size, p.cost_price, p.sale_price, p.created_by, p.updated_by, p.deleted_by, p.created_at, p.updated_at, p.deleted_at,
+    c.name AS category_name
+FROM products p
+    INNER JOIN product_categories c ON p.category_id = c.id
+WHERE p.company_id = $1
+    AND p.deleted_at IS NULL
 `
 
-func (q *Queries) ListProductsByCompany(ctx context.Context, companyID pgtype.UUID) ([]Product, error) {
+type ListProductsByCompanyRow struct {
+	ID           pgtype.UUID        `json:"id"`
+	CompanyID    pgtype.UUID        `json:"company_id"`
+	CategoryID   pgtype.UUID        `json:"category_id"`
+	Name         string             `json:"name"`
+	Description  pgtype.Text        `json:"description"`
+	Barcode      pgtype.Text        `json:"barcode"`
+	Quantity     int32              `json:"quantity"`
+	Size         pgtype.Text        `json:"size"`
+	CostPrice    pgtype.Numeric     `json:"cost_price"`
+	SalePrice    pgtype.Numeric     `json:"sale_price"`
+	CreatedBy    pgtype.UUID        `json:"created_by"`
+	UpdatedBy    pgtype.UUID        `json:"updated_by"`
+	DeletedBy    pgtype.UUID        `json:"deleted_by"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt    pgtype.Timestamptz `json:"deleted_at"`
+	CategoryName string             `json:"category_name"`
+}
+
+func (q *Queries) ListProductsByCompany(ctx context.Context, companyID pgtype.UUID) ([]ListProductsByCompanyRow, error) {
 	rows, err := q.db.Query(ctx, listProductsByCompany, companyID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Product{}
+	items := []ListProductsByCompanyRow{}
 	for rows.Next() {
-		var i Product
+		var i ListProductsByCompanyRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CompanyID,
@@ -249,6 +271,7 @@ func (q *Queries) ListProductsByCompany(ctx context.Context, companyID pgtype.UU
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
+			&i.CategoryName,
 		); err != nil {
 			return nil, err
 		}

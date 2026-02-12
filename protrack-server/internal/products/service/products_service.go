@@ -17,7 +17,7 @@ type RepositoryInterface interface {
 	GetProductByBarcode(ctx context.Context, barcode pgtype.Text) (db.Product, error)
 	GetProductById(ctx context.Context, id pgtype.UUID) (db.Product, error)
 	ListProductsByCategoryId(ctx context.Context, arg db.ListProductsByCategoryIdParams) ([]db.Product, error)
-	ListProductsByCompany(ctx context.Context, categoryID pgtype.UUID) ([]db.Product, error)
+	ListProductsByCompany(ctx context.Context, categoryID pgtype.UUID) ([]db.ListProductsByCompanyRow, error)
 	UpdateProduct(ctx context.Context, arg db.UpdateProductParams) (db.Product, error)
 }
 
@@ -158,32 +158,33 @@ func (s *Service) ListProductsByCategoryId(ctx context.Context, req domain.ListP
 	return response, nil
 }
 
-func (s *Service) ListProductsByCompany(ctx context.Context, companyId uuid.UUID) ([]domain.ProductResponse, error) {
+func (s *Service) ListProductsByCompany(ctx context.Context, companyId uuid.UUID) ([]domain.ListProductsByCompanyRow, error) {
 	products, err := s.repo.ListProductsByCompany(ctx, pgconv.ParseUUIDToPgType(companyId))
 	if err != nil {
-		return []domain.ProductResponse{}, err
+		return []domain.ListProductsByCompanyRow{}, err
 	}
 
-	var response []domain.ProductResponse
+	var response []domain.ListProductsByCompanyRow
 
 	for _, product := range products {
-		response = append(response, domain.ProductResponse{
-			ID:          pgconv.PgUUIDToUUID(product.ID),
-			CompanyID:   pgconv.PgUUIDToUUID(product.CompanyID),
-			CategoryID:  pgconv.PgUUIDToUUID(product.CategoryID),
-			Name:        product.Name,
-			Description: pgconv.ParsePgTextToString(product.Description),
-			Barcode:     pgconv.ParsePgTextToString(product.Barcode),
-			Quantity:    product.Quantity,
-			Size:        pgconv.ParsePgTextToString(product.Size),
-			CostPrice:   pgconv.PgNumericToFloat64(product.CostPrice),
-			SalePrice:   pgconv.PgNumericToFloat64(product.SalePrice),
-			CreatedBy:   pgconv.PgUUIDToUUID(product.CreatedBy),
-			UpdatedBy:   pgconv.PgUUIDToUUID(product.UpdatedBy),
-			DeletedBy:   pgconv.PgUUIDToUUID(product.DeletedBy),
-			CreatedAt:   pgconv.PgTimestamptzToTime(product.CreatedAt),
-			UpdatedAt:   pgconv.PgTimestamptzToTime(product.UpdatedAt),
-			DeletedAt:   pgconv.PgTimestamptzToTime(product.DeletedAt),
+		response = append(response, domain.ListProductsByCompanyRow{
+			ID:           pgconv.PgUUIDToUUID(product.ID),
+			CompanyID:    pgconv.PgUUIDToUUID(product.CompanyID),
+			CategoryID:   pgconv.PgUUIDToUUID(product.CategoryID),
+			Name:         product.Name,
+			Description:  pgconv.ParsePgTextToString(product.Description),
+			Barcode:      pgconv.ParsePgTextToString(product.Barcode),
+			Quantity:     product.Quantity,
+			Size:         pgconv.ParsePgTextToString(product.Size),
+			CostPrice:    pgconv.PgNumericToFloat64(product.CostPrice),
+			SalePrice:    pgconv.PgNumericToFloat64(product.SalePrice),
+			CreatedBy:    pgconv.PgUUIDToUUID(product.CreatedBy),
+			UpdatedBy:    pgconv.PgUUIDToUUID(product.UpdatedBy),
+			DeletedBy:    pgconv.PgUUIDToUUID(product.DeletedBy),
+			CreatedAt:    pgconv.PgTimestamptzToTime(product.CreatedAt),
+			UpdatedAt:    pgconv.PgTimestamptzToTime(product.UpdatedAt),
+			DeletedAt:    pgconv.PgTimestamptzToTime(product.DeletedAt),
+			CategoryName: product.CategoryName,
 		})
 	}
 
