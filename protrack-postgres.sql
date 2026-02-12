@@ -49,7 +49,7 @@ UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 -- =======================
 -- TABELA CLIENTES
 -- =======================
-CREATE TABLE IF NOT EXISTS clientes (
+CREATE TABLE IF NOT EXISTS customers (
   id SERIAL PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
   data_nascimento DATE NOT NULL,
