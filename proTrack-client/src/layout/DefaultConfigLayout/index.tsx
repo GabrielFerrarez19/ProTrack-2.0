@@ -128,7 +128,7 @@ export const DefaultConfigLayout = () => {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/status")}
             className="shrink-0 cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />

@@ -106,7 +106,7 @@ export function ProductTable({
             >
               <TableCell className="font-medium">{product.name}</TableCell>
               <TableCell>{product.barcode ?? "—"}</TableCell>
-              <TableCell>{product.category_id ?? "—"}</TableCell>
+              <TableCell>{product.category_name ?? "—"}</TableCell>
               <TableCell>{product.size ?? "—"}</TableCell>
               <TableCell>
                 {product.sale_price != null
