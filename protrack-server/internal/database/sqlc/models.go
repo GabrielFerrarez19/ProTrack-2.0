@@ -35,6 +35,36 @@ type Company struct {
 	DeletedAt           pgtype.Timestamptz `json:"deleted_at"`
 }
 
+type Customer struct {
+	ID                  pgtype.UUID        `json:"id"`
+	CompanyID           pgtype.UUID        `json:"company_id"`
+	FullName            string             `json:"full_name"`
+	BirthDate           pgtype.Date        `json:"birth_date"`
+	Cpf                 string             `json:"cpf"`
+	Rg                  pgtype.Text        `json:"rg"`
+	MaritalStatus       pgtype.Text        `json:"marital_status"`
+	Gender              interface{}        `json:"gender"`
+	Whatsapp            pgtype.Text        `json:"whatsapp"`
+	MobilePhone         pgtype.Text        `json:"mobile_phone"`
+	HomePhone           pgtype.Text        `json:"home_phone"`
+	Email               string             `json:"email"`
+	AddressStreet       pgtype.Text        `json:"address_street"`
+	AddressNumber       pgtype.Text        `json:"address_number"`
+	AddressComplement   pgtype.Text        `json:"address_complement"`
+	AddressNeighborhood pgtype.Text        `json:"address_neighborhood"`
+	AddressCity         pgtype.Text        `json:"address_city"`
+	AddressState        pgtype.Text        `json:"address_state"`
+	AddressZipcode      pgtype.Text        `json:"address_zipcode"`
+	AddressCountry      pgtype.Text        `json:"address_country"`
+	BalanceDue          pgtype.Numeric     `json:"balance_due"`
+	CreatedBy           pgtype.UUID        `json:"created_by"`
+	UpdatedBy           pgtype.UUID        `json:"updated_by"`
+	DeletedBy           pgtype.UUID        `json:"deleted_by"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt           pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type Department struct {
 	ID          pgtype.UUID        `json:"id"`
 	CompanyID   pgtype.UUID        `json:"company_id"`
