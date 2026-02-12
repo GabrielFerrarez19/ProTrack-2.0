@@ -26,4 +26,5 @@ export interface ProductResponse {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  category_name: string;
 }
