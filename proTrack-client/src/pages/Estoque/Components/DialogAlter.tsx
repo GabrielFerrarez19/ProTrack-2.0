@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -19,19 +19,10 @@ import {
   SelectItem,
 } from "../../../components/ui/select";
 
-/* import { toast } from "sonner"; */
 import type { ProductRequest, ProductResponse } from "@/@types/product";
-
-const categorias = [
-  "Roupas",
-  "Calçados",
-  "Acessórios",
-  "Eletrônicos",
-  "Casa e Decoração",
-  "Esportes",
-  "Beleza",
-  "Livros",
-];
+import type { ProductCategoryResponse } from "@/@types/product_categories";
+import { getProductCategories } from "@/services/product_categories";
+import { toast } from "sonner";
 
 const tamanhos = ["PP", "P", "M", "G", "GG", "XG", "Único"];
 
@@ -98,8 +89,26 @@ export function DialogAlter({
     }
   }; */
 
-  const categoriaSelecionada = watch("category_id");
+  const categoriaSelecionada =
+    watch("category_id") || product?.category_id || "";
   const tamanhoSelecionado = watch("size");
+  const [categories, setCategories] = useState<ProductCategoryResponse[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const data = await getProductCategories();
+        setCategories(data);
+      } catch (err) {
+        console.error("Erro ao buscar categorias", err);
+        toast.error("Erro ao carregar categorias");
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    }
+    loadCategories();
+  }, []);
 
   return (
     <DialogContent
@@ -179,14 +188,28 @@ export function DialogAlter({
                 <Select
                   value={categoriaSelecionada}
                   onValueChange={(val) => setValue("category_id", val)}
+                  disabled={isLoadingCategories}
                 >
                   <SelectTrigger className="h-11 bg-input border-border">
-                    <SelectValue placeholder="Selecione uma categoria" />
+                    <SelectValue
+                      placeholder={
+                        isLoadingCategories
+                          ? "Carregando..."
+                          : "Selecione uma categoria"
+                      }
+                    />
                   </SelectTrigger>
+
                   <SelectContent>
-                    {categorias.map((categoria) => (
-                      <SelectItem key={categoria} value={categoria}>
-                        {categoria}
+                    {(categories ?? []).map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: category.color }}
+                          />
+                          {category.name}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -266,10 +289,22 @@ export function DialogAlter({
             <Button
               type="button"
               variant="outline"
-              onClick={() => reset()}
+              onClick={() =>
+                product &&
+                reset({
+                  name: product.name,
+                  description: product.description || "",
+                  category_id: product.category_id || "",
+                  barcode: product.barcode || "",
+                  quantity: product.quantity ?? 0,
+                  size: product.size || "",
+                  cost_price: product.cost_price ?? 0,
+                  sale_price: product.sale_price ?? 0,
+                })
+              }
               className="border-border hover:bg-muted h-11 px-8"
             >
-              Limpar
+              Desfazer alterações
             </Button>
           </div>
         </form>
