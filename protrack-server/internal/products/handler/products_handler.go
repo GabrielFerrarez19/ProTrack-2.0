@@ -131,7 +131,13 @@ func (h *Handler) ListProductsByCategoryId(c *gin.Context) {
 }
 
 func (h *Handler) ListProductsByCompany(c *gin.Context) {
-	companyIdStr := c.Param("companyId")
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "company_id null"})
+		return
+	}
+
+	companyIdStr := companyIdAny.(string)
 
 	companyId, err := uuid.Parse(companyIdStr)
 	if err != nil {
