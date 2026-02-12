@@ -16,9 +16,9 @@ export function Estoque() {
   const filteredProducts = products.filter((product) => {
     const term = searchTerm.toLowerCase();
     return (
-      product.nome.toLowerCase().includes(term) ||
-      (product.codigo_barras?.includes(searchTerm) ?? false) ||
-      (product.categoria?.toLowerCase().includes(term) ?? false)
+      product.name.toLowerCase().includes(term) ||
+      (product.barcode?.includes(searchTerm) ?? false) ||
+      (product.category_id?.toLowerCase().includes(term) ?? false)
     );
   });
 

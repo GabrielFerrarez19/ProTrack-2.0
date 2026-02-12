@@ -17,17 +17,6 @@ export interface TypeHeader {
   title: string;
 }
 
-export interface ProductFormData {
-  nome: string;
-  descricao: string;
-  categoria: string;
-  codigoBarras: string;
-  quantidade: number;
-  tamanho: string;
-  precoCusto: number;
-  precoVenda: number;
-}
-
 export interface ClienteFormData {
   id: number;
   nome: string;
