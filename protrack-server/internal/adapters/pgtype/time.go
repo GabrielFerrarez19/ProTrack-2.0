@@ -100,3 +100,27 @@ func FromPgDate(pgDate pgtype.Date) time.Time {
 	}
 	return pgDate.Time
 }
+
+// StringToPgDate converte uma string "YYYY-MM-DD" para pgtype.Date
+func StringToPgDate(dateStr string) pgtype.Date {
+	// Tenta fazer o parse da data vinda do frontend (input date padrão HTML)
+	t, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		// Se a data for inválida ou vazia, retorna um pgtype nulo para o banco
+		return pgtype.Date{Valid: false}
+	}
+
+	return pgtype.Date{
+		Time:  t,
+		Valid: true,
+	}
+}
+
+// PgDateToString converte pgtype.Date para string "YYYY-MM-DD"
+func PgDateToString(pgDate pgtype.Date) string {
+	if !pgDate.Valid {
+		return "" // Retorna string vazia se for nulo no banco
+	}
+	// Formatamos usando o layout padrão de data do Go
+	return pgDate.Time.Format("2006-01-02")
+}
