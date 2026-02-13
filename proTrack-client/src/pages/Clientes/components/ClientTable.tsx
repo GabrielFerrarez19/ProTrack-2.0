@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import type { Cliente } from "../../../@types/types.components";
 import {
   Table,
   TableBody,
@@ -12,14 +11,16 @@ import { Dialog } from "../../../components/ui/dialog";
 import { Button } from "../../../components/ui/button";
 import { DialogAlterCliente } from "./DialogAlterCliente";
 import { formatarDataNascimento } from "../../../utils/functions";
+import type { CustomerResponse } from "@/@types/customers";
 
 interface ClientTableProps {
-  clientes: Cliente[];
+  clientes: CustomerResponse[];
   onClienteUpdated?: () => void; // Nova prop para callback de atualização
 }
 
 export function ClientTable({ clientes, onClienteUpdated }: ClientTableProps) {
-  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+  const [selectedCliente, setSelectedCliente] =
+    useState<CustomerResponse | null>(null);
   const [open, setOpen] = useState(false);
 
   // Estados de paginação
@@ -99,20 +100,20 @@ export function ClientTable({ clientes, onClienteUpdated }: ClientTableProps) {
                 setOpen(true);
               }}
             >
-              <TableCell className="font-medium">{cliente.nome}</TableCell>
+              <TableCell className="font-medium">{cliente.full_name}</TableCell>
               <TableCell>
-                {cliente.dataNascimento
-                  ? formatarDataNascimento(cliente.dataNascimento)
+                {cliente.birth_date
+                  ? formatarDataNascimento(cliente.birth_date)
                   : "—"}
               </TableCell>
               <TableCell>{cliente.cpf}</TableCell>
-              <TableCell>{cliente.telefoneWhatsapp ?? "—"}</TableCell>
+              <TableCell>{cliente.whatsapp ?? "—"}</TableCell>
               <TableCell>{cliente.email}</TableCell>
-              <TableCell>{cliente.cep ?? "—"}</TableCell>
-              <TableCell>{cliente.endereco ?? "—"}</TableCell>
-              <TableCell>{cliente.numero ?? "—"}</TableCell>
-              <TableCell>{cliente.bairro ?? "—"}</TableCell>
-              <TableCell>{cliente.cidade ?? "—"}</TableCell>
+              <TableCell>{cliente.address_zipcode ?? "—"}</TableCell>
+              <TableCell>{cliente.address_street ?? "—"}</TableCell>
+              <TableCell>{cliente.address_number ?? "—"}</TableCell>
+              <TableCell>{cliente.address_neighborhood ?? "—"}</TableCell>
+              <TableCell>{cliente.address_city ?? "—"}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -151,7 +152,7 @@ export function ClientTable({ clientes, onClienteUpdated }: ClientTableProps) {
                   >
                     {page}
                   </Button>
-                )
+                ),
               )}
             </div>
 
