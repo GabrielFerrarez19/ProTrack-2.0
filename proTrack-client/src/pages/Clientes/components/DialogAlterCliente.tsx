@@ -20,7 +20,6 @@ import {
 import { toast } from "sonner";
 import type {
   ClienteFormData,
-  Cliente,
   VendaResponse,
 } from "../../../@types/types.components";
 import {
@@ -38,21 +37,22 @@ import {
 } from "../../../components/ui/table";
 import { ResumoVendas } from "./ResumoVendas";
 import { Badge } from "../../../components/ui/badge";
+import type { CustomerResponse } from "@/@types/customers";
 
 interface DialogAlterClienteProps {
   setOpen: (value: boolean) => void;
-  cliente: Cliente;
+  cliente: CustomerResponse;
   onClienteUpdated?: () => void;
 }
 
 export function DialogAlterCliente({
-  setOpen,
+  /* setOpen, */
   cliente,
   onClienteUpdated,
 }: DialogAlterClienteProps) {
   const {
     register,
-    handleSubmit,
+    /* handleSubmit, */
     reset,
     setValue,
     watch,
@@ -68,24 +68,24 @@ export function DialogAlterCliente({
     if (cliente) {
       reset({
         id: parseInt(cliente.id),
-        nome: cliente.nome,
-        dataNascimento: formatarDataParaInput(cliente.dataNascimento),
+        nome: cliente.full_name,
+        dataNascimento: formatarDataParaInput(cliente.birth_date),
         cpf: cliente.cpf,
         rg: cliente.rg || "",
-        estadoCivil: cliente.estadoCivil || "",
-        sexo: cliente.sexo || "",
-        telefoneCelular: cliente.telefoneCelular || "",
-        telefoneWhatsapp: cliente.telefoneWhatsapp || "",
-        telefoneResidencial: cliente.telefoneResidencial || "",
+        estadoCivil: cliente.marital_status || "",
+        sexo: cliente.gender || "",
+        telefoneCelular: cliente.mobile_phone || "",
+        telefoneWhatsapp: cliente.whatsapp || "",
+        telefoneResidencial: cliente.home_phone || "",
         email: cliente.email,
-        cep: cliente.cep || "",
-        endereco: cliente.endereco || "",
-        numero: cliente.numero || "",
-        complemento: cliente.complemento || "",
-        bairro: cliente.bairro || "",
-        cidade: cliente.cidade || "",
+        cep: cliente.address_zipcode || "",
+        endereco: cliente.address_street || "",
+        numero: cliente.address_number || "",
+        complemento: cliente.address_complement || "",
+        bairro: cliente.address_neighborhood || "",
+        cidade: cliente.address_city || "",
       });
-      setValorAPagar(cliente.valorAPagar ?? 0); // inicializa valor a pagar
+      setValorAPagar(cliente.balance_due ?? 0); // inicializa valor a pagar
     }
   }, [cliente, reset]);
 
@@ -108,14 +108,14 @@ export function DialogAlterCliente({
 
   useEffect(() => {
     if (cliente) {
-      setValorAPagar(cliente.valorAPagar ?? 0); // pega do cliente
+      setValorAPagar(cliente.balance_due ?? 0); // pega do cliente
     }
   }, [cliente]);
 
-  console.log("valor a pagar", cliente.valorAPagar);
+  console.log("valor a pagar", cliente.balance_due);
 
   // Envio do formulário
-  const onSubmit = async (data: ClienteFormData) => {
+  /*   const onSubmit = async (data: ClienteFormData) => {
     if (!cliente.id) {
       toast.error("ID do cliente ausente!");
       return;
@@ -125,7 +125,7 @@ export function DialogAlterCliente({
     reset();
     setOpen(false);
     if (onClienteUpdated) onClienteUpdated();
-  };
+  }; */
 
   // Função para registrar apenas o pagamento
   const onRegistrarPagamento = async () => {
@@ -239,7 +239,7 @@ export function DialogAlterCliente({
 
       {/* Formulário de Cliente */}
       <CardContent className="p-8">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <form /* onSubmit={handleSubmit(onSubmit)} */ className="space-y-8">
           {/* Dados Pessoais */}
           <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <legend className="text-lg font-medium text-muted-foreground mb-2 col-span-full">
