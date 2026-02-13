@@ -155,7 +155,7 @@ export function ClientForm() {
               Contato
             </legend>
 
-            <div className="space-y-2 col-span-full">
+            <div className="space-y-2 ">
               <Label htmlFor="email">Email *</Label>
               <Input
                 id="email"
@@ -167,10 +167,20 @@ export function ClientForm() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="telefonePessoal">Telefone pessoal</Label>
+              <Input
+                id="telefonePessoal"
+                {...register("mobile_phone")}
+                placeholder="(11) 97654-3210"
+                className="h-11 bg-input border-border"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="telefoneWhatsapp">Telefone WhatsApp</Label>
               <Input
                 id="telefoneWhatsapp"
-                {...register("mobile_phone")}
+                {...register("whatsapp")}
                 placeholder="(11) 97654-3210"
                 className="h-11 bg-input border-border"
               />
