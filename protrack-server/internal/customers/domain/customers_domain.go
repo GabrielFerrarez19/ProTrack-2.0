@@ -13,7 +13,7 @@ type Customer struct {
 	ID                  uuid.UUID    `json:"id"`
 	CompanyID           uuid.UUID    `json:"company_id"`
 	FullName            string       `json:"full_name"`
-	BirthDate           time.Time    `json:"birth_date"`
+	BirthDate           string       `json:"birth_date"`
 	Cpf                 string       `json:"cpf"`
 	Rg                  string       `json:"rg"`
 	MaritalStatus       string       `json:"marital_status"`
@@ -42,7 +42,7 @@ type Customer struct {
 type CreateCustomersRequest struct {
 	CompanyID           uuid.UUID    `json:"company_id"`
 	FullName            string       `json:"full_name"`
-	BirthDate           time.Time    `json:"birth_date"`
+	BirthDate           string       `json:"birth_date"`
 	Cpf                 string       `json:"cpf"`
 	Rg                  string       `json:"rg"`
 	MaritalStatus       string       `json:"marital_status"`
@@ -78,7 +78,7 @@ type UpdateBalanceDueCustomerRequest struct {
 type UpdateCustomerRequest struct {
 	ID                  uuid.UUID    `json:"id"`
 	FullName            string       `json:"full_name"`
-	BirthDate           time.Time    `json:"birth_date"`
+	BirthDate           string       `json:"birth_date"`
 	Cpf                 string       `json:"cpf"`
 	Rg                  string       `json:"rg"`
 	MaritalStatus       string       `json:"marital_status"`
@@ -103,7 +103,7 @@ type CustomerResponse struct {
 	ID                  uuid.UUID    `json:"id"`
 	CompanyID           uuid.UUID    `json:"company_id"`
 	FullName            string       `json:"full_name"`
-	BirthDate           time.Time    `json:"birth_date"`
+	BirthDate           string       `json:"birth_date"`
 	Cpf                 string       `json:"cpf"`
 	Rg                  string       `json:"rg"`
 	MaritalStatus       string       `json:"marital_status"`
@@ -134,8 +134,8 @@ func ApplyUpdateCustomerParams(req UpdateCustomerRequest, arg *db.UpdateCustomer
 		arg.FullName = req.FullName
 	}
 
-	if req.BirthDate != (time.Time{}) {
-		arg.BirthDate = pgconv.ToPgDate(req.BirthDate)
+	if req.BirthDate != "" {
+		arg.BirthDate = pgconv.StringToPgDate(req.BirthDate)
 	}
 
 	if req.Cpf != "" {
