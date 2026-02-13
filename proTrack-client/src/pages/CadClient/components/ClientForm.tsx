@@ -16,29 +16,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select";
-import type { ClienteFormData } from "../../../@types/types.components";
 
 // Sonner Toast
 import { toast } from "sonner";
+import { useState } from "react";
+import { CreateCustomers } from "@/services/customers";
+import type { CustomerRequest, Gender } from "@/@types/customers";
 
 export function ClientForm() {
-  const { register, setValue, handleSubmit, reset } =
-    useForm<ClienteFormData>();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<CustomerRequest>();
 
-  const onSubmit = async (data: ClienteFormData) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onSubmit = async (data: CustomerRequest) => {
+    setIsLoading(true);
     try {
-      reset();
+      await CreateCustomers(data);
+
       toast.success("Cliente cadastrado com sucesso!", {
         style: { background: "#4ade80", color: "#065f46" }, // verde pastel
       });
-    } catch (error) {
-      console.error("Erro ao cadastrar cliente:", error);
+      reset();
+    } catch {
+      console.error("Erro ao cadastrar cliente:", errors);
       toast.error(
         "Erro ao cadastrar cliente. Verifique os dados e tente novamente.",
         {
           style: { background: "#f87171", color: "#7f1d1d" }, // vermelho pastel
         },
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -62,7 +76,7 @@ export function ClientForm() {
               <Label htmlFor="nome">Nome completo *</Label>
               <Input
                 id="nome"
-                {...register("nome", { required: true })}
+                {...register("full_name", { required: true })}
                 placeholder="Ex: João da Silva"
                 className="h-11 bg-input border-border"
               />
@@ -73,7 +87,7 @@ export function ClientForm() {
               <Input
                 id="dataNascimento"
                 type="date"
-                {...register("dataNascimento", { required: true })}
+                {...register("birth_date", { required: true })}
                 className="h-11 bg-input border-border"
               />
             </div>
@@ -81,20 +95,26 @@ export function ClientForm() {
             <div className="space-y-2 grid grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="sexo">Sexo</Label>
-                <Select onValueChange={(val) => setValue("sexo", val)}>
+                <Select
+                  onValueChange={(val) => setValue("gender", val as Gender)}
+                >
                   <SelectTrigger className="h-11 bg-input border-border">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Masculino">Masculino</SelectItem>
-                    <SelectItem value="Feminino">Feminino</SelectItem>
-                    <SelectItem value="Outro">Outro</SelectItem>
+                    {/* O valor deve ser o que o Go espera no Enum */}
+                    <SelectItem value="MALE">Masculino</SelectItem>
+                    <SelectItem value="FEMALE">Feminino</SelectItem>
+                    <SelectItem value="OTHER">Outro</SelectItem>
+                    <SelectItem value="NOT_SAY">Prefiro não dizer</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="estadoCivil">Estado civil</Label>
-                <Select onValueChange={(val) => setValue("estadoCivil", val)}>
+                <Select
+                  onValueChange={(val) => setValue("marital_status", val)}
+                >
                   <SelectTrigger className="h-11 bg-input border-border">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
@@ -147,20 +167,10 @@ export function ClientForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="telefoneCelular">Telefone celular</Label>
-              <Input
-                id="telefoneCelular"
-                {...register("telefoneCelular")}
-                placeholder="(11) 91234-5678"
-                className="h-11 bg-input border-border"
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="telefoneWhatsapp">Telefone WhatsApp</Label>
               <Input
                 id="telefoneWhatsapp"
-                {...register("telefoneWhatsapp")}
+                {...register("mobile_phone")}
                 placeholder="(11) 97654-3210"
                 className="h-11 bg-input border-border"
               />
@@ -170,7 +180,7 @@ export function ClientForm() {
               <Label htmlFor="telefoneResidencial">Telefone residencial</Label>
               <Input
                 id="telefoneResidencial"
-                {...register("telefoneResidencial")}
+                {...register("home_phone")}
                 placeholder="(11) 3456-7890"
                 className="h-11 bg-input border-border"
               />
@@ -187,7 +197,7 @@ export function ClientForm() {
               <Label htmlFor="cep">CEP</Label>
               <Input
                 id="cep"
-                {...register("cep")}
+                {...register("address_zipcode")}
                 placeholder="00000-000"
                 className="h-11 bg-input border-border"
               />
@@ -197,7 +207,7 @@ export function ClientForm() {
               <Label htmlFor="endereco">Endereço</Label>
               <Input
                 id="endereco"
-                {...register("endereco")}
+                {...register("address_street")}
                 placeholder="Rua Exemplo"
                 className="h-11 bg-input border-border"
               />
@@ -207,7 +217,7 @@ export function ClientForm() {
               <Label htmlFor="numero">Número</Label>
               <Input
                 id="numero"
-                {...register("numero")}
+                {...register("address_number")}
                 placeholder="123"
                 className="h-11 bg-input border-border"
               />
@@ -217,7 +227,7 @@ export function ClientForm() {
               <Label htmlFor="complemento">Complemento</Label>
               <Input
                 id="complemento"
-                {...register("complemento")}
+                {...register("address_complement")}
                 placeholder="Casa / Apto / Bloco"
                 className="h-11 bg-input border-border"
               />
@@ -227,7 +237,7 @@ export function ClientForm() {
               <Label htmlFor="bairro">Bairro</Label>
               <Input
                 id="bairro"
-                {...register("bairro")}
+                {...register("address_neighborhood")}
                 placeholder="Centro"
                 className="h-11 bg-input border-border"
               />
@@ -237,7 +247,27 @@ export function ClientForm() {
               <Label htmlFor="cidade">Cidade</Label>
               <Input
                 id="cidade"
-                {...register("cidade")}
+                {...register("address_city")}
+                placeholder="São Paulo"
+                className="h-11 bg-input border-border"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="estado">Estado</Label>
+              <Input
+                id="estado"
+                {...register("address_state")}
+                placeholder="São Paulo"
+                className="h-11 bg-input border-border"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="pais">Pais</Label>
+              <Input
+                id="pais"
+                {...register("address_country")}
                 placeholder="São Paulo"
                 className="h-11 bg-input border-border"
               />
@@ -250,7 +280,7 @@ export function ClientForm() {
               type="submit"
               className=" cursor-pointer text-primary-foreground font-medium px-8 h-11 shadow-soft bg-gradient-to-r from-[#628DFD] to-[#6F31FF] hover:from-[#7A9BFD] hover:to-[#B597F9]"
             >
-              Cadastrar Cliente
+              {isLoading ? "Cadastrando..." : "Cadastrar Cliente"}
             </Button>
             <Button
               type="button"
