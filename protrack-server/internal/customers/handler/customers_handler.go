@@ -8,6 +8,7 @@ import (
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/customers/service"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 type Handler struct {
@@ -26,9 +27,16 @@ func (h *Handler) CreateCustomer(c *gin.Context) {
 	userIdAny, exists := c.Get("sub")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "userId is null"})
+		return
 	}
 
-	userID := userIdAny.(uuid.UUID)
+	userIdStr := userIdAny.(string)
+
+	userID, err := uuid.Parse(userIdStr)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	companyIdAny, exists := c.Get("company_id")
 	if !exists {
@@ -40,14 +48,14 @@ func (h *Handler) CreateCustomer(c *gin.Context) {
 
 	var req domain.CreateCustomersRequest
 
-	req.CompanyID = companyId
-
-	req.CreatedBy = userID
-
 	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Error().Err(err).Msg("erro no JSON")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	req.CompanyID = companyId
+	req.CreatedBy = userID
 
 	id, err := h.service.CreateCustomer(c.Request.Context(), req)
 	if err != nil {
@@ -142,7 +150,13 @@ func (h *Handler) UpdateBalanceDueCustomer(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "userId is null"})
 	}
 
-	userID := userIdAny.(uuid.UUID)
+	userIdStr := userIdAny.(string)
+
+	userID, err := uuid.Parse(userIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	idStr := c.Param("id")
 
@@ -174,7 +188,13 @@ func (h *Handler) UpdateCustomer(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "userId is null"})
 	}
 
-	userID := userIdAny.(uuid.UUID)
+	userIdStr := userIdAny.(string)
+
+	userID, err := uuid.Parse(userIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	idStr := c.Param("id")
 
