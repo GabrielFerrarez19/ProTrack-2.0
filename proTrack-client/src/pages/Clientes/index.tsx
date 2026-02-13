@@ -16,15 +16,15 @@ export function Cliente() {
   const filteredClientes = clientes.filter((cliente) => {
     const term = searchTerm.toLowerCase();
     return (
-      cliente.nome.toLowerCase().includes(term) ||
+      cliente.full_name.toLowerCase().includes(term) ||
       cliente.cpf.toLowerCase().includes(term) ||
       cliente.email.toLowerCase().includes(term) ||
-      cliente.telefoneWhatsapp?.toLowerCase().includes(term) ||
-      cliente.telefoneCelular?.toLowerCase().includes(term) ||
-      cliente.telefoneResidencial?.toLowerCase().includes(term) ||
-      cliente.endereco?.toLowerCase().includes(term) ||
-      cliente.cidade?.toLowerCase().includes(term) ||
-      cliente.bairro?.toLowerCase().includes(term)
+      cliente.whatsapp?.toLowerCase().includes(term) ||
+      cliente.mobile_phone?.toLowerCase().includes(term) ||
+      cliente.home_phone?.toLowerCase().includes(term) ||
+      cliente.address_street?.toLowerCase().includes(term) ||
+      cliente.address_city?.toLowerCase().includes(term) ||
+      cliente.address_neighborhood?.toLowerCase().includes(term)
     );
   });
 
