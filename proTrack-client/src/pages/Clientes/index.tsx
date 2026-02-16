@@ -13,7 +13,7 @@ export function Cliente() {
   const { clientes, loading, error, reload } = useClientes();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredClientes = clientes.filter((cliente) => {
+  const filteredClientes = (clientes ?? []).filter((cliente) => {
     const term = searchTerm.toLowerCase();
     return (
       cliente.full_name.toLowerCase().includes(term) ||
