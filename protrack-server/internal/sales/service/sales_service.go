@@ -112,7 +112,7 @@ func (s *Service) ListSales(ctx context.Context, companyId uuid.UUID) ([]domain.
 	return response, nil
 }
 
-func (s *Service) UpdateSaleStatus(ctx context.Context, reqId domain.GetSaleByIdRequest, req domain.UpdateSaleStatusRequest) error {
+func (s *Service) UpdateSaleStatus(ctx context.Context, id uuid.UUID, req domain.UpdateSaleStatusRequest) error {
 	sale, err := s.repo.GetSaleById(ctx, db.GetSaleByIdParams{
 		ID:        pgconv.ParseUUIDToPgType(req.ID),
 		CompanyID: pgconv.ParseUUIDToPgType(req.CompanyID),
@@ -124,7 +124,7 @@ func (s *Service) UpdateSaleStatus(ctx context.Context, reqId domain.GetSaleById
 	arg := db.UpdateSaleStatusParams{
 		Status:    sale.Status,
 		UpdatedBy: sale.UpdatedBy,
-		ID:        sale.ID,
+		ID:        pgconv.ParseUUIDToPgType(id),
 		CompanyID: sale.CompanyID,
 	}
 
