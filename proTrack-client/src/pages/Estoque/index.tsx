@@ -13,7 +13,7 @@ export function Estoque() {
   const { products, loading, error, reload } = useProdutos();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = (products ?? []).filter((product) => {
     const term = searchTerm.toLowerCase();
     return (
       product.name.toLowerCase().includes(term) ||

@@ -72,7 +72,7 @@ export function Categorias({
                   {tipoCategoria === "receita" ? "Receitas" : "Despesas"}
                 </h4>
                 <div className="space-y-2">
-                  {categorias
+                  {(categorias ?? [])
                     .filter((c) => c.tipo === tipoCategoria)
                     .map((categoria) => (
                       <div
