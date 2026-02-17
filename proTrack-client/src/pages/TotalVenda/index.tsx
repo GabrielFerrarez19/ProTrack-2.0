@@ -15,7 +15,7 @@ export function TotalVendas() {
   console.log("PaginaVendas", vendas);
 
   // Filtrar vendas baseado no termo de busca
-  const filteredVendas = vendas.filter((venda) => {
+  const filteredVendas = (vendas ?? []).filter((venda) => {
     const searchLower = searchTerm.toLowerCase();
     return (
       venda.id.toString().includes(searchLower) ||
