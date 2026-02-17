@@ -16,12 +16,14 @@ type Querier interface {
 	CreateDepartment(ctx context.Context, arg CreateDepartmentParams) (Department, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
 	CreateProductCategory(ctx context.Context, arg CreateProductCategoryParams) (ProductCategory, error)
+	CreateSale(ctx context.Context, arg CreateSaleParams) (pgtype.UUID, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteCompany(ctx context.Context, arg DeleteCompanyParams) error
 	DeleteCustomer(ctx context.Context, arg DeleteCustomerParams) error
 	DeleteDepartment(ctx context.Context, arg DeleteDepartmentParams) error
 	DeleteProduct(ctx context.Context, arg DeleteProductParams) error
 	DeleteProductCategory(ctx context.Context, arg DeleteProductCategoryParams) error
+	DeleteSale(ctx context.Context, arg DeleteSaleParams) error
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
 	GetCompanyByDocument(ctx context.Context, document pgtype.Text) (Company, error)
 	GetCompanyByID(ctx context.Context, id pgtype.UUID) (Company, error)
@@ -31,6 +33,7 @@ type Querier interface {
 	GetProductByBarcode(ctx context.Context, barcode pgtype.Text) (Product, error)
 	GetProductById(ctx context.Context, id pgtype.UUID) (Product, error)
 	GetProductCategoryById(ctx context.Context, id pgtype.UUID) (ProductCategory, error)
+	GetSaleById(ctx context.Context, arg GetSaleByIdParams) (GetSaleByIdRow, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 	ListCompanies(ctx context.Context) ([]Company, error)
@@ -39,6 +42,7 @@ type Querier interface {
 	ListProductCategoryByCompanyId(ctx context.Context, companyID pgtype.UUID) ([]ProductCategory, error)
 	ListProductsByCategoryId(ctx context.Context, arg ListProductsByCategoryIdParams) ([]Product, error)
 	ListProductsByCompany(ctx context.Context, companyID pgtype.UUID) ([]ListProductsByCompanyRow, error)
+	ListSales(ctx context.Context, companyID pgtype.UUID) ([]ListSalesRow, error)
 	ListUsers(ctx context.Context) ([]User, error)
 	SetCompanyStatus(ctx context.Context, arg SetCompanyStatusParams) (int64, error)
 	SetProductCategoryStatus(ctx context.Context, arg SetProductCategoryStatusParams) (int64, error)
@@ -50,6 +54,7 @@ type Querier interface {
 	UpdatePasswordHash(ctx context.Context, arg UpdatePasswordHashParams) error
 	UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error)
 	UpdateProductCategory(ctx context.Context, arg UpdateProductCategoryParams) (ProductCategory, error)
+	UpdateSaleStatus(ctx context.Context, arg UpdateSaleStatusParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateUserCompanyAndRole(ctx context.Context, arg UpdateUserCompanyAndRoleParams) error
 }
