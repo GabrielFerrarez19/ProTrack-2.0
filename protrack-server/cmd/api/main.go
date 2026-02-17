@@ -29,6 +29,9 @@ import (
 	productsCategoriesHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/handler"
 	productsCategoriesRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/repository"
 	productsCategoriesService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/service"
+	salesHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/handler"
+	salesRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/repository"
+	salesService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/service"
 	usersHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/handler"
 	usersRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/repository"
 	usersService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/service"
@@ -80,6 +83,7 @@ func main() {
 	productsCategoriesRepository := productsCategoriesRepository.NewRepository(db.Pool)
 	productsRepository := productsRepository.NewRepository(db.Pool)
 	customersRepository := customersRepository.NewRepository(db.Pool)
+	salesRepository := salesRepository.NewRepository(db.Pool)
 
 	usersService := usersService.NewService(usersRepository, db.Pool)
 	companiesService := companiesService.NewService(db.Pool, companiesRepository, usersRepository)
@@ -88,6 +92,7 @@ func main() {
 	productsService := productsService.NewService(productsRepository)
 	authService := authService.NewService(usersService, jwtManager)
 	customersService := customersService.NewService(customersRepository, db.Pool)
+	salesService := salesService.NewService(salesRepository,db.Pool)
 
 	usersHandler := usersHandler.NewHandler(usersService, jwtManager)
 	companiesHandler := companiesHandler.NewHandler(companiesService, jwtManager)
@@ -96,6 +101,7 @@ func main() {
 	productsHandler := productsHandler.NewHandler(productsService, jwtManager)
 	authHandler := authHandler.NewHandler(authService, jwtManager)
 	customersHandler := customersHandler.NewHandler(customersService, jwtManager)
+	salesHandler := salesHandler.NewHandler(salesService,jwtManager)
 
 	api := r.Group("/api/v1")
 	usersHandler.RegisterRoutes(api)
@@ -105,6 +111,7 @@ func main() {
 	productsHandler.RegisterRoute(api)
 	authHandler.RegisterRoute(api)
 	customersHandler.RegisterRoute(api)
+	salesHandler.RegisterRoute(api)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
