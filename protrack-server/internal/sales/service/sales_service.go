@@ -225,4 +225,6 @@ func (s *Service) CountSales(ctx context.Context, companyId uuid.UUID)(int64, er
 	if err != nil {
 		return 0, err
 	}
+
+	return count, nil
 }
