@@ -23,6 +23,7 @@ type RepositoryInterface interface {
 	ListSales(ctx context.Context, companyId pgtype.UUID) ([]db.ListSalesRow, error)
 	UpdateSaleStatus(ctx context.Context, arg db.UpdateSaleStatusParams) error
 	ListSalesByCompanyAndStatus(ctx context.Context, arg db.ListSalesByCompanyAndStatusParams) ([]db.ListSalesByCompanyAndStatusRow, error)
+	CountSales(ctx context.Context, companyId pgtype.UUID) (int64, error)
 	WithTx(tx db.DBTX) *repository.Repository
 }
 
@@ -217,4 +218,11 @@ func (s *Service) ListSalesByCustomerAndStatus(ctx context.Context, req domain.L
 	}
 
 	return response, nil
+}
+
+func (s *Service) CountSales(ctx context.Context, companyId uuid.UUID)(int64, error){
+	count, err := s.repo.CountSales(ctx,pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return 0, err
+	}
 }
