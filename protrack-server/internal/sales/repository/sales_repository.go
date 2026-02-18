@@ -48,7 +48,7 @@ func (r *Repository) UpdateSaleStatus(ctx context.Context, arg db.UpdateSaleStat
 	return q.UpdateSaleStatus(ctx, arg)
 }
 
-func (r *Repository) ListSalesByCustomerAndStatus(ctx context.Context, arg db.ListSalesByCustomerAndStatusParams) ([]db.ListSalesByCustomerAndStatusRow, error) {
+func (r *Repository) ListSalesByCompanyAndStatus(ctx context.Context, arg db.ListSalesByCompanyAndStatusParams) ([]db.ListSalesByCompanyAndStatusRow, error) {
 	q := db.New(r.db)
-	return q.ListSalesByCustomerAndStatus(ctx, arg)
+	return q.ListSalesByCompanyAndStatus(ctx, arg)
 }

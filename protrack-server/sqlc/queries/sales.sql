@@ -50,23 +50,27 @@ SET status = $1,
     updated_by = $2
 WHERE id = $3
     AND company_id = $4;
--- name: ListSalesByCustomerAndStatus :many
+-- name: ListSalesByCompanyAndStatus :many
 SELECT s.id AS sale_id,
     s.total_amount,
+    s.discount_amount,
     s.status,
+    s.sale_at,
     s.created_at AS sale_date,
     si.id AS item_id,
     si.product_id,
     si.quantity,
     si.unit_price,
     si.discount,
-    p.name AS product_name
+    p.name AS product_name,
+    c.full_name AS customer_name
 FROM sales s
+    INNER JOIN customers c ON s.customer_id = c.id
     INNER JOIN sale_items si ON s.id = si.sale_id
     INNER JOIN products p ON si.product_id = p.id
-WHERE s.customer_id = $1
+WHERE s.company_id = $1
     AND (
-        s.status = $2
-        OR $2 = ''
+        ($2::text IS NULL OR $2::text = '')
+        OR s.status::text = $2::text
     )
 ORDER BY s.created_at DESC;

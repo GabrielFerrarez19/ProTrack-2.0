@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import type { VendaResponse } from "../../../@types/types.components";
 import {
   Table,
   TableBody,
@@ -13,20 +12,50 @@ import { Dialog } from "../../../components/ui/dialog";
 import { Button } from "../../../components/ui/button";
 import { DialogAlterVenda } from "./DialogAlter";
 import { formatCurrency, formatStatus } from "../../../utils/functions";
+import type { ListSalesByCompanyResponse, VendaAgrupada } from "@/@types/sales";
 
 // Cores fixas para cada coluna
 const totalColor = "bg-blue-100 text-blue-800";
 const descontoColor = "bg-yellow-100 text-yellow-800";
 const totalComDescontoColor = "bg-green-100 text-green-800";
 
+function groupSalesBySaleId(
+  rows: ListSalesByCompanyResponse[],
+): VendaAgrupada[] {
+  const map = new Map<string, VendaAgrupada>();
+  for (const row of rows) {
+    const id = String(row.sale_id);
+    if (!map.has(id)) {
+      map.set(id, {
+        sale_id: row.sale_id,
+        total_amount: row.total_amount,
+        discount_amount: row.discount_amount,
+        status: String(row.status ?? ""),
+        sale_date: row.sale_date,
+        customer_name: row.customer_name,
+        itens: [],
+      });
+    }
+    map.get(id)!.itens.push({
+      item_id: row.item_id,
+      product_id: row.product_id,
+      quantity: row.quantity,
+      unit_price: row.unit_price,
+      discount: row.discount,
+      product_name: row.product_name,
+    });
+  }
+  return Array.from(map.values());
+}
+
 interface VendasTableProps {
-  vendas: VendaResponse[];
+  vendas: ListSalesByCompanyResponse[];
   onVendaUpdated?: () => void;
 }
 
 export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
-  const [selectedVenda, setSelectedVenda] = useState<VendaResponse | null>(
-    null
+  const [selectedVenda, setSelectedVenda] = useState<VendaAgrupada | null>(
+    null,
   );
   const [open, setOpen] = useState(false);
 
@@ -34,15 +63,15 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  console.log("VendaSelecionada", selectedVenda);
+  const vendasAgrupadas = useMemo(() => groupSalesBySaleId(vendas), [vendas]);
 
   // Cálculos de paginação
-  const totalPages = Math.ceil(vendas.length / itemsPerPage);
+  const totalPages = Math.ceil(vendasAgrupadas.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentVendas = useMemo(() => {
-    return vendas.slice(startIndex, endIndex);
-  }, [vendas, startIndex, endIndex]);
+    return vendasAgrupadas.slice(startIndex, endIndex);
+  }, [vendasAgrupadas, startIndex, endIndex]);
 
   // Funções de navegação
   const goToPage = (page: number) => {
@@ -93,40 +122,44 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
         <TableBody>
           {currentVendas.map((venda) => {
             const desconto =
-              Number(venda.total ?? 0) - Number(venda.total_com_desconto ?? 0);
+              Number(venda.total_amount ?? 0) -
+              Number(venda.discount_amount ?? 0);
+            const statusFormatted = formatStatus(
+              venda.status as "pendente" | "pago" | "cancelado" | "aprazo",
+            );
 
             return (
               <TableRow
-                key={venda.id}
+                key={venda.sale_id}
                 className="hover:bg-gray-200 cursor-pointer"
                 onClick={() => {
                   setSelectedVenda(venda);
                   setOpen(true);
                 }}
               >
-                <TableCell className="font-medium">{venda.id}</TableCell>
-                <TableCell>{venda.cliente_nome}</TableCell>
+                <TableCell className="font-medium">{venda.sale_id}</TableCell>
+                <TableCell>{venda.customer_name}</TableCell>
                 <TableCell>
-                  {new Date(venda.data_venda).toLocaleDateString()}
+                  {new Date(venda.sale_date).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
                   <Badge className={totalColor}>
-                    R$ {formatCurrency(Number(venda.total ?? 0))}
+                    R$ {formatCurrency(Number(venda.total_amount ?? 0))}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <Badge className={descontoColor}>
-                    R$ {formatCurrency(desconto)}
+                    R$ {formatCurrency(Number(venda.discount_amount ?? 0))}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <Badge className={totalComDescontoColor}>
-                    R$ {formatCurrency(Number(venda.total_com_desconto ?? 0))}
+                    R$ {formatCurrency(desconto)}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge className={formatStatus(venda.status).color}>
-                    {formatStatus(venda.status).text}
+                  <Badge className={statusFormatted.color}>
+                    {statusFormatted.text}
                   </Badge>
                 </TableCell>
               </TableRow>
@@ -140,8 +173,9 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
         <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t">
           <div className="flex items-center text-sm text-gray-700">
             <span>
-              Mostrando {startIndex + 1} a {Math.min(endIndex, vendas.length)}{" "}
-              de {vendas.length} vendas
+              Mostrando {startIndex + 1} a{" "}
+              {Math.min(endIndex, vendasAgrupadas.length)} de{" "}
+              {vendasAgrupadas.length} vendas
             </span>
           </div>
 
@@ -168,7 +202,7 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
                   >
                     {page}
                   </Button>
-                )
+                ),
               )}
             </div>
 
