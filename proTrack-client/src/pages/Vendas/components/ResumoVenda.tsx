@@ -48,7 +48,16 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
     }
   }, [totalPreco, valorComDesconto, onChangeResumo]);
 
-  const [metodos] = useState<{ nome: string; tipo: string; id: number }[]>([]);
+  // Valores do enum payment_method_enum do banco (PostgreSQL)
+  const formasPagamento = [
+    { value: "cash", label: "Dinheiro" },
+    { value: "credit_card", label: "Cartão de Crédito" },
+    { value: "debit_card", label: "Cartão de Débito" },
+    { value: "pix", label: "PIX" },
+    { value: "bank_transfer", label: "Transferência Bancária" },
+    { value: "installments", label: "Parcelado (à prazo)" },
+    { value: "other", label: "Outro" },
+  ] as const;
 
   // Dias de vencimento disponíveis
   const diasVencimentoOpcoes = [1, 3, 5, 9, 11, 15];
@@ -113,17 +122,17 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
               <Select
                 onValueChange={(value) => {
                   field.onChange(value);
-                  if (value !== "aprazo") setValue("diasVencimento", undefined); // limpa dias se não for aprazo
+                  if (value !== "installments") setValue("diasVencimento", undefined);
                 }}
-                value={field.value}
+                value={field.value ?? ""}
               >
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  {metodos.map((metodo) => (
-                    <SelectItem key={metodo.id} value={metodo.tipo}>
-                      {metodo.nome}
+                  {formasPagamento.map((fp) => (
+                    <SelectItem key={fp.value} value={fp.value}>
+                      {fp.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -132,8 +141,8 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
           />
         </div>
 
-        {/* Select de dias de vencimento apenas se forma de pagamento for aprazo */}
-        {formaPagamentoSelecionada === "aprazo" && (
+        {/* Select de dias de vencimento apenas se forma de pagamento for parcelado */}
+        {formaPagamentoSelecionada === "installments" && (
           <div className="flex justify-between items-center">
             <label
               className="text-sm text-muted-foreground mr-2"

@@ -8,7 +8,7 @@ import {
 
 import type { Control } from "react-hook-form";
 import type { VendaForm } from "../../../schemas/schemaVendas";
-import type { Produto } from "../../../@types/types.api";
+import type { ProductResponse } from "@/@types/product";
 
 type OptionType = {
   value: string;
@@ -18,7 +18,7 @@ type OptionType = {
 type ProdutoSelectProps = {
   control: Control<VendaForm>;
   name: keyof VendaForm;
-  produtos: Produto[];
+  produtos: ProductResponse[];
   index: number; // índice para passar no onChange
   atualizarPrecoProduto: (index: number, produtoId: string) => void;
   label?: string;
@@ -43,8 +43,8 @@ export function ProdutoSelect({
           produtos
             .map((p) => ({
               value: String(p.id),
-              label: `${p.nome} - Cod: ${p.codigo_barras ?? "-"} - R$ ${Number(
-                p.preco_venda ?? 0
+              label: `${p.name} - Cod: ${p.barcode ?? "-"} - R$ ${Number(
+                p.sale_price ?? 0,
               ).toFixed(2)}`,
             }))
             .find((opt) => opt.value === String(field.value)) || null;
@@ -55,9 +55,9 @@ export function ProdutoSelect({
               <Select
                 options={produtos.map((p) => ({
                   value: String(p.id),
-                  label: `${p.nome} - Cod: ${
-                    p.codigo_barras ?? "-"
-                  } - R$ ${Number(p.preco_venda ?? 0).toFixed(2)}`,
+                  label: `${p.name} - Cod: ${
+                    p.barcode ?? "-"
+                  } - R$ ${Number(p.sale_price ?? 0).toFixed(2)}`,
                 }))}
                 value={selectedOption}
                 onChange={(option: SingleValue<OptionType>) => {

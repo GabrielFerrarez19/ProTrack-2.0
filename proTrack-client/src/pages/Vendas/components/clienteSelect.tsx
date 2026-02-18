@@ -9,23 +9,17 @@ import {
 
 import type { Control } from "react-hook-form";
 import type { VendaForm } from "../../../schemas/schemaVendas";
+import type { CustomerResponse } from "@/@types/customers";
 
 type OptionType = {
   value: string;
   label: string;
 };
 
-export type Cliente = {
-  id: string;
-  nome: string;
-  email: string; // importante ter todos os campos usados
-  cpf?: string; // opcional se usar
-};
-
 type ClienteSelectProps = {
   control: Control<VendaForm>;
   name: keyof VendaForm;
-  clientes: Cliente[];
+  clientes: CustomerResponse[];
   label?: string;
   placeholder?: string;
 };
@@ -45,7 +39,7 @@ export function ClienteSelect({
         // Procura a opção selecionada no formato { value, label }
         const selectedOption =
           clientes
-            .map((c) => ({ value: c.id, label: `${c.nome} - ${c.email}` }))
+            .map((c) => ({ value: c.id, label: `${c.full_name} - ${c.cpf}` }))
             .find((opt) => opt.value === field.value) || null;
 
         return (
@@ -55,7 +49,7 @@ export function ClienteSelect({
               <Select
                 options={clientes.map((c) => ({
                   value: c.id,
-                  label: `${c.nome} - ${c.cpf}`,
+                  label: `${c.full_name} - ${c.cpf}`,
                 }))}
                 value={selectedOption}
                 onChange={(option: SingleValue<OptionType>) => {
