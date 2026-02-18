@@ -14,7 +14,7 @@ import type { Control, FieldArrayWithId } from "react-hook-form";
 import type { VendaForm } from "../../../schemas/schemaVendas";
 
 import { ProdutoSelect } from "./ProdutoSelect"; // importe o ProdutoSelect criado
-import type { Produto } from "../../../@types/types.api";
+import type { ProductResponse } from "@/@types/product";
 
 type ProdutoRowProps = {
   index: number;
@@ -22,7 +22,7 @@ type ProdutoRowProps = {
   remove: (index: number) => void;
   control: Control<VendaForm>;
   atualizarPrecoProduto: (index: number, produtoId: string) => void;
-  produtos: Produto[];
+  produtos: ProductResponse[];
 };
 
 export function ProdutoRow({
