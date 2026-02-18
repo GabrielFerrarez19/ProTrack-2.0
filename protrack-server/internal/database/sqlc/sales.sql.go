@@ -19,6 +19,8 @@ INSERT INTO sales (
         discount_amount,
         subtotal,
         total_amount,
+        due_days,
+        payment_method,
         created_by,
         status
     )
@@ -30,7 +32,9 @@ VALUES (
         $4,
         $5,
         $6,
-        'pending'
+        $7,
+        $8,
+        $9
     )
 RETURNING id
 `
@@ -41,7 +45,10 @@ type CreateSaleParams struct {
 	DiscountAmount pgtype.Numeric `json:"discount_amount"`
 	Subtotal       pgtype.Numeric `json:"subtotal"`
 	TotalAmount    pgtype.Numeric `json:"total_amount"`
+	DueDays        pgtype.Int4    `json:"due_days"`
+	PaymentMethod  interface{}    `json:"payment_method"`
 	CreatedBy      pgtype.UUID    `json:"created_by"`
+	Status         interface{}    `json:"status"`
 }
 
 func (q *Queries) CreateSale(ctx context.Context, arg CreateSaleParams) (pgtype.UUID, error) {
@@ -51,7 +58,10 @@ func (q *Queries) CreateSale(ctx context.Context, arg CreateSaleParams) (pgtype.
 		arg.DiscountAmount,
 		arg.Subtotal,
 		arg.TotalAmount,
+		arg.DueDays,
+		arg.PaymentMethod,
 		arg.CreatedBy,
+		arg.Status,
 	)
 	var id pgtype.UUID
 	err := row.Scan(&id)
@@ -202,7 +212,10 @@ FROM sales s
     INNER JOIN products p ON si.product_id = p.id
 WHERE s.company_id = $1
     AND (
-        ($2::text IS NULL OR $2::text = '')
+        (
+            $2::text IS NULL
+            OR $2::text = ''
+        )
         OR s.status::text = $2::text
     )
 ORDER BY s.created_at DESC

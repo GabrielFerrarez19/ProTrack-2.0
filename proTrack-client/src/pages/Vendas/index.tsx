@@ -68,6 +68,11 @@ export function Vendas() {
       discount_amount: data.desconto ?? 0,
       subtotal: totalGeral,
       total_amount: totalComDesconto,
+      payment_method: data.formaPagamento ?? "cash",
+      due_days:
+        data.formaPagamento === "installments"
+          ? (data.diasVencimento ?? 1)
+          : undefined,
       created_by: user.id,
       items: data.produtos.map((p) => ({
         product_id: p.produtoId,
