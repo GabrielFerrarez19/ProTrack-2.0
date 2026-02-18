@@ -52,6 +52,14 @@ func (h *Handler) CreateSale(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	id, err := h.service.CreateSale(c.Request.Context(), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"id": id})
 }
 
 func (h *Handler) DeleteSale(c *gin.Context) {
@@ -88,16 +96,15 @@ func (h *Handler) DeleteSale(c *gin.Context) {
 
 	req.DeletedBy = userId
 
-	if err := h.service.DeleteSale(c.Request.Context(), id ,req); err != nil {
+	if err := h.service.DeleteSale(c.Request.Context(), id, req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.Status(http.StatusNoContent)
-
 }
 
-func (h *Handler) GetSaleById(c *gin.Context){
+func (h *Handler) GetSaleById(c *gin.Context) {
 	idStr := c.Param("id")
 
 	id, err := uuid.Parse(idStr)
@@ -119,7 +126,7 @@ func (h *Handler) GetSaleById(c *gin.Context){
 
 	req.ID = id
 
-	sale, err := h.service.GetSaleById(c.Request.Context(), req )
+	sale, err := h.service.GetSaleById(c.Request.Context(), req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -128,14 +135,13 @@ func (h *Handler) GetSaleById(c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{"sale": sale})
 }
 
-func (h *Handler) ListSales(c *gin.Context){
+func (h *Handler) ListSales(c *gin.Context) {
 	companyIdAny, exists := c.Get("company_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id is null"})
 	}
 
 	companyId := companyIdAny.(uuid.UUID)
-
 
 	sales, err := h.service.ListSales(c.Request.Context(), companyId)
 	if err != nil {
@@ -146,7 +152,7 @@ func (h *Handler) ListSales(c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{"sales": sales})
 }
 
-func (h *Handler) UpdateSaleStatus(c *gin.Context){
+func (h *Handler) UpdateSaleStatus(c *gin.Context) {
 	idStr := c.Param("id")
 
 	id, err := uuid.Parse(idStr)
@@ -174,7 +180,6 @@ func (h *Handler) UpdateSaleStatus(c *gin.Context){
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "user_id is null"})
 	}
 
-
 	var req domain.UpdateSaleStatusRequest
 
 	req.CompanyID = companyId
@@ -188,5 +193,4 @@ func (h *Handler) UpdateSaleStatus(c *gin.Context){
 	if err := h.service.UpdateSaleStatus(c.Request.Context(), id, req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
-
 }
