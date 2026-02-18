@@ -12,6 +12,8 @@ export interface SaleRequest {
   discount_amount: number;
   subtotal: number;
   total_amount: number;
+  due_days?: number;
+  payment_method?: string;
   created_by: string;
   items: CreateSaleItemRequest[];
 }

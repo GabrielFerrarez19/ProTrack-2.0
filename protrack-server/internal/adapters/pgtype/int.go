@@ -18,6 +18,14 @@ func IntToPgInt4(value int) pgtype.Int4 {
 	}
 }
 
+// OptionalIntToPgInt4 retorna NULL (Valid: false) quando value <= 0; caso contrário converte para pgtype.Int4
+func OptionalIntToPgInt4(value int) pgtype.Int4 {
+	if value <= 0 {
+		return pgtype.Int4{Valid: false}
+	}
+	return IntToPgInt4(value)
+}
+
 // PgInt4ToInt converte pgtype.Int4 para int
 func PgInt4ToInt(value pgtype.Int4) int {
 	if !value.Valid {
