@@ -72,6 +72,24 @@ type UpdateSaleStatusRequest struct {
 	CompanyID uuid.UUID   `json:"company_id"`
 }
 
+type ListSalesByCompanyAndStatusRequest struct {
+	CompanyID uuid.UUID   `json:"company_id"`
+	Status    interface{} `json:"status"`
+}
+
+type ListSalesByCompanyAndStatusRow struct {
+	SaleID      uuid.UUID   `json:"sale_id"`
+	TotalAmount float64     `json:"total_amount"`
+	Status      interface{} `json:"status"`
+	SaleDate    time.Time   `json:"sale_date"`
+	ItemID      uuid.UUID   `json:"item_id"`
+	ProductID   uuid.UUID   `json:"product_id"`
+	Quantity    int32       `json:"quantity"`
+	UnitPrice   float64     `json:"unit_price"`
+	Discount    float64     `json:"discount"`
+	ProductName string      `json:"product_name"`
+}
+
 func ValidateCreateSaleRequest(req CreateSaleRequest) error {
 	if req.CustomerID == uuid.Nil {
 		return errors.New("customer_id is required")
