@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	CountSales(ctx context.Context, companyID pgtype.UUID) (int64, error)
 	CreateCompany(ctx context.Context, arg CreateCompanyParams) (Company, error)
 	CreateCustomers(ctx context.Context, arg CreateCustomersParams) (pgtype.UUID, error)
 	CreateDepartment(ctx context.Context, arg CreateDepartmentParams) (Department, error)

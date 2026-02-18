@@ -52,3 +52,8 @@ func (r *Repository) ListSalesByCompanyAndStatus(ctx context.Context, arg db.Lis
 	q := db.New(r.db)
 	return q.ListSalesByCompanyAndStatus(ctx, arg)
 }
+
+func (r *Repository) CountSales(ctx context.Context, companyId pgtype.UUID) (int64, error){
+	q := db.New(r.db)
+	return q.CountSales(ctx, companyId)
+}
