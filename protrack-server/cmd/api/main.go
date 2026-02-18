@@ -97,7 +97,7 @@ func main() {
 	authService := authService.NewService(usersService, jwtManager)
 	customersService := customersService.NewService(customersRepository, db.Pool)
 	saleItemsService := saleItemsService.NewService(saleItemsRepository, db.Pool, productsRepository)
-	salesService := salesService.NewService(salesRepository, db.Pool, saleItemsService)
+	salesService := salesService.NewService(salesRepository, db.Pool, saleItemsService, customersService)
 
 	usersHandler := usersHandler.NewHandler(usersService, jwtManager)
 	companiesHandler := companiesHandler.NewHandler(companiesService, jwtManager)

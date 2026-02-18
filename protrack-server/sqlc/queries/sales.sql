@@ -6,6 +6,8 @@ INSERT INTO sales (
         discount_amount,
         subtotal,
         total_amount,
+        due_days,
+        payment_method,
         created_by,
         status
     )
@@ -17,7 +19,9 @@ VALUES (
         $4,
         $5,
         $6,
-        'pending'
+        $7,
+        $8,
+        $9
     )
 RETURNING id;
 -- name: ListSales :many
@@ -70,7 +74,10 @@ FROM sales s
     INNER JOIN products p ON si.product_id = p.id
 WHERE s.company_id = $1
     AND (
-        ($2::text IS NULL OR $2::text = '')
+        (
+            $2::text IS NULL
+            OR $2::text = ''
+        )
         OR s.status::text = $2::text
     )
 ORDER BY s.created_at DESC;
