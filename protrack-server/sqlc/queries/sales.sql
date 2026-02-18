@@ -81,3 +81,5 @@ WHERE s.company_id = $1
         OR s.status::text = $2::text
     )
 ORDER BY s.created_at DESC;
+-- name: CountSales :one
+SELECT COUNT(*) FROM sales WHERE company_id = $1 AND delete_at IS NULL; 
