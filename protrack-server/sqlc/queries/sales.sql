@@ -50,7 +50,7 @@ SET status = $1,
     updated_by = $2
 WHERE id = $3
     AND company_id = $4;
--- name: ListSalesByCustomerAndStatus :many
+-- name: ListSalesByCompanyAndStatus :many
 SELECT s.id AS sale_id,
     s.total_amount,
     s.status,
@@ -64,7 +64,7 @@ SELECT s.id AS sale_id,
 FROM sales s
     INNER JOIN sale_items si ON s.id = si.sale_id
     INNER JOIN products p ON si.product_id = p.id
-WHERE s.customer_id = $1
+WHERE s.company_id = $1
     AND (
         s.status = $2
         OR $2 = ''
