@@ -67,3 +67,8 @@ UPDATE products
 SET deleted_by = $2,
     deleted_at = NOW()
 WHERE id = $1;
+-- name: DecrementStock :exec
+UPDATE products
+SET quantity = quantity - $1
+WHERE id = $2
+    AND quantity >= $1;

@@ -102,6 +102,11 @@ type ListProductsByCompanyRow struct {
 	CategoryName string    `json:"category_name"`
 }
 
+type DecrementStockRequest struct {
+	ID       uuid.UUID `json:"id"`
+	Quantity int32     `json:"quantity"`
+}
+
 func ApplyUpdateProductCategoryParams(
 	req UpdateProductRequest,
 	arg *db.UpdateProductParams,
