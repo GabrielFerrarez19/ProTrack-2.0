@@ -14,7 +14,10 @@ type CreateSaleRequest struct {
 	DiscountAmount float64                 `json:"discount_amount"`
 	Subtotal       float64                 `json:"subtotal"`
 	TotalAmount    float64                 `json:"total_amount"`
+	DueDays        int32                   `json:"due_days"`
 	CreatedBy      uuid.UUID               `json:"created_by"`
+	PaymentMethod  interface{}             `json:"payment_method"`
+	Status         interface{}             `json:"status"`
 	Items          []CreateSaleItemRequest `json:"items"`
 }
 

@@ -4,9 +4,11 @@ import (
 	"context"
 
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
+	customerDomain "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/customers/domain"
+	customerService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/customers/service"
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
 	saleItemDomain "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sale_items/domain"
-	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sale_items/service"
+	saleItemsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sale_items/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/domain"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/repository"
 	"github.com/google/uuid"
@@ -27,14 +29,16 @@ type RepositoryInterface interface {
 type Service struct {
 	repo             RepositoryInterface
 	pool             *pgxpool.Pool
-	saleItemsService *service.Service
+	saleItemsService *saleItemsService.Service
+	customerService  *customerService.Service
 }
 
-func NewService(repo *repository.Repository, pool *pgxpool.Pool, saleItemsService *service.Service) *Service {
+func NewService(repo *repository.Repository, pool *pgxpool.Pool, saleItemsService *saleItemsService.Service, customerService *customerService.Service) *Service {
 	return &Service{
 		repo:             repo,
 		pool:             pool,
 		saleItemsService: saleItemsService,
+		customerService:  customerService,
 	}
 }
 
@@ -51,12 +55,25 @@ func (s *Service) CreateSale(ctx context.Context, req domain.CreateSaleRequest) 
 
 	txRepo := s.repo.WithTx(tx)
 
+	if req.PaymentMethod == "installments" {
+		if err := s.customerService.UpdateBalanceDueCustomer(ctx, req.CustomerID, customerDomain.UpdateBalanceDueCustomerRequest{
+			BalanceDue: req.Subtotal,
+			UpdatedBy:  req.CreatedBy,
+		}); err != nil {
+			return uuid.Nil, err
+		}
+		req.Status = "pending"
+	}
+
 	id, err := txRepo.CreateSales(ctx, db.CreateSaleParams{
 		CustomerID:     pgconv.ParseUUIDToPgType(req.CustomerID),
 		CompanyID:      pgconv.ParseUUIDToPgType(req.CompanyID),
 		DiscountAmount: pgconv.Float64ToPgNumeric(req.DiscountAmount),
 		Subtotal:       pgconv.Float64ToPgNumeric(req.Subtotal),
 		TotalAmount:    pgconv.Float64ToPgNumeric(req.TotalAmount),
+		DueDays:        pgconv.IntToPgInt4(int(req.DueDays)),
+		PaymentMethod:  req.PaymentMethod,
+		Status:         req.Status,
 		CreatedBy:      pgconv.ParseUUIDToPgType(req.CreatedBy),
 	})
 	if err != nil {

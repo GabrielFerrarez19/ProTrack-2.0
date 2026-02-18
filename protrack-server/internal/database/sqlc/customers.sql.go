@@ -273,7 +273,7 @@ func (q *Queries) ListCustomers(ctx context.Context, companyID pgtype.UUID) ([]C
 
 const updateBalanceDueCustomer = `-- name: UpdateBalanceDueCustomer :exec
 UPDATE customers
-SET balance_due = $2,
+SET balance_due = balance_due + $2,
     updated_by = $3,
     updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
