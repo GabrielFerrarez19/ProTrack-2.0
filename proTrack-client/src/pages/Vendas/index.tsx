@@ -8,8 +8,9 @@ import { ProdutosTable } from "./components/ProdutosTable";
 import { Header } from "../../components/header";
 import { useProdutos } from "../../hooks/useProdutos";
 import { useVendas } from "../../hooks/useVendas";
+import { useAuth } from "../../hooks/useAuth";
 import { useState, useEffect } from "react";
-import type { VendaData } from "../../@types/types.api";
+import type { SaleRequest } from "../../@types/sales";
 
 // Sonner Toast
 import { toast } from "sonner";
@@ -24,6 +25,7 @@ export function Vendas() {
       total: 0,
       totalComDesconto: 0,
       status: "Pendente",
+      formaPagamento: "cash",
       produtos: [],
     },
   });
@@ -35,7 +37,8 @@ export function Vendas() {
 
   const watchedProdutos = methods.watch("produtos");
   const { products } = useProdutos();
-  const { submitVenda } = useVendas();
+  const { submitVenda, loading } = useVendas();
+  const { companyID, user } = useAuth();
   const [totalGeral, setTotalGeral] = useState(0);
   const [totalComDesconto, setTotalComDesconto] = useState(0);
 
@@ -44,7 +47,7 @@ export function Vendas() {
     if (produto) {
       methods.setValue(
         `produtos.${index}.precoUnitario`,
-        Number(produto.preco_venda) || 0,
+        Number(produto.sale_price) || 0,
       );
     } else {
       methods.setValue(`produtos.${index}.precoUnitario`, 0);
@@ -52,38 +55,30 @@ export function Vendas() {
   };
 
   const onSubmit = async (data: VendaForm) => {
-    console.log("=== onSubmit chamado ===");
-    console.log("Dados recebidos:", data);
-    console.log("Erros do formulário:", methods.formState.errors);
-    console.log("Produtos no campo:", fields);
-    console.log("Forma de pagamento selecionada:", data.formaPagamento);
+    if (!companyID || !user?.id) {
+      toast.error("Usuário ou empresa não identificados. Faça login novamente.", {
+        style: { background: "#f87171", color: "#7f1d1d" },
+      });
+      return;
+    }
 
-    data.totalComDesconto = totalComDesconto;
-    data.total = totalGeral;
+    const saleRequest: SaleRequest = {
+      customer_id: data.clienteId,
+      company_id: companyID,
+      discount_amount: data.desconto ?? 0,
+      subtotal: totalGeral,
+      total_amount: totalComDesconto,
+      created_by: user.id,
+      items: data.produtos.map((p) => ({
+        product_id: p.produtoId,
+        quantity: p.quantidade,
+        unit_price: p.precoUnitario,
+        discount: p.desconto ?? 0,
+      })),
+    };
 
     try {
-      const vendaParaEnviar: VendaData = {
-        clienteId: data.clienteId,
-        dataVenda: data.dataVenda,
-        desconto: data.desconto,
-        total: data.total,
-        totalComDesconto: data.totalComDesconto,
-        status: data.formaPagamento === "aprazo" ? "pendente" : "pago",
-        diasVencimento: data.diasVencimento,
-        produtos: data.produtos.map((p) => ({
-          produtoId: p.produtoId,
-          quantidade: p.quantidade,
-          precoUnitario: p.precoUnitario,
-          desconto: p.desconto ?? 0,
-        })),
-        formaPagamento: data.formaPagamento,
-      };
-
-      console.log("Venda a enviar para API:", vendaParaEnviar);
-
-      const resposta = await submitVenda(vendaParaEnviar);
-      console.log("Venda cadastrada com sucesso:", resposta);
-
+      await submitVenda(saleRequest);
       toast.success("Venda cadastrada com sucesso!", {
         style: { background: "#4ade80", color: "#065f46" },
       });
@@ -95,12 +90,12 @@ export function Vendas() {
         total: 0,
         totalComDesconto: 0,
         status: "Pendente",
+        formaPagamento: "cash",
         produtos: [],
       });
       setTotalGeral(0);
       setTotalComDesconto(0);
-    } catch (error) {
-      console.error("Erro ao cadastrar venda:", error);
+    } catch {
       toast.error("Erro ao cadastrar venda. Verifique os dados!", {
         style: { background: "#f87171", color: "#7f1d1d" },
       });
@@ -156,6 +151,7 @@ export function Vendas() {
                   total: 0,
                   totalComDesconto: 0,
                   status: "Pendente",
+                  formaPagamento: "cash",
                   produtos: [],
                 });
                 setTotalGeral(0);
@@ -167,9 +163,10 @@ export function Vendas() {
             </Button>
             <Button
               type="submit"
+              disabled={loading}
               className="bg-green-600 hover:bg-green-500 cursor-pointer"
             >
-              Cadastrar Venda
+              {loading ? "Cadastrando..." : "Cadastrar Venda"}
             </Button>
           </div>
         </form>
