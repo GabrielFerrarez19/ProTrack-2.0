@@ -17,13 +17,17 @@ type Querier interface {
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
 	CreateProductCategory(ctx context.Context, arg CreateProductCategoryParams) (ProductCategory, error)
 	CreateSale(ctx context.Context, arg CreateSaleParams) (pgtype.UUID, error)
+	CreateSaleItem(ctx context.Context, arg CreateSaleItemParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DecrementStock(ctx context.Context, arg DecrementStockParams) error
 	DeleteCompany(ctx context.Context, arg DeleteCompanyParams) error
 	DeleteCustomer(ctx context.Context, arg DeleteCustomerParams) error
 	DeleteDepartment(ctx context.Context, arg DeleteDepartmentParams) error
+	DeleteItemsBySale(ctx context.Context, saleID pgtype.UUID) error
 	DeleteProduct(ctx context.Context, arg DeleteProductParams) error
 	DeleteProductCategory(ctx context.Context, arg DeleteProductCategoryParams) error
 	DeleteSale(ctx context.Context, arg DeleteSaleParams) error
+	DeleteSaleItem(ctx context.Context, id pgtype.UUID) error
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
 	GetCompanyByDocument(ctx context.Context, document pgtype.Text) (Company, error)
 	GetCompanyByID(ctx context.Context, id pgtype.UUID) (Company, error)
@@ -39,10 +43,12 @@ type Querier interface {
 	ListCompanies(ctx context.Context) ([]Company, error)
 	ListCustomers(ctx context.Context, companyID pgtype.UUID) ([]Customer, error)
 	ListDepartmentsByCompanyId(ctx context.Context, companyID pgtype.UUID) ([]Department, error)
+	ListItemsFromPendingSale(ctx context.Context, saleID pgtype.UUID) ([]ListItemsFromPendingSaleRow, error)
 	ListProductCategoryByCompanyId(ctx context.Context, companyID pgtype.UUID) ([]ProductCategory, error)
 	ListProductsByCategoryId(ctx context.Context, arg ListProductsByCategoryIdParams) ([]Product, error)
 	ListProductsByCompany(ctx context.Context, companyID pgtype.UUID) ([]ListProductsByCompanyRow, error)
 	ListSales(ctx context.Context, companyID pgtype.UUID) ([]ListSalesRow, error)
+	ListSalesByCustomerAndStatus(ctx context.Context, arg ListSalesByCustomerAndStatusParams) ([]ListSalesByCustomerAndStatusRow, error)
 	ListUsers(ctx context.Context) ([]User, error)
 	SetCompanyStatus(ctx context.Context, arg SetCompanyStatusParams) (int64, error)
 	SetProductCategoryStatus(ctx context.Context, arg SetProductCategoryStatusParams) (int64, error)

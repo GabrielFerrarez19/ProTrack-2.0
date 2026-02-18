@@ -29,6 +29,9 @@ import (
 	productsCategoriesHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/handler"
 	productsCategoriesRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/repository"
 	productsCategoriesService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/service"
+	saleItemsHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sale_items/handler"
+	saleItemsRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sale_items/repository"
+	saleItemsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sale_items/service"
 	salesHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/handler"
 	salesRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/repository"
 	salesService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/service"
@@ -84,15 +87,17 @@ func main() {
 	productsRepository := productsRepository.NewRepository(db.Pool)
 	customersRepository := customersRepository.NewRepository(db.Pool)
 	salesRepository := salesRepository.NewRepository(db.Pool)
+	saleItemsRepository := saleItemsRepository.NewRepository(db.Pool)
 
 	usersService := usersService.NewService(usersRepository, db.Pool)
 	companiesService := companiesService.NewService(db.Pool, companiesRepository, usersRepository)
 	departmentsService := departmentsService.NewService(departmentsRepository)
 	productsCategoriesService := productsCategoriesService.NewService(productsCategoriesRepository)
-	productsService := productsService.NewService(productsRepository)
+	productsService := productsService.NewService(productsRepository, db.Pool)
 	authService := authService.NewService(usersService, jwtManager)
 	customersService := customersService.NewService(customersRepository, db.Pool)
-	salesService := salesService.NewService(salesRepository,db.Pool)
+	saleItemsService := saleItemsService.NewService(saleItemsRepository, db.Pool, productsRepository)
+	salesService := salesService.NewService(salesRepository, db.Pool, saleItemsService)
 
 	usersHandler := usersHandler.NewHandler(usersService, jwtManager)
 	companiesHandler := companiesHandler.NewHandler(companiesService, jwtManager)
@@ -101,7 +106,8 @@ func main() {
 	productsHandler := productsHandler.NewHandler(productsService, jwtManager)
 	authHandler := authHandler.NewHandler(authService, jwtManager)
 	customersHandler := customersHandler.NewHandler(customersService, jwtManager)
-	salesHandler := salesHandler.NewHandler(salesService,jwtManager)
+	salesHandler := salesHandler.NewHandler(salesService, jwtManager)
+	saleItemsHandler := saleItemsHandler.NewHandler(saleItemsService, jwtManager)
 
 	api := r.Group("/api/v1")
 	usersHandler.RegisterRoutes(api)
@@ -112,6 +118,7 @@ func main() {
 	authHandler.RegisterRoute(api)
 	customersHandler.RegisterRoute(api)
 	salesHandler.RegisterRoute(api)
+	saleItemsHandler.RegisterRoute(api)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
