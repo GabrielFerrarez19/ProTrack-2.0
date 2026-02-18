@@ -15,3 +15,35 @@ export interface SaleRequest {
   created_by: string;
   items: CreateSaleItemRequest[];
 }
+
+export interface ListSalesByCompanyResponse {
+  sale_id: string;
+  total_amount: number;
+  discount_amount: number;
+  status: string | any;
+  sale_date: string | Date;
+  item_id: string;
+  product_id: string;
+  quantity: number;
+  unit_price: number;
+  discount: number;
+  product_name: string;
+  customer_name: string;
+}
+
+export interface VendaAgrupada {
+  sale_id: string;
+  total_amount: number;
+  discount_amount: number;
+  status: string;
+  sale_date: string | Date;
+  customer_name: string;
+  itens: {
+    item_id: string;
+    product_id: string;
+    quantity: number;
+    unit_price: number;
+    discount: number;
+    product_name: string;
+  }[];
+}
