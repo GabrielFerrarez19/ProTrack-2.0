@@ -17,6 +17,12 @@ func NewRepository(db db.DBTX) *Repository {
 	}
 }
 
+func (r *Repository) WithTx(tx db.DBTX) *Repository {
+	return &Repository{
+		db: tx,
+	}
+}
+
 func (r *Repository) CreateSales(ctx context.Context, arg db.CreateSaleParams) (pgtype.UUID, error) {
 	q := db.New(r.db)
 	return q.CreateSale(ctx, arg)
@@ -40,4 +46,9 @@ func (r *Repository) ListSales(ctx context.Context, companyId pgtype.UUID) ([]db
 func (r *Repository) UpdateSaleStatus(ctx context.Context, arg db.UpdateSaleStatusParams) error {
 	q := db.New(r.db)
 	return q.UpdateSaleStatus(ctx, arg)
+}
+
+func (r *Repository) ListSalesByCustomerAndStatus(ctx context.Context, arg db.ListSalesByCustomerAndStatusParams) ([]db.ListSalesByCustomerAndStatusRow, error) {
+	q := db.New(r.db)
+	return q.ListSalesByCustomerAndStatus(ctx, arg)
 }

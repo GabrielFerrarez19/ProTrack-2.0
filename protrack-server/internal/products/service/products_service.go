@@ -9,6 +9,7 @@ import (
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/repository"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type RepositoryInterface interface {
@@ -19,15 +20,18 @@ type RepositoryInterface interface {
 	ListProductsByCategoryId(ctx context.Context, arg db.ListProductsByCategoryIdParams) ([]db.Product, error)
 	ListProductsByCompany(ctx context.Context, categoryID pgtype.UUID) ([]db.ListProductsByCompanyRow, error)
 	UpdateProduct(ctx context.Context, arg db.UpdateProductParams) (db.Product, error)
+	DecrementStock(ctx context.Context, arg db.DecrementStockParams) error
 }
 
 type Service struct {
 	repo RepositoryInterface
+	pool *pgxpool.Pool
 }
 
-func NewService(repo *repository.Repository) *Service {
+func NewService(repo *repository.Repository, pool *pgxpool.Pool) *Service {
 	return &Service{
 		repo: repo,
+		pool: pool,
 	}
 }
 
@@ -231,4 +235,14 @@ func (s *Service) UpdateProduct(ctx context.Context, id uuid.UUID, req domain.Up
 		UpdatedBy:   pgconv.PgUUIDToUUID(product.UpdatedBy),
 		UpdatedAt:   pgconv.PgTimestamptzToTime(product.UpdatedAt),
 	}, nil
+}
+
+func (s *Service) DecrementStock(ctx context.Context, req domain.DecrementStockRequest) error {
+	if err := s.repo.DecrementStock(ctx, db.DecrementStockParams{
+		ID:       pgconv.ParseUUIDToPgType(req.ID),
+		Quantity: req.Quantity,
+	}); err != nil {
+		return err
+	}
+	return nil
 }

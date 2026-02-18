@@ -13,17 +13,26 @@ import (
 
 const createSale = `-- name: CreateSale :one
 INSERT INTO sales (
-    customer_id, 
-    company_id, 
-    sale_at, 
-    discount_amount, 
-    subtotal, 
-    total_amount, 
-    created_by,
-    status
-) VALUES (
-    $1, $2, CURRENT_DATE, $3, $4, $5, $6, 'pending'
-) RETURNING id
+        customer_id,
+        company_id,
+        sale_at,
+        discount_amount,
+        subtotal,
+        total_amount,
+        created_by,
+        status
+    )
+VALUES (
+        $1,
+        $2,
+        CURRENT_DATE,
+        $3,
+        $4,
+        $5,
+        $6,
+        'pending'
+    )
+RETURNING id
 `
 
 type CreateSaleParams struct {
@@ -50,11 +59,11 @@ func (q *Queries) CreateSale(ctx context.Context, arg CreateSaleParams) (pgtype.
 }
 
 const deleteSale = `-- name: DeleteSale :exec
-UPDATE sales 
-SET 
-    deleted_at = CURRENT_TIMESTAMP, 
-    deleted_by = $1 
-WHERE id = $2 AND company_id = $3
+UPDATE sales
+SET deleted_at = CURRENT_TIMESTAMP,
+    deleted_by = $1
+WHERE id = $2
+    AND company_id = $3
 `
 
 type DeleteSaleParams struct {
@@ -69,12 +78,12 @@ func (q *Queries) DeleteSale(ctx context.Context, arg DeleteSaleParams) error {
 }
 
 const getSaleById = `-- name: GetSaleById :one
-SELECT 
-    s.id, s.customer_id, s.company_id, s.sale_at, s.discount_amount, s.subtotal, s.total_amount, s.due_days, s.payment_method, s.status, s.created_at, s.created_by, s.updated_at, s.updated_by, s.deleted_at, s.deleted_by, 
-    c.full_name as customer_name 
+SELECT s.id, s.customer_id, s.company_id, s.sale_at, s.discount_amount, s.subtotal, s.total_amount, s.due_days, s.payment_method, s.status, s.created_at, s.created_by, s.updated_at, s.updated_by, s.deleted_at, s.deleted_by,
+    c.full_name as customer_name
 FROM sales s
-INNER JOIN customers c ON s.customer_id = c.id
-WHERE s.id = $1 AND s.company_id = $2
+    INNER JOIN customers c ON s.customer_id = c.id
+WHERE s.id = $1
+    AND s.company_id = $2
 `
 
 type GetSaleByIdParams struct {
@@ -128,11 +137,14 @@ func (q *Queries) GetSaleById(ctx context.Context, arg GetSaleByIdParams) (GetSa
 }
 
 const listSales = `-- name: ListSales :many
-SELECT 
-    id, sale_at, total_amount, status, created_at 
-FROM sales 
-WHERE company_id = $1 
-  AND deleted_at IS NULL 
+SELECT id,
+    sale_at,
+    total_amount,
+    status,
+    created_at
+FROM sales
+WHERE company_id = $1
+    AND deleted_at IS NULL
 ORDER BY created_at DESC
 `
 
@@ -170,13 +182,84 @@ func (q *Queries) ListSales(ctx context.Context, companyID pgtype.UUID) ([]ListS
 	return items, nil
 }
 
+const listSalesByCustomerAndStatus = `-- name: ListSalesByCustomerAndStatus :many
+SELECT s.id AS sale_id,
+    s.total_amount,
+    s.status,
+    s.created_at AS sale_date,
+    si.id AS item_id,
+    si.product_id,
+    si.quantity,
+    si.unit_price,
+    si.discount,
+    p.name AS product_name
+FROM sales s
+    INNER JOIN sale_items si ON s.id = si.sale_id
+    INNER JOIN products p ON si.product_id = p.id
+WHERE s.customer_id = $1
+    AND (
+        s.status = $2
+        OR $2 = ''
+    )
+ORDER BY s.created_at DESC
+`
+
+type ListSalesByCustomerAndStatusParams struct {
+	CustomerID pgtype.UUID `json:"customer_id"`
+	Status     interface{} `json:"status"`
+}
+
+type ListSalesByCustomerAndStatusRow struct {
+	SaleID      pgtype.UUID        `json:"sale_id"`
+	TotalAmount pgtype.Numeric     `json:"total_amount"`
+	Status      interface{}        `json:"status"`
+	SaleDate    pgtype.Timestamptz `json:"sale_date"`
+	ItemID      pgtype.UUID        `json:"item_id"`
+	ProductID   pgtype.UUID        `json:"product_id"`
+	Quantity    int32              `json:"quantity"`
+	UnitPrice   pgtype.Numeric     `json:"unit_price"`
+	Discount    pgtype.Numeric     `json:"discount"`
+	ProductName string             `json:"product_name"`
+}
+
+func (q *Queries) ListSalesByCustomerAndStatus(ctx context.Context, arg ListSalesByCustomerAndStatusParams) ([]ListSalesByCustomerAndStatusRow, error) {
+	rows, err := q.db.Query(ctx, listSalesByCustomerAndStatus, arg.CustomerID, arg.Status)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListSalesByCustomerAndStatusRow{}
+	for rows.Next() {
+		var i ListSalesByCustomerAndStatusRow
+		if err := rows.Scan(
+			&i.SaleID,
+			&i.TotalAmount,
+			&i.Status,
+			&i.SaleDate,
+			&i.ItemID,
+			&i.ProductID,
+			&i.Quantity,
+			&i.UnitPrice,
+			&i.Discount,
+			&i.ProductName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateSaleStatus = `-- name: UpdateSaleStatus :exec
-UPDATE sales 
-SET 
-    status = $1, 
-    updated_at = CURRENT_TIMESTAMP, 
-    updated_by = $2 
-WHERE id = $3 AND company_id = $4
+UPDATE sales
+SET status = $1,
+    updated_at = CURRENT_TIMESTAMP,
+    updated_by = $2
+WHERE id = $3
+    AND company_id = $4
 `
 
 type UpdateSaleStatusParams struct {
