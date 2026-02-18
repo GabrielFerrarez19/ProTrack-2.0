@@ -185,45 +185,52 @@ func (q *Queries) ListSales(ctx context.Context, companyID pgtype.UUID) ([]ListS
 const listSalesByCompanyAndStatus = `-- name: ListSalesByCompanyAndStatus :many
 SELECT s.id AS sale_id,
     s.total_amount,
+    s.discount_amount,
     s.status,
+    s.sale_at,
     s.created_at AS sale_date,
     si.id AS item_id,
     si.product_id,
     si.quantity,
     si.unit_price,
     si.discount,
-    p.name AS product_name
+    p.name AS product_name,
+    c.full_name AS customer_name
 FROM sales s
+    INNER JOIN customers c ON s.customer_id = c.id
     INNER JOIN sale_items si ON s.id = si.sale_id
     INNER JOIN products p ON si.product_id = p.id
 WHERE s.company_id = $1
     AND (
-        s.status = $2
-        OR $2 = ''
+        ($2::text IS NULL OR $2::text = '')
+        OR s.status::text = $2::text
     )
 ORDER BY s.created_at DESC
 `
 
 type ListSalesByCompanyAndStatusParams struct {
 	CompanyID pgtype.UUID `json:"company_id"`
-	Status    interface{} `json:"status"`
+	Column2   string      `json:"column_2"`
 }
 
 type ListSalesByCompanyAndStatusRow struct {
-	SaleID      pgtype.UUID        `json:"sale_id"`
-	TotalAmount pgtype.Numeric     `json:"total_amount"`
-	Status      interface{}        `json:"status"`
-	SaleDate    pgtype.Timestamptz `json:"sale_date"`
-	ItemID      pgtype.UUID        `json:"item_id"`
-	ProductID   pgtype.UUID        `json:"product_id"`
-	Quantity    int32              `json:"quantity"`
-	UnitPrice   pgtype.Numeric     `json:"unit_price"`
-	Discount    pgtype.Numeric     `json:"discount"`
-	ProductName string             `json:"product_name"`
+	SaleID         pgtype.UUID        `json:"sale_id"`
+	TotalAmount    pgtype.Numeric     `json:"total_amount"`
+	DiscountAmount pgtype.Numeric     `json:"discount_amount"`
+	Status         interface{}        `json:"status"`
+	SaleAt         pgtype.Timestamptz `json:"sale_at"`
+	SaleDate       pgtype.Timestamptz `json:"sale_date"`
+	ItemID         pgtype.UUID        `json:"item_id"`
+	ProductID      pgtype.UUID        `json:"product_id"`
+	Quantity       int32              `json:"quantity"`
+	UnitPrice      pgtype.Numeric     `json:"unit_price"`
+	Discount       pgtype.Numeric     `json:"discount"`
+	ProductName    string             `json:"product_name"`
+	CustomerName   string             `json:"customer_name"`
 }
 
 func (q *Queries) ListSalesByCompanyAndStatus(ctx context.Context, arg ListSalesByCompanyAndStatusParams) ([]ListSalesByCompanyAndStatusRow, error) {
-	rows, err := q.db.Query(ctx, listSalesByCompanyAndStatus, arg.CompanyID, arg.Status)
+	rows, err := q.db.Query(ctx, listSalesByCompanyAndStatus, arg.CompanyID, arg.Column2)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +241,9 @@ func (q *Queries) ListSalesByCompanyAndStatus(ctx context.Context, arg ListSales
 		if err := rows.Scan(
 			&i.SaleID,
 			&i.TotalAmount,
+			&i.DiscountAmount,
 			&i.Status,
+			&i.SaleAt,
 			&i.SaleDate,
 			&i.ItemID,
 			&i.ProductID,
@@ -242,6 +251,7 @@ func (q *Queries) ListSalesByCompanyAndStatus(ctx context.Context, arg ListSales
 			&i.UnitPrice,
 			&i.Discount,
 			&i.ProductName,
+			&i.CustomerName,
 		); err != nil {
 			return nil, err
 		}
