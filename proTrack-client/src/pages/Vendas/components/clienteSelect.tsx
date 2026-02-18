@@ -31,6 +31,8 @@ export function ClienteSelect({
   label = "Cliente",
   placeholder = "Selecione um cliente",
 }: ClienteSelectProps) {
+  const lista = clientes ?? [];
+
   return (
     <FormField
       control={control}
@@ -38,7 +40,7 @@ export function ClienteSelect({
       render={({ field }) => {
         // Procura a opção selecionada no formato { value, label }
         const selectedOption =
-          clientes
+          lista
             .map((c) => ({ value: c.id, label: `${c.full_name} - ${c.cpf}` }))
             .find((opt) => opt.value === field.value) || null;
 
@@ -47,7 +49,7 @@ export function ClienteSelect({
             <FormLabel>{label}</FormLabel>
             <FormControl>
               <Select
-                options={clientes.map((c) => ({
+                options={lista.map((c) => ({
                   value: c.id,
                   label: `${c.full_name} - ${c.cpf}`,
                 }))}
