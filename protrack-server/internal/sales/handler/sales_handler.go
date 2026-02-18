@@ -195,7 +195,7 @@ func (h *Handler) UpdateSaleStatus(c *gin.Context) {
 	}
 }
 
-func (h *Handler) ListSalesByCustomerAndStatus(c *gin.Context) {
+func (h *Handler) ListSalesByCompanyAndStatus(c *gin.Context) {
 	companyIdAny, exists := c.Get("company_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id is null"})
