@@ -63,6 +63,13 @@ func (s *Service) CreateSale(ctx context.Context, req domain.CreateSaleRequest) 
 			return uuid.Nil, err
 		}
 		req.Status = "pending"
+	} else if req.Status == nil {
+		req.Status = "paid" // à vista: pago por padrão
+	}
+
+	dueDaysVal := 0
+	if req.PaymentMethod == "installments" && req.DueDays > 0 {
+		dueDaysVal = int(req.DueDays)
 	}
 
 	id, err := txRepo.CreateSales(ctx, db.CreateSaleParams{
@@ -71,7 +78,7 @@ func (s *Service) CreateSale(ctx context.Context, req domain.CreateSaleRequest) 
 		DiscountAmount: pgconv.Float64ToPgNumeric(req.DiscountAmount),
 		Subtotal:       pgconv.Float64ToPgNumeric(req.Subtotal),
 		TotalAmount:    pgconv.Float64ToPgNumeric(req.TotalAmount),
-		DueDays:        pgconv.IntToPgInt4(int(req.DueDays)),
+		DueDays:        pgconv.OptionalIntToPgInt4(dueDaysVal),
 		PaymentMethod:  req.PaymentMethod,
 		Status:         req.Status,
 		CreatedBy:      pgconv.ParseUUIDToPgType(req.CreatedBy),
