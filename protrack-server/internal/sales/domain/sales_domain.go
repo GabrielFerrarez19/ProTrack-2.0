@@ -1,18 +1,29 @@
 package domain
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type CreateSaleRequest struct {
-	CustomerID     uuid.UUID `json:"customer_id"`
-	CompanyID      uuid.UUID `json:"company_id"`
-	DiscountAmount float64   `json:"discount_amount"`
-	Subtotal       float64   `json:"subtotal"`
-	TotalAmount    float64   `json:"total_amount"`
-	CreatedBy      uuid.UUID `json:"created_by"`
+	CustomerID     uuid.UUID               `json:"customer_id"`
+	CompanyID      uuid.UUID               `json:"company_id"`
+	DiscountAmount float64                 `json:"discount_amount"`
+	Subtotal       float64                 `json:"subtotal"`
+	TotalAmount    float64                 `json:"total_amount"`
+	CreatedBy      uuid.UUID               `json:"created_by"`
+	Items          []CreateSaleItemRequest `json:"items"`
+}
+
+type CreateSaleItemRequest struct {
+	SaleID    uuid.UUID `json:"sale_id"`
+	ProductID uuid.UUID `json:"product_id"`
+	Quantity  int32     `json:"quantity"`
+	UnitPrice float64   `json:"unit_price"`
+	Discount  float64   `json:"discount"`
 }
 
 type DeleteSaleRequest struct {
@@ -59,4 +70,34 @@ type UpdateSaleStatusRequest struct {
 	UpdatedBy uuid.UUID   `json:"updated_by"`
 	ID        uuid.UUID   `json:"id"`
 	CompanyID uuid.UUID   `json:"company_id"`
+}
+
+func ValidateCreateSaleRequest(req CreateSaleRequest) error {
+	if req.CustomerID == uuid.Nil {
+		return errors.New("customer_id is required")
+	}
+	if req.CompanyID == uuid.Nil {
+		return errors.New("company_id is required")
+	}
+	if req.CreatedBy == uuid.Nil {
+		return errors.New("created_by is required")
+	}
+	if len(req.Items) == 0 {
+		return errors.New("the sale must have at least one item")
+	}
+	if req.DiscountAmount < 0 || req.Subtotal < 0 || req.TotalAmount < 0 {
+		return errors.New("values cannot be negative")
+	}
+	for i, item := range req.Items {
+		if item.ProductID == uuid.Nil {
+			return fmt.Errorf("item[%d]: product_id is required", i)
+		}
+		if item.Quantity <= 0 {
+			return fmt.Errorf("item[%d]: quantity must be greater than zero", i)
+		}
+		if item.UnitPrice < 0 || item.Discount < 0 {
+			return fmt.Errorf("item[%d]: unit_price and discount cannot be negative", i)
+		}
+	}
+	return nil
 }

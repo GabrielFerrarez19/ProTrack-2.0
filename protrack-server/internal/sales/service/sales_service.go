@@ -5,6 +5,8 @@ import (
 
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
+	saleItemDomain "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sale_items/domain"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sale_items/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/domain"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/repository"
 	"github.com/google/uuid"
@@ -18,23 +20,38 @@ type RepositoryInterface interface {
 	GetSaleById(ctx context.Context, arg db.GetSaleByIdParams) (db.GetSaleByIdRow, error)
 	ListSales(ctx context.Context, companyId pgtype.UUID) ([]db.ListSalesRow, error)
 	UpdateSaleStatus(ctx context.Context, arg db.UpdateSaleStatusParams) error
+	WithTx(tx db.DBTX) *repository.Repository
 }
 
 type Service struct {
-	repo RepositoryInterface
-	pool *pgxpool.Pool
+	repo             RepositoryInterface
+	pool             *pgxpool.Pool
+	saleItemsService *service.Service
 }
 
-func NewService(repo *repository.Repository, pool *pgxpool.Pool) *Service {
+func NewService(repo *repository.Repository, pool *pgxpool.Pool, saleItemsService *service.Service) *Service {
 	return &Service{
-		repo: repo,
-		pool: pool,
+		repo:             repo,
+		pool:             pool,
+		saleItemsService: saleItemsService,
 	}
 }
 
 func (s *Service) CreateSale(ctx context.Context, req domain.CreateSaleRequest) (uuid.UUID, error) {
-	id, err := s.repo.CreateSales(ctx, db.CreateSaleParams{
-		CustomerID:     pgconv.ParseUUIDToPgType(req.CompanyID),
+	if err := domain.ValidateCreateSaleRequest(req); err != nil {
+		return uuid.Nil, err
+	}
+
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	txRepo := s.repo.WithTx(tx)
+
+	id, err := txRepo.CreateSales(ctx, db.CreateSaleParams{
+		CustomerID:     pgconv.ParseUUIDToPgType(req.CustomerID),
 		CompanyID:      pgconv.ParseUUIDToPgType(req.CompanyID),
 		DiscountAmount: pgconv.Float64ToPgNumeric(req.DiscountAmount),
 		Subtotal:       pgconv.Float64ToPgNumeric(req.Subtotal),
@@ -45,7 +62,15 @@ func (s *Service) CreateSale(ctx context.Context, req domain.CreateSaleRequest) 
 		return uuid.Nil, err
 	}
 
-	return pgconv.PgUUIDToUUID(id), nil
+	for _, itemReq := range req.Items {
+		itemReq.SaleID = pgconv.PgUUIDToUUID(id)
+
+		if err := s.saleItemsService.CreateSaleItemInTx(ctx, tx, saleItemDomain.CreateSaleItemRequest(itemReq), req.CompanyID); err != nil {
+			return uuid.Nil, err
+		}
+	}
+
+	return pgconv.PgUUIDToUUID(id), tx.Commit(ctx)
 }
 
 func (s *Service) DeleteSale(ctx context.Context, id uuid.UUID, req domain.DeleteSaleRequest) error {
@@ -58,7 +83,6 @@ func (s *Service) DeleteSale(ctx context.Context, id uuid.UUID, req domain.Delet
 	}
 
 	return nil
-
 }
 
 func (s *Service) GetSaleById(ctx context.Context, req domain.GetSaleByIdRequest) (domain.GetSaleByIdRow, error) {
