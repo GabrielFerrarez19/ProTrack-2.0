@@ -167,7 +167,7 @@ func (s *Service) UpdateSaleStatus(ctx context.Context, id uuid.UUID, req domain
 func (s *Service) ListSalesByCustomerAndStatus(ctx context.Context, req domain.ListSalesByCompanyAndStatusRequest) ([]domain.ListSalesByCompanyAndStatusRow, error) {
 	sales, err := s.repo.ListSalesByCompanyAndStatus(ctx, db.ListSalesByCompanyAndStatusParams{
 		CompanyID: pgconv.ParseUUIDToPgType(req.CompanyID),
-		Status:    req.Status,
+		Column2:   req.Status,
 	})
 	if err != nil {
 		return []domain.ListSalesByCompanyAndStatusRow{}, err
@@ -177,16 +177,18 @@ func (s *Service) ListSalesByCustomerAndStatus(ctx context.Context, req domain.L
 
 	for _, sale := range sales {
 		response = append(response, domain.ListSalesByCompanyAndStatusRow{
-			SaleID:      pgconv.PgUUIDToUUID(sale.SaleID),
-			TotalAmount: pgconv.PgNumericToFloat64(sale.TotalAmount),
-			Status:      sale.Status,
-			SaleDate:    pgconv.PgTimestamptzToTime(sale.SaleDate),
-			ItemID:      pgconv.PgUUIDToUUID(sale.ItemID),
-			ProductID:   pgconv.PgUUIDToUUID(sale.ProductID),
-			Quantity:    sale.Quantity,
-			UnitPrice:   pgconv.PgNumericToFloat64(sale.UnitPrice),
-			Discount:    pgconv.PgNumericToFloat64(sale.Discount),
-			ProductName: sale.ProductName,
+			SaleID:         pgconv.PgUUIDToUUID(sale.SaleID),
+			TotalAmount:    pgconv.PgNumericToFloat64(sale.TotalAmount),
+			DiscountAmount: pgconv.PgNumericToFloat64(sale.DiscountAmount),
+			Status:         sale.Status,
+			SaleDate:       pgconv.PgTimestamptzToTime(sale.SaleDate),
+			ItemID:         pgconv.PgUUIDToUUID(sale.ItemID),
+			ProductID:      pgconv.PgUUIDToUUID(sale.ProductID),
+			Quantity:       sale.Quantity,
+			UnitPrice:      pgconv.PgNumericToFloat64(sale.UnitPrice),
+			Discount:       pgconv.PgNumericToFloat64(sale.Discount),
+			ProductName:    sale.ProductName,
+			CustomerName:   sale.CustomerName,
 		})
 	}
 

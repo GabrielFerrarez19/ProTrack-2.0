@@ -18,11 +18,10 @@ export function TotalVendas() {
   const filteredVendas = (vendas ?? []).filter((venda) => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      venda.id.toString().includes(searchLower) ||
-      venda.cliente_nome?.toLowerCase().includes(searchLower) ||
-      new Date(venda.data_venda).toLocaleDateString().includes(searchLower) ||
-      venda.total?.toString().includes(searchLower) ||
-      venda.total_com_desconto?.toString().includes(searchLower) ||
+      venda.sale_id.toString().includes(searchLower) ||
+      venda.customer_name?.toLowerCase().includes(searchLower) ||
+      new Date(venda.sale_date).toLocaleDateString().includes(searchLower) ||
+      venda.total_amount?.toString().includes(searchLower) ||
       venda.status?.toLowerCase().includes(searchLower)
     );
   });
