@@ -182,7 +182,7 @@ func (q *Queries) ListSales(ctx context.Context, companyID pgtype.UUID) ([]ListS
 	return items, nil
 }
 
-const listSalesByCustomerAndStatus = `-- name: ListSalesByCustomerAndStatus :many
+const listSalesByCompanyAndStatus = `-- name: ListSalesByCompanyAndStatus :many
 SELECT s.id AS sale_id,
     s.total_amount,
     s.status,
@@ -196,7 +196,7 @@ SELECT s.id AS sale_id,
 FROM sales s
     INNER JOIN sale_items si ON s.id = si.sale_id
     INNER JOIN products p ON si.product_id = p.id
-WHERE s.customer_id = $1
+WHERE s.company_id = $1
     AND (
         s.status = $2
         OR $2 = ''
@@ -204,12 +204,12 @@ WHERE s.customer_id = $1
 ORDER BY s.created_at DESC
 `
 
-type ListSalesByCustomerAndStatusParams struct {
-	CustomerID pgtype.UUID `json:"customer_id"`
-	Status     interface{} `json:"status"`
+type ListSalesByCompanyAndStatusParams struct {
+	CompanyID pgtype.UUID `json:"company_id"`
+	Status    interface{} `json:"status"`
 }
 
-type ListSalesByCustomerAndStatusRow struct {
+type ListSalesByCompanyAndStatusRow struct {
 	SaleID      pgtype.UUID        `json:"sale_id"`
 	TotalAmount pgtype.Numeric     `json:"total_amount"`
 	Status      interface{}        `json:"status"`
@@ -222,15 +222,15 @@ type ListSalesByCustomerAndStatusRow struct {
 	ProductName string             `json:"product_name"`
 }
 
-func (q *Queries) ListSalesByCustomerAndStatus(ctx context.Context, arg ListSalesByCustomerAndStatusParams) ([]ListSalesByCustomerAndStatusRow, error) {
-	rows, err := q.db.Query(ctx, listSalesByCustomerAndStatus, arg.CustomerID, arg.Status)
+func (q *Queries) ListSalesByCompanyAndStatus(ctx context.Context, arg ListSalesByCompanyAndStatusParams) ([]ListSalesByCompanyAndStatusRow, error) {
+	rows, err := q.db.Query(ctx, listSalesByCompanyAndStatus, arg.CompanyID, arg.Status)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []ListSalesByCustomerAndStatusRow{}
+	items := []ListSalesByCompanyAndStatusRow{}
 	for rows.Next() {
-		var i ListSalesByCustomerAndStatusRow
+		var i ListSalesByCompanyAndStatusRow
 		if err := rows.Scan(
 			&i.SaleID,
 			&i.TotalAmount,

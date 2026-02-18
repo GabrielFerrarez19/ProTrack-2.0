@@ -194,3 +194,29 @@ func (h *Handler) UpdateSaleStatus(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 }
+
+func (h *Handler) ListSalesByCustomerAndStatus(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id is null"})
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	var req domain.ListSalesByCompanyAndStatusRequest
+
+	req.CompanyID = companyId
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	sales, err := h.service.ListSalesByCustomerAndStatus(c.Request.Context(), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"sales": sales})
+}
