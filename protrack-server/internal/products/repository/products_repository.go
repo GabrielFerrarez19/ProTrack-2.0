@@ -5,45 +5,56 @@ import (
 
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Repository struct {
-	pool *pgxpool.Pool
-	q    *db.Queries
+	db db.DBTX
 }
 
-func NewRepository(pool *pgxpool.Pool) *Repository {
+func NewRepository(db db.DBTX) *Repository {
 	return &Repository{
-		pool: pool,
-		q:    db.New(pool),
+		db: db,
 	}
 }
 
+func (r *Repository) WithTx(tx db.DBTX) *Repository {
+	return &Repository{
+		db: tx,
+	}
+}
+
+func (r *Repository) queries() *db.Queries {
+	return db.New(r.db)
+}
+
 func (r *Repository) CreateProduct(ctx context.Context, arg db.CreateProductParams) (db.Product, error) {
-	return r.q.CreateProduct(ctx, arg)
+	return r.queries().CreateProduct(ctx, arg)
 }
 
 func (r *Repository) DeleteProduct(ctx context.Context, arg db.DeleteProductParams) error {
-	return r.q.DeleteProduct(ctx, arg)
+	return r.queries().DeleteProduct(ctx, arg)
 }
 
 func (r *Repository) GetProductByBarcode(ctx context.Context, barcode pgtype.Text) (db.Product, error) {
-	return r.q.GetProductByBarcode(ctx, barcode)
+	return r.queries().GetProductByBarcode(ctx, barcode)
 }
 
 func (r *Repository) GetProductById(ctx context.Context, id pgtype.UUID) (db.Product, error) {
-	return r.q.GetProductById(ctx, id)
+	return r.queries().GetProductById(ctx, id)
 }
 
 func (r *Repository) ListProductsByCategoryId(ctx context.Context, arg db.ListProductsByCategoryIdParams) ([]db.Product, error) {
-	return r.q.ListProductsByCategoryId(ctx, arg)
+	return r.queries().ListProductsByCategoryId(ctx, arg)
 }
 
 func (r *Repository) ListProductsByCompany(ctx context.Context, categoryID pgtype.UUID) ([]db.ListProductsByCompanyRow, error) {
-	return r.q.ListProductsByCompany(ctx, categoryID)
+	return r.queries().ListProductsByCompany(ctx, categoryID)
 }
 
 func (r *Repository) UpdateProduct(ctx context.Context, arg db.UpdateProductParams) (db.Product, error) {
-	return r.q.UpdateProduct(ctx, arg)
+	return r.queries().UpdateProduct(ctx, arg)
+}
+
+func (r *Repository) DecrementStock(ctx context.Context, arg db.DecrementStockParams) error {
+	return r.queries().DecrementStock(ctx, arg)
 }

@@ -131,6 +131,16 @@ type Sale struct {
 	DeletedBy      pgtype.UUID        `json:"deleted_by"`
 }
 
+type SaleItem struct {
+	ID        pgtype.UUID        `json:"id"`
+	SaleID    pgtype.UUID        `json:"sale_id"`
+	ProductID pgtype.UUID        `json:"product_id"`
+	Quantity  int32              `json:"quantity"`
+	UnitPrice pgtype.Numeric     `json:"unit_price"`
+	Discount  pgtype.Numeric     `json:"discount"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
 type User struct {
 	ID           pgtype.UUID        `json:"id"`
 	Name         string             `json:"name"`
