@@ -14,5 +14,6 @@ func (h *Handler) RegisterRoute(r *gin.RouterGroup) {
 		sales.GET("/list/", h.ListSales)
 		sales.PUT("/status/:id", h.UpdateSaleStatus)
 		sales.GET("/list/company", h.ListSalesByCompanyAndStatus)
+		sales.GET("/count", h.CountSales)
 	}
 }
