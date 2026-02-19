@@ -15,5 +15,6 @@ func (h *Handler) RegisterRoute(r *gin.RouterGroup) {
 		product.GET("/company", h.ListProductsByCompany)
 		product.GET("/:id", h.GetProductById)
 		product.PUT("/:id", h.UpdateProduct)
+		product.GET("/count", h.CountProducts)
 	}
 }
