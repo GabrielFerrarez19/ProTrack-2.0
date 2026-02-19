@@ -33,12 +33,13 @@ export function ProdutoSelect({
   atualizarPrecoProduto,
   placeholder = "Selecione um produto",
 }: ProdutoSelectProps) {
+  const lista = produtos ?? [];
   return (
     <FormField
       control={control}
       name={name}
       render={({ field }) => {
-        const options: OptionType[] = produtos.map((p) => ({
+        const options: OptionType[] = lista.map((p) => ({
           value: String(p.id),
           label: `${p.nome} - Cod: ${p.codigo_barras ?? "-"} - R$ ${
             p.preco_venda != null ? Number(p.preco_venda).toFixed(2) : "0.00"
