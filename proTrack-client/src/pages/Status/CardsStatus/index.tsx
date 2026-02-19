@@ -12,11 +12,11 @@ export function CardsStatus({
   loading: loadingVendas,
   error: erroVendas,
 }: CardsStatusProps) {
-  const totalEstoque = 0;
+  const totalEstoque = dados?.estoque ?? 0;
   const loadingEstoque = false;
   const erroEstoque: string | null = null;
 
-  const totalClientes = dados?.clientes;
+  const totalClientes = dados?.clientes ?? 0;
   const loadingClientes = false;
   const erroClientes: string | null = null;
 
