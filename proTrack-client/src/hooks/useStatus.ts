@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import type {
-  DashboardDados,
-  VendasDashboardResponse,
-} from "../@types/types.api";
 import { CountSales } from "@/services/sales";
 import type { Status } from "@/@types/types.components";
+import { CountCustomers } from "@/services/customers";
 
 const emptyDados = {
   vendas: 0,
+  clientes: 0,
 };
 
 export const useStatus = () => {
@@ -20,10 +18,13 @@ export const useStatus = () => {
     try {
       setLoading(true);
       setError(null);
-      const count = await CountSales();
+      const countSales = await CountSales();
+      const countCustomers = await CountCustomers();
+
       setDados((prev) => ({
         ...prev,
-        vendas: count,
+        vendas: countSales,
+        clientes: countCustomers,
       }));
     } catch {
       setError("Erro ao buscar dados");
