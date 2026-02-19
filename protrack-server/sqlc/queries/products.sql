@@ -72,3 +72,8 @@ UPDATE products
 SET quantity = quantity - $1
 WHERE id = $2
     AND quantity >= $1;
+-- name: CountProducts :one
+SELECT COUNT(*)
+FROM products
+WHERE company_id = $1
+    AND deleted_at IS NULL;
