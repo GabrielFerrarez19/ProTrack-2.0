@@ -95,6 +95,13 @@ type ListSalesByCompanyAndStatusRow struct {
 	CustomerName   string      `json:"customer_name"`
 }
 
+type GetSalesPerformanceSummaryRow struct {
+	CurrentMonthCount   int64 `json:"current_month_count"`
+	CurrentMonthRevenue int64 `json:"current_month_revenue"`
+	LastMonthCount      int64 `json:"last_month_count"`
+	LastMonthRevenue    int64 `json:"last_month_revenue"`
+}
+
 func ValidateCreateSaleRequest(req CreateSaleRequest) error {
 	if req.CustomerID == uuid.Nil {
 		return errors.New("customer_id is required")

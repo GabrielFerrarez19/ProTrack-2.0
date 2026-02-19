@@ -216,7 +216,7 @@ func (h *Handler) ListSalesByCompanyAndStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"sales": sales})
 }
 
-func (h *Handler) CountSales(c *gin.Context){
+func (h *Handler) CountSales(c *gin.Context) {
 	companyIdAny, exists := c.Get("company_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id is null"})
@@ -230,5 +230,22 @@ func (h *Handler) CountSales(c *gin.Context){
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"count":count})
+	c.JSON(http.StatusOK, gin.H{"count": count})
+}
+
+func (h *Handler) GetSalesPerformanceSummary(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id is null"})
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	percentage, err := h.service.GetSalesPerformanceSummary(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"percentage": percentage})
 }
