@@ -99,3 +99,8 @@ SET deleted_at = CURRENT_TIMESTAMP,
     deleted_by = $2
 WHERE id = $1
     AND deleted_at IS NULL;
+-- name: CountCustomers :one
+SELECT COUNT(*)
+FROM customers
+WHERE company_id = $1
+    AND deleted_at IS NULL;
