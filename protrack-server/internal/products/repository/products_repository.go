@@ -58,3 +58,7 @@ func (r *Repository) UpdateProduct(ctx context.Context, arg db.UpdateProductPara
 func (r *Repository) DecrementStock(ctx context.Context, arg db.DecrementStockParams) error {
 	return r.queries().DecrementStock(ctx, arg)
 }
+
+func (r *Repository) CountProducts(ctx context.Context, companyId pgtype.UUID) (int64, error) {
+	return r.queries().CountProducts(ctx, companyId)
+}

@@ -21,6 +21,7 @@ type RepositoryInterface interface {
 	ListProductsByCompany(ctx context.Context, categoryID pgtype.UUID) ([]db.ListProductsByCompanyRow, error)
 	UpdateProduct(ctx context.Context, arg db.UpdateProductParams) (db.Product, error)
 	DecrementStock(ctx context.Context, arg db.DecrementStockParams) error
+	CountProducts(ctx context.Context, companyId pgtype.UUID) (int64, error)
 }
 
 type Service struct {
@@ -245,4 +246,13 @@ func (s *Service) DecrementStock(ctx context.Context, req domain.DecrementStockR
 		return err
 	}
 	return nil
+}
+
+func (s *Service) CountProducts(ctx context.Context, companyId uuid.UUID) (int64, error) {
+	count, err := s.repo.CountProducts(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
