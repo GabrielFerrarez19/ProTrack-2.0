@@ -33,6 +33,8 @@ export function ProdutoSelect({
   atualizarPrecoProduto,
   placeholder = "Selecione um produto",
 }: ProdutoSelectProps) {
+  const lista = produtos ?? [];
+
   return (
     <FormField
       control={control}
@@ -40,7 +42,7 @@ export function ProdutoSelect({
       render={({ field }) => {
         // seleciona a opção do select
         const selectedOption: OptionType | null =
-          produtos
+          lista
             .map((p) => ({
               value: String(p.id),
               label: `${p.name} - Cod: ${p.barcode ?? "-"} - R$ ${Number(
@@ -53,7 +55,7 @@ export function ProdutoSelect({
           <FormItem>
             <FormControl>
               <Select
-                options={produtos.map((p) => ({
+                options={lista.map((p) => ({
                   value: String(p.id),
                   label: `${p.name} - Cod: ${
                     p.barcode ?? "-"
