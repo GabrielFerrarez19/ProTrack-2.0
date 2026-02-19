@@ -24,6 +24,7 @@ type RepositoryInterface interface {
 	UpdateSaleStatus(ctx context.Context, arg db.UpdateSaleStatusParams) error
 	ListSalesByCompanyAndStatus(ctx context.Context, arg db.ListSalesByCompanyAndStatusParams) ([]db.ListSalesByCompanyAndStatusRow, error)
 	CountSales(ctx context.Context, companyId pgtype.UUID) (int64, error)
+	GetSalesPerformanceSummary(ctx context.Context, companyId pgtype.UUID) (db.GetSalesPerformanceSummaryRow, error)
 	WithTx(tx db.DBTX) *repository.Repository
 }
 
@@ -220,11 +221,33 @@ func (s *Service) ListSalesByCustomerAndStatus(ctx context.Context, req domain.L
 	return response, nil
 }
 
-func (s *Service) CountSales(ctx context.Context, companyId uuid.UUID)(int64, error){
-	count, err := s.repo.CountSales(ctx,pgconv.ParseUUIDToPgType(companyId))
+func (s *Service) CountSales(ctx context.Context, companyId uuid.UUID) (int64, error) {
+	count, err := s.repo.CountSales(ctx, pgconv.ParseUUIDToPgType(companyId))
 	if err != nil {
 		return 0, err
 	}
 
 	return count, nil
+}
+
+func (s *Service) GetSalesPerformanceSummary(ctx context.Context, companyId uuid.UUID) (float64, error) {
+	res, err := s.repo.GetSalesPerformanceSummary(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return 0, err
+	}
+
+	var percentage float64
+
+	if res.LastMonthCount > 0 {
+		percentage = (float64(res.CurrentMonthCount) - float64(res.LastMonthCount)) / float64(res.LastMonthCount) * 100
+	} else {
+		if res.CurrentMonthCount > 0 {
+			percentage = 100.0
+		} else {
+			percentage = 0.0
+		}
+	}
+
+	return percentage, nil
+
 }

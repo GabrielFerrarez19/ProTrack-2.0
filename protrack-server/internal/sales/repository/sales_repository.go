@@ -53,7 +53,12 @@ func (r *Repository) ListSalesByCompanyAndStatus(ctx context.Context, arg db.Lis
 	return q.ListSalesByCompanyAndStatus(ctx, arg)
 }
 
-func (r *Repository) CountSales(ctx context.Context, companyId pgtype.UUID) (int64, error){
+func (r *Repository) CountSales(ctx context.Context, companyId pgtype.UUID) (int64, error) {
 	q := db.New(r.db)
 	return q.CountSales(ctx, companyId)
+}
+
+func (r *Repository) GetSalesPerformanceSummary(ctx context.Context, companyId pgtype.UUID) (db.GetSalesPerformanceSummaryRow, error) {
+	q := db.New(r.db)
+	return q.GetSalesPerformanceSummary(ctx, companyId)
 }
