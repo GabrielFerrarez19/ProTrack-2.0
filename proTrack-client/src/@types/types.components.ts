@@ -241,3 +241,7 @@ export interface PerfilFormData {
   role: string;
   departamento_id?: string; // string porque o Select envia valores como string
 }
+
+export interface Status {
+  vendas: number;
+}

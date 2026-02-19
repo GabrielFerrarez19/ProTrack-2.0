@@ -1,18 +1,22 @@
-import { useState } from "react";
 import { Card, CardContent } from "../../../components/ui/card";
+import type { Status } from "@/@types/types.components";
 
-export function CardsStatus() {
-  const [totalEstoque] = useState(0);
-  const [loadingEstoque] = useState(false);
-  const [erroEstoque] = useState<string | null>(null);
+interface CardsStatusProps {
+  dados: Status;
+  loading?: boolean;
+  error?: string | null;
+}
 
-  const [totalClientes] = useState(0);
-  const [loadingClientes] = useState(false);
-  const [erroClientes] = useState<string | null>(null);
+export function CardsStatus({ dados, loading: loadingVendas, error: erroVendas }: CardsStatusProps) {
+  const totalEstoque = 0;
+  const loadingEstoque = false;
+  const erroEstoque: string | null = null;
 
-  const [totalVendas] = useState(0);
-  const [loadingVendas] = useState(false);
-  const [erroVendas] = useState<string | null>(null);
+  const totalClientes = 0;
+  const loadingClientes = false;
+  const erroClientes: string | null = null;
+
+  const totalVendas = dados?.vendas ?? 0;
 
   const statsData = [
     {
