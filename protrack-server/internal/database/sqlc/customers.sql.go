@@ -11,6 +11,20 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countCustomers = `-- name: CountCustomers :one
+SELECT COUNT(*)
+FROM customers
+WHERE company_id = $1
+    AND deleted_at IS NULL
+`
+
+func (q *Queries) CountCustomers(ctx context.Context, companyID pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countCustomers, companyID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createCustomers = `-- name: CreateCustomers :one
 INSERT INTO customers(
         company_id,

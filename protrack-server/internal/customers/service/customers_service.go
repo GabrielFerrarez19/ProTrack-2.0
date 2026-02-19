@@ -21,6 +21,7 @@ type RepositoryInterface interface {
 	ListCustomers(ctx context.Context, companyID pgtype.UUID) ([]db.Customer, error)
 	UpdateBalanceDueCustomer(ctx context.Context, arg db.UpdateBalanceDueCustomerParams) error
 	UpdateCustomer(ctx context.Context, arg db.UpdateCustomerParams) error
+	CountCustomers(ctx context.Context, companyId pgtype.UUID) (int64, error)
 }
 
 type Service struct {
@@ -254,4 +255,13 @@ func (s *Service) UpdateCustomer(ctx context.Context, id uuid.UUID, req domain.U
 	}
 
 	return nil
+}
+
+func (s *Service) CountCustomers(ctx context.Context, companyId uuid.UUID) (int64, error) {
+	count, err := s.repo.CountCustomers(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
