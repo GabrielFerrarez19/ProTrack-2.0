@@ -51,3 +51,8 @@ func (r *Repository) UpdateCustomer(ctx context.Context, arg db.UpdateCustomerPa
 	q := db.New(r.db)
 	return q.UpdateCustomer(ctx, arg)
 }
+
+func (r *Repository) CountCustomers(ctx context.Context, companyId pgtype.UUID) (int64, error) {
+	q := db.New(r.db)
+	return q.CountCustomers(ctx, companyId)
+}
