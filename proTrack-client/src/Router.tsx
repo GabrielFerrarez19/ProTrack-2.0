@@ -26,6 +26,7 @@ import Usuarios from "./pages/Usuarios";
 import { NotFound } from "./pages/NotFound";
 import { Seguranca } from "./pages/ConfigSeguranca";
 import { Aparencia } from "./pages/ConfigAparencia";
+import { Index } from "./pages/Index";
 
 export function Router() {
   return (
@@ -56,16 +57,8 @@ export function Router() {
         }
       />
 
-      {/* Rota raiz sem redirecionamento - acesse /login, /status, etc. diretamente */}
-
-      <Route
-        path="cadastrocontaspagar"
-        element={
-          <ProtectedRoute requiredRoute="/cadastrocontaspagar">
-            <CadastroContasPagar />
-          </ProtectedRoute>
-        }
-      />
+      {/* Rota pública - Index/landing */}
+      <Route path="/" element={<Index />} />
 
       {/* Rotas protegidas - apenas para usuários autenticados */}
       <Route
@@ -150,6 +143,14 @@ export function Router() {
           element={
             <ProtectedRoute requiredRoute="/flucoCaixa">
               <FluxoCaixa />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="cadastrocontaspagar"
+          element={
+            <ProtectedRoute requiredRoute="/cadastrocontaspagar">
+              <CadastroContasPagar />
             </ProtectedRoute>
           }
         />
