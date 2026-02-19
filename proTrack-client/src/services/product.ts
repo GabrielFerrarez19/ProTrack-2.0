@@ -3,6 +3,7 @@ import { api } from "./api";
 
 interface ListProductResponse {
   products: ProductResponse[];
+  count: number;
 }
 
 export async function CreateProduct(
@@ -15,4 +16,9 @@ export async function CreateProduct(
 export async function ListProduct(): Promise<ProductResponse[]> {
   const response = await api.get<ListProductResponse>("/product/company");
   return response.data.products;
+}
+
+export async function CountProduct(): Promise<number> {
+  const response = await api.get<ListProductResponse>("/product/count");
+  return response.data.count;
 }
