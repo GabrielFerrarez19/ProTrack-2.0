@@ -244,4 +244,5 @@ export interface PerfilFormData {
 
 export interface Status {
   vendas: number;
+  clientes: number;
 }
