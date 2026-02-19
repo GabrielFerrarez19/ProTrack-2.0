@@ -5,10 +5,12 @@ import { CardsStatus } from "./CardsStatus";
 import { TableData } from "./TabelaDados";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
+import { useStatus } from "@/hooks/useStatus";
 
 export function Status() {
   const { hasCompany, setHasCompany } = useAuth();
   const [openModal, setOpenModal] = useState(false);
+  const { dados, loading, error } = useStatus();
 
   useEffect(() => {
     if (!hasCompany) {
@@ -30,7 +32,7 @@ export function Status() {
       />
       {/* Stats Cards */}
 
-      <CardsStatus />
+      <CardsStatus dados={dados} loading={loading} error={error} />
 
       {/* People Cards */}
       <CardsClientes />
