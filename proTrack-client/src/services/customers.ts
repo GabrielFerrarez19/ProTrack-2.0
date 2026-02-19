@@ -4,6 +4,7 @@ import { data } from "react-router-dom";
 
 interface ListCustomersResponse {
   customers: CustomerResponse[];
+  count: number;
 }
 
 export async function CreateCustomers(data: CustomerRequest): Promise<string> {
@@ -14,4 +15,9 @@ export async function CreateCustomers(data: CustomerRequest): Promise<string> {
 export async function ListCustomers(): Promise<CustomerResponse[]> {
   const response = await api.get<ListCustomersResponse>("/customers/list");
   return response.data.customers;
+}
+
+export async function CountCustomers(): Promise<number> {
+  const response = await api.get<ListCustomersResponse>("/customers/count");
+  return response.data.count;
 }
