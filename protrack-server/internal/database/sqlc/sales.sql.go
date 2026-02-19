@@ -12,7 +12,10 @@ import (
 )
 
 const countSales = `-- name: CountSales :one
-SELECT COUNT(*) FROM sales WHERE company_id = $1 AND delete_at IS NULL
+SELECT COUNT(*)
+FROM sales
+WHERE company_id = $1
+    AND deleted_at IS NULL
 `
 
 func (q *Queries) CountSales(ctx context.Context, companyID pgtype.UUID) (int64, error) {
