@@ -7,12 +7,16 @@ interface CardsStatusProps {
   error?: string | null;
 }
 
-export function CardsStatus({ dados, loading: loadingVendas, error: erroVendas }: CardsStatusProps) {
+export function CardsStatus({
+  dados,
+  loading: loadingVendas,
+  error: erroVendas,
+}: CardsStatusProps) {
   const totalEstoque = 0;
   const loadingEstoque = false;
   const erroEstoque: string | null = null;
 
-  const totalClientes = 0;
+  const totalClientes = dados?.clientes;
   const loadingClientes = false;
   const erroClientes: string | null = null;
 
