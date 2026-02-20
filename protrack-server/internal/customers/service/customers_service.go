@@ -22,6 +22,7 @@ type RepositoryInterface interface {
 	UpdateBalanceDueCustomer(ctx context.Context, arg db.UpdateBalanceDueCustomerParams) error
 	UpdateCustomer(ctx context.Context, arg db.UpdateCustomerParams) error
 	CountCustomers(ctx context.Context, companyId pgtype.UUID) (int64, error)
+	GetCustomersPerformanceSummary(ctx context.Context, companyId pgtype.UUID) (db.GetCustomersPerformanceSummaryRow, error)
 }
 
 type Service struct {
@@ -264,4 +265,25 @@ func (s *Service) CountCustomers(ctx context.Context, companyId uuid.UUID) (int6
 	}
 
 	return count, nil
+}
+
+func (s *Service) GetCustomersPerformanceSummary(ctx context.Context, companyId uuid.UUID) (float64, error) {
+	res, err := s.repo.GetCustomersPerformanceSummary(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return 0, err
+	}
+
+	var percentage float64
+
+	if res.LastMonthCount > 0 {
+		percentage = ((float64(res.CurrentMonthCount) - float64(res.LastMonthCount)) / float64(res.LastMonthCount)) * 100
+	} else {
+		if res.LastMonthCount > 0 {
+			percentage = 100.0
+		} else {
+			percentage = 0
+		}
+	}
+
+	return percentage, nil
 }
