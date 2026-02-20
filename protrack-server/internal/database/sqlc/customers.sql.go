@@ -230,6 +230,31 @@ func (q *Queries) GetCustomerById(ctx context.Context, id pgtype.UUID) (Customer
 	return i, err
 }
 
+const getCustomersPerformanceSummary = `-- name: GetCustomersPerformanceSummary :one
+SELECT COUNT(*) FILTER (
+        WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)
+    ) AS current_month_count,
+    COUNT(*) FILTER (
+        WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
+    ) AS last_month_count
+FROM customers
+WHERE company_id = $1
+    AND deleted_at IS NULL
+    AND created_at >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
+`
+
+type GetCustomersPerformanceSummaryRow struct {
+	CurrentMonthCount int64 `json:"current_month_count"`
+	LastMonthCount    int64 `json:"last_month_count"`
+}
+
+func (q *Queries) GetCustomersPerformanceSummary(ctx context.Context, companyID pgtype.UUID) (GetCustomersPerformanceSummaryRow, error) {
+	row := q.db.QueryRow(ctx, getCustomersPerformanceSummary, companyID)
+	var i GetCustomersPerformanceSummaryRow
+	err := row.Scan(&i.CurrentMonthCount, &i.LastMonthCount)
+	return i, err
+}
+
 const listCustomers = `-- name: ListCustomers :many
 SELECT id, company_id, full_name, birth_date, cpf, rg, marital_status, gender, whatsapp, mobile_phone, home_phone, email, address_street, address_number, address_complement, address_neighborhood, address_city, address_state, address_zipcode, address_country, balance_due, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at
 FROM customers
