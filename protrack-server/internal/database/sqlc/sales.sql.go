@@ -161,48 +161,27 @@ func (q *Queries) GetSaleById(ctx context.Context, arg GetSaleByIdParams) (GetSa
 }
 
 const getSalesPerformanceSummary = `-- name: GetSalesPerformanceSummary :one
-SELECT 
-    
-    COUNT(*) FILTER (
+SELECT COUNT(*) FILTER (
         WHERE date_trunc('month', sale_at) = date_trunc('month', CURRENT_DATE)
     ) AS current_month_count,
-    
-    SUM(total_amount) FILTER (
-        WHERE date_trunc('month', sale_at) = date_trunc('month', CURRENT_DATE)
-    ) AS current_month_revenue,
-
-    
     COUNT(*) FILTER (
         WHERE date_trunc('month', sale_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
-    ) AS last_month_count,
-    
-    SUM(total_amount) FILTER (
-        WHERE date_trunc('month', sale_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
-    ) AS last_month_revenue
-
+    ) AS last_month_count
 FROM sales
-WHERE 
-    company_id = $1 
-    AND deleted_at IS NULL        
+WHERE company_id = $1
+    AND deleted_at IS NULL
     AND sale_at >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
 `
 
 type GetSalesPerformanceSummaryRow struct {
-	CurrentMonthCount   int64 `json:"current_month_count"`
-	CurrentMonthRevenue int64 `json:"current_month_revenue"`
-	LastMonthCount      int64 `json:"last_month_count"`
-	LastMonthRevenue    int64 `json:"last_month_revenue"`
+	CurrentMonthCount int64 `json:"current_month_count"`
+	LastMonthCount    int64 `json:"last_month_count"`
 }
 
 func (q *Queries) GetSalesPerformanceSummary(ctx context.Context, companyID pgtype.UUID) (GetSalesPerformanceSummaryRow, error) {
 	row := q.db.QueryRow(ctx, getSalesPerformanceSummary, companyID)
 	var i GetSalesPerformanceSummaryRow
-	err := row.Scan(
-		&i.CurrentMonthCount,
-		&i.CurrentMonthRevenue,
-		&i.LastMonthCount,
-		&i.LastMonthRevenue,
-	)
+	err := row.Scan(&i.CurrentMonthCount, &i.LastMonthCount)
 	return i, err
 }
 

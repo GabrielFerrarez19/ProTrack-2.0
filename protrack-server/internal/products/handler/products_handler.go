@@ -8,6 +8,7 @@ import (
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/service"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 type Handler struct {
@@ -202,6 +203,7 @@ func (h *Handler) GetProductsPerformanceSummary(c *gin.Context) {
 
 	percentage, err := h.service.GetProductsPerformanceSummary(c.Request.Context(), companyId)
 	if err != nil {
+		log.Error().Err(err).Msg("Debug para error")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
