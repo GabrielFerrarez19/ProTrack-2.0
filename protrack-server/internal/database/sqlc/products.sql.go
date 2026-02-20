@@ -12,7 +12,7 @@ import (
 )
 
 const countProducts = `-- name: CountProducts :one
-SELECT COUNT(*)
+SELECT SUM(quantity)
 FROM products
 WHERE company_id = $1
     AND deleted_at IS NULL
@@ -20,9 +20,9 @@ WHERE company_id = $1
 
 func (q *Queries) CountProducts(ctx context.Context, companyID pgtype.UUID) (int64, error) {
 	row := q.db.QueryRow(ctx, countProducts, companyID)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
+	var sum int64
+	err := row.Scan(&sum)
+	return sum, err
 }
 
 const createProduct = `-- name: CreateProduct :one
@@ -198,11 +198,17 @@ func (q *Queries) GetProductById(ctx context.Context, id pgtype.UUID) (Product, 
 }
 
 const getProductsPerformanceSummary = `-- name: GetProductsPerformanceSummary :one
-SELECT SUM(quantity) FILTER (
-        WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)
+SELECT COALESCE(
+        SUM(quantity) FILTER (
+            WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)
+        ),
+        0
     ) AS current_month_qty,
-    SUM(quantity) FILTER (
-        WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
+    COALESCE(
+        SUM(quantity) FILTER (
+            WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
+        ),
+        0
     ) AS last_month_qty
 FROM products
 WHERE company_id = $1
@@ -211,8 +217,8 @@ WHERE company_id = $1
 `
 
 type GetProductsPerformanceSummaryRow struct {
-	CurrentMonthQty int64 `json:"current_month_qty"`
-	LastMonthQty    int64 `json:"last_month_qty"`
+	CurrentMonthQty interface{} `json:"current_month_qty"`
+	LastMonthQty    interface{} `json:"last_month_qty"`
 }
 
 func (q *Queries) GetProductsPerformanceSummary(ctx context.Context, companyID pgtype.UUID) (GetProductsPerformanceSummaryRow, error) {

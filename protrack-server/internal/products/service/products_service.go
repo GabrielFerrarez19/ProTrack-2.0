@@ -266,13 +266,23 @@ func (s *Service) GetProductsPerformanceSummary(ctx context.Context, companyId u
 
 	var percentage float64
 
-	if res.CurrentMonthQty > 0 {
-		percentage = ((float64(res.CurrentMonthQty) - float64(res.LastMonthQty)) / float64(res.LastMonthQty)) * 100
+	current, okC := res.CurrentMonthQty.(float64)
+	last, okL := res.LastMonthQty.(float64)
+
+	if !okC {
+		current = 0
+	}
+	if !okL {
+		last = 0
+	}
+
+	if last > 0 {
+		percentage = ((current - last) / last) * 100
 	} else {
-		if res.LastMonthQty > 0 {
+		if current > 0 {
 			percentage = 100.0
 		} else {
-			percentage = 0
+			percentage = 0.0
 		}
 	}
 
