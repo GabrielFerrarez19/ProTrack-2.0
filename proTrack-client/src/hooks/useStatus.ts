@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
-import { CountSales } from "@/services/sales";
+import { CountSales, PercentageSales } from "@/services/sales";
 import type { Status } from "@/@types/types.components";
-import { CountCustomers } from "@/services/customers";
-import { CountProduct } from "@/services/product";
+import { CountCustomers, PercentageCustomers } from "@/services/customers";
+import { CountProduct, PercentageProduct } from "@/services/product";
+import { data } from "react-router-dom";
 
 const emptyDados = {
   vendas: 0,
   clientes: 0,
   estoque: 0,
+  percentageVendas: 0,
+  percentageClientes: 0,
+  percentageEstoque: 0,
 };
 
 export const useStatus = () => {
@@ -23,12 +27,18 @@ export const useStatus = () => {
       const countSales = await CountSales();
       const countCustomers = await CountCustomers();
       const countProducts = await CountProduct();
+      const percentageSales = await PercentageSales();
+      const percentageCustomers = await PercentageCustomers();
+      const percentageProducts = await PercentageProduct();
 
       setDados((prev) => ({
         ...prev,
         vendas: countSales,
         clientes: countCustomers,
         estoque: countProducts,
+        percentageVendas: percentageSales,
+        percentageClientes: percentageCustomers,
+        percentageEstoque: percentageProducts,
       }));
     } catch {
       setError("Erro ao buscar dados");
@@ -36,6 +46,8 @@ export const useStatus = () => {
       setLoading(false);
     }
   }, []);
+
+  console.log(data.length);
 
   useEffect(() => {
     loadDados();
