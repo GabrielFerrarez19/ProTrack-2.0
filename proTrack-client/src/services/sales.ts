@@ -4,6 +4,7 @@ import type { ListSalesByCompanyResponse, SaleRequest } from "@/@types/sales";
 interface ListSalesResponse {
   sales: ListSalesByCompanyResponse[];
   count: number;
+  percentage: number;
 }
 
 export async function CreateSale(data: SaleRequest): Promise<string> {
@@ -26,4 +27,9 @@ export async function UpdateSaleStatus(
 export async function CountSales(): Promise<number> {
   const response = await api.get<ListSalesResponse>("/sales/count");
   return response.data.count;
+}
+
+export async function PercentageSales(): Promise<number> {
+  const response = await api.get<ListSalesResponse>("/sales/percentage");
+  return response.data.percentage;
 }
