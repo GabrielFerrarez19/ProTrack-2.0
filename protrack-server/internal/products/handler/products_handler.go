@@ -190,3 +190,21 @@ func (h *Handler) CountProducts(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"count": count})
 }
+
+func (h *Handler) GetProductsPerformanceSummary(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "company_id null"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	percentage, err := h.service.GetProductsPerformanceSummary(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"percentage": percentage})
+}
