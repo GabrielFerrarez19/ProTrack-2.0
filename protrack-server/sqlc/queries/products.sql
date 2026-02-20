@@ -73,16 +73,22 @@ SET quantity = quantity - $1
 WHERE id = $2
     AND quantity >= $1;
 -- name: CountProducts :one
-SELECT COUNT(*)
+SELECT SUM(quantity)
 FROM products
 WHERE company_id = $1
     AND deleted_at IS NULL;
 -- name: GetProductsPerformanceSummary :one
-SELECT SUM(quantity) FILTER (
-        WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)
+SELECT COALESCE(
+        SUM(quantity) FILTER (
+            WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)
+        ),
+        0
     ) AS current_month_qty,
-    SUM(quantity) FILTER (
-        WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
+    COALESCE(
+        SUM(quantity) FILTER (
+            WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
+        ),
+        0
     ) AS last_month_qty
 FROM products
 WHERE company_id = $1
