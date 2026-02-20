@@ -16,5 +16,7 @@ func (h *Handler) RegisterRoute(r *gin.RouterGroup) {
 		sales.GET("/list/company", h.ListSalesByCompanyAndStatus)
 		sales.GET("/count", h.CountSales)
 		sales.GET("/percentage", h.GetSalesPerformanceSummary)
+		sales.GET("/total-amount", h.GetTotalAmountSummary)
+		sales.GET("/total-pending", h.GetTotalAmountIsPending)
 	}
 }
