@@ -13,14 +13,17 @@ export function CardsStatus({
   error: erroVendas,
 }: CardsStatusProps) {
   const totalEstoque = dados?.estoque ?? 0;
+  const porcentagemEstoque = dados?.percentageEstoque ?? 0;
   const loadingEstoque = false;
   const erroEstoque: string | null = null;
 
   const totalClientes = dados?.clientes ?? 0;
+  const porcentagemClientes = dados?.percentageClientes ?? 0;
   const loadingClientes = false;
   const erroClientes: string | null = null;
 
   const totalVendas = dados?.vendas ?? 0;
+  const porcentagemVendas = dados?.percentageVendas ?? 0;
 
   const statsData = [
     {
@@ -30,6 +33,7 @@ export function CardsStatus({
         : erroVendas
           ? "Erro"
           : totalVendas.toString(),
+      percentage: porcentagemVendas,
       color: "text-red-500",
       bgColor: "bg-red-50",
     },
@@ -40,6 +44,7 @@ export function CardsStatus({
         : erroClientes
           ? "Erro"
           : totalClientes.toString(),
+      percentage: porcentagemClientes,
       color: "text-blue-500",
       bgColor: "bg-blue-50",
     },
@@ -50,6 +55,7 @@ export function CardsStatus({
         : erroEstoque
           ? "Erro"
           : totalEstoque.toString(),
+      percentage: porcentagemEstoque,
       color: "text-green-500",
       bgColor: "bg-green-50",
     },
@@ -82,7 +88,7 @@ export function CardsStatus({
                   } border-t-transparent`}
                 >
                   <div className="text-xs text-center mt-3 text-muted-foreground">
-                    0,00%
+                    {stat.percentage}%
                   </div>
                 </div>
               </div>

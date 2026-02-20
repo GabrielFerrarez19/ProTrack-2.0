@@ -278,7 +278,7 @@ func (s *Service) GetCustomersPerformanceSummary(ctx context.Context, companyId 
 	if res.LastMonthCount > 0 {
 		percentage = ((float64(res.CurrentMonthCount) - float64(res.LastMonthCount)) / float64(res.LastMonthCount)) * 100
 	} else {
-		if res.LastMonthCount > 0 {
+		if res.CurrentMonthCount > 0 {
 			percentage = 100.0
 		} else {
 			percentage = 0
