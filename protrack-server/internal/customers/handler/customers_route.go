@@ -16,5 +16,6 @@ func (h *Handler) RegisterRoute(r *gin.RouterGroup) {
 		customers.PUT("/balanceDue/:id", h.UpdateBalanceDueCustomer)
 		customers.PUT("/:id", h.UpdateCustomer)
 		customers.GET("/count", h.CountCustomers)
+		customers.GET("/percentage", h.GetCustomersPerformanceSummary)
 	}
 }

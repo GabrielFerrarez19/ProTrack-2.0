@@ -36,6 +36,7 @@ type Querier interface {
 	GetCompanyByID(ctx context.Context, id pgtype.UUID) (Company, error)
 	GetCustomerByCPF(ctx context.Context, cpf string) (Customer, error)
 	GetCustomerById(ctx context.Context, id pgtype.UUID) (Customer, error)
+	GetCustomersPerformanceSummary(ctx context.Context, companyID pgtype.UUID) (GetCustomersPerformanceSummaryRow, error)
 	GetDepartmentById(ctx context.Context, id pgtype.UUID) (Department, error)
 	GetProductByBarcode(ctx context.Context, barcode pgtype.Text) (Product, error)
 	GetProductById(ctx context.Context, id pgtype.UUID) (Product, error)
