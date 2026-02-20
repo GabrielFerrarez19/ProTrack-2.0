@@ -62,3 +62,7 @@ func (r *Repository) DecrementStock(ctx context.Context, arg db.DecrementStockPa
 func (r *Repository) CountProducts(ctx context.Context, companyId pgtype.UUID) (int64, error) {
 	return r.queries().CountProducts(ctx, companyId)
 }
+
+func (r *Repository) GetProductsPerformanceSummary(ctx context.Context, companyId pgtype.UUID) (db.GetProductsPerformanceSummaryRow, error) {
+	return r.queries().GetProductsPerformanceSummary(ctx, companyId)
+}

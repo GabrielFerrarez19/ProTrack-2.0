@@ -22,6 +22,7 @@ type RepositoryInterface interface {
 	UpdateProduct(ctx context.Context, arg db.UpdateProductParams) (db.Product, error)
 	DecrementStock(ctx context.Context, arg db.DecrementStockParams) error
 	CountProducts(ctx context.Context, companyId pgtype.UUID) (int64, error)
+	GetProductsPerformanceSummary(ctx context.Context, companyId pgtype.UUID) (db.GetProductsPerformanceSummaryRow, error)
 }
 
 type Service struct {
@@ -255,4 +256,25 @@ func (s *Service) CountProducts(ctx context.Context, companyId uuid.UUID) (int64
 	}
 
 	return count, nil
+}
+
+func (s *Service) GetProductsPerformanceSummary(ctx context.Context, companyId uuid.UUID) (float64, error) {
+	res, err := s.repo.GetProductsPerformanceSummary(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return 0, err
+	}
+
+	var percentage float64
+
+	if res.CurrentMonthQty > 0 {
+		percentage = ((float64(res.CurrentMonthQty) - float64(res.LastMonthQty)) / float64(res.LastMonthQty)) * 100
+	} else {
+		if res.LastMonthQty > 0 {
+			percentage = 100.0
+		} else {
+			percentage = 0
+		}
+	}
+
+	return percentage, nil
 }
