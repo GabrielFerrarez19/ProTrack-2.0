@@ -249,3 +249,37 @@ func (h *Handler) GetSalesPerformanceSummary(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"percentage": percentage})
 }
+
+func (h *Handler) GetTotalAmountSummary(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id is null"})
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	totalAmount, err := h.service.GetTotalAmountSummary(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"total_amount": totalAmount})
+}
+
+func (h *Handler) GetTotalAmountIsPending(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id is null"})
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	total, err := h.service.GetTotalAmountIsPending(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"total_pending": total})
+}

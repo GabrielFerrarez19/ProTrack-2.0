@@ -102,6 +102,11 @@ type GetSalesPerformanceSummaryRow struct {
 	LastMonthRevenue    int64 `json:"last_month_revenue"`
 }
 
+type GetTotalAmountSummaryRow struct {
+	CurrentMonthSt float64 `json:"current_month_st"`
+	LastMonthSt    float64 `json:"last_month_st"`
+}
+
 func ValidateCreateSaleRequest(req CreateSaleRequest) error {
 	if req.CustomerID == uuid.Nil {
 		return errors.New("customer_id is required")
