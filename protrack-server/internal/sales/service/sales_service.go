@@ -26,6 +26,8 @@ type RepositoryInterface interface {
 	ListSalesByCompanyAndStatus(ctx context.Context, arg db.ListSalesByCompanyAndStatusParams) ([]db.ListSalesByCompanyAndStatusRow, error)
 	CountSales(ctx context.Context, companyId pgtype.UUID) (int64, error)
 	GetSalesPerformanceSummary(ctx context.Context, companyId pgtype.UUID) (db.GetSalesPerformanceSummaryRow, error)
+	GetTotalAmountSummary(ctx context.Context, companyId pgtype.UUID) (db.GetTotalAmountSummaryRow, error)
+	GetTotalAmountIsPending(ctx context.Context, companyId pgtype.UUID) (float64, error)
 	WithTx(tx db.DBTX) *repository.Repository
 }
 
@@ -251,4 +253,25 @@ func (s *Service) GetSalesPerformanceSummary(ctx context.Context, companyId uuid
 	}
 
 	return percentage, nil
+}
+
+func (s *Service) GetTotalAmountSummary(ctx context.Context, companyId uuid.UUID) (domain.GetTotalAmountSummaryRow, error) {
+	res, err := s.repo.GetTotalAmountSummary(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return domain.GetTotalAmountSummaryRow{}, err
+	}
+
+	return domain.GetTotalAmountSummaryRow{
+		CurrentMonthSt: res.CurrentMonthSt,
+		LastMonthSt:    res.LastMonthSt,
+	}, nil
+}
+
+func (s *Service) GetTotalAmountIsPending(ctx context.Context, companyId uuid.UUID) (float64, error) {
+	total, err := s.repo.GetTotalAmountIsPending(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return 0, err
+	}
+
+	return total, nil
 }
