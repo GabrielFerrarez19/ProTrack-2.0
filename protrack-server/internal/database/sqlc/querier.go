@@ -41,6 +41,7 @@ type Querier interface {
 	GetProductByBarcode(ctx context.Context, barcode pgtype.Text) (Product, error)
 	GetProductById(ctx context.Context, id pgtype.UUID) (Product, error)
 	GetProductCategoryById(ctx context.Context, id pgtype.UUID) (ProductCategory, error)
+	GetProductsPerformanceSummary(ctx context.Context, companyID pgtype.UUID) (GetProductsPerformanceSummaryRow, error)
 	GetSaleById(ctx context.Context, arg GetSaleByIdParams) (GetSaleByIdRow, error)
 	GetSalesPerformanceSummary(ctx context.Context, companyID pgtype.UUID) (GetSalesPerformanceSummaryRow, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
