@@ -77,3 +77,14 @@ SELECT COUNT(*)
 FROM products
 WHERE company_id = $1
     AND deleted_at IS NULL;
+-- name: GetProductsPerformanceSummary :one
+SELECT SUM(quantity) FILTER (
+        WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)
+    ) AS current_month_qty,
+    SUM(quantity) FILTER (
+        WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
+    ) AS last_month_qty
+FROM products
+WHERE company_id = $1
+    AND deleted_at IS NULL
+    AND created_at >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month');

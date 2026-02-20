@@ -197,6 +197,31 @@ func (q *Queries) GetProductById(ctx context.Context, id pgtype.UUID) (Product, 
 	return i, err
 }
 
+const getProductsPerformanceSummary = `-- name: GetProductsPerformanceSummary :one
+SELECT SUM(quantity) FILTER (
+        WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)
+    ) AS current_month_qty,
+    SUM(quantity) FILTER (
+        WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
+    ) AS last_month_qty
+FROM products
+WHERE company_id = $1
+    AND deleted_at IS NULL
+    AND created_at >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
+`
+
+type GetProductsPerformanceSummaryRow struct {
+	CurrentMonthQty int64 `json:"current_month_qty"`
+	LastMonthQty    int64 `json:"last_month_qty"`
+}
+
+func (q *Queries) GetProductsPerformanceSummary(ctx context.Context, companyID pgtype.UUID) (GetProductsPerformanceSummaryRow, error) {
+	row := q.db.QueryRow(ctx, getProductsPerformanceSummary, companyID)
+	var i GetProductsPerformanceSummaryRow
+	err := row.Scan(&i.CurrentMonthQty, &i.LastMonthQty)
+	return i, err
+}
+
 const listProductsByCategoryId = `-- name: ListProductsByCategoryId :many
 SELECT id, company_id, category_id, name, description, barcode, quantity, size, cost_price, sale_price, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at
 FROM products
