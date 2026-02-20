@@ -4,6 +4,7 @@ import { api } from "./api";
 interface ListProductResponse {
   products: ProductResponse[];
   count: number;
+  percentage: number;
 }
 
 export async function CreateProduct(
@@ -21,4 +22,9 @@ export async function ListProduct(): Promise<ProductResponse[]> {
 export async function CountProduct(): Promise<number> {
   const response = await api.get<ListProductResponse>("/product/count");
   return response.data.count;
+}
+
+export async function PercentageProduct(): Promise<number> {
+  const response = await api.get<ListProductResponse>("/product/percentage");
+  return response.data.percentage;
 }
