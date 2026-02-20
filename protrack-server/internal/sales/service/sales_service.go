@@ -14,6 +14,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rs/zerolog/log"
 )
 
 type RepositoryInterface interface {
@@ -233,6 +234,7 @@ func (s *Service) CountSales(ctx context.Context, companyId uuid.UUID) (int64, e
 func (s *Service) GetSalesPerformanceSummary(ctx context.Context, companyId uuid.UUID) (float64, error) {
 	res, err := s.repo.GetSalesPerformanceSummary(ctx, pgconv.ParseUUIDToPgType(companyId))
 	if err != nil {
+		log.Err(err).Msg("Debug para error")
 		return 0, err
 	}
 
@@ -249,5 +251,4 @@ func (s *Service) GetSalesPerformanceSummary(ctx context.Context, companyId uuid
 	}
 
 	return percentage, nil
-
 }

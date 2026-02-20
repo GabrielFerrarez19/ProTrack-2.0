@@ -87,27 +87,13 @@ FROM sales
 WHERE company_id = $1
     AND deleted_at IS NULL;
 -- name: GetSalesPerformanceSummary :one
-SELECT 
-    
-    COUNT(*) FILTER (
+SELECT COUNT(*) FILTER (
         WHERE date_trunc('month', sale_at) = date_trunc('month', CURRENT_DATE)
     ) AS current_month_count,
-    
-    SUM(total_amount) FILTER (
-        WHERE date_trunc('month', sale_at) = date_trunc('month', CURRENT_DATE)
-    ) AS current_month_revenue,
-
-    
     COUNT(*) FILTER (
         WHERE date_trunc('month', sale_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
-    ) AS last_month_count,
-    
-    SUM(total_amount) FILTER (
-        WHERE date_trunc('month', sale_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
-    ) AS last_month_revenue
-
+    ) AS last_month_count
 FROM sales
-WHERE 
-    company_id = $1 
-    AND deleted_at IS NULL        
+WHERE company_id = $1
+    AND deleted_at IS NULL
     AND sale_at >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month');
