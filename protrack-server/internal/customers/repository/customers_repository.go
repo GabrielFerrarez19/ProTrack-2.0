@@ -56,3 +56,8 @@ func (r *Repository) CountCustomers(ctx context.Context, companyId pgtype.UUID) 
 	q := db.New(r.db)
 	return q.CountCustomers(ctx, companyId)
 }
+
+func (r *Repository) GetCustomersPerformanceSummary(ctx context.Context, companyId pgtype.UUID) (db.GetCustomersPerformanceSummaryRow, error) {
+	q := db.New(r.db)
+	return q.GetCustomersPerformanceSummary(ctx, companyId)
+}

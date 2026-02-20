@@ -104,3 +104,14 @@ SELECT COUNT(*)
 FROM customers
 WHERE company_id = $1
     AND deleted_at IS NULL;
+-- name: GetCustomersPerformanceSummary :one
+SELECT COUNT(*) FILTER (
+        WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)
+    ) AS current_month_count,
+    COUNT(*) FILTER (
+        WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
+    ) AS last_month_count
+FROM customers
+WHERE company_id = $1
+    AND deleted_at IS NULL
+    AND created_at >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month');
