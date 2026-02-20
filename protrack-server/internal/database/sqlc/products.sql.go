@@ -135,6 +135,21 @@ func (q *Queries) DeleteProduct(ctx context.Context, arg DeleteProductParams) er
 	return err
 }
 
+const getCostTotalStock = `-- name: GetCostTotalStock :one
+SELECT COALESCE(SUM(cost_price * quantity), 0)::FLOAT AS total_stock_value
+FROM products
+WHERE company_id = $1
+    AND deleted_at IS NULL
+    AND quantity > 0
+`
+
+func (q *Queries) GetCostTotalStock(ctx context.Context, companyID pgtype.UUID) (float64, error) {
+	row := q.db.QueryRow(ctx, getCostTotalStock, companyID)
+	var total_stock_value float64
+	err := row.Scan(&total_stock_value)
+	return total_stock_value, err
+}
+
 const getProductByBarcode = `-- name: GetProductByBarcode :one
 SELECT id, company_id, category_id, name, description, barcode, quantity, size, cost_price, sale_price, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at
 FROM products
