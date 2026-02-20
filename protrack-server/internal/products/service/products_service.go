@@ -23,6 +23,7 @@ type RepositoryInterface interface {
 	DecrementStock(ctx context.Context, arg db.DecrementStockParams) error
 	CountProducts(ctx context.Context, companyId pgtype.UUID) (int64, error)
 	GetProductsPerformanceSummary(ctx context.Context, companyId pgtype.UUID) (db.GetProductsPerformanceSummaryRow, error)
+	GetCostTotalStock(ctx context.Context, companyId pgtype.UUID) (float64, error)
 }
 
 type Service struct {
@@ -287,4 +288,13 @@ func (s *Service) GetProductsPerformanceSummary(ctx context.Context, companyId u
 	}
 
 	return percentage, nil
+}
+
+func (s *Service) GetCostTotalStock(ctx context.Context, companyId uuid.UUID) (float64, error) {
+	total, err := s.repo.GetCostTotalStock(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return 0, err
+	}
+
+	return total, nil
 }

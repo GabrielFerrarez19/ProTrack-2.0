@@ -94,3 +94,9 @@ FROM products
 WHERE company_id = $1
     AND deleted_at IS NULL
     AND created_at >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month');
+-- name: GetCostTotalStock :one
+SELECT COALESCE(SUM(cost_price * quantity), 0)::FLOAT AS total_stock_value
+FROM products
+WHERE company_id = $1
+    AND deleted_at IS NULL
+    AND quantity > 0;

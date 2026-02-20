@@ -66,3 +66,7 @@ func (r *Repository) CountProducts(ctx context.Context, companyId pgtype.UUID) (
 func (r *Repository) GetProductsPerformanceSummary(ctx context.Context, companyId pgtype.UUID) (db.GetProductsPerformanceSummaryRow, error) {
 	return r.queries().GetProductsPerformanceSummary(ctx, companyId)
 }
+
+func (r *Repository) GetCostTotalStock(ctx context.Context, companyId pgtype.UUID) (float64, error) {
+	return r.queries().GetCostTotalStock(ctx, companyId)
+}
