@@ -246,4 +246,7 @@ export interface Status {
   vendas: number;
   clientes: number;
   estoque: number;
+  percentageVendas: number;
+  percentageClientes: number;
+  percentageEstoque: number;
 }
