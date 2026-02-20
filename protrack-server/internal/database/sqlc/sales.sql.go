@@ -185,6 +185,56 @@ func (q *Queries) GetSalesPerformanceSummary(ctx context.Context, companyID pgty
 	return i, err
 }
 
+const getTotalAmountIsPending = `-- name: GetTotalAmountIsPending :one
+SELECT COALESCE(
+        SUM(total_amount) FILTER (
+            WHERE status = 'pending'
+                AND company_id = $1
+                AND deleted_at IS NULL
+        ),
+        0
+    )::FLOAT AS total_pending_amount
+from sales
+`
+
+func (q *Queries) GetTotalAmountIsPending(ctx context.Context, companyID pgtype.UUID) (float64, error) {
+	row := q.db.QueryRow(ctx, getTotalAmountIsPending, companyID)
+	var total_pending_amount float64
+	err := row.Scan(&total_pending_amount)
+	return total_pending_amount, err
+}
+
+const getTotalAmountSummary = `-- name: GetTotalAmountSummary :one
+SELECT coalesce(
+        SUM(total_amount) FILTER (
+            WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)
+        ),
+        0
+    )::FLOAT AS current_month_st,
+    coalesce(
+        SUM(total_amount) FILTER (
+            WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
+        ),
+        0
+    )::FLOAT AS last_month_st
+FROM sales
+WHERE company_id = $1
+    AND deleted_at IS NULL
+    AND created_at >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
+`
+
+type GetTotalAmountSummaryRow struct {
+	CurrentMonthSt float64 `json:"current_month_st"`
+	LastMonthSt    float64 `json:"last_month_st"`
+}
+
+func (q *Queries) GetTotalAmountSummary(ctx context.Context, companyID pgtype.UUID) (GetTotalAmountSummaryRow, error) {
+	row := q.db.QueryRow(ctx, getTotalAmountSummary, companyID)
+	var i GetTotalAmountSummaryRow
+	err := row.Scan(&i.CurrentMonthSt, &i.LastMonthSt)
+	return i, err
+}
+
 const listSales = `-- name: ListSales :many
 SELECT id,
     sale_at,

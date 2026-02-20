@@ -97,3 +97,30 @@ FROM sales
 WHERE company_id = $1
     AND deleted_at IS NULL
     AND sale_at >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month');
+-- name: GetTotalAmountSummary :one
+SELECT coalesce(
+        SUM(total_amount) FILTER (
+            WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)
+        ),
+        0
+    )::FLOAT AS current_month_st,
+    coalesce(
+        SUM(total_amount) FILTER (
+            WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
+        ),
+        0
+    )::FLOAT AS last_month_st
+FROM sales
+WHERE company_id = $1
+    AND deleted_at IS NULL
+    AND created_at >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month');
+-- name: GetTotalAmountIsPending :one
+SELECT COALESCE(
+        SUM(total_amount) FILTER (
+            WHERE status = 'pending'
+                AND company_id = $1
+                AND deleted_at IS NULL
+        ),
+        0
+    )::FLOAT AS total_pending_amount
+from sales;
