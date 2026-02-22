@@ -185,10 +185,10 @@ func (q *Queries) GetSalesPerformanceSummary(ctx context.Context, companyID pgty
 	return i, err
 }
 
-const getTotalAmountIsPending = `-- name: GetTotalAmountIsPending :one
+const getTotalAmountByStatus = `-- name: GetTotalAmountByStatus :one
 SELECT COALESCE(
         SUM(total_amount) FILTER (
-            WHERE status = 'pending'
+            WHERE status = $2
                 AND company_id = $1
                 AND deleted_at IS NULL
         ),
@@ -197,8 +197,13 @@ SELECT COALESCE(
 from sales
 `
 
-func (q *Queries) GetTotalAmountIsPending(ctx context.Context, companyID pgtype.UUID) (float64, error) {
-	row := q.db.QueryRow(ctx, getTotalAmountIsPending, companyID)
+type GetTotalAmountByStatusParams struct {
+	CompanyID pgtype.UUID `json:"company_id"`
+	Status    interface{} `json:"status"`
+}
+
+func (q *Queries) GetTotalAmountByStatus(ctx context.Context, arg GetTotalAmountByStatusParams) (float64, error) {
+	row := q.db.QueryRow(ctx, getTotalAmountByStatus, arg.CompanyID, arg.Status)
 	var total_pending_amount float64
 	err := row.Scan(&total_pending_amount)
 	return total_pending_amount, err
@@ -363,6 +368,28 @@ func (q *Queries) ListSalesByCompanyAndStatus(ctx context.Context, arg ListSales
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateOverdueSales = `-- name: UpdateOverdueSales :exec
+UPDATE sales
+SET status = 'overdue'
+WHERE status = 'pending'
+  AND deleted_at IS NULL
+  AND due_days IS NOT NULL
+  AND (
+    CASE 
+      WHEN EXTRACT(DAY FROM sale_at) <= due_days THEN 
+        (date_trunc('month', sale_at) + (due_days - 1 || ' days')::interval)::date
+      
+      ELSE 
+        (date_trunc('month', sale_at) + INTERVAL '1 month' + (due_days - 1 || ' days')::interval)::date
+    END
+  ) < CURRENT_DATE
+`
+
+func (q *Queries) UpdateOverdueSales(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, updateOverdueSales)
+	return err
 }
 
 const updateSaleStatus = `-- name: UpdateSaleStatus :exec

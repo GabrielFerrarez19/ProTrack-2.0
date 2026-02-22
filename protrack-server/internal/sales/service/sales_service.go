@@ -27,7 +27,7 @@ type RepositoryInterface interface {
 	CountSales(ctx context.Context, companyId pgtype.UUID) (int64, error)
 	GetSalesPerformanceSummary(ctx context.Context, companyId pgtype.UUID) (db.GetSalesPerformanceSummaryRow, error)
 	GetTotalAmountSummary(ctx context.Context, companyId pgtype.UUID) (db.GetTotalAmountSummaryRow, error)
-	GetTotalAmountIsPending(ctx context.Context, companyId pgtype.UUID) (float64, error)
+	GetTotalAmountByStatus(ctx context.Context, arg db.GetTotalAmountByStatusParams) (float64, error)
 	WithTx(tx db.DBTX) *repository.Repository
 }
 
@@ -267,8 +267,28 @@ func (s *Service) GetTotalAmountSummary(ctx context.Context, companyId uuid.UUID
 	}, nil
 }
 
-func (s *Service) GetTotalAmountIsPending(ctx context.Context, companyId uuid.UUID) (float64, error) {
-	total, err := s.repo.GetTotalAmountIsPending(ctx, pgconv.ParseUUIDToPgType(companyId))
+func (s *Service) GetTotalAmountIsPending(ctx context.Context, req domain.GetTotalAmountByStatusRequest) (float64, error) {
+
+	req.Status = "pending"
+
+	total, err := s.repo.GetTotalAmountByStatus(ctx, db.GetTotalAmountByStatusParams{
+		CompanyID: pgconv.ParseUUIDToPgType(req.CompanyID),
+		Status:    req.Status,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return total, nil
+}
+
+func (s *Service) GetTotalAmountIsOverdue(ctx context.Context, req domain.GetTotalAmountByStatusRequest) (float64, error) {
+	req.Status = "overdue"
+
+	total, err := s.repo.GetTotalAmountByStatus(ctx, db.GetTotalAmountByStatusParams{
+		CompanyID: pgconv.ParseUUIDToPgType(req.CompanyID),
+		Status:    req.Status,
+	})
 	if err != nil {
 		return 0, err
 	}
