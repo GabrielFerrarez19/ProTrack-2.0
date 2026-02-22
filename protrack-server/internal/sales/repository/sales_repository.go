@@ -68,7 +68,12 @@ func (r *Repository) GetTotalAmountSummary(ctx context.Context, companyId pgtype
 	return q.GetTotalAmountSummary(ctx, companyId)
 }
 
-func (r *Repository) GetTotalAmountIsPending(ctx context.Context, companyId pgtype.UUID) (float64, error) {
+func (r *Repository) GetTotalAmountByStatus(ctx context.Context, arg db.GetTotalAmountByStatusParams) (float64, error) {
 	q := db.New(r.db)
-	return q.GetTotalAmountIsPending(ctx, companyId)
+	return q.GetTotalAmountByStatus(ctx, arg)
+}
+
+func (r *Repository) UpdateOverdueSales(ctx context.Context) error {
+	q := db.New(r.db)
+	return q.UpdateOverdueSales(ctx)
 }
