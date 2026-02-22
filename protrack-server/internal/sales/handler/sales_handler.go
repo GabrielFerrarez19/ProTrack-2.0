@@ -275,11 +275,39 @@ func (h *Handler) GetTotalAmountIsPending(c *gin.Context) {
 
 	companyId := companyIdAny.(uuid.UUID)
 
-	total, err := h.service.GetTotalAmountIsPending(c.Request.Context(), companyId)
+	var req domain.GetTotalAmountByStatusRequest
+
+	req.CompanyID = companyId
+
+	total, err := h.service.GetTotalAmountIsPending(c.Request.Context(), req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"total_pending": total})
+}
+
+func (h *Handler) GetTotalAmountIsOverdue(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id is null"})
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	var req domain.GetTotalAmountByStatusRequest
+
+	req.CompanyID = companyId
+
+	total, err := h.service.GetTotalAmountIsOverdue(c.Request.Context(), req)
+	if err != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+		return
+
+	}
+
+	c.JSON(http.StatusOK, gin.H{"total_overdue": total})
 }
