@@ -114,13 +114,28 @@ FROM sales
 WHERE company_id = $1
     AND deleted_at IS NULL
     AND created_at >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month');
--- name: GetTotalAmountIsPending :one
+-- name: GetTotalAmountByStatus :one
 SELECT COALESCE(
         SUM(total_amount) FILTER (
-            WHERE status = 'pending'
+            WHERE status = $2
                 AND company_id = $1
                 AND deleted_at IS NULL
         ),
         0
     )::FLOAT AS total_pending_amount
 from sales;
+-- name: UpdateOverdueSales :exec
+UPDATE sales
+SET status = 'overdue'
+WHERE status = 'pending'
+  AND deleted_at IS NULL
+  AND due_days IS NOT NULL
+  AND (
+    CASE 
+      WHEN EXTRACT(DAY FROM sale_at) <= due_days THEN 
+        (date_trunc('month', sale_at) + (due_days - 1 || ' days')::interval)::date
+      
+      ELSE 
+        (date_trunc('month', sale_at) + INTERVAL '1 month' + (due_days - 1 || ' days')::interval)::date
+    END
+  ) < CURRENT_DATE;

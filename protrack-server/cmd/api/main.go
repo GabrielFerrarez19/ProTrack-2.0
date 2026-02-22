@@ -38,6 +38,7 @@ import (
 	usersHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/handler"
 	usersRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/repository"
 	usersService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/service"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/worker"
 	"github.com/gin-contrib/cors"
 
 	"github.com/gin-gonic/gin"
@@ -119,6 +120,8 @@ func main() {
 	customersHandler.RegisterRoute(api)
 	salesHandler.RegisterRoute(api)
 	saleItemsHandler.RegisterRoute(api)
+
+	worker.StartOverdueMonitor(salesRepository)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
