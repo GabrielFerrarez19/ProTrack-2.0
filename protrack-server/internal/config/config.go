@@ -17,6 +17,9 @@ type Config struct {
 	ApiPort string
 
 	SecretKey string
+
+	EvolutionApi string
+	EvolutionKey string
 }
 
 func LoadConfig() (*Config, error) {
@@ -24,13 +27,15 @@ func LoadConfig() (*Config, error) {
 	_ = godotenv.Load(".env")
 
 	config := &Config{
-		DBHost:     getEnv("DB_HOST"),
-		DBPort:     getEnv("DB_PORT"),
-		DBUser:     getEnv("DB_USER"),
-		DBPassword: getEnv("DB_PASSWORD"),
-		DBName:     getEnv("DB_NAME"),
-		ApiPort:    getEnv("API_PORT"),
-		SecretKey:  getEnv("JWT_SECRET"),
+		DBHost:       getEnv("DB_HOST"),
+		DBPort:       getEnv("DB_PORT"),
+		DBUser:       getEnv("DB_USER"),
+		DBPassword:   getEnv("DB_PASSWORD"),
+		DBName:       getEnv("DB_NAME"),
+		ApiPort:      getEnv("API_PORT"),
+		SecretKey:    getEnv("JWT_SECRET"),
+		EvolutionApi: getEnv("EVOLUTION_API"),
+		EvolutionKey: getEnv("EVOLUTION_KEY"),
 	}
 
 	return config, nil
