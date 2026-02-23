@@ -218,13 +218,13 @@ SELECT COALESCE(
             WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)
         ),
         0
-    ) AS current_month_qty,
+    )::FLOAT AS current_month_qty,
     COALESCE(
         SUM(quantity) FILTER (
             WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
         ),
         0
-    ) AS last_month_qty
+    )::FLOAT AS last_month_qty
 FROM products
 WHERE company_id = $1
     AND deleted_at IS NULL
@@ -232,8 +232,8 @@ WHERE company_id = $1
 `
 
 type GetProductsPerformanceSummaryRow struct {
-	CurrentMonthQty interface{} `json:"current_month_qty"`
-	LastMonthQty    interface{} `json:"last_month_qty"`
+	CurrentMonthQty float64 `json:"current_month_qty"`
+	LastMonthQty    float64 `json:"last_month_qty"`
 }
 
 func (q *Queries) GetProductsPerformanceSummary(ctx context.Context, companyID pgtype.UUID) (GetProductsPerformanceSummaryRow, error) {
