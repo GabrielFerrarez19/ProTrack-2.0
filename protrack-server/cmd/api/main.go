@@ -38,6 +38,7 @@ import (
 	usersHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/handler"
 	usersRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/repository"
 	usersService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/service"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/whatsapp"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/worker"
 	"github.com/gin-contrib/cors"
 
@@ -79,6 +80,8 @@ func main() {
 	}
 	defer db.Close()
 
+	whatsapp := whatsapp.NewWhatsapp(cfg)
+
 	jwtManager := jwt.NewJWTManager(cfg.SecretKey)
 
 	usersRepository := usersRepository.NewRepository(db.Pool)
@@ -98,7 +101,7 @@ func main() {
 	authService := authService.NewService(usersService, jwtManager)
 	customersService := customersService.NewService(customersRepository, db.Pool)
 	saleItemsService := saleItemsService.NewService(saleItemsRepository, db.Pool, productsRepository)
-	salesService := salesService.NewService(salesRepository, db.Pool, saleItemsService, customersService)
+	salesService := salesService.NewService(salesRepository, db.Pool, saleItemsService, customersService, whatsapp)
 
 	usersHandler := usersHandler.NewHandler(usersService, jwtManager)
 	companiesHandler := companiesHandler.NewHandler(companiesService, jwtManager)
@@ -121,7 +124,7 @@ func main() {
 	salesHandler.RegisterRoute(api)
 	saleItemsHandler.RegisterRoute(api)
 
-	worker.StartOverdueMonitor(salesRepository)
+	worker.StartOverdueMonitor(salesService)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
