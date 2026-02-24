@@ -20,6 +20,9 @@ type Config struct {
 
 	EvolutionApi string
 	EvolutionKey string
+
+	RedisHost string
+	RedisPort string
 }
 
 func LoadConfig() (*Config, error) {
@@ -36,6 +39,8 @@ func LoadConfig() (*Config, error) {
 		SecretKey:    getEnv("JWT_SECRET"),
 		EvolutionApi: getEnv("EVOLUTION_API"),
 		EvolutionKey: getEnv("EVOLUTION_KEY"),
+		RedisHost:    getEnv("REDIS_HOST"),
+		RedisPort:    getEnv("REDIS_PORT"),
 	}
 
 	return config, nil
