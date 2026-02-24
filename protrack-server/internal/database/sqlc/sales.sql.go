@@ -160,6 +160,62 @@ func (q *Queries) GetSaleById(ctx context.Context, arg GetSaleByIdParams) (GetSa
 	return i, err
 }
 
+const getSaleByIdWhatsapp = `-- name: GetSaleByIdWhatsapp :one
+SELECT s.id, s.customer_id, s.company_id, s.sale_at, s.discount_amount, s.subtotal, s.total_amount, s.due_days, s.payment_method, s.status, s.created_at, s.created_by, s.updated_at, s.updated_by, s.deleted_at, s.deleted_by,
+    c.full_name as customer_name,
+    c.whatsapp as customer_whatsApp
+FROM sales s
+    INNER JOIN customers c ON s.customer_id = c.id
+WHERE s.id = $1
+`
+
+type GetSaleByIdWhatsappRow struct {
+	ID               pgtype.UUID        `json:"id"`
+	CustomerID       pgtype.UUID        `json:"customer_id"`
+	CompanyID        pgtype.UUID        `json:"company_id"`
+	SaleAt           pgtype.Timestamptz `json:"sale_at"`
+	DiscountAmount   pgtype.Numeric     `json:"discount_amount"`
+	Subtotal         pgtype.Numeric     `json:"subtotal"`
+	TotalAmount      pgtype.Numeric     `json:"total_amount"`
+	DueDays          pgtype.Int4        `json:"due_days"`
+	PaymentMethod    interface{}        `json:"payment_method"`
+	Status           interface{}        `json:"status"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	CreatedBy        pgtype.UUID        `json:"created_by"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	UpdatedBy        pgtype.UUID        `json:"updated_by"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
+	DeletedBy        pgtype.UUID        `json:"deleted_by"`
+	CustomerName     string             `json:"customer_name"`
+	CustomerWhatsapp pgtype.Text        `json:"customer_whatsapp"`
+}
+
+func (q *Queries) GetSaleByIdWhatsapp(ctx context.Context, id pgtype.UUID) (GetSaleByIdWhatsappRow, error) {
+	row := q.db.QueryRow(ctx, getSaleByIdWhatsapp, id)
+	var i GetSaleByIdWhatsappRow
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.CompanyID,
+		&i.SaleAt,
+		&i.DiscountAmount,
+		&i.Subtotal,
+		&i.TotalAmount,
+		&i.DueDays,
+		&i.PaymentMethod,
+		&i.Status,
+		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.DeletedAt,
+		&i.DeletedBy,
+		&i.CustomerName,
+		&i.CustomerWhatsapp,
+	)
+	return i, err
+}
+
 const getSalesPerformanceSummary = `-- name: GetSalesPerformanceSummary :one
 SELECT COUNT(*) FILTER (
         WHERE date_trunc('month', sale_at) = date_trunc('month', CURRENT_DATE)
@@ -370,26 +426,46 @@ func (q *Queries) ListSalesByCompanyAndStatus(ctx context.Context, arg ListSales
 	return items, nil
 }
 
-const updateOverdueSales = `-- name: UpdateOverdueSales :exec
+const updateOverdueSales = `-- name: UpdateOverdueSales :many
 UPDATE sales
 SET status = 'overdue'
 WHERE status = 'pending'
-  AND deleted_at IS NULL
-  AND due_days IS NOT NULL
-  AND (
-    CASE 
-      WHEN EXTRACT(DAY FROM sale_at) <= due_days THEN 
-        (date_trunc('month', sale_at) + (due_days - 1 || ' days')::interval)::date
-      
-      ELSE 
-        (date_trunc('month', sale_at) + INTERVAL '1 month' + (due_days - 1 || ' days')::interval)::date
-    END
-  ) < CURRENT_DATE
+    AND deleted_at IS NULL
+    AND due_days IS NOT NULL
+    AND (
+        CASE
+            WHEN EXTRACT(
+                DAY
+                FROM sale_at
+            ) <= due_days THEN (
+                date_trunc('month', sale_at) + (due_days - 1 || ' days')::interval
+            )::date
+            ELSE (
+                date_trunc('month', sale_at) + INTERVAL '1 month' + (due_days - 1 || ' days')::interval
+            )::date
+        END
+    ) < CURRENT_DATE
+RETURNING id
 `
 
-func (q *Queries) UpdateOverdueSales(ctx context.Context) error {
-	_, err := q.db.Exec(ctx, updateOverdueSales)
-	return err
+func (q *Queries) UpdateOverdueSales(ctx context.Context) ([]pgtype.UUID, error) {
+	rows, err := q.db.Query(ctx, updateOverdueSales)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []pgtype.UUID{}
+	for rows.Next() {
+		var id pgtype.UUID
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateSaleStatus = `-- name: UpdateSaleStatus :exec

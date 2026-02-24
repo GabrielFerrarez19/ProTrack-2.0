@@ -4,18 +4,17 @@ import (
 	"context"
 	"time"
 
-	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/repository"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/service"
 	"github.com/rs/zerolog/log"
 )
 
-func StartOverdueMonitor(saleRepo *repository.Repository) {
-
+func StartOverdueMonitor(saleService *service.Service) {
 	ticker := time.NewTicker(1 * time.Hour)
 
 	go func() {
 		runUpdate := func() {
 			ctx := context.Background()
-			err := saleRepo.UpdateOverdueSales(ctx)
+			err := saleService.UpdateOverdueSales(ctx)
 			if err != nil {
 				log.Error().Err(err).Msg("Erro ao atualizar vendas vencidas")
 			} else {
