@@ -7,14 +7,16 @@ import (
 
 func (h *Handler) RegisterRoute(r *gin.RouterGroup) {
 	protected := r.Group("/")
-	protected.Use(middleware.AuthMiddleware(h.jwtManager))
+	protected.Use(middleware.AuthMiddleware(h.jwtManager, h.blacklist))
 	{
 		protected.GET("/me", h.GetUserFromContext)
+		protected.POST("/logout", h.Logout)
 	}
 
 	auth := r.Group("/auth")
 	{
 		auth.POST("/login", h.Login)
 		auth.POST("/refresh", h.RefreshToken)
+
 	}
 }

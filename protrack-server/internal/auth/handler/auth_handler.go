@@ -1,8 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
+	"time"
 
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/cache"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/adapters/jwt"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/domain"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/service"
@@ -13,12 +17,14 @@ import (
 type Handler struct {
 	service    *service.Service
 	jwtManager *jwt.JWTManager
+	blacklist  *cache.TokenBlacklist
 }
 
-func NewHandler(service *service.Service, jwtManager *jwt.JWTManager) *Handler {
+func NewHandler(service *service.Service, jwtManager *jwt.JWTManager, blacklist *cache.TokenBlacklist) *Handler {
 	return &Handler{
 		service:    service,
 		jwtManager: jwtManager,
+		blacklist:  blacklist,
 	}
 }
 
@@ -69,6 +75,18 @@ func (h *Handler) RefreshToken(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	claims, err := h.jwtManager.ValidateToken(req.RefreshToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
+		return
+	}
+
+	tokenID := fmt.Sprintf("%s:%d", claims.Subject, claims.ExpiresAt.Unix())
+	expiresIn := time.Until(claims.ExpiresAt.Time)
+	if expiresIn > 0 {
+		_ = h.blacklist.AddRefreshToken(c.Request.Context(), tokenID, expiresIn)
 	}
 
 	response, err := h.service.RefreshToken(c.Request.Context(), req.RefreshToken)
@@ -130,4 +148,59 @@ func (h *Handler) GetUserFromContext(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"user": user})
+}
+
+func (h *Handler) Logout(c *gin.Context) {
+	authHeader := c.GetHeader("Authorization")
+	var accessToken string
+	if authHeader != "" {
+		accessToken = strings.TrimPrefix(accessToken, "Bearer ")
+	}
+	if accessToken == "" {
+		accessToken, _ = c.Cookie("access_token")
+	}
+	if accessToken != "" {
+		claims, err := h.jwtManager.ValidateToken(accessToken)
+		if err == nil {
+			tokenID := fmt.Sprintf("%s:%d", claims.Subject, claims.ExpiresAt.Unix())
+			expiresIn := time.Until(claims.ExpiresAt.Time)
+			if expiresIn > 0 {
+				_ = h.blacklist.AddToken(c.Request.Context(), tokenID, expiresIn)
+			}
+		}
+	}
+
+	refreshToken, _ := c.Cookie("refresh_token")
+	if refreshToken != "" {
+		claims, err := h.jwtManager.ValidateToken(refreshToken)
+		if err == nil {
+			tokenID := fmt.Sprintf("%s:%d", claims.Subject, claims.ExpiresAt.Unix())
+			expiresIn := time.Until(claims.ExpiresAt.Time)
+			if expiresIn > 0 {
+				_ = h.blacklist.AddRefreshToken(c.Request.Context(), tokenID, expiresIn)
+			}
+		}
+	}
+
+	c.SetCookie(
+		"access_token", // Nome deve ser idêntico
+		"",             // Valor vazio
+		-1,             // Expira imediatamente (deleta)
+		"/",            // Mesmo path usado na criação
+		"",             // Mesmo domínio
+		false,          // Secure (mesmo valor da criação)
+		true,           // HttpOnly (mesmo valor da criação)
+	)
+
+	c.SetCookie(
+		"refresh_token", // Nome deve ser idêntico
+		"",              // Valor vazio
+		-1,              // Expira imediatamente (deleta)
+		"/",             // Mesmo path usado na criação
+		"",              // Mesmo domínio
+		false,           // Secure (mesmo valor da criação)
+		true,            // HttpOnly (mesmo valor da criação)
+	)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 }
