@@ -1,3 +1,4 @@
+import type { TotalAmountSummary } from "./sales";
 import type {
   ProdutoMaisVendido,
   ProdutoMargemLucroResponse,
@@ -205,16 +206,11 @@ export interface TotalEstoqueResponse {
 }
 
 export interface DashboardDados {
-  estoque: TotalEstoqueResponse | null;
-  financeiro: TotalAPagarResponse | null;
-  giro: GiroEstoqueResponse | null;
-  vendas: VendasDashboardResponse | null;
-  melhorMargem: ProdutoMargemLucroResponse | null;
-  margemTotal: MargemLucroTotalResponse | null;
-  evolucaoLucroMensal: EvolucaoLucroMensalResponse[];
-  valorInvestidoPorCategoria: ValorInvestidoPorCategoriaResponse | null;
-  distribuicaoMargemLucro: DistribuicaoMargemLucroResponse | null;
-  vendasEmAberto: VendasAberto | null;
+  vendasMesPassado: number | null;
+  vendasEsseMes: number | null;
+  aReceber: number | null;
+  crescimento: number | null;
+  custoTotalEstoque: number | null;
 }
 
 export interface GiroEstoqueResponse {

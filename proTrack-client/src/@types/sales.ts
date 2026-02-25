@@ -49,3 +49,8 @@ export interface VendaAgrupada {
     product_name: string;
   }[];
 }
+
+export interface TotalAmountSummary {
+  current_month_st: number;
+  last_month_st: number;
+}

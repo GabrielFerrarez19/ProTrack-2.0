@@ -29,21 +29,16 @@ export function ValorEstoqueCard({ dados }: ValorEstoqueCardProps) {
         <div className="space-y-4">
           <div>
             <p className="text-2xl font-bold text-gray-800">
-              R$ {formatBRL(dados.estoque?.totalEstoque ?? 0)}
+              R$ {formatBRL(dados.custoTotalEstoque ?? 0)}
             </p>
             <p className="text-sm text-gray-400">Total investido</p>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Giro de estoque</span>
-              <span className="font-medium text-gray-800">
-                {dados.giro?.giroEstoque ?? 0}%
-              </span>
+              <span className="font-medium text-gray-800">{0}%</span>
             </div>
-            <Progress
-              value={dados.giro?.giroEstoque ?? 0}
-              className="h-2 bg-blue-100"
-            />
+            <Progress value={0} className="h-2 bg-blue-100" />
           </div>
           <Button
             variant="outline"
