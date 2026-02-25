@@ -60,7 +60,7 @@ func (j *JWTManager) GenerateTokenPair(sub uuid.UUID, companyId uuid.UUID, role 
 		Role:      role,
 
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.accessTokenTTL)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.refreshTokenTTL)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			Issuer:    "protrack",

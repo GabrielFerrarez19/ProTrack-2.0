@@ -7,7 +7,7 @@ import (
 
 func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	protected := r.Group("/")
-	protected.Use(middleware.AuthMiddleware(h.jwtManager))
+	protected.Use(middleware.AuthMiddleware(h.jwtManager, h.blacklist))
 	{
 
 		protected.GET("/:id", h.GetUserById)

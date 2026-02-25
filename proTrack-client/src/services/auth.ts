@@ -8,6 +8,11 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
   return response.data;
 }
 
+export async function logout() {
+  const response = await api.post<string>("/logout");
+  return response.data;
+}
+
 interface MeResponse {
   user: {
     id: string;
