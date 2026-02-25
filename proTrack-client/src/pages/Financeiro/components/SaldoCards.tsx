@@ -11,7 +11,7 @@ export function SaldoCards({ dados }: SaldoCardsProps) {
     caixa: 15400.5,
     banco: 45200.3,
     contasReceber: 0,
-    aReceber: dados.financeiro?.total_geral ?? 0,
+    aReceber: dados.aReceber ?? 0,
   };
 
   const saldoTotal =
@@ -71,7 +71,7 @@ export function SaldoCards({ dados }: SaldoCardsProps) {
             <p className="text-sm opacity-90">A Receber</p>
             <h3 className="text-2xl font-bold">
               R${" "}
-              {dados.financeiro?.total_geral.toLocaleString("pt-BR", {
+              {(dados.aReceber ?? 0).toLocaleString("pt-BR", {
                 minimumFractionDigits: 2,
               })}
             </h3>
