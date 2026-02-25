@@ -5,6 +5,7 @@ interface ListProductResponse {
   products: ProductResponse[];
   count: number;
   percentage: number;
+  cost_total: number;
 }
 
 export async function CreateProduct(
@@ -27,4 +28,9 @@ export async function CountProduct(): Promise<number> {
 export async function PercentageProduct(): Promise<number> {
   const response = await api.get<ListProductResponse>("/product/percentage");
   return response.data.percentage;
+}
+
+export async function GetCostTotalStock(): Promise<number> {
+  const response = await api.get<ListProductResponse>("/product/cost-total");
+  return response.data.cost_total;
 }
