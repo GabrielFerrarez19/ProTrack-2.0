@@ -154,7 +154,7 @@ func (h *Handler) Logout(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
 	var accessToken string
 	if authHeader != "" {
-		accessToken = strings.TrimPrefix(accessToken, "Bearer ")
+		accessToken = strings.TrimPrefix(authHeader, "Bearer ")
 	}
 	if accessToken == "" {
 		accessToken, _ = c.Cookie("access_token")
