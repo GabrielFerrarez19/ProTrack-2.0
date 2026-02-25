@@ -25,7 +25,7 @@ export function DashboardFinanceiro() {
       <SaldoCards dados={dados} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <ResumoVendas vendas={dados.vendas} />
+        <ResumoVendas dados={dados} />
         <AlertasDashboard />
       </div>
 
