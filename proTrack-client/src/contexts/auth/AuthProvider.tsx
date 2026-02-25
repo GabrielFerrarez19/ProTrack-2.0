@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
-import { getMe, updateCurrentUser } from "@/services/auth";
+import { getMe, logout as logoutApi, updateCurrentUser } from "@/services/auth";
 import type { User } from "@/@types/types.api";
 import type { UpdateUserData } from "@/@types/types.api";
 
@@ -63,13 +63,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [isAuthenticated, fetchUser]);
 
   const logout = useCallback(async () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("has_company");
-    setUser(null);
-    setHasCompanyState(false);
-    setError(null);
-    navigate("/login");
+    try {
+      await logoutApi();
+    } catch {
+      // Ignora erro (ex: token expirado, sem conexão) - sempre limpa localmente
+    } finally {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("has_company");
+      setUser(null);
+      setHasCompanyState(false);
+      setError(null);
+      navigate("/login");
+    }
   }, [navigate]);
 
   const updateUser = useCallback(

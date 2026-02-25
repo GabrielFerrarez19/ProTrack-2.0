@@ -214,7 +214,7 @@ export interface DashboardDados {
   evolucaoLucroMensal: EvolucaoLucroMensalResponse[];
   valorInvestidoPorCategoria: ValorInvestidoPorCategoriaResponse | null;
   distribuicaoMargemLucro: DistribuicaoMargemLucroResponse | null;
-  vendasEmAberto: VendasAberto | null;
+  vendasEmAberto: number | null;
 }
 
 export interface GiroEstoqueResponse {
