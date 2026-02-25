@@ -243,6 +243,47 @@ func (q *Queries) GetProductsPerformanceSummary(ctx context.Context, companyID p
 	return i, err
 }
 
+const getTop5BestSellingProducts = `-- name: GetTop5BestSellingProducts :many
+SELECT p.id,
+    p.name,
+    COALESCE(SUM(si.quantity), 0)::INTEGER AS total_quantity_sold
+FROM products p
+    INNER JOIN sale_items si ON si.product_id = p.id
+    INNER JOIN sales s ON s.id = si.sale_id
+WHERE s.company_id = $1
+    AND s.deleted_at IS NULL
+GROUP BY p.id,
+    p.name
+ORDER BY total_quantity_sold DESC
+LIMIT 5
+`
+
+type GetTop5BestSellingProductsRow struct {
+	ID                pgtype.UUID `json:"id"`
+	Name              string      `json:"name"`
+	TotalQuantitySold int32       `json:"total_quantity_sold"`
+}
+
+func (q *Queries) GetTop5BestSellingProducts(ctx context.Context, companyID pgtype.UUID) ([]GetTop5BestSellingProductsRow, error) {
+	rows, err := q.db.Query(ctx, getTop5BestSellingProducts, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetTop5BestSellingProductsRow{}
+	for rows.Next() {
+		var i GetTop5BestSellingProductsRow
+		if err := rows.Scan(&i.ID, &i.Name, &i.TotalQuantitySold); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listProductsByCategoryId = `-- name: ListProductsByCategoryId :many
 SELECT id, company_id, category_id, name, description, barcode, quantity, size, cost_price, sale_price, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at
 FROM products

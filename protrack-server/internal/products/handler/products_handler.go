@@ -177,7 +177,7 @@ func (h *Handler) UpdateProduct(c *gin.Context) {
 func (h *Handler) CountProducts(c *gin.Context) {
 	companyIdAny, exists := c.Get("company_id")
 	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "company_id null"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id null"})
 		return
 	}
 
@@ -195,7 +195,7 @@ func (h *Handler) CountProducts(c *gin.Context) {
 func (h *Handler) GetProductsPerformanceSummary(c *gin.Context) {
 	companyIdAny, exists := c.Get("company_id")
 	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "company_id null"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id null"})
 		return
 	}
 
@@ -214,7 +214,7 @@ func (h *Handler) GetProductsPerformanceSummary(c *gin.Context) {
 func (h *Handler) GetCostTotalStock(c *gin.Context) {
 	companyIdAny, exists := c.Get("company_id")
 	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "company_id null"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id null"})
 		return
 	}
 
@@ -227,4 +227,22 @@ func (h *Handler) GetCostTotalStock(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"cost_total": total})
+}
+
+func (h *Handler) GetTop5BestSellingProducts(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id null"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	products, err := h.service.GetTop5BestSellingProducts(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"top_products": products})
 }
