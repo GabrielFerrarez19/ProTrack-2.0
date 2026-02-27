@@ -6,7 +6,7 @@ import (
 )
 
 func (h *Handler) RegisterRoute(r *gin.RouterGroup) {
-	saleItems := r.Group("/sale-items").Use(middleware.AuthMiddleware(h.jwtManager))
+	saleItems := r.Group("/sale-items").Use(middleware.AuthMiddleware(h.jwtManager, h.blacklist))
 	{
 		saleItems.DELETE("/:id", h.DeleteSaleItem)
 		saleItems.DELETE("/sale/:saleId", h.DeleteItemsBySale)

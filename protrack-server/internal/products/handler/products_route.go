@@ -6,7 +6,7 @@ import (
 )
 
 func (h *Handler) RegisterRoute(r *gin.RouterGroup) {
-	product := r.Group("/product").Use(middleware.AuthMiddleware(h.jwtManager))
+	product := r.Group("/product").Use(middleware.AuthMiddleware(h.jwtManager, h.blacklist))
 	{
 		product.POST("", h.CreateProduct)
 		product.DELETE("/:id", h.DeleteProduct)
