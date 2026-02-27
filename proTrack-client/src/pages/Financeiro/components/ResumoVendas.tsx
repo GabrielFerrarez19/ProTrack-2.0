@@ -7,16 +7,13 @@ import {
 import { Badge } from "../../../components/ui/badge";
 import { TrendingUp } from "lucide-react";
 import { formatBRL, getBadgeClass } from "../../../utils/functions";
+import type { DashboardDados } from "@/@types/types.api";
 
-interface ResumoVendasProps {
-  vendas: {
-    mesAtual?: number;
-    mesAnterior?: number;
-    crescimento?: number;
-  } | null; // <- adicionamos null aqui
+interface SaldoCardsProps {
+  dados: DashboardDados;
 }
 
-export function ResumoVendas({ vendas }: ResumoVendasProps) {
+export function ResumoVendas({ dados }: SaldoCardsProps) {
   return (
     <Card className="lg:col-span-2 bg-white shadow-sm">
       <CardHeader>
@@ -30,14 +27,14 @@ export function ResumoVendas({ vendas }: ResumoVendasProps) {
           <div>
             <p className="text-sm text-gray-400">Vendas do Mês</p>
             <p className="text-2xl font-bold text-gray-800">
-              R${formatBRL(vendas?.mesAtual?.toLocaleString("pt-BR") ?? "0,00")}
+              R${formatBRL(dados.vendasEsseMes ?? "0,00")}
             </p>
             <div className="flex items-center gap-2 mt-2">
               <Badge
                 variant="secondary"
-                className={getBadgeClass(vendas?.crescimento ?? 0)}
+                className={getBadgeClass(dados?.crescimento ?? 0)}
               >
-                {formatBRL(vendas?.crescimento ?? 0)}%
+                {formatBRL(dados?.crescimento ?? 0)}%
               </Badge>
               <span className="text-sm text-gray-400">vs mês anterior</span>
             </div>
@@ -45,7 +42,7 @@ export function ResumoVendas({ vendas }: ResumoVendasProps) {
           <div>
             <p className="text-sm text-gray-400">Mês Anterior</p>
             <p className="text-xl font-semibold text-gray-500">
-              R${formatBRL(vendas?.mesAnterior ?? "0,00")}
+              R${formatBRL(dados.vendasMesPassado ?? "0,00")}
             </p>
           </div>
         </div>

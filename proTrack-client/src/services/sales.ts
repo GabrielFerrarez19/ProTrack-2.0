@@ -1,10 +1,16 @@
 import { api } from "./api";
-import type { ListSalesByCompanyResponse, SaleRequest } from "@/@types/sales";
+import type {
+  ListSalesByCompanyResponse,
+  SaleRequest,
+  TotalAmountSummary,
+} from "@/@types/sales";
 
 interface ListSalesResponse {
   sales: ListSalesByCompanyResponse[];
   count: number;
   percentage: number;
+  total_pending: number;
+  total_amount: TotalAmountSummary;
 }
 
 export async function CreateSale(data: SaleRequest): Promise<string> {
@@ -32,4 +38,14 @@ export async function CountSales(): Promise<number> {
 export async function PercentageSales(): Promise<number> {
   const response = await api.get<ListSalesResponse>("/sales/percentage");
   return response.data.percentage;
+}
+
+export async function GetTotalAmountIsPending(): Promise<number> {
+  const response = await api.get<ListSalesResponse>("/sales/total-pending");
+  return response.data.total_pending ?? 0;
+}
+
+export async function GetTotalAmountSummary(): Promise<TotalAmountSummary> {
+  const response = await api.get<ListSalesResponse>("/sales/total-amount");
+  return response.data.total_amount ?? 0;
 }
