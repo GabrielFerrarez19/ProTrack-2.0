@@ -62,7 +62,7 @@ export function Sidebar({ children }: SidebarProps) {
         <div className="border-t flex p-3 relative">
           <img
             src={`https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${encodeURIComponent(
-              user?.name || "User"
+              user?.name || "User",
             )}`}
             alt="Avatar"
             className="w-10 h-10 rounded-md"

@@ -8,6 +8,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/cache"
+	redis_connection "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/redis"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/adapters/jwt"
 	authHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/handler"
 	authService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/service"
@@ -38,6 +40,7 @@ import (
 	usersHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/handler"
 	usersRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/repository"
 	usersService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/service"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/whatsapp"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/worker"
 	"github.com/gin-contrib/cors"
 
@@ -79,7 +82,17 @@ func main() {
 	}
 	defer db.Close()
 
+	redis, err := redis_connection.NewRedisConnection(cfg)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to connect to redis")
+	}
+	defer redis.Close()
+
+	whatsapp := whatsapp.NewWhatsapp(cfg)
+
 	jwtManager := jwt.NewJWTManager(cfg.SecretKey)
+
+	blacklist := cache.NewTokenBlackList(redis)
 
 	usersRepository := usersRepository.NewRepository(db.Pool)
 	companiesRepository := companiesRepository.NewRepository(db.Pool)
@@ -98,17 +111,17 @@ func main() {
 	authService := authService.NewService(usersService, jwtManager)
 	customersService := customersService.NewService(customersRepository, db.Pool)
 	saleItemsService := saleItemsService.NewService(saleItemsRepository, db.Pool, productsRepository)
-	salesService := salesService.NewService(salesRepository, db.Pool, saleItemsService, customersService)
+	salesService := salesService.NewService(salesRepository, db.Pool, saleItemsService, customersService, whatsapp)
 
-	usersHandler := usersHandler.NewHandler(usersService, jwtManager)
-	companiesHandler := companiesHandler.NewHandler(companiesService, jwtManager)
+	usersHandler := usersHandler.NewHandler(usersService, jwtManager, blacklist)
+	companiesHandler := companiesHandler.NewHandler(companiesService, jwtManager, blacklist)
 	departmentsHandler := departmentsHandler.NewHandler(departmentsService)
-	productsCategoriesHandler := productsCategoriesHandler.NewHandler(productsCategoriesService, jwtManager)
-	productsHandler := productsHandler.NewHandler(productsService, jwtManager)
-	authHandler := authHandler.NewHandler(authService, jwtManager)
-	customersHandler := customersHandler.NewHandler(customersService, jwtManager)
-	salesHandler := salesHandler.NewHandler(salesService, jwtManager)
-	saleItemsHandler := saleItemsHandler.NewHandler(saleItemsService, jwtManager)
+	productsCategoriesHandler := productsCategoriesHandler.NewHandler(productsCategoriesService, jwtManager, blacklist)
+	productsHandler := productsHandler.NewHandler(productsService, jwtManager, blacklist)
+	authHandler := authHandler.NewHandler(authService, jwtManager, blacklist)
+	customersHandler := customersHandler.NewHandler(customersService, jwtManager, blacklist)
+	salesHandler := salesHandler.NewHandler(salesService, jwtManager, blacklist)
+	saleItemsHandler := saleItemsHandler.NewHandler(saleItemsService, jwtManager, blacklist)
 
 	api := r.Group("/api/v1")
 	usersHandler.RegisterRoutes(api)
@@ -121,7 +134,7 @@ func main() {
 	salesHandler.RegisterRoute(api)
 	saleItemsHandler.RegisterRoute(api)
 
-	worker.StartOverdueMonitor(salesRepository)
+	worker.StartOverdueMonitor(salesService)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
