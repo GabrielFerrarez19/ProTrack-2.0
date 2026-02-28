@@ -79,6 +79,16 @@ type Department struct {
 	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
 }
 
+type PaymentMethod struct {
+	ID        pgtype.UUID        `json:"id"`
+	CompanyID pgtype.UUID        `json:"company_id"`
+	Name      string             `json:"name"`
+	Type      interface{}        `json:"type"`
+	IsActive  bool               `json:"is_active"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+}
+
 type Product struct {
 	ID          pgtype.UUID        `json:"id"`
 	CompanyID   pgtype.UUID        `json:"company_id"`

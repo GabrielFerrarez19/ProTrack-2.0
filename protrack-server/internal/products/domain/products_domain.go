@@ -107,6 +107,12 @@ type DecrementStockRequest struct {
 	Quantity int32     `json:"quantity"`
 }
 
+type GetTop5BestSellingProductsRow struct {
+	ID                uuid.UUID `json:"id"`
+	Name              string    `json:"name"`
+	TotalQuantitySold int32     `json:"total_quantity_sold"`
+}
+
 func ApplyUpdateProductCategoryParams(
 	req UpdateProductRequest,
 	arg *db.UpdateProductParams,

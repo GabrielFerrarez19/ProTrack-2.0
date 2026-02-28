@@ -24,6 +24,7 @@ type RepositoryInterface interface {
 	CountProducts(ctx context.Context, companyId pgtype.UUID) (int64, error)
 	GetProductsPerformanceSummary(ctx context.Context, companyId pgtype.UUID) (db.GetProductsPerformanceSummaryRow, error)
 	GetCostTotalStock(ctx context.Context, companyId pgtype.UUID) (float64, error)
+	GetTop5BestSellingProducts(ctx context.Context, companyId pgtype.UUID) ([]db.GetTop5BestSellingProductsRow, error)
 }
 
 type Service struct {
@@ -287,4 +288,23 @@ func (s *Service) GetCostTotalStock(ctx context.Context, companyId uuid.UUID) (f
 	}
 
 	return total, nil
+}
+
+func (s *Service) GetTop5BestSellingProducts(ctx context.Context, companyId uuid.UUID) ([]domain.GetTop5BestSellingProductsRow, error) {
+	products, err := s.repo.GetTop5BestSellingProducts(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return []domain.GetTop5BestSellingProductsRow{}, err
+	}
+
+	var response []domain.GetTop5BestSellingProductsRow
+
+	for _, product := range products {
+		response = append(response, domain.GetTop5BestSellingProductsRow{
+			ID:                pgconv.PgUUIDToUUID(product.ID),
+			Name:              product.Name,
+			TotalQuantitySold: product.TotalQuantitySold,
+		})
+	}
+
+	return response, nil
 }
