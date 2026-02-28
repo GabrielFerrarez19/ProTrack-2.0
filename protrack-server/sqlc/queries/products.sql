@@ -100,3 +100,16 @@ FROM products
 WHERE company_id = $1
     AND deleted_at IS NULL
     AND quantity > 0;
+-- name: GetTop5BestSellingProducts :many
+SELECT p.id,
+    p.name,
+    COALESCE(SUM(si.quantity), 0)::INTEGER AS total_quantity_sold
+FROM products p
+    INNER JOIN sale_items si ON si.product_id = p.id
+    INNER JOIN sales s ON s.id = si.sale_id
+WHERE s.company_id = $1
+    AND s.deleted_at IS NULL
+GROUP BY p.id,
+    p.name
+ORDER BY total_quantity_sold DESC
+LIMIT 5;

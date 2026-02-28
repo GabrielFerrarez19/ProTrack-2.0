@@ -25,6 +25,9 @@ import (
 	departmentsRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/departments/repository"
 	departmentsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/departments/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/logger"
+	paymentMethodsHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/payment_methods/handler"
+	paymentMethodsRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/payment_methods/repository"
+	paymentMethodsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/payment_methods/service"
 	productsHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/handler"
 	productsRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/repository"
 	productsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/service"
@@ -102,6 +105,7 @@ func main() {
 	customersRepository := customersRepository.NewRepository(db.Pool)
 	salesRepository := salesRepository.NewRepository(db.Pool)
 	saleItemsRepository := saleItemsRepository.NewRepository(db.Pool)
+	paymentMethodsRepository := paymentMethodsRepository.NewRepository(db.Pool)
 
 	usersService := usersService.NewService(usersRepository, db.Pool)
 	companiesService := companiesService.NewService(db.Pool, companiesRepository, usersRepository)
@@ -112,6 +116,7 @@ func main() {
 	customersService := customersService.NewService(customersRepository, db.Pool)
 	saleItemsService := saleItemsService.NewService(saleItemsRepository, db.Pool, productsRepository)
 	salesService := salesService.NewService(salesRepository, db.Pool, saleItemsService, customersService, whatsapp)
+	paymentMethodsService := paymentMethodsService.NewService(paymentMethodsRepository, db.Pool)
 
 	usersHandler := usersHandler.NewHandler(usersService, jwtManager, blacklist)
 	companiesHandler := companiesHandler.NewHandler(companiesService, jwtManager, blacklist)
@@ -122,6 +127,7 @@ func main() {
 	customersHandler := customersHandler.NewHandler(customersService, jwtManager, blacklist)
 	salesHandler := salesHandler.NewHandler(salesService, jwtManager, blacklist)
 	saleItemsHandler := saleItemsHandler.NewHandler(saleItemsService, jwtManager, blacklist)
+	paymentMethodsHandler := paymentMethodsHandler.NewHandler(paymentMethodsService, jwtManager, blacklist)
 
 	api := r.Group("/api/v1")
 	usersHandler.RegisterRoutes(api)
@@ -133,6 +139,7 @@ func main() {
 	customersHandler.RegisterRoute(api)
 	salesHandler.RegisterRoute(api)
 	saleItemsHandler.RegisterRoute(api)
+	paymentMethodsHandler.RegisterRoutes(api)
 
 	worker.StartOverdueMonitor(salesService)
 
