@@ -13,10 +13,11 @@ func (h *Handler) RegisterRoute(r *gin.RouterGroup) {
 		product.GET("/barcode/:barcode", h.GetProductByBarcode)
 		product.GET("/category", h.ListProductsByCategoryId)
 		product.GET("/company", h.ListProductsByCompany)
-		product.GET("/:id", h.GetProductById)
-		product.PUT("/:id", h.UpdateProduct)
 		product.GET("/count", h.CountProducts)
 		product.GET("/percentage", h.GetProductsPerformanceSummary)
 		product.GET("/cost-total", h.GetCostTotalStock)
+		product.GET("/top-products", h.GetTop5BestSellingProducts)
+		product.GET("/:id", h.GetProductById)
+		product.PUT("/:id", h.UpdateProduct)
 	}
 }
