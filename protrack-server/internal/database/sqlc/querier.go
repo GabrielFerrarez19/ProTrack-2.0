@@ -23,6 +23,7 @@ type Querier interface {
 	CreateSale(ctx context.Context, arg CreateSaleParams) (pgtype.UUID, error)
 	CreateSaleItem(ctx context.Context, arg CreateSaleItemParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	CreateVendors(ctx context.Context, arg CreateVendorsParams) error
 	DecrementStock(ctx context.Context, arg DecrementStockParams) error
 	DeleteCompany(ctx context.Context, arg DeleteCompanyParams) error
 	DeleteCustomer(ctx context.Context, arg DeleteCustomerParams) error
@@ -53,6 +54,7 @@ type Querier interface {
 	GetTotalAmountSummary(ctx context.Context, companyID pgtype.UUID) (GetTotalAmountSummaryRow, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
+	GetVendorsById(ctx context.Context, arg GetVendorsByIdParams) (Vendor, error)
 	ListCompanies(ctx context.Context) ([]Company, error)
 	ListCustomers(ctx context.Context, companyID pgtype.UUID) ([]Customer, error)
 	ListDepartmentsByCompanyId(ctx context.Context, companyID pgtype.UUID) ([]Department, error)
@@ -65,10 +67,13 @@ type Querier interface {
 	ListSales(ctx context.Context, companyID pgtype.UUID) ([]ListSalesRow, error)
 	ListSalesByCompanyAndStatus(ctx context.Context, arg ListSalesByCompanyAndStatusParams) ([]ListSalesByCompanyAndStatusRow, error)
 	ListUsers(ctx context.Context) ([]User, error)
+	ListVendors(ctx context.Context, companyID pgtype.UUID) ([]Vendor, error)
+	ListVendorsIsActive(ctx context.Context, companyID pgtype.UUID) ([]Vendor, error)
 	SetCompanyStatus(ctx context.Context, arg SetCompanyStatusParams) (int64, error)
 	SetProductCategoryStatus(ctx context.Context, arg SetProductCategoryStatusParams) (int64, error)
 	SetStatusDepartment(ctx context.Context, arg SetStatusDepartmentParams) (int64, error)
 	TogglePaymentMethodActive(ctx context.Context, arg TogglePaymentMethodActiveParams) error
+	ToggleVendorsActive(ctx context.Context, arg ToggleVendorsActiveParams) error
 	UpdateBalanceDueCustomer(ctx context.Context, arg UpdateBalanceDueCustomerParams) error
 	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) (Company, error)
 	UpdateCustomer(ctx context.Context, arg UpdateCustomerParams) error
@@ -80,6 +85,7 @@ type Querier interface {
 	UpdateSaleStatus(ctx context.Context, arg UpdateSaleStatusParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateUserCompanyAndRole(ctx context.Context, arg UpdateUserCompanyAndRoleParams) error
+	UpdateVendors(ctx context.Context, arg UpdateVendorsParams) error
 }
 
 var _ Querier = (*Queries)(nil)
