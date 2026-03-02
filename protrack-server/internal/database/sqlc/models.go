@@ -169,3 +169,23 @@ type User struct {
 	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt    pgtype.Timestamptz `json:"deleted_at"`
 }
+
+type Vendor struct {
+	ID           pgtype.UUID        `json:"id"`
+	CompanyID    pgtype.UUID        `json:"company_id"`
+	Name         string             `json:"name"`
+	TaxID        pgtype.Text        `json:"tax_id"`
+	Email        pgtype.Text        `json:"email"`
+	Phone        pgtype.Text        `json:"phone"`
+	PostalCode   pgtype.Text        `json:"postal_code"`
+	AddressLine1 pgtype.Text        `json:"address_line_1"`
+	AddressLine2 pgtype.Text        `json:"address_line_2"`
+	Number       pgtype.Text        `json:"number"`
+	Neighborhood pgtype.Text        `json:"neighborhood"`
+	City         pgtype.Text        `json:"city"`
+	State        pgtype.Text        `json:"state"`
+	Country      pgtype.Text        `json:"country"`
+	IsActive     bool               `json:"is_active"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+}
