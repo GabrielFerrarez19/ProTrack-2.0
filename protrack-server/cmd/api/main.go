@@ -43,6 +43,9 @@ import (
 	usersHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/handler"
 	usersRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/repository"
 	usersService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/service"
+	vendorsHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/vendors/handler"
+	vendorsRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/vendors/repository"
+	vendorsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/vendors/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/whatsapp"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/worker"
 	"github.com/gin-contrib/cors"
@@ -106,6 +109,7 @@ func main() {
 	salesRepository := salesRepository.NewRepository(db.Pool)
 	saleItemsRepository := saleItemsRepository.NewRepository(db.Pool)
 	paymentMethodsRepository := paymentMethodsRepository.NewRepository(db.Pool)
+	vendorsRepository := vendorsRepository.NewRepository(db.Pool)
 
 	usersService := usersService.NewService(usersRepository, db.Pool)
 	companiesService := companiesService.NewService(db.Pool, companiesRepository, usersRepository)
@@ -117,6 +121,7 @@ func main() {
 	saleItemsService := saleItemsService.NewService(saleItemsRepository, db.Pool, productsRepository)
 	salesService := salesService.NewService(salesRepository, db.Pool, saleItemsService, customersService, whatsapp)
 	paymentMethodsService := paymentMethodsService.NewService(paymentMethodsRepository, db.Pool)
+	vendorsService := vendorsService.NewService(vendorsRepository, db.Pool)
 
 	usersHandler := usersHandler.NewHandler(usersService, jwtManager, blacklist)
 	companiesHandler := companiesHandler.NewHandler(companiesService, jwtManager, blacklist)
@@ -128,6 +133,7 @@ func main() {
 	salesHandler := salesHandler.NewHandler(salesService, jwtManager, blacklist)
 	saleItemsHandler := saleItemsHandler.NewHandler(saleItemsService, jwtManager, blacklist)
 	paymentMethodsHandler := paymentMethodsHandler.NewHandler(paymentMethodsService, jwtManager, blacklist)
+	vendorsHandler := vendorsHandler.NewHandler(vendorsService, jwtManager, blacklist)
 
 	api := r.Group("/api/v1")
 	usersHandler.RegisterRoutes(api)
@@ -140,12 +146,13 @@ func main() {
 	salesHandler.RegisterRoute(api)
 	saleItemsHandler.RegisterRoute(api)
 	paymentMethodsHandler.RegisterRoutes(api)
-
-	worker.StartOverdueMonitor(salesService)
+	vendorsHandler.RegisterRoute(api)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
+
+	worker.StartOverdueMonitor(salesService)
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.ApiPort,
