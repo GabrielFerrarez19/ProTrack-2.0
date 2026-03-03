@@ -15,6 +15,7 @@ type Querier interface {
 	CountProducts(ctx context.Context, companyID pgtype.UUID) (int64, error)
 	CountSales(ctx context.Context, companyID pgtype.UUID) (int64, error)
 	CreateBillCategories(ctx context.Context, arg CreateBillCategoriesParams) error
+	CreateBillPayable(ctx context.Context, arg CreateBillPayableParams) error
 	CreateCompany(ctx context.Context, arg CreateCompanyParams) (Company, error)
 	CreateCustomers(ctx context.Context, arg CreateCustomersParams) (pgtype.UUID, error)
 	CreateDepartment(ctx context.Context, arg CreateDepartmentParams) (Department, error)
@@ -37,6 +38,8 @@ type Querier interface {
 	DeleteSaleItem(ctx context.Context, id pgtype.UUID) error
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
 	GetBillCategoriesById(ctx context.Context, id pgtype.UUID) (BillCategory, error)
+	GetBillsById(ctx context.Context, arg GetBillsByIdParams) (BillsPayable, error)
+	GetBillsByStatus(ctx context.Context, arg GetBillsByStatusParams) ([]BillsPayable, error)
 	GetCompanyByDocument(ctx context.Context, document pgtype.Text) (Company, error)
 	GetCompanyByID(ctx context.Context, id pgtype.UUID) (Company, error)
 	GetCostTotalStock(ctx context.Context, companyID pgtype.UUID) (float64, error)
@@ -44,6 +47,7 @@ type Querier interface {
 	GetCustomerById(ctx context.Context, id pgtype.UUID) (Customer, error)
 	GetCustomersPerformanceSummary(ctx context.Context, companyID pgtype.UUID) (GetCustomersPerformanceSummaryRow, error)
 	GetDepartmentById(ctx context.Context, id pgtype.UUID) (Department, error)
+	GetOverdueBills(ctx context.Context, companyID pgtype.UUID) ([]BillsPayable, error)
 	GetPaymentMethodByID(ctx context.Context, id pgtype.UUID) (PaymentMethod, error)
 	GetProductByBarcode(ctx context.Context, barcode pgtype.Text) (Product, error)
 	GetProductById(ctx context.Context, id pgtype.UUID) (Product, error)
@@ -60,6 +64,7 @@ type Querier interface {
 	GetVendorsById(ctx context.Context, arg GetVendorsByIdParams) (Vendor, error)
 	ListBillCategories(ctx context.Context, companyID pgtype.UUID) ([]BillCategory, error)
 	ListBillCategoriesActive(ctx context.Context, id pgtype.UUID) ([]BillCategory, error)
+	ListBillsPayable(ctx context.Context, companyID pgtype.UUID) ([]ListBillsPayableRow, error)
 	ListCompanies(ctx context.Context) ([]Company, error)
 	ListCustomers(ctx context.Context, companyID pgtype.UUID) ([]Customer, error)
 	ListDepartmentsByCompanyId(ctx context.Context, companyID pgtype.UUID) ([]Department, error)
@@ -74,6 +79,8 @@ type Querier interface {
 	ListUsers(ctx context.Context) ([]User, error)
 	ListVendors(ctx context.Context, companyID pgtype.UUID) ([]Vendor, error)
 	ListVendorsIsActive(ctx context.Context, companyID pgtype.UUID) ([]Vendor, error)
+	PayBill(ctx context.Context, arg PayBillParams) error
+	ScheduleBill(ctx context.Context, arg ScheduleBillParams) error
 	SetCompanyStatus(ctx context.Context, arg SetCompanyStatusParams) (int64, error)
 	SetProductCategoryStatus(ctx context.Context, arg SetProductCategoryStatusParams) (int64, error)
 	SetStatusDepartment(ctx context.Context, arg SetStatusDepartmentParams) (int64, error)
@@ -81,6 +88,7 @@ type Querier interface {
 	TogglePaymentMethodActive(ctx context.Context, arg TogglePaymentMethodActiveParams) error
 	ToggleVendorsActive(ctx context.Context, arg ToggleVendorsActiveParams) error
 	UpdateBalanceDueCustomer(ctx context.Context, arg UpdateBalanceDueCustomerParams) error
+	UpdateBillPayable(ctx context.Context, arg UpdateBillPayableParams) error
 	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) (Company, error)
 	UpdateCustomer(ctx context.Context, arg UpdateCustomerParams) error
 	UpdateDepartment(ctx context.Context, arg UpdateDepartmentParams) (Department, error)
