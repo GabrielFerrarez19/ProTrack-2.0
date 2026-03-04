@@ -5,15 +5,16 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/alexedwards/argon2id"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/crypto/bcrypt"
 
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/validate"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/config"
 
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/domain"
@@ -34,12 +35,14 @@ type RepositoryInterface interface {
 type Service struct {
 	repo RepositoryInterface
 	pool *pgxpool.Pool
+	cfg  *config.Config
 }
 
-func NewService(repo *repository.Repository, pool *pgxpool.Pool) *Service {
+func NewService(repo *repository.Repository, pool *pgxpool.Pool, cfg *config.Config) *Service {
 	return &Service{
 		repo: repo,
 		pool: pool,
+		cfg:  cfg,
 	}
 }
 
@@ -53,7 +56,14 @@ func (s *Service) CreateUser(ctx context.Context, req domain.CreateUserParams) (
 		return domain.UserResponse{}, errors.New("invalid email")
 	}
 
-	hashPassword, err := bcrypt.GenerateFromPassword([]byte(req.PasswordHash), 12)
+	// hashPassword, err := bcrypt.GenerateFromPassword([]byte(req.PasswordHash), 12)
+
+	passwordPepper := req.PasswordHash + s.cfg.Pepper
+
+	hashPassword, err := argon2id.CreateHash(passwordPepper, argon2id.DefaultParams)
+	if err != nil {
+		return domain.UserResponse{}, err
+	}
 
 	user, err := s.repo.CreateUsers(ctx, db.CreateUserParams{
 		Name:         req.Name,
@@ -250,9 +260,16 @@ func (s *Service) ValidatePassword(ctx context.Context, email string, password s
 		return domain.UserResponse{}, errors.New("invalid credentials")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+	/* err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if err != nil {
 		log.Error().Err(err).Msg("caiu no segundo if")
+		return domain.UserResponse{}, errors.New("invalid credentials")
+	} */
+
+	passwordPepper := password + s.cfg.Pepper
+
+	match, err := argon2id.ComparePasswordAndHash(passwordPepper, user.PasswordHash)
+	if !match {
 		return domain.UserResponse{}, errors.New("invalid credentials")
 	}
 
