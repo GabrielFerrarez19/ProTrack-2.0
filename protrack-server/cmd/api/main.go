@@ -119,7 +119,7 @@ func main() {
 	billCategoriesRepository := billCategoriesRepository.NewRepository(db.Pool)
 	billsPayableRepository := billsPayableRepository.NewRepository(db.Pool)
 
-	usersService := usersService.NewService(usersRepository, db.Pool)
+	usersService := usersService.NewService(usersRepository, db.Pool, cfg)
 	companiesService := companiesService.NewService(db.Pool, companiesRepository, usersRepository)
 	departmentsService := departmentsService.NewService(departmentsRepository)
 	productsCategoriesService := productsCategoriesService.NewService(productsCategoriesRepository)
