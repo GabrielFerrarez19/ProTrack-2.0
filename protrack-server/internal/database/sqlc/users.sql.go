@@ -196,6 +196,17 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
+const updateLastLogin = `-- name: UpdateLastLogin :exec
+UPDATE users
+SET last_login_at = CURRENT_TIMESTAMP
+WHERE id = $1
+`
+
+func (q *Queries) UpdateLastLogin(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, updateLastLogin, id)
+	return err
+}
+
 const updatePasswordHash = `-- name: UpdatePasswordHash :exec
 UPDATE users
 SET password_hash = $2

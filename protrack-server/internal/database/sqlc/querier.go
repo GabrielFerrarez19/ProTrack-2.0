@@ -92,6 +92,7 @@ type Querier interface {
 	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) (Company, error)
 	UpdateCustomer(ctx context.Context, arg UpdateCustomerParams) error
 	UpdateDepartment(ctx context.Context, arg UpdateDepartmentParams) (Department, error)
+	UpdateLastLogin(ctx context.Context, id pgtype.UUID) error
 	UpdateOverdueSales(ctx context.Context) ([]pgtype.UUID, error)
 	UpdatePasswordHash(ctx context.Context, arg UpdatePasswordHashParams) error
 	UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error)

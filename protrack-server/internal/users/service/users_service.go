@@ -5,15 +5,15 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/alexedwards/argon2id"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/rs/zerolog/log"
-	"golang.org/x/crypto/bcrypt"
 
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/validate"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/config"
 
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/users/domain"
@@ -29,17 +29,21 @@ type RepositoryInterface interface {
 	UpdatePasswordHash(ctx context.Context, arg db.UpdatePasswordHashParams) error
 	UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.User, error)
 	UpdateUserCompanyAndRole(ctx context.Context, arg db.UpdateUserCompanyAndRoleParams) error
+	UpdateLastLogin(ctx context.Context, id pgtype.UUID) error
+	WithTx(tx db.DBTX) *repository.Repository
 }
 
 type Service struct {
 	repo RepositoryInterface
 	pool *pgxpool.Pool
+	cfg  *config.Config
 }
 
-func NewService(repo *repository.Repository, pool *pgxpool.Pool) *Service {
+func NewService(repo *repository.Repository, pool *pgxpool.Pool, cfg *config.Config) *Service {
 	return &Service{
 		repo: repo,
 		pool: pool,
+		cfg:  cfg,
 	}
 }
 
@@ -53,7 +57,14 @@ func (s *Service) CreateUser(ctx context.Context, req domain.CreateUserParams) (
 		return domain.UserResponse{}, errors.New("invalid email")
 	}
 
-	hashPassword, err := bcrypt.GenerateFromPassword([]byte(req.PasswordHash), 12)
+	// hashPassword, err := bcrypt.GenerateFromPassword([]byte(req.PasswordHash), 12)
+
+	passwordPepper := req.PasswordHash + s.cfg.Pepper
+
+	hashPassword, err := argon2id.CreateHash(passwordPepper, argon2id.DefaultParams)
+	if err != nil {
+		return domain.UserResponse{}, err
+	}
 
 	user, err := s.repo.CreateUsers(ctx, db.CreateUserParams{
 		Name:         req.Name,
@@ -244,16 +255,41 @@ func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, req domain.Updat
 }
 
 func (s *Service) ValidatePassword(ctx context.Context, email string, password string) (domain.UserResponse, error) {
-	user, err := s.repo.GetUserByEmail(ctx, email)
+	tx, err := s.pool.Begin(ctx)
 	if err != nil {
-		log.Error().Err(err).Msg("caiu no primeiro if")
+		return domain.UserResponse{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	txRepo := s.repo.WithTx(tx)
+
+	user, err := txRepo.GetUserByEmail(ctx, email)
+	if err != nil {
 		return domain.UserResponse{}, errors.New("invalid credentials")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+	/* err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if err != nil {
 		log.Error().Err(err).Msg("caiu no segundo if")
 		return domain.UserResponse{}, errors.New("invalid credentials")
+	} */
+
+	passwordPepper := password + s.cfg.Pepper
+
+	match, err := argon2id.ComparePasswordAndHash(passwordPepper, user.PasswordHash)
+	if err != nil {
+		return domain.UserResponse{}, errors.New("invalid credentials")
+	}
+	if !match {
+		return domain.UserResponse{}, errors.New("invalid credentials")
+	}
+
+	if err := txRepo.UpdateLastLogin(ctx, user.ID); err != nil {
+		return domain.UserResponse{}, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return domain.UserResponse{}, err
 	}
 
 	return domain.UserResponse{
