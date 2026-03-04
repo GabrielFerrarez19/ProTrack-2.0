@@ -108,6 +108,18 @@ type Department struct {
 	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
 }
 
+type PaymentHistory struct {
+	ID              pgtype.UUID        `json:"id"`
+	CompanyID       pgtype.UUID        `json:"company_id"`
+	CustomerID      pgtype.UUID        `json:"customer_id"`
+	SaleID          pgtype.UUID        `json:"sale_id"`
+	PaymentMethodID pgtype.UUID        `json:"payment_method_id"`
+	UserID          pgtype.UUID        `json:"user_id"`
+	AmountPaid      pgtype.Numeric     `json:"amount_paid"`
+	PaymentDate     pgtype.Timestamptz `json:"payment_date"`
+	Notes           pgtype.Text        `json:"notes"`
+}
+
 type PaymentMethod struct {
 	ID        pgtype.UUID        `json:"id"`
 	CompanyID pgtype.UUID        `json:"company_id"`

@@ -46,8 +46,8 @@ type DeleteProductRequest struct {
 }
 
 type ListProductsByCategoryIdRequest struct {
-	CategoryID uuid.UUID `json:"category_id"`
-	CompanyID  uuid.UUID `json:"company_id"`
+	CategoryID uuid.UUID `json:"category_id" form:"category_id"`
+	CompanyID  uuid.UUID `json:"company_id" form:"company_id"`
 }
 
 type UpdateProductRequest struct {
