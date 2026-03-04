@@ -11,10 +11,20 @@ type Repository struct {
 	db db.DBTX
 }
 
-func NewRepository(dbtx db.DBTX) *Repository {
+func NewRepository(db db.DBTX) *Repository {
 	return &Repository{
-		db: dbtx,
+		db: db,
 	}
+}
+
+func (r *Repository) WithTx(tx db.DBTX) *Repository {
+	return &Repository{
+		db: tx,
+	}
+}
+
+func (r *Repository) queries() *db.Queries {
+	return db.New(r.db)
 }
 
 func (r *Repository) CreateUsers(ctx context.Context, arg db.CreateUserParams) (db.User, error) {
@@ -55,4 +65,8 @@ func (r *Repository) UpdateUser(ctx context.Context, arg db.UpdateUserParams) (d
 func (r *Repository) UpdateUserCompanyAndRole(ctx context.Context, arg db.UpdateUserCompanyAndRoleParams) error {
 	q := db.New(r.db)
 	return q.UpdateUserCompanyAndRole(ctx, arg)
+}
+
+func (r *Repository) UpdateLastLogin(ctx context.Context, id pgtype.UUID) error {
+	return r.queries().UpdateLastLogin(ctx, id)
 }

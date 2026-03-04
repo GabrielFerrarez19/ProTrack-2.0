@@ -10,7 +10,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/rs/zerolog/log"
 
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/validate"
@@ -30,6 +29,8 @@ type RepositoryInterface interface {
 	UpdatePasswordHash(ctx context.Context, arg db.UpdatePasswordHashParams) error
 	UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.User, error)
 	UpdateUserCompanyAndRole(ctx context.Context, arg db.UpdateUserCompanyAndRoleParams) error
+	UpdateLastLogin(ctx context.Context, id pgtype.UUID) error
+	WithTx(tx db.DBTX) *repository.Repository
 }
 
 type Service struct {
@@ -254,9 +255,16 @@ func (s *Service) UpdateUser(ctx context.Context, id uuid.UUID, req domain.Updat
 }
 
 func (s *Service) ValidatePassword(ctx context.Context, email string, password string) (domain.UserResponse, error) {
-	user, err := s.repo.GetUserByEmail(ctx, email)
+	tx, err := s.pool.Begin(ctx)
 	if err != nil {
-		log.Error().Err(err).Msg("caiu no primeiro if")
+		return domain.UserResponse{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	txRepo := s.repo.WithTx(tx)
+
+	user, err := txRepo.GetUserByEmail(ctx, email)
+	if err != nil {
 		return domain.UserResponse{}, errors.New("invalid credentials")
 	}
 
@@ -269,8 +277,19 @@ func (s *Service) ValidatePassword(ctx context.Context, email string, password s
 	passwordPepper := password + s.cfg.Pepper
 
 	match, err := argon2id.ComparePasswordAndHash(passwordPepper, user.PasswordHash)
+	if err != nil {
+		return domain.UserResponse{}, errors.New("invalid credentials")
+	}
 	if !match {
 		return domain.UserResponse{}, errors.New("invalid credentials")
+	}
+
+	if err := txRepo.UpdateLastLogin(ctx, user.ID); err != nil {
+		return domain.UserResponse{}, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return domain.UserResponse{}, err
 	}
 
 	return domain.UserResponse{

@@ -57,3 +57,7 @@ SET company_id = $2,
     role = $3,
     updated_at = now()
 WHERE id = $1;
+-- name: UpdateLastLogin :exec
+UPDATE users
+SET last_login_at = CURRENT_TIMESTAMP
+WHERE id = $1;
