@@ -19,6 +19,24 @@ type BillCategory struct {
 	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
 }
 
+type BillsPayable struct {
+	ID              pgtype.UUID        `json:"id"`
+	CompanyID       pgtype.UUID        `json:"company_id"`
+	VendorID        pgtype.UUID        `json:"vendor_id"`
+	CategoryID      pgtype.UUID        `json:"category_id"`
+	PaymentMethodID pgtype.UUID        `json:"payment_method_id"`
+	Amount          pgtype.Numeric     `json:"amount"`
+	DueDate         pgtype.Date        `json:"due_date"`
+	Status          interface{}        `json:"status"`
+	Description     pgtype.Text        `json:"description"`
+	ScheduledDate   pgtype.Date        `json:"scheduled_date"`
+	PaymentDate     pgtype.Date        `json:"payment_date"`
+	AmountPaid      pgtype.Numeric     `json:"amount_paid"`
+	Notes           pgtype.Text        `json:"notes"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+}
+
 type Company struct {
 	ID                  pgtype.UUID        `json:"id"`
 	Name                string             `json:"name"`
