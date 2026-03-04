@@ -273,12 +273,12 @@ func (s *Service) GetTotalAmountSummary(ctx context.Context, companyId uuid.UUID
 	}, nil
 }
 
-func (s *Service) GetTotalAmountIsPending(ctx context.Context, req domain.GetTotalAmountByStatusRequest) (float64, error) {
-	req.Status = "pending"
+func (s *Service) GetTotalAmountIsPending(ctx context.Context, companyId uuid.UUID) (float64, error) {
+	status := "pending"
 
 	total, err := s.repo.GetTotalAmountByStatus(ctx, db.GetTotalAmountByStatusParams{
-		CompanyID: pgconv.ParseUUIDToPgType(req.CompanyID),
-		Status:    req.Status,
+		CompanyID: pgconv.ParseUUIDToPgType(companyId),
+		Status:    status,
 	})
 	if err != nil {
 		return 0, err

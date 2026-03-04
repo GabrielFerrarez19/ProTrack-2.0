@@ -76,8 +76,8 @@ type UpdateSaleStatusRequest struct {
 }
 
 type ListSalesByCompanyAndStatusRequest struct {
-	CompanyID uuid.UUID `json:"company_id"`
-	Status    string    `json:"status"`
+	CompanyID uuid.UUID `json:"company_id" form:"company_id"`
+	Status    string    `json:"status" form:"status"`
 }
 
 type ListSalesByCompanyAndStatusRow struct {

@@ -118,12 +118,22 @@ func (h *Handler) GetProductById(c *gin.Context) {
 }
 
 func (h *Handler) ListProductsByCategoryId(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "company_id null"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
 	var req domain.ListProductsByCategoryIdRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindQuery(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	req.CompanyID = companyId
 
 	products, err := h.service.ListProductsByCategoryId(c.Request.Context(), req)
 	if err != nil {

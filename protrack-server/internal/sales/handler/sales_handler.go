@@ -202,11 +202,17 @@ func (h *Handler) ListSalesByCompanyAndStatus(c *gin.Context) {
 	companyIdAny, exists := c.Get("company_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id is null"})
+		return
 	}
 
 	companyId := companyIdAny.(uuid.UUID)
 
 	var req domain.ListSalesByCompanyAndStatusRequest
+
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	req.CompanyID = companyId
 
@@ -278,11 +284,7 @@ func (h *Handler) GetTotalAmountIsPending(c *gin.Context) {
 
 	companyId := companyIdAny.(uuid.UUID)
 
-	var req domain.GetTotalAmountByStatusRequest
-
-	req.CompanyID = companyId
-
-	total, err := h.service.GetTotalAmountIsPending(c.Request.Context(), req)
+	total, err := h.service.GetTotalAmountIsPending(c.Request.Context(), companyId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
