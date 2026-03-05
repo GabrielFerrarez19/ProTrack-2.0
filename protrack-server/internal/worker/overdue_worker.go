@@ -1,7 +1,6 @@
 package worker
 
 import (
-	"context"
 	"time"
 
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/service"
@@ -13,13 +12,13 @@ func StartOverdueMonitor(saleService *service.Service) {
 
 	go func() {
 		runUpdate := func() {
-			ctx := context.Background()
+			/* ctx := context.Background()
 			err := saleService.UpdateOverdueSales(ctx)
 			if err != nil {
 				log.Error().Err(err).Msg("Erro ao atualizar vendas vencidas")
 			} else {
 				log.Info().Msg("Rotina de monitoramento: Status de vendas atualizado com sucesso.")
-			}
+			} */
 		}
 
 		log.Info().Msg("Rotina de vendas vencidas iniciada")

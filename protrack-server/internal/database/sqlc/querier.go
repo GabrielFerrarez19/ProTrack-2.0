@@ -14,6 +14,7 @@ type Querier interface {
 	CountCustomers(ctx context.Context, companyID pgtype.UUID) (int64, error)
 	CountProducts(ctx context.Context, companyID pgtype.UUID) (int64, error)
 	CountSales(ctx context.Context, companyID pgtype.UUID) (int64, error)
+	CreateAccountReceivable(ctx context.Context, arg CreateAccountReceivableParams) error
 	CreateBillCategories(ctx context.Context, arg CreateBillCategoriesParams) error
 	CreateBillPayable(ctx context.Context, arg CreateBillPayableParams) error
 	CreateCompany(ctx context.Context, arg CreateCompanyParams) (Company, error)
@@ -46,16 +47,19 @@ type Querier interface {
 	GetCostTotalStock(ctx context.Context, companyID pgtype.UUID) (float64, error)
 	GetCustomerByCPF(ctx context.Context, cpf string) (Customer, error)
 	GetCustomerById(ctx context.Context, id pgtype.UUID) (Customer, error)
+	GetCustomerDebtSummary(ctx context.Context, customerID pgtype.UUID) (GetCustomerDebtSummaryRow, error)
 	GetCustomersPerformanceSummary(ctx context.Context, companyID pgtype.UUID) (GetCustomersPerformanceSummaryRow, error)
 	GetDepartmentById(ctx context.Context, id pgtype.UUID) (Department, error)
 	GetOverdueBills(ctx context.Context, companyID pgtype.UUID) ([]BillsPayable, error)
 	GetPaymentMethodByID(ctx context.Context, id pgtype.UUID) (PaymentMethod, error)
 	GetPaymentsByCustomer(ctx context.Context, arg GetPaymentsByCustomerParams) ([]PaymentHistory, error)
 	GetPaymentsBySale(ctx context.Context, arg GetPaymentsBySaleParams) ([]PaymentHistory, error)
+	GetPendingReceivablesByCustomer(ctx context.Context, arg GetPendingReceivablesByCustomerParams) ([]AccountsReceivable, error)
 	GetProductByBarcode(ctx context.Context, barcode pgtype.Text) (Product, error)
 	GetProductById(ctx context.Context, id pgtype.UUID) (Product, error)
 	GetProductCategoryById(ctx context.Context, id pgtype.UUID) (ProductCategory, error)
 	GetProductsPerformanceSummary(ctx context.Context, companyID pgtype.UUID) (GetProductsPerformanceSummaryRow, error)
+	GetReceivablesBySale(ctx context.Context, saleID pgtype.UUID) ([]AccountsReceivable, error)
 	GetSaleById(ctx context.Context, arg GetSaleByIdParams) (GetSaleByIdRow, error)
 	GetSaleByIdWhatsapp(ctx context.Context, id pgtype.UUID) (GetSaleByIdWhatsappRow, error)
 	GetSalesPerformanceSummary(ctx context.Context, companyID pgtype.UUID) (GetSalesPerformanceSummaryRow, error)
@@ -73,6 +77,7 @@ type Querier interface {
 	ListCustomers(ctx context.Context, companyID pgtype.UUID) ([]Customer, error)
 	ListDepartmentsByCompanyId(ctx context.Context, companyID pgtype.UUID) ([]Department, error)
 	ListItemsFromPendingSale(ctx context.Context, saleID pgtype.UUID) ([]ListItemsFromPendingSaleRow, error)
+	ListOverdueReceivables(ctx context.Context, companyID pgtype.UUID) ([]ListOverdueReceivablesRow, error)
 	ListPaymentHistory(ctx context.Context, companyID pgtype.UUID) ([]ListPaymentHistoryRow, error)
 	ListPaymentMethod(ctx context.Context, companyID pgtype.UUID) ([]PaymentMethod, error)
 	ListPaymentMethodIsActive(ctx context.Context, companyID pgtype.UUID) ([]PaymentMethod, error)
@@ -92,6 +97,7 @@ type Querier interface {
 	ToggleBillCategoriesActive(ctx context.Context, arg ToggleBillCategoriesActiveParams) error
 	TogglePaymentMethodActive(ctx context.Context, arg TogglePaymentMethodActiveParams) error
 	ToggleVendorsActive(ctx context.Context, arg ToggleVendorsActiveParams) error
+	UpdateAccountReceivableBalance(ctx context.Context, arg UpdateAccountReceivableBalanceParams) error
 	UpdateBalanceDueCustomer(ctx context.Context, arg UpdateBalanceDueCustomerParams) error
 	UpdateBillPayable(ctx context.Context, arg UpdateBillPayableParams) error
 	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) (Company, error)
