@@ -8,6 +8,24 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type AccountsReceivable struct {
+	ID                pgtype.UUID        `json:"id"`
+	CompanyID         pgtype.UUID        `json:"company_id"`
+	CustomerID        pgtype.UUID        `json:"customer_id"`
+	SaleID            pgtype.UUID        `json:"sale_id"`
+	TotalAmount       pgtype.Numeric     `json:"total_amount"`
+	Balance           pgtype.Numeric     `json:"balance"`
+	DueDate           pgtype.Date        `json:"due_date"`
+	InstallmentNumber pgtype.Int4        `json:"installment_number"`
+	TotalInstallments pgtype.Int4        `json:"total_installments"`
+	Status            string             `json:"status"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	CreatedBy         pgtype.UUID        `json:"created_by"`
+	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+	UpdatedBy         pgtype.UUID        `json:"updated_by"`
+	DeletedAt         pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type BillCategory struct {
 	ID          pgtype.UUID        `json:"id"`
 	CompanyID   pgtype.UUID        `json:"company_id"`
