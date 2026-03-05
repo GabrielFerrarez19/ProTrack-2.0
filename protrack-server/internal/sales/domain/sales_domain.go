@@ -9,16 +9,16 @@ import (
 )
 
 type CreateSaleRequest struct {
-	CustomerID     uuid.UUID               `json:"customer_id"`
-	CompanyID      uuid.UUID               `json:"company_id"`
-	DiscountAmount float64                 `json:"discount_amount"`
-	Subtotal       float64                 `json:"subtotal"`
-	TotalAmount    float64                 `json:"total_amount"`
-	DueDays        int32                   `json:"due_days"`
-	CreatedBy      uuid.UUID               `json:"created_by"`
-	PaymentMethod  interface{}             `json:"payment_method"`
-	Status         interface{}             `json:"status"`
-	Items          []CreateSaleItemRequest `json:"items"`
+	CustomerID        uuid.UUID               `json:"customer_id"`
+	DiscountAmount    float64                 `json:"discount_amount"`
+	Subtotal          float64                 `json:"subtotal"`
+	TotalAmount       float64                 `json:"total_amount"`
+	DueDays           int32                   `json:"due_days"`
+	PaymentMethod     interface{}             `json:"payment_method"`
+	InstallmentsCount int32                   `json:"installments_count"`
+	Status            interface{}             `json:"status"`
+	Items             []CreateSaleItemRequest `json:"items"`
+	Prohibited        float64                 `json:"prohibited"`
 }
 
 type CreateSaleItemRequest struct {
@@ -115,12 +115,6 @@ type GetTotalAmountByStatusRequest struct {
 func ValidateCreateSaleRequest(req CreateSaleRequest) error {
 	if req.CustomerID == uuid.Nil {
 		return errors.New("customer_id is required")
-	}
-	if req.CompanyID == uuid.Nil {
-		return errors.New("company_id is required")
-	}
-	if req.CreatedBy == uuid.Nil {
-		return errors.New("created_by is required")
 	}
 	if len(req.Items) == 0 {
 		return errors.New("the sale must have at least one item")

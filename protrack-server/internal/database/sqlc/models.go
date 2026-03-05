@@ -182,22 +182,24 @@ type ProductCategory struct {
 }
 
 type Sale struct {
-	ID             pgtype.UUID        `json:"id"`
-	CustomerID     pgtype.UUID        `json:"customer_id"`
-	CompanyID      pgtype.UUID        `json:"company_id"`
-	SaleAt         pgtype.Timestamptz `json:"sale_at"`
-	DiscountAmount pgtype.Numeric     `json:"discount_amount"`
-	Subtotal       pgtype.Numeric     `json:"subtotal"`
-	TotalAmount    pgtype.Numeric     `json:"total_amount"`
-	DueDays        pgtype.Int4        `json:"due_days"`
-	PaymentMethod  interface{}        `json:"payment_method"`
-	Status         interface{}        `json:"status"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
-	CreatedBy      pgtype.UUID        `json:"created_by"`
-	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
-	UpdatedBy      pgtype.UUID        `json:"updated_by"`
-	DeletedAt      pgtype.Timestamptz `json:"deleted_at"`
-	DeletedBy      pgtype.UUID        `json:"deleted_by"`
+	ID                pgtype.UUID        `json:"id"`
+	CustomerID        pgtype.UUID        `json:"customer_id"`
+	CompanyID         pgtype.UUID        `json:"company_id"`
+	SaleAt            pgtype.Timestamptz `json:"sale_at"`
+	DiscountAmount    pgtype.Numeric     `json:"discount_amount"`
+	Subtotal          pgtype.Numeric     `json:"subtotal"`
+	TotalAmount       pgtype.Numeric     `json:"total_amount"`
+	DueDays           pgtype.Int4        `json:"due_days"`
+	DownPayment       pgtype.Numeric     `json:"down_payment"`
+	PaymentMethod     interface{}        `json:"payment_method"`
+	InstallmentsCount int32              `json:"installments_count"`
+	Status            interface{}        `json:"status"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	CreatedBy         pgtype.UUID        `json:"created_by"`
+	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+	UpdatedBy         pgtype.UUID        `json:"updated_by"`
+	DeletedAt         pgtype.Timestamptz `json:"deleted_at"`
+	DeletedBy         pgtype.UUID        `json:"deleted_by"`
 }
 
 type SaleItem struct {

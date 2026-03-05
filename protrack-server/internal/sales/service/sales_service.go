@@ -3,7 +3,10 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
+	accountsReceivableDomain "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/accounts_receivable/domain"
+	accountsReceivableService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/accounts_receivable/service"
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
 	customerDomain "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/customers/domain"
 	customerService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/customers/service"
@@ -36,24 +39,33 @@ type RepositoryInterface interface {
 }
 
 type Service struct {
-	repo             RepositoryInterface
-	pool             *pgxpool.Pool
-	saleItemsService *saleItemsService.Service
-	customerService  *customerService.Service
-	whatsApp         *whatsapp.Whatsapp
+	repo                      RepositoryInterface
+	pool                      *pgxpool.Pool
+	saleItemsService          *saleItemsService.Service
+	customerService           *customerService.Service
+	accountsReceivableService *accountsReceivableService.Service
+	whatsApp                  *whatsapp.Whatsapp
 }
 
-func NewService(repo *repository.Repository, pool *pgxpool.Pool, saleItemsService *saleItemsService.Service, customerService *customerService.Service, whatsApp *whatsapp.Whatsapp) *Service {
+func NewService(
+	repo *repository.Repository,
+	pool *pgxpool.Pool,
+	saleItemsService *saleItemsService.Service,
+	customerService *customerService.Service,
+	whatsApp *whatsapp.Whatsapp,
+	accountsReceivableService *accountsReceivableService.Service,
+) *Service {
 	return &Service{
-		repo:             repo,
-		pool:             pool,
-		saleItemsService: saleItemsService,
-		customerService:  customerService,
-		whatsApp:         whatsApp,
+		repo:                      repo,
+		pool:                      pool,
+		saleItemsService:          saleItemsService,
+		customerService:           customerService,
+		accountsReceivableService: accountsReceivableService,
+		whatsApp:                  whatsApp,
 	}
 }
 
-func (s *Service) CreateSale(ctx context.Context, req domain.CreateSaleRequest) (uuid.UUID, error) {
+func (s *Service) CreateSale(ctx context.Context, userId, companyId uuid.UUID, req domain.CreateSaleRequest) (uuid.UUID, error) {
 	if err := domain.ValidateCreateSaleRequest(req); err != nil {
 		return uuid.Nil, err
 	}
@@ -66,16 +78,17 @@ func (s *Service) CreateSale(ctx context.Context, req domain.CreateSaleRequest) 
 
 	txRepo := s.repo.WithTx(tx)
 
+	// 1. Definição do Status e Atualização de Saldo Devedor
 	if req.PaymentMethod == "installments" {
 		if err := s.customerService.UpdateBalanceDueCustomer(ctx, req.CustomerID, customerDomain.UpdateBalanceDueCustomerRequest{
 			BalanceDue: req.Subtotal,
-			UpdatedBy:  req.CreatedBy,
+			UpdatedBy:  userId,
 		}); err != nil {
 			return uuid.Nil, err
 		}
 		req.Status = "pending"
-	} else if req.Status == nil {
-		req.Status = "paid" // à vista: pago por padrão
+	} else {
+		req.Status = "paid"
 	}
 
 	dueDaysVal := 0
@@ -83,25 +96,63 @@ func (s *Service) CreateSale(ctx context.Context, req domain.CreateSaleRequest) 
 		dueDaysVal = int(req.DueDays)
 	}
 
+	var installments int32
+
 	id, err := txRepo.CreateSales(ctx, db.CreateSaleParams{
-		CustomerID:     pgconv.ParseUUIDToPgType(req.CustomerID),
-		CompanyID:      pgconv.ParseUUIDToPgType(req.CompanyID),
-		DiscountAmount: pgconv.Float64ToPgNumeric(req.DiscountAmount),
-		Subtotal:       pgconv.Float64ToPgNumeric(req.Subtotal),
-		TotalAmount:    pgconv.Float64ToPgNumeric(req.TotalAmount),
-		DueDays:        pgconv.OptionalIntToPgInt4(dueDaysVal),
-		PaymentMethod:  req.PaymentMethod,
-		Status:         req.Status,
-		CreatedBy:      pgconv.ParseUUIDToPgType(req.CreatedBy),
+		CustomerID:        pgconv.ParseUUIDToPgType(req.CustomerID),
+		CompanyID:         pgconv.ParseUUIDToPgType(companyId),
+		DiscountAmount:    pgconv.Float64ToPgNumeric(req.DiscountAmount),
+		Subtotal:          pgconv.Float64ToPgNumeric(req.Subtotal),
+		TotalAmount:       pgconv.Float64ToPgNumeric(req.TotalAmount),
+		DueDays:           pgconv.OptionalIntToPgInt4(dueDaysVal),
+		DownPayment:       pgconv.Float64ToPgNumeric(req.Prohibited),
+		PaymentMethod:     req.PaymentMethod,
+		InstallmentsCount: installments,
+		Status:            req.Status,
+		CreatedBy:         pgconv.ParseUUIDToPgType(userId),
 	})
 	if err != nil {
 		return uuid.Nil, err
 	}
 
+	installments = req.InstallmentsCount
+
+	if req.PaymentMethod == "installments" {
+
+		amountToParcel := req.TotalAmount - req.Prohibited
+		installmentValue := amountToParcel / float64(req.InstallmentsCount)
+		dataBase := time.Now()
+
+		for i := 0; i < int(req.InstallmentsCount); i++ {
+			maturity := time.Date(
+				dataBase.Year(),
+				dataBase.Month()+time.Month(i),
+				int(req.DueDays),
+				0, 0, 0, 0,
+				dataBase.Location(),
+			)
+
+			var reqAR accountsReceivableDomain.CreateAccountReceivableRequest
+			reqAR.CustomerID = req.CustomerID
+			reqAR.SaleID = pgconv.PgUUIDToUUID(id)
+
+			reqAR.Balance = installmentValue
+			reqAR.TotalAmount = installmentValue
+
+			reqAR.InstallmentNumber = int64(i + 1)
+			reqAR.TotalInstallments = int64(req.InstallmentsCount)
+			reqAR.DueDate = maturity.Format("2006-01-02")
+
+			if err := s.accountsReceivableService.CreateAccountReceivable(ctx, tx, userId, companyId, reqAR); err != nil {
+				return uuid.Nil, err
+			}
+		}
+	}
+
 	for _, itemReq := range req.Items {
 		itemReq.SaleID = pgconv.PgUUIDToUUID(id)
 
-		if err := s.saleItemsService.CreateSaleItemInTx(ctx, tx, saleItemDomain.CreateSaleItemRequest(itemReq), req.CompanyID); err != nil {
+		if err := s.saleItemsService.CreateSaleItemInTx(ctx, tx, saleItemDomain.CreateSaleItemRequest(itemReq), companyId); err != nil {
 			return uuid.Nil, err
 		}
 	}

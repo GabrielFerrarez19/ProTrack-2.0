@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS sales (
   total_amount NUMERIC(10, 2) NOT NULL,
   due_days INT DEFAULT NULL,
   payment_method payment_method_enum DEFAULT 'cash',
+  down_payment NUMERIC(10, 2) DEFAULT 0.00,
+  installments_count INT NOT NULL DEFAULT 1,
   status account_status_enum DEFAULT 'paid',
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by UUID NOT NULL,

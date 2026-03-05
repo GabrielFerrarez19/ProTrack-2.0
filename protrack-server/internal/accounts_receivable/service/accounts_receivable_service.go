@@ -19,6 +19,7 @@ type RepositoryInterface interface {
 	GetReceivablesBySale(ctx context.Context, saleId pgtype.UUID) ([]db.AccountsReceivable, error)
 	ListOverdueReceivables(ctx context.Context, companyId pgtype.UUID) ([]db.ListOverdueReceivablesRow, error)
 	UpdateAccountReceivableBalance(ctx context.Context, arg db.UpdateAccountReceivableBalanceParams) error
+	WithTx(tx db.DBTX) *repository.Repository
 }
 
 type Service struct {
@@ -33,14 +34,16 @@ func NewService(repo *repository.Repository, pool *pgxpool.Pool) *Service {
 	}
 }
 
-func (s *Service) CreateAccountReceivable(ctx context.Context, userId uuid.UUID, companyId uuid.UUID, req domain.CreateAccountReceivableRequest) error {
+func (s *Service) CreateAccountReceivable(ctx context.Context, tx db.DBTX, userId uuid.UUID, companyId uuid.UUID, req domain.CreateAccountReceivableRequest) error {
+	txRepo := s.repo.WithTx(tx)
+
 	status := "pending"
 
 	if req.Balance < req.TotalAmount {
 		status = "partial"
 	}
 
-	return s.repo.CreateAccountReceivable(ctx, db.CreateAccountReceivableParams{
+	return txRepo.CreateAccountReceivable(ctx, db.CreateAccountReceivableParams{
 		CompanyID:         pgconv.ParseUUIDToPgType(companyId),
 		CustomerID:        pgconv.ParseUUIDToPgType(req.CustomerID),
 		SaleID:            pgconv.ParseUUIDToPgType(req.SaleID),

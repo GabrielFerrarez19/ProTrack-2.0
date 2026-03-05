@@ -34,7 +34,9 @@ INSERT INTO sales (
         subtotal,
         total_amount,
         due_days,
+        down_payment,
         payment_method,
+        installments_count,
         created_by,
         status
     )
@@ -48,21 +50,25 @@ VALUES (
         $6,
         $7,
         $8,
-        $9
+        $9,
+        $10,
+        $11
     )
 RETURNING id
 `
 
 type CreateSaleParams struct {
-	CustomerID     pgtype.UUID    `json:"customer_id"`
-	CompanyID      pgtype.UUID    `json:"company_id"`
-	DiscountAmount pgtype.Numeric `json:"discount_amount"`
-	Subtotal       pgtype.Numeric `json:"subtotal"`
-	TotalAmount    pgtype.Numeric `json:"total_amount"`
-	DueDays        pgtype.Int4    `json:"due_days"`
-	PaymentMethod  interface{}    `json:"payment_method"`
-	CreatedBy      pgtype.UUID    `json:"created_by"`
-	Status         interface{}    `json:"status"`
+	CustomerID        pgtype.UUID    `json:"customer_id"`
+	CompanyID         pgtype.UUID    `json:"company_id"`
+	DiscountAmount    pgtype.Numeric `json:"discount_amount"`
+	Subtotal          pgtype.Numeric `json:"subtotal"`
+	TotalAmount       pgtype.Numeric `json:"total_amount"`
+	DueDays           pgtype.Int4    `json:"due_days"`
+	DownPayment       pgtype.Numeric `json:"down_payment"`
+	PaymentMethod     interface{}    `json:"payment_method"`
+	InstallmentsCount int32          `json:"installments_count"`
+	CreatedBy         pgtype.UUID    `json:"created_by"`
+	Status            interface{}    `json:"status"`
 }
 
 func (q *Queries) CreateSale(ctx context.Context, arg CreateSaleParams) (pgtype.UUID, error) {
@@ -73,7 +79,9 @@ func (q *Queries) CreateSale(ctx context.Context, arg CreateSaleParams) (pgtype.
 		arg.Subtotal,
 		arg.TotalAmount,
 		arg.DueDays,
+		arg.DownPayment,
 		arg.PaymentMethod,
+		arg.InstallmentsCount,
 		arg.CreatedBy,
 		arg.Status,
 	)
@@ -102,7 +110,7 @@ func (q *Queries) DeleteSale(ctx context.Context, arg DeleteSaleParams) error {
 }
 
 const getSaleById = `-- name: GetSaleById :one
-SELECT s.id, s.customer_id, s.company_id, s.sale_at, s.discount_amount, s.subtotal, s.total_amount, s.due_days, s.payment_method, s.status, s.created_at, s.created_by, s.updated_at, s.updated_by, s.deleted_at, s.deleted_by,
+SELECT s.id, s.customer_id, s.company_id, s.sale_at, s.discount_amount, s.subtotal, s.total_amount, s.due_days, s.down_payment, s.payment_method, s.installments_count, s.status, s.created_at, s.created_by, s.updated_at, s.updated_by, s.deleted_at, s.deleted_by,
     c.full_name as customer_name
 FROM sales s
     INNER JOIN customers c ON s.customer_id = c.id
@@ -116,23 +124,25 @@ type GetSaleByIdParams struct {
 }
 
 type GetSaleByIdRow struct {
-	ID             pgtype.UUID        `json:"id"`
-	CustomerID     pgtype.UUID        `json:"customer_id"`
-	CompanyID      pgtype.UUID        `json:"company_id"`
-	SaleAt         pgtype.Timestamptz `json:"sale_at"`
-	DiscountAmount pgtype.Numeric     `json:"discount_amount"`
-	Subtotal       pgtype.Numeric     `json:"subtotal"`
-	TotalAmount    pgtype.Numeric     `json:"total_amount"`
-	DueDays        pgtype.Int4        `json:"due_days"`
-	PaymentMethod  interface{}        `json:"payment_method"`
-	Status         interface{}        `json:"status"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
-	CreatedBy      pgtype.UUID        `json:"created_by"`
-	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
-	UpdatedBy      pgtype.UUID        `json:"updated_by"`
-	DeletedAt      pgtype.Timestamptz `json:"deleted_at"`
-	DeletedBy      pgtype.UUID        `json:"deleted_by"`
-	CustomerName   string             `json:"customer_name"`
+	ID                pgtype.UUID        `json:"id"`
+	CustomerID        pgtype.UUID        `json:"customer_id"`
+	CompanyID         pgtype.UUID        `json:"company_id"`
+	SaleAt            pgtype.Timestamptz `json:"sale_at"`
+	DiscountAmount    pgtype.Numeric     `json:"discount_amount"`
+	Subtotal          pgtype.Numeric     `json:"subtotal"`
+	TotalAmount       pgtype.Numeric     `json:"total_amount"`
+	DueDays           pgtype.Int4        `json:"due_days"`
+	DownPayment       pgtype.Numeric     `json:"down_payment"`
+	PaymentMethod     interface{}        `json:"payment_method"`
+	InstallmentsCount int32              `json:"installments_count"`
+	Status            interface{}        `json:"status"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	CreatedBy         pgtype.UUID        `json:"created_by"`
+	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+	UpdatedBy         pgtype.UUID        `json:"updated_by"`
+	DeletedAt         pgtype.Timestamptz `json:"deleted_at"`
+	DeletedBy         pgtype.UUID        `json:"deleted_by"`
+	CustomerName      string             `json:"customer_name"`
 }
 
 func (q *Queries) GetSaleById(ctx context.Context, arg GetSaleByIdParams) (GetSaleByIdRow, error) {
@@ -147,7 +157,9 @@ func (q *Queries) GetSaleById(ctx context.Context, arg GetSaleByIdParams) (GetSa
 		&i.Subtotal,
 		&i.TotalAmount,
 		&i.DueDays,
+		&i.DownPayment,
 		&i.PaymentMethod,
+		&i.InstallmentsCount,
 		&i.Status,
 		&i.CreatedAt,
 		&i.CreatedBy,
@@ -161,7 +173,7 @@ func (q *Queries) GetSaleById(ctx context.Context, arg GetSaleByIdParams) (GetSa
 }
 
 const getSaleByIdWhatsapp = `-- name: GetSaleByIdWhatsapp :one
-SELECT s.id, s.customer_id, s.company_id, s.sale_at, s.discount_amount, s.subtotal, s.total_amount, s.due_days, s.payment_method, s.status, s.created_at, s.created_by, s.updated_at, s.updated_by, s.deleted_at, s.deleted_by,
+SELECT s.id, s.customer_id, s.company_id, s.sale_at, s.discount_amount, s.subtotal, s.total_amount, s.due_days, s.down_payment, s.payment_method, s.installments_count, s.status, s.created_at, s.created_by, s.updated_at, s.updated_by, s.deleted_at, s.deleted_by,
     c.full_name as customer_name,
     c.whatsapp as customer_whatsApp
 FROM sales s
@@ -170,24 +182,26 @@ WHERE s.id = $1
 `
 
 type GetSaleByIdWhatsappRow struct {
-	ID               pgtype.UUID        `json:"id"`
-	CustomerID       pgtype.UUID        `json:"customer_id"`
-	CompanyID        pgtype.UUID        `json:"company_id"`
-	SaleAt           pgtype.Timestamptz `json:"sale_at"`
-	DiscountAmount   pgtype.Numeric     `json:"discount_amount"`
-	Subtotal         pgtype.Numeric     `json:"subtotal"`
-	TotalAmount      pgtype.Numeric     `json:"total_amount"`
-	DueDays          pgtype.Int4        `json:"due_days"`
-	PaymentMethod    interface{}        `json:"payment_method"`
-	Status           interface{}        `json:"status"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	CreatedBy        pgtype.UUID        `json:"created_by"`
-	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
-	UpdatedBy        pgtype.UUID        `json:"updated_by"`
-	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
-	DeletedBy        pgtype.UUID        `json:"deleted_by"`
-	CustomerName     string             `json:"customer_name"`
-	CustomerWhatsapp pgtype.Text        `json:"customer_whatsapp"`
+	ID                pgtype.UUID        `json:"id"`
+	CustomerID        pgtype.UUID        `json:"customer_id"`
+	CompanyID         pgtype.UUID        `json:"company_id"`
+	SaleAt            pgtype.Timestamptz `json:"sale_at"`
+	DiscountAmount    pgtype.Numeric     `json:"discount_amount"`
+	Subtotal          pgtype.Numeric     `json:"subtotal"`
+	TotalAmount       pgtype.Numeric     `json:"total_amount"`
+	DueDays           pgtype.Int4        `json:"due_days"`
+	DownPayment       pgtype.Numeric     `json:"down_payment"`
+	PaymentMethod     interface{}        `json:"payment_method"`
+	InstallmentsCount int32              `json:"installments_count"`
+	Status            interface{}        `json:"status"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	CreatedBy         pgtype.UUID        `json:"created_by"`
+	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+	UpdatedBy         pgtype.UUID        `json:"updated_by"`
+	DeletedAt         pgtype.Timestamptz `json:"deleted_at"`
+	DeletedBy         pgtype.UUID        `json:"deleted_by"`
+	CustomerName      string             `json:"customer_name"`
+	CustomerWhatsapp  pgtype.Text        `json:"customer_whatsapp"`
 }
 
 func (q *Queries) GetSaleByIdWhatsapp(ctx context.Context, id pgtype.UUID) (GetSaleByIdWhatsappRow, error) {
@@ -202,7 +216,9 @@ func (q *Queries) GetSaleByIdWhatsapp(ctx context.Context, id pgtype.UUID) (GetS
 		&i.Subtotal,
 		&i.TotalAmount,
 		&i.DueDays,
+		&i.DownPayment,
 		&i.PaymentMethod,
+		&i.InstallmentsCount,
 		&i.Status,
 		&i.CreatedAt,
 		&i.CreatedBy,
