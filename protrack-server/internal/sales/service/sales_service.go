@@ -110,13 +110,25 @@ func (s *Service) CreateSale(ctx context.Context, req domain.CreateSaleRequest) 
 		dataBase := time.Now()
 
 		for i := 0; i < int(req.InstallmentsCount); i++ {
-			maturity := time.Date(
-				dataBase.Year(),
-				dataBase.Month()+time.Month(i),
-				int(req.DueDays),
-				0, 0, 0, 0,
-				dataBase.Location(),
-			)
+			var maturity time.Time
+
+			if dataBase.Day() >= int(req.DueDays) {
+				maturity = time.Date(
+					dataBase.Year(),
+					dataBase.Month()+time.Month(i+1),
+					int(req.DueDays),
+					0, 0, 0, 0,
+					dataBase.Location(),
+				)
+			} else {
+				maturity = time.Date(
+					dataBase.Year(),
+					dataBase.Month()+time.Month(i),
+					int(req.DueDays),
+					0, 0, 0, 0,
+					dataBase.Location(),
+				)
+			}
 
 			var reqAR accountsReceivableDomain.CreateAccountReceivableRequest
 			reqAR.CustomerID = req.CustomerID
