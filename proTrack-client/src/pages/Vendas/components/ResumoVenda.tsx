@@ -122,7 +122,12 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
               <Select
                 onValueChange={(value) => {
                   field.onChange(value);
-                  if (value !== "installments") setValue("diasVencimento", undefined);
+                  if (value !== "installments") {
+                    setValue("diasVencimento", undefined);
+                    setValue("parcelas", undefined);
+                  } else {
+                    setValue("parcelas", 1);
+                  }
                 }}
                 value={field.value ?? ""}
               >
@@ -141,38 +146,101 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
           />
         </div>
 
-        {/* Select de dias de vencimento apenas se forma de pagamento for parcelado */}
+        {/* Em quantas vezes (parcelas) - apenas se forma de pagamento for parcelado */}
         {formaPagamentoSelecionada === "installments" && (
-          <div className="flex justify-between items-center">
-            <label
-              className="text-sm text-muted-foreground mr-2"
-              htmlFor="diasVencimento"
-            >
-              Dias para Vencimento:
-            </label>
-            <Controller
-              control={control}
-              name="diasVencimento"
-              defaultValue={diasVencimentoOpcoes[0]} // valor padrão
-              render={({ field }) => (
-                <Select
-                  onValueChange={(val) => field.onChange(Number(val))}
-                  value={(field.value ?? diasVencimentoOpcoes[0]).toString()} // garante valor mesmo que undefined
-                >
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {diasVencimentoOpcoes.map((dias) => (
-                      <SelectItem key={dias} value={dias.toString()}>
-                        Dia {dias}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
+          <>
+            <div className="flex justify-between items-center">
+              <label
+                className="text-sm text-muted-foreground mr-2"
+                htmlFor="parcelas"
+              >
+                Em quantas vezes:
+              </label>
+              <Controller
+                control={control}
+                name="parcelas"
+                defaultValue={1}
+                render={({ field }) => (
+                  <Select
+                    onValueChange={(val) => field.onChange(Number(val))}
+                    value={(field.value ?? 1).toString()}
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue placeholder="Parcelas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map(
+                        (n) => (
+                          <SelectItem key={n} value={n.toString()}>
+                            {n}x
+                          </SelectItem>
+                        ),
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <div className="flex justify-between items-center">
+              <label
+                className="text-sm text-muted-foreground mr-2"
+                htmlFor="diasVencimento"
+              >
+                Dias para Vencimento:
+              </label>
+              <Controller
+                control={control}
+                name="diasVencimento"
+                defaultValue={diasVencimentoOpcoes[0]}
+                render={({ field }) => (
+                  <Select
+                    onValueChange={(val) => field.onChange(Number(val))}
+                    value={(field.value ?? diasVencimentoOpcoes[0]).toString()}
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {diasVencimentoOpcoes.map((dias) => (
+                        <SelectItem key={dias} value={dias.toString()}>
+                          Dia {dias}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <div className="flex justify-between items-center">
+              <label
+                className="text-sm text-muted-foreground mr-2"
+                htmlFor="entrada"
+              >
+                Entrada (R$):
+              </label>
+              <Controller
+                control={control}
+                name="entrada"
+                defaultValue={0}
+                render={({ field }) => (
+                  <Input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    placeholder="0,00"
+                    className="w-32"
+                    value={field.value ?? ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      field.onChange(
+                        v === "" ? 0 : Number.parseFloat(v) || 0,
+                      );
+                    }}
+                  />
+                )}
+              />
+            </div>
+          </>
         )}
 
         {/* Totais finais */}

@@ -14,8 +14,8 @@ interface ListSalesResponse {
 }
 
 export async function CreateSale(data: SaleRequest): Promise<string> {
-  const response = await api.post<string>("/sales", data);
-  return response.data;
+  const response = await api.post<{ id: string }>("/sales", data);
+  return response.data.id;
 }
 
 export async function ListSales(): Promise<ListSalesByCompanyResponse[]> {
