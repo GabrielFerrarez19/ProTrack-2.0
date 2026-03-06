@@ -54,6 +54,27 @@ func (s *Service) CreateAccountReceivable(ctx context.Context, userId uuid.UUID,
 	})
 }
 
+// CreateAccountReceivableInTx cria uma conta a receber dentro da transação tx (ex.: mesma transação da venda).
+func (s *Service) CreateAccountReceivableInTx(ctx context.Context, tx db.DBTX, userId, companyId uuid.UUID, req domain.CreateAccountReceivableRequest) error {
+	status := "pending"
+	if req.Balance < req.TotalAmount {
+		status = "partial"
+	}
+	repoTx := repository.NewRepository(tx)
+	return repoTx.CreateAccountReceivable(ctx, db.CreateAccountReceivableParams{
+		CompanyID:         pgconv.ParseUUIDToPgType(companyId),
+		CustomerID:        pgconv.ParseUUIDToPgType(req.CustomerID),
+		SaleID:            pgconv.ParseUUIDToPgType(req.SaleID),
+		TotalAmount:       pgconv.Float64ToPgNumeric(req.TotalAmount),
+		Balance:           pgconv.Float64ToPgNumeric(req.Balance),
+		DueDate:           pgconv.StringToPgDate(req.DueDate),
+		InstallmentNumber: pgconv.IntToPgInt4(int(req.InstallmentNumber)),
+		TotalInstallments: pgconv.IntToPgInt4(int(req.TotalInstallments)),
+		Status:            status,
+		CreatedBy:         pgconv.ParseUUIDToPgType(userId),
+	})
+}
+
 func (s *Service) GetCustomerDebtSummary(ctx context.Context, customerId uuid.UUID) (domain.GetCustomerDebtSummaryRow, error) {
 	account, err := s.repo.GetCustomerDebtSummary(ctx, pgconv.ParseUUIDToPgType(customerId))
 	if err != nil {

@@ -3,7 +3,10 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
+	accountsReceivableDomain "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/accounts_receivable/domain"
+	accountsReceivableService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/accounts_receivable/service"
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
 	customerDomain "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/customers/domain"
 	customerService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/customers/service"
@@ -36,20 +39,22 @@ type RepositoryInterface interface {
 }
 
 type Service struct {
-	repo             RepositoryInterface
-	pool             *pgxpool.Pool
-	saleItemsService *saleItemsService.Service
-	customerService  *customerService.Service
-	whatsApp         *whatsapp.Whatsapp
+	repo                      RepositoryInterface
+	pool                      *pgxpool.Pool
+	saleItemsService          *saleItemsService.Service
+	customerService           *customerService.Service
+	accountsReceivableService *accountsReceivableService.Service
+	whatsApp                  *whatsapp.Whatsapp
 }
 
-func NewService(repo *repository.Repository, pool *pgxpool.Pool, saleItemsService *saleItemsService.Service, customerService *customerService.Service, whatsApp *whatsapp.Whatsapp) *Service {
+func NewService(repo *repository.Repository, pool *pgxpool.Pool, saleItemsService *saleItemsService.Service, customerService *customerService.Service, accountsReceivableService *accountsReceivableService.Service, whatsApp *whatsapp.Whatsapp) *Service {
 	return &Service{
-		repo:             repo,
-		pool:             pool,
-		saleItemsService: saleItemsService,
-		customerService:  customerService,
-		whatsApp:         whatsApp,
+		repo:                      repo,
+		pool:                      pool,
+		saleItemsService:          saleItemsService,
+		customerService:           customerService,
+		accountsReceivableService: accountsReceivableService,
+		whatsApp:                  whatsApp,
 	}
 }
 
@@ -96,6 +101,38 @@ func (s *Service) CreateSale(ctx context.Context, req domain.CreateSaleRequest) 
 	})
 	if err != nil {
 		return uuid.Nil, err
+	}
+
+	if req.PaymentMethod == "installments" {
+
+		amountToParcel := req.TotalAmount - req.Prohibited
+		installmentValue := amountToParcel / float64(req.InstallmentsCount)
+		dataBase := time.Now()
+
+		for i := 0; i < int(req.InstallmentsCount); i++ {
+			maturity := time.Date(
+				dataBase.Year(),
+				dataBase.Month()+time.Month(i),
+				int(req.DueDays),
+				0, 0, 0, 0,
+				dataBase.Location(),
+			)
+
+			var reqAR accountsReceivableDomain.CreateAccountReceivableRequest
+			reqAR.CustomerID = req.CustomerID
+			reqAR.SaleID = pgconv.PgUUIDToUUID(id)
+
+			reqAR.Balance = installmentValue
+			reqAR.TotalAmount = installmentValue
+
+			reqAR.InstallmentNumber = int64(i + 1)
+			reqAR.TotalInstallments = int64(req.InstallmentsCount)
+			reqAR.DueDate = maturity.Format("2006-01-02")
+
+			if err := s.accountsReceivableService.CreateAccountReceivableInTx(ctx, tx, req.CreatedBy, req.CompanyID, reqAR); err != nil {
+				return uuid.Nil, err
+			}
+		}
 	}
 
 	for _, itemReq := range req.Items {

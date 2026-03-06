@@ -26,6 +26,8 @@ export function Vendas() {
       totalComDesconto: 0,
       status: "Pendente",
       formaPagamento: "cash",
+      parcelas: 1,
+      entrada: 0,
       produtos: [],
     },
   });
@@ -64,7 +66,6 @@ export function Vendas() {
 
     const saleRequest: SaleRequest = {
       customer_id: data.clienteId,
-      company_id: companyID,
       discount_amount: data.desconto ?? 0,
       subtotal: totalGeral,
       total_amount: totalComDesconto,
@@ -73,7 +74,12 @@ export function Vendas() {
         data.formaPagamento === "installments"
           ? (data.diasVencimento ?? 1)
           : undefined,
-      created_by: user.id,
+      installments_count:
+        data.formaPagamento === "installments"
+          ? (data.parcelas ?? 1)
+          : 1,
+      status: data.status ?? "Pendente",
+      prohibited: data.entrada ?? 0,
       items: data.produtos.map((p) => ({
         product_id: p.produtoId,
         quantity: p.quantidade,
@@ -96,6 +102,8 @@ export function Vendas() {
         totalComDesconto: 0,
         status: "Pendente",
         formaPagamento: "cash",
+        parcelas: 1,
+        entrada: 0,
         produtos: [],
       });
       setTotalGeral(0);
@@ -157,6 +165,8 @@ export function Vendas() {
                   totalComDesconto: 0,
                   status: "Pendente",
                   formaPagamento: "cash",
+                  parcelas: 1,
+                  entrada: 0,
                   produtos: [],
                 });
                 setTotalGeral(0);
