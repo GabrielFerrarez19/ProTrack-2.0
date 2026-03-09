@@ -124,30 +124,34 @@ SELECT COALESCE(
         0
     )::FLOAT AS total_pending_amount
 from sales;
--- name: UpdateOverdueSales :many
+-- name: UpdateOverdueSalesAndAccountsGlobal :many
+WITH updated_accounts AS (
+    UPDATE accounts_receivable
+    SET status = 'overdue'
+    WHERE status = 'pending'
+        AND due_date::DATE < CURRENT_DATE
+    RETURNING sale_id
+)
 UPDATE sales
-SET status = 'overdue'
-WHERE status = 'pending'
-    AND deleted_at IS NULL
-    AND due_days IS NOT NULL
-    AND (
-        CASE
-            WHEN EXTRACT(
-                DAY
-                FROM sale_at
-            ) <= due_days THEN (
-                date_trunc('month', sale_at) + (due_days - 1 || ' days')::interval
-            )::date
-            ELSE (
-                date_trunc('month', sale_at) + INTERVAL '1 month' + (due_days - 1 || ' days')::interval
-            )::date
-        END
-    ) < CURRENT_DATE
-RETURNING id;
+SET status = 'overdue',
+    updated_at = CURRENT_TIMESTAMP
+WHERE id IN (
+        SELECT sale_id
+        FROM updated_accounts
+    )
+    AND status NOT IN ('paid', 'canceled')
+RETURNING id AS sale_id,
+    customer_id;
 -- name: GetSaleByIdWhatsapp :one
 SELECT s.*,
     c.full_name as customer_name,
     c.whatsapp as customer_whatsApp
+FROM sales s
+    INNER JOIN customers c ON s.customer_id = c.id
+WHERE s.id = $1;
+-- name: GetSaleByIdJust :one
+SELECT s.*,
+    c.full_name as customer_name
 FROM sales s
     INNER JOIN customers c ON s.customer_id = c.id
 WHERE s.id = $1;
