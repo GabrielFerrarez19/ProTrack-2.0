@@ -1,15 +1,13 @@
-import type { DashboardDados } from "../../../@types/types.api";
+import type { ContasReceber } from "../../../@types/types.api";
 import { Card, CardContent } from "../../../components/ui/card";
 import { DollarSign, AlertCircle, Calendar } from "lucide-react";
 import { formatBRL } from "../../../utils/functions";
 
 interface Props {
-  totalVencidas: number;
-  dados: DashboardDados;
+  dados: ContasReceber;
 }
 
-export function ResumoCards({ dados, totalVencidas }: Props) {
-  console.log("dados", dados);
+export function ResumoCards({ dados }: Props) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Total a Receber */}
@@ -19,8 +17,7 @@ export function ResumoCards({ dados, totalVencidas }: Props) {
             <div>
               <p className="text-sm text-gray-600">Total a Receber</p>
               <h3 className="text-2xl font-bold text-gray-900">
-                R$
-                {formatBRL(dados.financeiro?.total_geral)}
+                R$ {formatBRL(dados.totalReceber ?? 0)}
               </h3>
             </div>
             <DollarSign className="h-8 w-8 text-blue-500" />
@@ -35,7 +32,7 @@ export function ResumoCards({ dados, totalVencidas }: Props) {
             <div>
               <p className="text-sm text-gray-600">Contas Vencidas</p>
               <h3 className="text-2xl font-bold text-red-600">
-                R$ {totalVencidas}
+                R$ {formatBRL(dados.contasVencidas ?? 0)}
               </h3>
             </div>
             <AlertCircle className="h-8 w-8 text-red-500" />
@@ -50,7 +47,7 @@ export function ResumoCards({ dados, totalVencidas }: Props) {
             <div>
               <p className="text-sm text-gray-600">Total de Contas</p>
               <h3 className="text-2xl font-bold text-gray-900">
-                {dados.vendasEmAberto?.totalClientesEmAberto ?? 0}
+                {dados.totalContas ?? 0}
               </h3>
             </div>
             <Calendar className="h-8 w-8 text-green-500" />

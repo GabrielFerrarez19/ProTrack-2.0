@@ -17,8 +17,6 @@ interface Props {
 }
 
 export function TabelaContas({ vendas }: Props) {
-  console.log("vendas", vendas);
-
   return (
     <Table>
       <TableHeader>
