@@ -1,3 +1,4 @@
+import type { Top5Products } from "./product";
 import type { TotalAmountSummary } from "./sales";
 import type {
   ProdutoMaisVendido,
@@ -209,8 +210,15 @@ export interface DashboardDados {
   vendasMesPassado: number | null;
   vendasEsseMes: number | null;
   aReceber: number | null;
-  crescimento: number | null;
+  percentage: number | null;
   custoTotalEstoque: number | null;
+  Top5Products: Top5Products[];
+}
+
+export interface ContasReceber {
+  totalReceber: number | null;
+  contasVencidas: number | null;
+  totalContas: number | null;
 }
 
 export interface GiroEstoqueResponse {

@@ -32,9 +32,9 @@ export function ResumoVendas({ dados }: SaldoCardsProps) {
             <div className="flex items-center gap-2 mt-2">
               <Badge
                 variant="secondary"
-                className={getBadgeClass(dados?.crescimento ?? 0)}
+                className={getBadgeClass(dados?.percentage ?? 0)}
               >
-                {formatBRL(dados?.crescimento ?? 0)}%
+                {formatBRL(dados?.percentage ?? 0)}%
               </Badge>
               <span className="text-sm text-gray-400">vs mês anterior</span>
             </div>

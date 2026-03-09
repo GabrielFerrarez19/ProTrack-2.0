@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS bills_payable (
     payment_method_id UUID,
     amount DECIMAL(12, 2) NOT NULL,
     due_date DATE NOT NULL,
-    status bill_status_enum DEFAULT 'pending',
+    status account_status_enum DEFAULT 'pending',
     description TEXT,
     scheduled_date DATE,
     payment_date DATE,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS bills_payable (
     CONSTRAINT fk_bills_company FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
     CONSTRAINT fk_bills_vendor FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE
     SET NULL,
-        CONSTRAINT fk_bills_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE
+        CONSTRAINT fk_bills_category FOREIGN KEY (category_id) REFERENCES product_categories(id) ON DELETE
     SET NULL,
         CONSTRAINT fk_bills_payment_method FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id) ON DELETE
     SET NULL

@@ -73,12 +73,17 @@ func (r *Repository) GetTotalAmountByStatus(ctx context.Context, arg db.GetTotal
 	return q.GetTotalAmountByStatus(ctx, arg)
 }
 
-func (r *Repository) UpdateOverdueSales(ctx context.Context) ([]pgtype.UUID, error) {
-	q := db.New(r.db)
-	return q.UpdateOverdueSales(ctx)
-}
-
 func (r *Repository) GetSaleByIdWhatsapp(ctx context.Context, id pgtype.UUID) (db.GetSaleByIdWhatsappRow, error) {
 	q := db.New(r.db)
 	return q.GetSaleByIdWhatsapp(ctx, id)
+}
+
+func (r *Repository) UpdateOverdueSalesAndAccounts(ctx context.Context) ([]db.UpdateOverdueSalesAndAccountsGlobalRow, error) {
+	q := db.New(r.db)
+	return q.UpdateOverdueSalesAndAccountsGlobal(ctx)
+}
+
+func (r *Repository) GetSaleByIdJust(ctx context.Context, saleId pgtype.UUID) (db.GetSaleByIdJustRow, error) {
+	q := db.New(r.db)
+	return q.GetSaleByIdJust(ctx, saleId)
 }

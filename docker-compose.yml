@@ -74,7 +74,7 @@ services:
       - SERVER_PORT=8081
       - SERVER_URL=http://localhost:8085
       - AUTHENTICATION_TYPE=apikey
-      - AUTHENTICATION_API_KEY=${JWT_SECRET}
+      - AUTHENTICATION_API_KEY=${EVOLUTION_KEY}
       - DATABASE_ENABLED=true
       - DATABASE_PROVIDER=postgresql
       - DATABASE_CONNECTION_URI=postgresql://protrack:pr0tr@ck2026@db:5432/evolution_db?schema=public

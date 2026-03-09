@@ -23,6 +23,7 @@ type RepositoryInterface interface {
 	UpdateCustomer(ctx context.Context, arg db.UpdateCustomerParams) error
 	CountCustomers(ctx context.Context, companyId pgtype.UUID) (int64, error)
 	GetCustomersPerformanceSummary(ctx context.Context, companyId pgtype.UUID) (db.GetCustomersPerformanceSummaryRow, error)
+	WithTx(tx db.DBTX) *repository.Repository
 }
 
 type Service struct {
@@ -114,6 +115,45 @@ func (s *Service) GetCustomerByCPF(ctx context.Context, cpf string) (domain.Cust
 
 func (s *Service) GetCustomerById(ctx context.Context, id uuid.UUID) (domain.CustomerResponse, error) {
 	customer, err := s.repo.GetCustomerById(ctx, pgconv.ParseUUIDToPgType(id))
+	if err != nil {
+		return domain.CustomerResponse{}, err
+	}
+
+	return domain.CustomerResponse{
+		ID:                  pgconv.PgUUIDToUUID(customer.ID),
+		CompanyID:           pgconv.PgUUIDToUUID(customer.CompanyID),
+		FullName:            customer.FullName,
+		BirthDate:           pgconv.PgDateToString(customer.BirthDate),
+		Cpf:                 customer.Cpf,
+		Rg:                  pgconv.ParsePgTextToString(customer.Rg),
+		MaritalStatus:       pgconv.ParsePgTextToString(customer.MaritalStatus),
+		Gender:              enums.Gender(customer.Gender.(string)),
+		Whatsapp:            pgconv.ParsePgTextToString(customer.Whatsapp),
+		MobilePhone:         pgconv.ParsePgTextToString(customer.MobilePhone),
+		HomePhone:           pgconv.ParsePgTextToString(customer.HomePhone),
+		Email:               customer.Email,
+		AddressStreet:       pgconv.ParsePgTextToString(customer.AddressStreet),
+		AddressNumber:       pgconv.ParsePgTextToString(customer.AddressNumber),
+		AddressComplement:   pgconv.ParsePgTextToString(customer.AddressComplement),
+		AddressNeighborhood: pgconv.ParsePgTextToString(customer.AddressNeighborhood),
+		AddressCity:         pgconv.ParsePgTextToString(customer.AddressCity),
+		AddressState:        pgconv.ParsePgTextToString(customer.AddressState),
+		AddressZipcode:      pgconv.ParsePgTextToString(customer.AddressZipcode),
+		AddressCountry:      pgconv.ParsePgTextToString(customer.AddressCountry),
+		BalanceDue:          pgconv.PgNumericToFloat64(customer.BalanceDue),
+		CreatedBy:           pgconv.PgUUIDToUUID(customer.CreatedBy),
+		UpdatedBy:           pgconv.PgUUIDToUUID(customer.UpdatedBy),
+		DeletedBy:           pgconv.PgUUIDToUUID(customer.DeletedBy),
+		CreatedAt:           pgconv.PgTimestamptzToTime(customer.CreatedAt),
+		UpdatedAt:           pgconv.PgTimestamptzToTime(customer.UpdatedAt),
+		DeletedAt:           pgconv.PgTimestamptzToTime(customer.DeletedAt),
+	}, nil
+}
+
+func (s *Service) GetCustomerByIdTx(ctx context.Context, tx db.DBTX, id uuid.UUID) (domain.CustomerResponse, error) {
+	repoTx := s.repo.WithTx(tx)
+
+	customer, err := repoTx.GetCustomerById(ctx, pgconv.ParseUUIDToPgType(id))
 	if err != nil {
 		return domain.CustomerResponse{}, err
 	}

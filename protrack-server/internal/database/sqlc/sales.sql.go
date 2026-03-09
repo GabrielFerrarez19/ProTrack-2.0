@@ -160,6 +160,59 @@ func (q *Queries) GetSaleById(ctx context.Context, arg GetSaleByIdParams) (GetSa
 	return i, err
 }
 
+const getSaleByIdJust = `-- name: GetSaleByIdJust :one
+SELECT s.id, s.customer_id, s.company_id, s.sale_at, s.discount_amount, s.subtotal, s.total_amount, s.due_days, s.payment_method, s.status, s.created_at, s.created_by, s.updated_at, s.updated_by, s.deleted_at, s.deleted_by,
+    c.full_name as customer_name
+FROM sales s
+    INNER JOIN customers c ON s.customer_id = c.id
+WHERE s.id = $1
+`
+
+type GetSaleByIdJustRow struct {
+	ID             pgtype.UUID        `json:"id"`
+	CustomerID     pgtype.UUID        `json:"customer_id"`
+	CompanyID      pgtype.UUID        `json:"company_id"`
+	SaleAt         pgtype.Timestamptz `json:"sale_at"`
+	DiscountAmount pgtype.Numeric     `json:"discount_amount"`
+	Subtotal       pgtype.Numeric     `json:"subtotal"`
+	TotalAmount    pgtype.Numeric     `json:"total_amount"`
+	DueDays        pgtype.Int4        `json:"due_days"`
+	PaymentMethod  interface{}        `json:"payment_method"`
+	Status         interface{}        `json:"status"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	CreatedBy      pgtype.UUID        `json:"created_by"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	UpdatedBy      pgtype.UUID        `json:"updated_by"`
+	DeletedAt      pgtype.Timestamptz `json:"deleted_at"`
+	DeletedBy      pgtype.UUID        `json:"deleted_by"`
+	CustomerName   string             `json:"customer_name"`
+}
+
+func (q *Queries) GetSaleByIdJust(ctx context.Context, id pgtype.UUID) (GetSaleByIdJustRow, error) {
+	row := q.db.QueryRow(ctx, getSaleByIdJust, id)
+	var i GetSaleByIdJustRow
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.CompanyID,
+		&i.SaleAt,
+		&i.DiscountAmount,
+		&i.Subtotal,
+		&i.TotalAmount,
+		&i.DueDays,
+		&i.PaymentMethod,
+		&i.Status,
+		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.DeletedAt,
+		&i.DeletedBy,
+		&i.CustomerName,
+	)
+	return i, err
+}
+
 const getSaleByIdWhatsapp = `-- name: GetSaleByIdWhatsapp :one
 SELECT s.id, s.customer_id, s.company_id, s.sale_at, s.discount_amount, s.subtotal, s.total_amount, s.due_days, s.payment_method, s.status, s.created_at, s.created_by, s.updated_at, s.updated_by, s.deleted_at, s.deleted_by,
     c.full_name as customer_name,
@@ -426,41 +479,44 @@ func (q *Queries) ListSalesByCompanyAndStatus(ctx context.Context, arg ListSales
 	return items, nil
 }
 
-const updateOverdueSales = `-- name: UpdateOverdueSales :many
+const updateOverdueSalesAndAccountsGlobal = `-- name: UpdateOverdueSalesAndAccountsGlobal :many
+WITH updated_accounts AS (
+    UPDATE accounts_receivable
+    SET status = 'overdue'
+    WHERE status = 'pending'
+        AND due_date::DATE < CURRENT_DATE
+    RETURNING sale_id
+)
 UPDATE sales
-SET status = 'overdue'
-WHERE status = 'pending'
-    AND deleted_at IS NULL
-    AND due_days IS NOT NULL
-    AND (
-        CASE
-            WHEN EXTRACT(
-                DAY
-                FROM sale_at
-            ) <= due_days THEN (
-                date_trunc('month', sale_at) + (due_days - 1 || ' days')::interval
-            )::date
-            ELSE (
-                date_trunc('month', sale_at) + INTERVAL '1 month' + (due_days - 1 || ' days')::interval
-            )::date
-        END
-    ) < CURRENT_DATE
-RETURNING id
+SET status = 'overdue',
+    updated_at = CURRENT_TIMESTAMP
+WHERE id IN (
+        SELECT sale_id
+        FROM updated_accounts
+    )
+    AND status NOT IN ('paid', 'canceled')
+RETURNING id AS sale_id,
+    customer_id
 `
 
-func (q *Queries) UpdateOverdueSales(ctx context.Context) ([]pgtype.UUID, error) {
-	rows, err := q.db.Query(ctx, updateOverdueSales)
+type UpdateOverdueSalesAndAccountsGlobalRow struct {
+	SaleID     pgtype.UUID `json:"sale_id"`
+	CustomerID pgtype.UUID `json:"customer_id"`
+}
+
+func (q *Queries) UpdateOverdueSalesAndAccountsGlobal(ctx context.Context) ([]UpdateOverdueSalesAndAccountsGlobalRow, error) {
+	rows, err := q.db.Query(ctx, updateOverdueSalesAndAccountsGlobal)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []pgtype.UUID{}
+	items := []UpdateOverdueSalesAndAccountsGlobalRow{}
 	for rows.Next() {
-		var id pgtype.UUID
-		if err := rows.Scan(&id); err != nil {
+		var i UpdateOverdueSalesAndAccountsGlobalRow
+		if err := rows.Scan(&i.SaleID, &i.CustomerID); err != nil {
 			return nil, err
 		}
-		items = append(items, id)
+		items = append(items, i)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

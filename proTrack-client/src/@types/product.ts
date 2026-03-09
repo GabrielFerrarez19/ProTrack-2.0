@@ -28,3 +28,9 @@ export interface ProductResponse {
   deleted_at: string | null;
   category_name: string;
 }
+
+export interface Top5Products {
+  id: string;
+  name: string;
+  total_quantity_sold: number;
+}

@@ -21,6 +21,12 @@ func (r *Repository) queries() *db.Queries {
 	return db.New(r.db)
 }
 
+func (r *Repository) WithTx(tx db.DBTX) *Repository {
+	return &Repository{
+		db: tx,
+	}
+}
+
 func (r *Repository) CreateAccountReceivable(ctx context.Context, arg db.CreateAccountReceivableParams) error {
 	return r.queries().CreateAccountReceivable(ctx, arg)
 }
