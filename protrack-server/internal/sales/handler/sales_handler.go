@@ -297,6 +297,7 @@ func (h *Handler) GetTotalAmountIsOverdue(c *gin.Context) {
 	companyIdAny, exists := c.Get("company_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id is null"})
+		return
 	}
 
 	companyId := companyIdAny.(uuid.UUID)
@@ -307,11 +308,8 @@ func (h *Handler) GetTotalAmountIsOverdue(c *gin.Context) {
 
 	total, err := h.service.GetTotalAmountIsOverdue(c.Request.Context(), req)
 	if err != nil {
-
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-
 		return
-
 	}
 
 	c.JSON(http.StatusOK, gin.H{"total_overdue": total})
