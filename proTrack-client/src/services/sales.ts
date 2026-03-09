@@ -9,7 +9,8 @@ interface ListSalesResponse {
   sales: ListSalesByCompanyResponse[];
   count: number;
   percentage: number;
-  total_pending: number;
+  total_open: number;
+  total_overdue: number;
   total_amount: TotalAmountSummary;
 }
 
@@ -41,11 +42,20 @@ export async function PercentageSales(): Promise<number> {
 }
 
 export async function GetTotalAmountIsPending(): Promise<number> {
-  const response = await api.get<ListSalesResponse>("/sales/total-pending");
-  return response.data.total_pending ?? 0;
+  const response = await api.get<ListSalesResponse>(
+    "/accounts-receivable/total-pending",
+  );
+  return response.data.total_open ?? 0;
 }
 
 export async function GetTotalAmountSummary(): Promise<TotalAmountSummary> {
   const response = await api.get<ListSalesResponse>("/sales/total-amount");
   return response.data.total_amount ?? 0;
+}
+
+export async function GetTotalOverdue(): Promise<number> {
+  const response = await api.get<ListSalesResponse>(
+    "/accounts-receivable/total-overdue",
+  );
+  return response.data.total_overdue ?? 0;
 }
