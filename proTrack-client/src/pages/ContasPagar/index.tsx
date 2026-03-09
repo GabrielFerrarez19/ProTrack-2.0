@@ -14,7 +14,6 @@ import type { ContaPagarFiltros } from "../../@types/types.contasPagar";
 import { Button } from "../../components/ui/button";
 import { Plus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import { StatusMonitoramento } from "./components";
 import { useNavigate } from "react-router-dom";
 import { Header } from "../../components/header";
 
@@ -30,13 +29,8 @@ export function ContasPagar() {
     formatarMoeda,
   } = useContasPagar();
 
-  const {
-    totalVencidas,
-    loadingVencidas,
-    errorVencidas,
-    monitoramentoExecutado,
-    executarMonitoramento,
-  } = useContasPagarVencidas();
+  const { totalVencidas, loadingVencidas, errorVencidas } =
+    useContasPagarVencidas();
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -105,18 +99,6 @@ export function ContasPagar() {
 
         <div className="flex gap-2">
           <Button
-            variant="outline"
-            size="sm"
-            onClick={recarregarDados}
-            disabled={loading}
-          >
-            <RefreshCw
-              className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
-            />
-            Atualizar
-          </Button>
-
-          <Button
             size="sm"
             className="cursor-pointer bg-gradient-to-r from-[#628DFD] to-[#6F31FF] hover:from-[#7A9BFD] hover:to-[#B597F9]"
             onClick={() => navigate("/cadastrocontaspagar")}
@@ -125,13 +107,6 @@ export function ContasPagar() {
             Nova Conta
           </Button>
         </div>
-
-        {/* Status do Monitoramento */}
-        <StatusMonitoramento
-          monitoramentoExecutado={monitoramentoExecutado}
-          executarMonitoramento={executarMonitoramento}
-          recarregarDados={recarregarDados}
-        />
       </div>
 
       {/* Cards de Resumo */}
@@ -146,13 +121,15 @@ export function ContasPagar() {
           formatarMoeda={formatarMoeda}
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-          <div className="h-32 bg-muted rounded-lg animate-pulse"></div>
-          <div className="h-32 bg-muted rounded-lg animate-pulse"></div>
-          <div className="h-32 bg-muted rounded-lg animate-pulse"></div>
-          <div className="h-32 bg-muted rounded-lg animate-pulse"></div>
-          <div className="h-32 bg-muted rounded-lg animate-pulse"></div>
-        </div>
+        <SummaryCards
+          totalPendente={0}
+          totalVencido={0}
+          totalAgendado={0}
+          totalCount={0}
+          contasVencidasCount={0}
+          totalVencidasMonitoramento={totalVencidas}
+          formatarMoeda={formatarMoeda}
+        />
       )}
 
       {/* Filtros */}

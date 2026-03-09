@@ -57,6 +57,27 @@ func (s *Service) CreateAccountReceivable(ctx context.Context, tx db.DBTX, userI
 	})
 }
 
+// CreateAccountReceivableInTx cria uma conta a receber dentro da transação tx (ex.: mesma transação da venda).
+func (s *Service) CreateAccountReceivableInTx(ctx context.Context, tx db.DBTX, userId, companyId uuid.UUID, req domain.CreateAccountReceivableRequest) error {
+	status := "pending"
+	if req.Balance < req.TotalAmount {
+		status = "partial"
+	}
+	repoTx := repository.NewRepository(tx)
+	return repoTx.CreateAccountReceivable(ctx, db.CreateAccountReceivableParams{
+		CompanyID:         pgconv.ParseUUIDToPgType(companyId),
+		CustomerID:        pgconv.ParseUUIDToPgType(req.CustomerID),
+		SaleID:            pgconv.ParseUUIDToPgType(req.SaleID),
+		TotalAmount:       pgconv.Float64ToPgNumeric(req.TotalAmount),
+		Balance:           pgconv.Float64ToPgNumeric(req.Balance),
+		DueDate:           pgconv.StringToPgDate(req.DueDate),
+		InstallmentNumber: pgconv.IntToPgInt4(int(req.InstallmentNumber)),
+		TotalInstallments: pgconv.IntToPgInt4(int(req.TotalInstallments)),
+		Status:            status,
+		CreatedBy:         pgconv.ParseUUIDToPgType(userId),
+	})
+}
+
 func (s *Service) GetCustomerDebtSummary(ctx context.Context, customerId uuid.UUID) (domain.GetCustomerDebtSummaryRow, error) {
 	account, err := s.repo.GetCustomerDebtSummary(ctx, pgconv.ParseUUIDToPgType(customerId))
 	if err != nil {
@@ -135,6 +156,41 @@ func (s *Service) GetReceivablesBySale(ctx context.Context, saleId uuid.UUID) ([
 	return response, nil
 }
 
+func (s *Service) ListOverdueReceivablesTx(ctx context.Context, tx db.DBTX, companyId uuid.UUID) ([]domain.ListOverdueReceivablesRow, error) {
+	repoTx := s.repo.WithTx(tx)
+
+	accounts, err := repoTx.ListOverdueReceivables(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return []domain.ListOverdueReceivablesRow{}, err
+	}
+
+	var response []domain.ListOverdueReceivablesRow
+
+	for _, account := range accounts {
+		response = append(response, domain.ListOverdueReceivablesRow{
+			ID:                pgconv.PgUUIDToUUID(account.CompanyID),
+			CompanyID:         pgconv.PgUUIDToUUID(account.CompanyID),
+			CustomerID:        pgconv.PgUUIDToUUID(account.CustomerID),
+			SaleID:            pgconv.PgUUIDToUUID(account.SaleID),
+			TotalAmount:       pgconv.PgNumericToFloat64(account.TotalAmount),
+			Balance:           pgconv.PgNumericToFloat64(account.Balance),
+			DueDate:           pgconv.PgDateToString(account.DueDate),
+			InstallmentNumber: int64(pgconv.PgInt4ToInt(account.InstallmentNumber)),
+			TotalInstallments: int64(pgconv.PgInt4ToInt(account.TotalInstallments)),
+			Status:            account.Status,
+			CreatedAt:         pgconv.PgTimestamptzToTime(account.CreatedAt),
+			CreatedBy:         pgconv.PgUUIDToUUID(account.CreatedBy),
+			UpdatedAt:         pgconv.PgTimestamptzToTime(account.UpdatedAt),
+			UpdatedBy:         pgconv.PgUUIDToUUID(account.UpdatedBy),
+			DeletedAt:         pgconv.PgTimestamptzToTime(account.DeletedAt),
+			CustomerName:      account.CustomerName,
+			DaysOverdue:       account.DaysOverdue,
+		})
+	}
+
+	return response, nil
+}
+
 func (s *Service) ListOverdueReceivables(ctx context.Context, companyId uuid.UUID) ([]domain.ListOverdueReceivablesRow, error) {
 	accounts, err := s.repo.ListOverdueReceivables(ctx, pgconv.ParseUUIDToPgType(companyId))
 	if err != nil {
@@ -168,7 +224,7 @@ func (s *Service) ListOverdueReceivables(ctx context.Context, companyId uuid.UUI
 	return response, nil
 }
 
-func (s *Service) UpdateAccountReceivableBalance(ctx context.Context, companyId, customerId, userId uuid.UUID, req domain.UpdateAccountReceivableBalanceRequest) error {
+func (s *Service) UpdateAccountReceivableBalance(ctx context.Context, tx db.DBTX, companyId, customerId, userId uuid.UUID, req domain.UpdateAccountReceivableBalanceRequest) error {
 	accounts, err := s.repo.GetPendingReceivablesByCustomer(ctx, db.GetPendingReceivablesByCustomerParams{
 		CustomerID: pgconv.ParseUUIDToPgType(customerId),
 		CompanyID:  pgconv.ParseUUIDToPgType(companyId),

@@ -19,7 +19,9 @@ export const vendaSchema = z.object({
       "other",
     ])
     .optional(),
-  diasVencimento: z.number().optional(), // <-- Adicione esta linha
+  diasVencimento: z.number().optional(),
+  parcelas: z.number().min(1).max(24).optional(),
+  entrada: z.number().min(0).optional(),
   produtos: z.array(
     z.object({
       produtoId: z.string(),

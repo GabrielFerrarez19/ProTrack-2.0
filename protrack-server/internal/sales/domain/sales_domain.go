@@ -10,15 +10,17 @@ import (
 
 type CreateSaleRequest struct {
 	CustomerID        uuid.UUID               `json:"customer_id"`
+	CompanyID         uuid.UUID               `json:"company_id"`
 	DiscountAmount    float64                 `json:"discount_amount"`
 	Subtotal          float64                 `json:"subtotal"`
 	TotalAmount       float64                 `json:"total_amount"`
 	DueDays           int32                   `json:"due_days"`
+	CreatedBy         uuid.UUID               `json:"created_by"`
 	PaymentMethod     interface{}             `json:"payment_method"`
 	InstallmentsCount int32                   `json:"installments_count"`
 	Status            interface{}             `json:"status"`
 	Items             []CreateSaleItemRequest `json:"items"`
-	Prohibited        float64                 `json:"prohibited"`
+	Prohibited        float64                 `json:"prohibited"` // valor não parcelado (ex.: entrada)
 }
 
 type CreateSaleItemRequest struct {
@@ -110,6 +112,11 @@ type GetTotalAmountSummaryRow struct {
 type GetTotalAmountByStatusRequest struct {
 	CompanyID uuid.UUID   `json:"company_id"`
 	Status    interface{} `json:"status"`
+}
+
+type UpdateOverdueSalesAndAccountsGlobalRow struct {
+	SaleID     uuid.UUID `json:"sale_id"`
+	CustomerID uuid.UUID `json:"customer_id"`
 }
 
 func ValidateCreateSaleRequest(req CreateSaleRequest) error {

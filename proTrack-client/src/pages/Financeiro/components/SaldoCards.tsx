@@ -10,14 +10,12 @@ export function SaldoCards({ dados }: SaldoCardsProps) {
   const saldoAtual = {
     caixa: 15400.5,
     banco: 45200.3,
-    contasReceber: 0,
     aReceber: dados.aReceber ?? 0,
   };
 
   const saldoTotal =
     Number(saldoAtual.caixa) +
     Number(saldoAtual.banco) +
-    Number(saldoAtual.contasReceber) +
     Number(saldoAtual.aReceber);
 
   return (

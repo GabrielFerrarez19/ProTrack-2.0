@@ -17,6 +17,12 @@ func NewRepository(db db.DBTX) *Repository {
 	}
 }
 
+func (r *Repository) WithTx(tx db.DBTX) *Repository {
+	return &Repository{
+		db: tx,
+	}
+}
+
 func (r *Repository) CreateCustomer(ctx context.Context, arg db.CreateCustomersParams) (pgtype.UUID, error) {
 	q := db.New(r.db)
 	return q.CreateCustomers(ctx, arg)

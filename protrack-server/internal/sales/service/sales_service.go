@@ -33,8 +33,9 @@ type RepositoryInterface interface {
 	GetSalesPerformanceSummary(ctx context.Context, companyId pgtype.UUID) (db.GetSalesPerformanceSummaryRow, error)
 	GetTotalAmountSummary(ctx context.Context, companyId pgtype.UUID) (db.GetTotalAmountSummaryRow, error)
 	GetTotalAmountByStatus(ctx context.Context, arg db.GetTotalAmountByStatusParams) (float64, error)
-	UpdateOverdueSales(ctx context.Context) ([]pgtype.UUID, error)
 	GetSaleByIdWhatsapp(ctx context.Context, id pgtype.UUID) (db.GetSaleByIdWhatsappRow, error)
+	UpdateOverdueSalesAndAccounts(ctx context.Context) ([]db.UpdateOverdueSalesAndAccountsGlobalRow, error)
+	GetSaleByIdJust(ctx context.Context, saleId pgtype.UUID) (db.GetSaleByIdJustRow, error)
 	WithTx(tx db.DBTX) *repository.Repository
 }
 
@@ -52,8 +53,8 @@ func NewService(
 	pool *pgxpool.Pool,
 	saleItemsService *saleItemsService.Service,
 	customerService *customerService.Service,
-	whatsApp *whatsapp.Whatsapp,
 	accountsReceivableService *accountsReceivableService.Service,
+	whatsApp *whatsapp.Whatsapp,
 ) *Service {
 	return &Service{
 		repo:                      repo,
@@ -97,6 +98,9 @@ func (s *Service) CreateSale(ctx context.Context, userId, companyId uuid.UUID, r
 	}
 
 	var installments int32
+	if req.PaymentMethod == "installments" {
+		installments = req.InstallmentsCount
+	}
 
 	id, err := txRepo.CreateSales(ctx, db.CreateSaleParams{
 		CustomerID:        pgconv.ParseUUIDToPgType(req.CustomerID),
@@ -114,8 +118,6 @@ func (s *Service) CreateSale(ctx context.Context, userId, companyId uuid.UUID, r
 	if err != nil {
 		return uuid.Nil, err
 	}
-
-	installments = req.InstallmentsCount
 
 	if req.PaymentMethod == "installments" {
 
@@ -143,7 +145,7 @@ func (s *Service) CreateSale(ctx context.Context, userId, companyId uuid.UUID, r
 			reqAR.TotalInstallments = int64(req.InstallmentsCount)
 			reqAR.DueDate = maturity.Format("2006-01-02")
 
-			if err := s.accountsReceivableService.CreateAccountReceivable(ctx, tx, userId, companyId, reqAR); err != nil {
+			if err := s.accountsReceivableService.CreateAccountReceivableInTx(ctx, tx, userId, companyId, reqAR); err != nil {
 				return uuid.Nil, err
 			}
 		}
@@ -353,32 +355,42 @@ func (s *Service) GetTotalAmountIsOverdue(ctx context.Context, req domain.GetTot
 }
 
 func (s *Service) UpdateOverdueSales(ctx context.Context) error {
-	ids, err := s.repo.UpdateOverdueSales(ctx)
+	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 
-	// Nenhuma venda vencida para atualizar - não é erro
-	if len(ids) == 0 {
-		return nil
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
+	response, err := repoTx.UpdateOverdueSalesAndAccounts(ctx)
+	if err != nil {
+		return err
 	}
 
-	for _, id := range ids {
-		sale, err := s.repo.GetSaleByIdWhatsapp(ctx, id)
+	for _, data := range response {
+		customer, err := s.customerService.GetCustomerByIdTx(ctx, tx, pgconv.PgUUIDToUUID(data.CustomerID))
 		if err != nil {
-			log.Error().Err(err).Str("sale_id", id.String()).Msg("Erro ao buscar venda para WhatsApp")
+			return err
+		}
+
+		sale, err := repoTx.GetSaleByIdJust(ctx, data.SaleID)
+		if err != nil {
+			log.Error().Err(err).Str("sale_id", data.SaleID.String()).Msg("Erro ao buscar venda para WhatsApp")
 			continue
 		}
 
-		msg := fmt.Sprintf("Sua compra com o vencimento do dia %d vence hoje",
-			sale.DueDays.Int32)
+		msg := fmt.Sprintf("⚠️ *Aviso de Vencimento*\n\n"+
+			"Informamos que a sua parcela com vencimento no dia %d venceu hoje.\n"+
+			"Pedimos que entre em contato para realizar a regularização.", sale.DueDays.Int32)
 
-		targetNumber := pgconv.ParsePgTextToString(sale.CustomerWhatsapp)
+		targetNumber := customer.Whatsapp
 
 		if err := s.whatsApp.SendWhatsAppMessage(targetNumber, msg); err != nil {
-			log.Error().Err(err).Str("sale_id", id.String()).Msg("Erro ao enviar WhatsApp de vencimento")
+			log.Error().Err(err).Str("sale_id", data.SaleID.String()).Msg("Erro ao enviar WhatsApp de vencimento")
 		}
 	}
 
-	return nil
+	return tx.Commit(ctx)
 }
