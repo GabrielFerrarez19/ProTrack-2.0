@@ -215,6 +215,12 @@ export interface DashboardDados {
   Top5Products: Top5Products[];
 }
 
+export interface ContasReceber {
+  totalReceber: number | null;
+  contasVencidas: number | null;
+  totalContas: number | null;
+}
+
 export interface GiroEstoqueResponse {
   percentual: number; // ex: 68
 }
