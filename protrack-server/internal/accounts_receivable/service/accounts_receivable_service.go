@@ -19,6 +19,8 @@ type RepositoryInterface interface {
 	GetReceivablesBySale(ctx context.Context, saleId pgtype.UUID) ([]db.AccountsReceivable, error)
 	ListOverdueReceivables(ctx context.Context, companyId pgtype.UUID) ([]db.ListOverdueReceivablesRow, error)
 	UpdateAccountReceivableBalance(ctx context.Context, arg db.UpdateAccountReceivableBalanceParams) error
+	GetTotalOpenAmountByCompany(ctx context.Context, companyId pgtype.UUID) (db.GetTotalOpenAmountByCompanyRow, error)
+	GetTotalOverdueAmountByCompany(ctx context.Context, companyId pgtype.UUID) (db.GetTotalOverdueAmountByCompanyRow, error)
 }
 
 type Service struct {
@@ -209,4 +211,22 @@ func (s *Service) UpdateAccountReceivableBalance(ctx context.Context, companyId,
 		remaining -= amountToApply
 	}
 	return nil
+}
+
+func (s *Service) GetTotalOpenAmountByCompany(ctx context.Context, companyId uuid.UUID) (float64, error) {
+	total, err := s.repo.GetTotalOpenAmountByCompany(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return 0, err
+	}
+
+	return pgconv.PgNumericToFloat64(total.TotalOpen), nil
+}
+
+func (s *Service) GetTotalOverdueAmountByCompany(ctx context.Context, companyId uuid.UUID) (float64, error) {
+	total, err := s.repo.GetTotalOverdueAmountByCompany(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return 0, err
+	}
+
+	return pgconv.PgNumericToFloat64(total.TotalOverdue), nil
 }

@@ -54,3 +54,23 @@ SELECT *
 FROM accounts_receivable
 WHERE sale_id = $1
 ORDER BY installment_number ASC;
+-- name: GetTotalOpenAmountByCompany :one
+SELECT company_id,
+    SUM(balance)::NUMERIC(10, 2) as total_open
+FROM accounts_receivable
+WHERE company_id = $1
+    AND status IN ('pending', 'overdue')
+    AND deleted_at IS NULL
+GROUP BY company_id;
+-- name: GetTotalOverdueAmountByCompany :one
+SELECT company_id,
+    COALESCE(SUM(balance), 0)::NUMERIC(10, 2) as total_overdue
+FROM accounts_receivable
+WHERE company_id = $1
+    AND (
+        status = 'overdue'
+        OR due_date < CURRENT_DATE
+    )
+    AND status != 'paid'
+    AND deleted_at IS NULL
+GROUP BY company_id;

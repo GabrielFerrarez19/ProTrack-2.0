@@ -66,6 +66,8 @@ type Querier interface {
 	GetTop5BestSellingProducts(ctx context.Context, companyID pgtype.UUID) ([]GetTop5BestSellingProductsRow, error)
 	GetTotalAmountByStatus(ctx context.Context, arg GetTotalAmountByStatusParams) (float64, error)
 	GetTotalAmountSummary(ctx context.Context, companyID pgtype.UUID) (GetTotalAmountSummaryRow, error)
+	GetTotalOpenAmountByCompany(ctx context.Context, companyID pgtype.UUID) (GetTotalOpenAmountByCompanyRow, error)
+	GetTotalOverdueAmountByCompany(ctx context.Context, companyID pgtype.UUID) (GetTotalOverdueAmountByCompanyRow, error)
 	GetTotalReceivedByPeriod(ctx context.Context, arg GetTotalReceivedByPeriodParams) (pgtype.Numeric, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)

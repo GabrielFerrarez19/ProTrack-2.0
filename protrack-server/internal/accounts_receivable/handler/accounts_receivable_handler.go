@@ -103,3 +103,39 @@ func (h *Handler) ListOverdueReceivables(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"accounts_receivable": accounts})
 }
+
+func (h *Handler) GetTotalOpenAmountByCompany(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	total, err := h.service.GetTotalOpenAmountByCompany(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"total_open": total})
+}
+
+func (h *Handler) GetTotalOverdueAmountByCompany(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	total, err := h.service.GetTotalOverdueAmountByCompany(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"total_overdue": total})
+}
