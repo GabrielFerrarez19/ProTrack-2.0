@@ -18,10 +18,7 @@ import {
 } from "../../../components/ui/select";
 
 import { toast } from "sonner";
-import type {
-  ClienteFormData,
-  VendaResponse,
-} from "../../../@types/types.components";
+import type { ClienteFormData } from "../../../@types/types.components";
 import {
   formatarDataParaInput,
   formatCurrency,
@@ -38,6 +35,11 @@ import {
 import { ResumoVendas } from "./ResumoVendas";
 import { Badge } from "../../../components/ui/badge";
 import type { CustomerResponse } from "@/@types/customers";
+import type { AccountReceivable } from "@/@types/accountsReceivable";
+import {
+  GetPendingReceivablesByCustomer,
+  GetReceivablesBySale,
+} from "@/services/accountsReceivable";
 
 interface DialogAlterClienteProps {
   setOpen: (value: boolean) => void;
@@ -59,9 +61,23 @@ export function DialogAlterCliente({
     formState: { errors },
   } = useForm<ClienteFormData>();
 
-  const [vendasPorCliente, setVendasPorCliente] = useState<
-    Record<number, VendaResponse[]>
+  type VendaParceladaResumo = {
+    saleId: string;
+    totalParcelado: number;
+    totalAberto: number;
+    totalParcelas: number;
+    primeiraDataVencimento: string | null;
+    status: string;
+  };
+
+  const [vendasParceladas, setVendasParceladas] = useState<
+    VendaParceladaResumo[]
+  >([]);
+  const [parcelasPorVenda, setParcelasPorVenda] = useState<
+    Record<string, AccountReceivable[]>
   >({});
+  const [vendaExpandidaId, setVendaExpandidaId] = useState<string | null>(null);
+  const [loadingVendas, setLoadingVendas] = useState(false);
 
   // Preenche o formulário com dados do cliente
   useEffect(() => {
@@ -91,19 +107,94 @@ export function DialogAlterCliente({
 
   useEffect(() => {
     if (!cliente?.id) return;
-    setVendasPorCliente({ [parseInt(cliente.id)]: [] });
+
+    const carregarVendasParceladas = async () => {
+      try {
+        setLoadingVendas(true);
+        const contas = await GetPendingReceivablesByCustomer(cliente.id);
+
+        const agrupadoPorVenda = new Map<string, AccountReceivable[]>();
+
+        contas.forEach((conta) => {
+          if (!conta.sale_id) return;
+          const atual = agrupadoPorVenda.get(conta.sale_id) ?? [];
+          agrupadoPorVenda.set(conta.sale_id, [...atual, conta]);
+        });
+
+        const resumo: VendaParceladaResumo[] = [];
+
+        agrupadoPorVenda.forEach((parcelas, saleId) => {
+          const totalParcelado = parcelas.reduce(
+            (acc, p) => acc + (p.total_amount ?? 0),
+            0,
+          );
+          const totalAberto = parcelas.reduce(
+            (acc, p) => acc + (p.balance ?? 0),
+            0,
+          );
+          const totalParcelas =
+            parcelas[0]?.total_installments ?? parcelas.length;
+          const datasOrdenadas = [...parcelas]
+            .map((p) => p.due_date)
+            .filter(Boolean)
+            .sort();
+          const primeiraDataVencimento =
+            datasOrdenadas.length > 0 ? datasOrdenadas[0] : null;
+
+          let status = "pendente";
+          const todosPagos = parcelas.every((p) => p.status === "paid");
+          const algumParcial = parcelas.some((p) => p.status === "partial");
+
+          if (todosPagos) status = "pago";
+          else if (algumParcial) status = "parcial";
+
+          resumo.push({
+            saleId,
+            totalParcelado,
+            totalAberto,
+            totalParcelas,
+            primeiraDataVencimento,
+            status,
+          });
+        });
+
+        setVendasParceladas(resumo);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoadingVendas(false);
+      }
+    };
+
+    void carregarVendasParceladas();
   }, [cliente]);
 
   const sexoSelecionado = watch("sexo");
   const estadoCivilSelecionado = watch("estadoCivil");
   const [valorPago, setValorPago] = useState<number>(0);
   const [valorAPagar, setValorAPagar] = useState<number>(0);
-  const [totalRestante, setTotalRestante] = useState<number>(0); // novo estado
+  const [, setTotalRestante] = useState<number>(0); // estado usado apenas para receber valor do resumo
 
   const [tabelaAberta, setTabelaAberta] = useState<boolean>(false);
 
   const toggleTabela = () => {
     setTabelaAberta(!tabelaAberta);
+  };
+
+  const handleClickVenda = async (saleId: string) => {
+    setVendaExpandidaId((prev) => (prev === saleId ? null : saleId));
+
+    if (!parcelasPorVenda[saleId]) {
+      try {
+        const parcelas = await GetReceivablesBySale(saleId);
+        setParcelasPorVenda((prev) => ({
+          ...prev,
+          [saleId]: parcelas,
+        }));
+      } catch (error) {
+        console.error(error);
+      }
+    }
   };
 
   useEffect(() => {
@@ -162,9 +253,9 @@ export function DialogAlterCliente({
       </DialogHeader>
 
       <CardContent className="p-8">
-        {/* Tabela de Vendas */}
+        {/* Tabela de Vendas Parceladas */}
         <legend className="text-lg font-medium text-muted-foreground mb-2 col-span-full">
-          Dados vendas
+          Vendas parceladas em aberto
         </legend>
         <Table>
           <TableHeader>
@@ -173,47 +264,109 @@ export function DialogAlterCliente({
               onClick={toggleTabela}
             >
               <TableHead>ID Venda</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead>Total</TableHead>
-              <TableHead>Desconto</TableHead>
-              <TableHead>Total c/ Desconto</TableHead>
+              <TableHead>1º Vencimento</TableHead>
+              <TableHead>Total Parcelado</TableHead>
+              <TableHead>Saldo em Aberto</TableHead>
+              <TableHead>Qtd. Parcelas</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
 
           {tabelaAberta && (
             <TableBody>
-              {(vendasPorCliente[parseInt(cliente.id)] ?? []).map(
-                (venda: VendaResponse) => {
-                  const desconto =
-                    Number(venda.total ?? 0) -
-                    Number(venda.total_com_desconto ?? 0);
-                  return (
-                    <TableRow
-                      key={venda.id}
-                      className="hover:bg-gray-200 cursor-pointer"
-                    >
-                      <TableCell>{venda.id}</TableCell>
-                      <TableCell>
-                        {new Date(venda.data_venda).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        R$ {formatCurrency(Number(venda.total ?? 0))}
-                      </TableCell>
-                      <TableCell>R$ {formatCurrency(desconto)}</TableCell>
-                      <TableCell>
-                        R${" "}
-                        {formatCurrency(Number(venda.total_com_desconto ?? 0))}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={formatStatus(venda.status).color}>
-                          {formatStatus(venda.status).text}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  );
-                },
+              {loadingVendas && (
+                <TableRow>
+                  <TableCell colSpan={6}>Carregando vendas...</TableCell>
+                </TableRow>
               )}
+
+              {!loadingVendas && vendasParceladas.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6}>
+                    Nenhuma venda parcelada em aberto para este cliente.
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {!loadingVendas &&
+                vendasParceladas.map((venda) => {
+                  const statusFormatted = formatStatus(
+                    venda.status as "pendente" | "pago" | "cancelado" | "aprazo",
+                  );
+
+                  return (
+                    <>
+                      <TableRow
+                        key={venda.saleId}
+                        className="hover:bg-gray-200 cursor-pointer"
+                        onClick={() => handleClickVenda(venda.saleId)}
+                      >
+                        <TableCell>{venda.saleId}</TableCell>
+                        <TableCell>
+                          {venda.primeiraDataVencimento
+                            ? new Date(
+                                venda.primeiraDataVencimento,
+                              ).toLocaleDateString()
+                            : "-"}
+                        </TableCell>
+                        <TableCell>
+                          R$ {formatCurrency(venda.totalParcelado)}
+                        </TableCell>
+                        <TableCell>
+                          R$ {formatCurrency(venda.totalAberto)}
+                        </TableCell>
+                        <TableCell>{venda.totalParcelas}</TableCell>
+                        <TableCell>
+                          <Badge className={statusFormatted.color}>
+                            {statusFormatted.text}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+
+                      {vendaExpandidaId === venda.saleId && (
+                        <TableRow>
+                          <TableCell colSpan={6}>
+                            <Table className="mt-2">
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Parcela</TableHead>
+                                  <TableHead>Vencimento</TableHead>
+                                  <TableHead>Valor</TableHead>
+                                  <TableHead>Saldo</TableHead>
+                                  <TableHead>Status</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {(parcelasPorVenda[venda.saleId] ?? []).map(
+                                  (parcela) => (
+                                    <TableRow key={parcela.id}>
+                                      <TableCell>
+                                        {parcela.installment_number} /{" "}
+                                        {parcela.total_installments}
+                                      </TableCell>
+                                      <TableCell>
+                                        {new Date(
+                                          parcela.due_date,
+                                        ).toLocaleDateString()}
+                                      </TableCell>
+                                      <TableCell>
+                                        R$ {formatCurrency(parcela.total_amount)}
+                                      </TableCell>
+                                      <TableCell>
+                                        R$ {formatCurrency(parcela.balance)}
+                                      </TableCell>
+                                      <TableCell>{parcela.status}</TableCell>
+                                    </TableRow>
+                                  ),
+                                )}
+                              </TableBody>
+                            </Table>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
+                  );
+                })}
             </TableBody>
           )}
         </Table>
