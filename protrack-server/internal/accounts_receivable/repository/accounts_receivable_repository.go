@@ -47,7 +47,7 @@ func (r *Repository) ListOverdueReceivables(ctx context.Context, companyId pgtyp
 	return r.queries().ListOverdueReceivables(ctx, companyId)
 }
 
-func (r *Repository) UpdateAccountReceivableBalance(ctx context.Context, arg db.UpdateAccountReceivableBalanceParams) error {
+func (r *Repository) UpdateAccountReceivableBalance(ctx context.Context, arg db.UpdateAccountReceivableBalanceParams) (pgtype.UUID, error) {
 	return r.queries().UpdateAccountReceivableBalance(ctx, arg)
 }
 

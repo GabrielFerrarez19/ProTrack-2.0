@@ -100,7 +100,7 @@ type Querier interface {
 	ToggleBillCategoriesActive(ctx context.Context, arg ToggleBillCategoriesActiveParams) error
 	TogglePaymentMethodActive(ctx context.Context, arg TogglePaymentMethodActiveParams) error
 	ToggleVendorsActive(ctx context.Context, arg ToggleVendorsActiveParams) error
-	UpdateAccountReceivableBalance(ctx context.Context, arg UpdateAccountReceivableBalanceParams) error
+	UpdateAccountReceivableBalance(ctx context.Context, arg UpdateAccountReceivableBalanceParams) (pgtype.UUID, error)
 	UpdateBalanceDueCustomer(ctx context.Context, arg UpdateBalanceDueCustomerParams) error
 	UpdateBillPayable(ctx context.Context, arg UpdateBillPayableParams) error
 	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) (Company, error)

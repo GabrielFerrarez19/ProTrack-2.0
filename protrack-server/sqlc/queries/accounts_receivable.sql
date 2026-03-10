@@ -20,13 +20,14 @@ WHERE customer_id = $1
     AND status IN ('pending', 'partial')
     AND deleted_at IS NULL
 ORDER BY due_date ASC;
--- name: UpdateAccountReceivableBalance :exec
+-- name: UpdateAccountReceivableBalance :one
 UPDATE accounts_receivable
 SET balance = $1,
     status = $2,
     updated_at = CURRENT_TIMESTAMP,
     updated_by = $3
-WHERE id = $4;
+WHERE id = $4
+RETURNING sale_id;
 -- name: GetCustomerDebtSummary :one
 SELECT COUNT(id)::int AS total_count,
     COALESCE(SUM(balance), 0)::numeric AS total_balance,
