@@ -268,7 +268,34 @@ func (s *Service) UpdateCustomerBalanceSubTx(ctx context.Context, tx db.DBTX, id
 		return err
 	}
 
-	newBalance := pgconv.PgNumericToFloat64(customer.BalanceDue) - req.BalanceDue
+	newBalance := pgconv.PgNumericToFloat64(customer.BalanceDue) - (req.BalanceDue - req.Prohibited)
+
+	arg := db.UpdateCustomerBalanceParams{
+		ID:         pgconv.ParseUUIDToPgType(id),
+		BalanceDue: pgconv.Float64ToPgNumeric(newBalance),
+		UpdatedBy:  customer.UpdatedBy,
+	}
+
+	if req.UpdatedBy != uuid.Nil {
+		arg.UpdatedBy = pgconv.ParseUUIDToPgType(req.UpdatedBy)
+	}
+
+	if err := repoTx.UpdateCustomerBalance(ctx, arg); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) UpdateCustomerBalanceAddTx(ctx context.Context, tx db.DBTX, id uuid.UUID, req domain.UpdateBalanceDueCustomerRequest) error {
+	repoTx := db.New(tx)
+
+	customer, err := repoTx.GetCustomerById(ctx, pgconv.ParseUUIDToPgType(id))
+	if err != nil {
+		return err
+	}
+
+	newBalance := pgconv.PgNumericToFloat64(customer.BalanceDue) + (req.BalanceDue - req.Prohibited)
 
 	arg := db.UpdateCustomerBalanceParams{
 		ID:         pgconv.ParseUUIDToPgType(id),

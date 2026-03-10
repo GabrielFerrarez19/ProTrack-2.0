@@ -144,7 +144,7 @@ func main() {
 	billCategoriesService := billCategoriesService.NewService(billCategoriesRepository, db.Pool)
 	billsPayableService := billsPayableService.NewService(billsPayableRepository, db.Pool)
 	paymentHistoryService := paymentHistoryService.NewService(paymentHistoryRepository, db.Pool)
-	paymentsService := paymentsService.NewService(db.Pool, paymentHistoryService, accountsReceivableService, customersService)
+	paymentsService := paymentsService.NewService(db.Pool, paymentHistoryService, accountsReceivableService, customersService, salesService)
 
 	usersHandler := usersHandler.NewHandler(usersService, jwtManager, blacklist)
 	companiesHandler := companiesHandler.NewHandler(companiesService, jwtManager, blacklist)

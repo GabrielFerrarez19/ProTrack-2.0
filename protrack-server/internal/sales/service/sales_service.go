@@ -73,8 +73,9 @@ func (s *Service) CreateSale(ctx context.Context, req domain.CreateSaleRequest) 
 	txRepo := s.repo.WithTx(tx)
 
 	if req.PaymentMethod == "installments" {
-		if err := s.customerService.UpdateBalanceDueCustomer(ctx, req.CustomerID, customerDomain.UpdateBalanceDueCustomerRequest{
+		if err := s.customerService.UpdateCustomerBalanceAddTx(ctx, tx, req.CustomerID, customerDomain.UpdateBalanceDueCustomerRequest{
 			BalanceDue: req.Subtotal,
+			Prohibited: req.Prohibited,
 			UpdatedBy:  req.CreatedBy,
 		}); err != nil {
 			return uuid.Nil, err
@@ -90,15 +91,17 @@ func (s *Service) CreateSale(ctx context.Context, req domain.CreateSaleRequest) 
 	}
 
 	id, err := txRepo.CreateSales(ctx, db.CreateSaleParams{
-		CustomerID:     pgconv.ParseUUIDToPgType(req.CustomerID),
-		CompanyID:      pgconv.ParseUUIDToPgType(req.CompanyID),
-		DiscountAmount: pgconv.Float64ToPgNumeric(req.DiscountAmount),
-		Subtotal:       pgconv.Float64ToPgNumeric(req.Subtotal),
-		TotalAmount:    pgconv.Float64ToPgNumeric(req.TotalAmount),
-		DueDays:        pgconv.OptionalIntToPgInt4(dueDaysVal),
-		PaymentMethod:  req.PaymentMethod,
-		Status:         req.Status,
-		CreatedBy:      pgconv.ParseUUIDToPgType(req.CreatedBy),
+		CustomerID:        pgconv.ParseUUIDToPgType(req.CustomerID),
+		CompanyID:         pgconv.ParseUUIDToPgType(req.CompanyID),
+		DiscountAmount:    pgconv.Float64ToPgNumeric(req.DiscountAmount),
+		Subtotal:          pgconv.Float64ToPgNumeric(req.Subtotal),
+		TotalAmount:       pgconv.Float64ToPgNumeric(req.TotalAmount),
+		DueDays:           pgconv.OptionalIntToPgInt4(dueDaysVal),
+		PaymentMethod:     req.PaymentMethod,
+		Status:            req.Status,
+		CreatedBy:         pgconv.ParseUUIDToPgType(req.CreatedBy),
+		InstallmentsCount: req.InstallmentsCount,
+		DownPayment:       pgconv.Float64ToPgNumeric(req.Prohibited),
 	})
 	if err != nil {
 		return uuid.Nil, err
@@ -189,6 +192,38 @@ func (s *Service) GetSaleById(ctx context.Context, req domain.GetSaleByIdRequest
 	}, nil
 }
 
+func (s *Service) GetSaleByIdTx(ctx context.Context, tx db.DBTX, id, companyId uuid.UUID) (domain.GetSaleByIdRow, error) {
+	repoTx := db.New(tx)
+
+	sale, err := repoTx.GetSaleById(ctx, db.GetSaleByIdParams{
+		ID:        pgconv.ParseUUIDToPgType(id),
+		CompanyID: pgconv.ParseUUIDToPgType(companyId),
+	})
+	if err != nil {
+		return domain.GetSaleByIdRow{}, err
+	}
+
+	return domain.GetSaleByIdRow{
+		ID:             pgconv.PgUUIDToUUID(sale.ID),
+		CustomerID:     pgconv.PgUUIDToUUID(sale.CustomerID),
+		CompanyID:      pgconv.PgUUIDToUUID(sale.CompanyID),
+		SaleAt:         pgconv.PgTimestamptzToTime(sale.SaleAt),
+		DiscountAmount: pgconv.PgNumericToFloat64(sale.DiscountAmount),
+		Subtotal:       pgconv.PgNumericToFloat64(sale.Subtotal),
+		TotalAmount:    pgconv.PgNumericToFloat64(sale.TotalAmount),
+		DueDays:        int32(pgconv.PgInt4ToInt(sale.DueDays)),
+		PaymentMethod:  sale.PaymentMethod,
+		Status:         sale.Status,
+		CreatedAt:      pgconv.PgTimestamptzToTime(sale.CreatedAt),
+		CreatedBy:      pgconv.PgUUIDToUUID(sale.CreatedBy),
+		UpdatedAt:      pgconv.PgTimestamptzToTime(sale.UpdatedAt),
+		UpdatedBy:      pgconv.PgUUIDToUUID(sale.UpdatedBy),
+		DeletedAt:      pgconv.PgTimestamptzToTime(sale.DeletedAt),
+		DeletedBy:      pgconv.PgUUIDToUUID(sale.DeletedBy),
+		CustomerName:   sale.CustomerName,
+	}, nil
+}
+
 func (s *Service) ListSales(ctx context.Context, companyId uuid.UUID) ([]domain.ListSalesRow, error) {
 	sales, err := s.repo.ListSales(ctx, pgconv.ParseUUIDToPgType(companyId))
 	if err != nil {
@@ -231,6 +266,35 @@ func (s *Service) UpdateSaleStatus(ctx context.Context, id uuid.UUID, req domain
 	}
 
 	if err := s.repo.UpdateSaleStatus(ctx, arg); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) UpdateSaleStatusTx(ctx context.Context, tx db.DBTX, id, company_id, userId uuid.UUID, status string) error {
+	repoTx := db.New(tx)
+
+	sale, err := repoTx.GetSaleById(ctx, db.GetSaleByIdParams{
+		ID:        pgconv.ParseUUIDToPgType(id),
+		CompanyID: pgconv.ParseUUIDToPgType(company_id),
+	})
+	if err != nil {
+		return err
+	}
+
+	arg := db.UpdateSaleStatusParams{
+		Status:    sale.Status,
+		UpdatedBy: sale.UpdatedBy,
+		ID:        pgconv.ParseUUIDToPgType(id),
+		CompanyID: sale.CompanyID,
+	}
+
+	if status != "" {
+		arg.Status = status
+	}
+
+	if err := repoTx.UpdateSaleStatus(ctx, arg); err != nil {
 		return err
 	}
 
