@@ -23,6 +23,7 @@ type RepositoryInterface interface {
 	UpdateCustomer(ctx context.Context, arg db.UpdateCustomerParams) error
 	CountCustomers(ctx context.Context, companyId pgtype.UUID) (int64, error)
 	GetCustomersPerformanceSummary(ctx context.Context, companyId pgtype.UUID) (db.GetCustomersPerformanceSummaryRow, error)
+	UpdateCustomerBalance(ctx context.Context, arg db.UpdateCustomerBalanceParams) error
 	WithTx(tx db.DBTX) *repository.Repository
 }
 
@@ -253,6 +254,33 @@ func (s *Service) UpdateBalanceDueCustomer(ctx context.Context, id uuid.UUID, re
 	}
 
 	if err := s.repo.UpdateBalanceDueCustomer(ctx, arg); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) UpdateCustomerBalanceSubTx(ctx context.Context, tx db.DBTX, id uuid.UUID, req domain.UpdateBalanceDueCustomerRequest) error {
+	repoTx := db.New(tx)
+
+	customer, err := repoTx.GetCustomerById(ctx, pgconv.ParseUUIDToPgType(id))
+	if err != nil {
+		return err
+	}
+
+	newBalance := pgconv.PgNumericToFloat64(customer.BalanceDue) - req.BalanceDue
+
+	arg := db.UpdateCustomerBalanceParams{
+		ID:         pgconv.ParseUUIDToPgType(id),
+		BalanceDue: pgconv.Float64ToPgNumeric(newBalance),
+		UpdatedBy:  customer.UpdatedBy,
+	}
+
+	if req.UpdatedBy != uuid.Nil {
+		arg.UpdatedBy = pgconv.ParseUUIDToPgType(req.UpdatedBy)
+	}
+
+	if err := repoTx.UpdateCustomerBalance(ctx, arg); err != nil {
 		return err
 	}
 

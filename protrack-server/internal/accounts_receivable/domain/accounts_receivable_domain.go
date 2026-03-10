@@ -43,9 +43,7 @@ type ListOverdueReceivablesRow struct {
 }
 
 type UpdateAccountReceivableBalanceRequest struct {
-	Balance float64   `json:"balance"`
-	Status  string    `json:"status"`
-	ID      uuid.UUID `json:"id"`
+	Balance float64 `json:"balance"`
 }
 
 type AccountsReceivableResponse struct {
@@ -64,4 +62,9 @@ type AccountsReceivableResponse struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 	UpdatedBy         uuid.UUID `json:"updated_by"`
 	DeletedAt         time.Time `json:"deleted_at"`
+}
+
+type GetTotalPendingAndOverdueResponse struct {
+	TotalPending float64 `json:"total_pending"`
+	TotalOverdue float64 `json:"total_overdue"`
 }

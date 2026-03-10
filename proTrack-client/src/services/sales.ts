@@ -59,3 +59,24 @@ export async function GetTotalOverdue(): Promise<number> {
   );
   return response.data.total_overdue ?? 0;
 }
+
+export interface TotalPendingAndOverdueResponse {
+  totals: {
+    total_pending: number;
+    total_overdue: number;
+  };
+}
+
+export async function GetTotalPendingAndOverdue(): Promise<{
+  total_pending: number;
+  total_overdue: number;
+}> {
+  const response = await api.get<TotalPendingAndOverdueResponse>(
+    "/accounts-receivable/total-pending-overdue",
+  );
+  const totals = response.data.totals;
+  return {
+    total_pending: totals?.total_pending ?? 0,
+    total_overdue: totals?.total_overdue ?? 0,
+  };
+}

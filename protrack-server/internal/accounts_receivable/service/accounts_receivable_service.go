@@ -224,7 +224,7 @@ func (s *Service) ListOverdueReceivables(ctx context.Context, companyId uuid.UUI
 	return response, nil
 }
 
-func (s *Service) UpdateAccountReceivableBalance(ctx context.Context, tx db.DBTX, companyId, customerId, userId uuid.UUID, req domain.UpdateAccountReceivableBalanceRequest) error {
+func (s *Service) UpdateAccountReceivableBalance(ctx context.Context, companyId, customerId, userId uuid.UUID, req domain.UpdateAccountReceivableBalanceRequest) error {
 	accounts, err := s.repo.GetPendingReceivablesByCustomer(ctx, db.GetPendingReceivablesByCustomerParams{
 		CustomerID: pgconv.ParseUUIDToPgType(customerId),
 		CompanyID:  pgconv.ParseUUIDToPgType(companyId),
@@ -257,6 +257,54 @@ func (s *Service) UpdateAccountReceivableBalance(ctx context.Context, tx db.DBTX
 		}
 
 		if err := s.repo.UpdateAccountReceivableBalance(ctx, db.UpdateAccountReceivableBalanceParams{
+			Balance:   pgconv.Float64ToPgNumeric(newBalance),
+			Status:    newStatus,
+			UpdatedBy: pgconv.ParseUUIDToPgType(userId),
+			ID:        account.ID,
+		}); err != nil {
+			return err
+		}
+
+		remaining -= amountToApply
+	}
+	return nil
+}
+
+func (s *Service) UpdateAccountReceivableBalanceTx(ctx context.Context, tx db.DBTX, companyId, customerId, userId uuid.UUID, req domain.UpdateAccountReceivableBalanceRequest) error {
+	repoTx := db.New(tx)
+
+	accounts, err := repoTx.GetPendingReceivablesByCustomer(ctx, db.GetPendingReceivablesByCustomerParams{
+		CustomerID: pgconv.ParseUUIDToPgType(customerId),
+		CompanyID:  pgconv.ParseUUIDToPgType(companyId),
+	})
+	if err != nil {
+		return err
+	}
+
+	remaining := req.Balance
+
+	for _, account := range accounts {
+		if remaining <= 0 {
+			break
+		}
+
+		currentAccountBalance := pgconv.PgNumericToFloat64(account.Balance)
+
+		var amountToApply float64
+		var newBalance float64
+		var newStatus string
+
+		if remaining >= currentAccountBalance {
+			amountToApply = currentAccountBalance
+			newBalance = 0
+			newStatus = "paid"
+		} else {
+			amountToApply = remaining
+			newBalance = currentAccountBalance - remaining
+			newStatus = "partial"
+		}
+
+		if err := repoTx.UpdateAccountReceivableBalance(ctx, db.UpdateAccountReceivableBalanceParams{
 			Balance:   pgconv.Float64ToPgNumeric(newBalance),
 			Status:    newStatus,
 			UpdatedBy: pgconv.ParseUUIDToPgType(userId),
