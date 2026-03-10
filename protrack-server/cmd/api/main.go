@@ -40,6 +40,8 @@ import (
 	paymentMethodsHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/payment_methods/handler"
 	paymentMethodsRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/payment_methods/repository"
 	paymentMethodsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/payment_methods/service"
+	paymentsHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/payments/handler"
+	paymentsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/payments/service"
 	productsHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/handler"
 	productsRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/repository"
 	productsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/service"
@@ -135,13 +137,14 @@ func main() {
 	authService := authService.NewService(usersService, jwtManager)
 	customersService := customersService.NewService(customersRepository, db.Pool)
 	saleItemsService := saleItemsService.NewService(saleItemsRepository, db.Pool, productsRepository)
-	arService := accountsReceivableService.NewService(accountsReceivableRepository, db.Pool)
-	salesService := salesService.NewService(salesRepository, db.Pool, saleItemsService, customersService, arService, whatsapp)
+	accountsReceivableService := accountsReceivableService.NewService(accountsReceivableRepository, db.Pool)
+	salesService := salesService.NewService(salesRepository, db.Pool, saleItemsService, customersService, accountsReceivableService, whatsapp)
 	paymentMethodsService := paymentMethodsService.NewService(paymentMethodsRepository, db.Pool)
 	vendorsService := vendorsService.NewService(vendorsRepository, db.Pool)
 	billCategoriesService := billCategoriesService.NewService(billCategoriesRepository, db.Pool)
 	billsPayableService := billsPayableService.NewService(billsPayableRepository, db.Pool)
 	paymentHistoryService := paymentHistoryService.NewService(paymentHistoryRepository, db.Pool)
+	paymentsService := paymentsService.NewService(db.Pool, paymentHistoryService, accountsReceivableService, customersService)
 
 	usersHandler := usersHandler.NewHandler(usersService, jwtManager, blacklist)
 	companiesHandler := companiesHandler.NewHandler(companiesService, jwtManager, blacklist)
@@ -157,7 +160,8 @@ func main() {
 	billCategoriesHandler := billCategoriesHandler.NewHandler(billCategoriesService, jwtManager, blacklist)
 	billsPayableHandler := billsPayableHandler.NewHandler(billsPayableService, jwtManager, blacklist)
 	paymentHistoryHandler := paymentHistoryHandler.NewHandler(paymentHistoryService, jwtManager, blacklist)
-	accountsReceivableHandler := accountsReceivableHandler.NewHandler(arService, jwtManager, blacklist)
+	accountsReceivableHandler := accountsReceivableHandler.NewHandler(accountsReceivableService, jwtManager, blacklist)
+	paymentsHandler := paymentsHandler.NewHandler(paymentsService, jwtManager, blacklist)
 
 	api := r.Group("/api/v1")
 	usersHandler.RegisterRoutes(api)
@@ -175,6 +179,7 @@ func main() {
 	billsPayableHandler.RegisterRoute(api)
 	paymentHistoryHandler.RegisterRoute(api)
 	accountsReceivableHandler.RegisterRoute(api)
+	paymentsHandler.RegisterRoute(api)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})

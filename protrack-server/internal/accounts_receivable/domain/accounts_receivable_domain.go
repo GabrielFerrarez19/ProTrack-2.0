@@ -43,9 +43,7 @@ type ListOverdueReceivablesRow struct {
 }
 
 type UpdateAccountReceivableBalanceRequest struct {
-	Balance float64   `json:"balance"`
-	Status  string    `json:"status"`
-	ID      uuid.UUID `json:"id"`
+	Balance float64 `json:"balance"`
 }
 
 type AccountsReceivableResponse struct {

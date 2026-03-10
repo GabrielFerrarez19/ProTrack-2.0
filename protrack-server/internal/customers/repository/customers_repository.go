@@ -67,3 +67,8 @@ func (r *Repository) GetCustomersPerformanceSummary(ctx context.Context, company
 	q := db.New(r.db)
 	return q.GetCustomersPerformanceSummary(ctx, companyId)
 }
+
+func (r *Repository) UpdateCustomerBalance(ctx context.Context, arg db.UpdateCustomerBalanceParams) error {
+	q := db.New(r.db)
+	return q.UpdateCustomerBalance(ctx, arg)
+}

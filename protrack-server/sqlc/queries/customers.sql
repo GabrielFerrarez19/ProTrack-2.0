@@ -115,3 +115,11 @@ FROM customers
 WHERE company_id = $1
     AND deleted_at IS NULL
     AND created_at >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month');
+-- name: UpdateCustomerBalance :exec
+UPDATE customers
+SET balance_due = $2,
+    -- Atribui o valor final calculado no Go
+    updated_by = $3,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = $1
+    AND deleted_at IS NULL;
