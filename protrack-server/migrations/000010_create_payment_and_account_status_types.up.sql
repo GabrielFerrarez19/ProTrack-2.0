@@ -21,7 +21,8 @@ DO $$ BEGIN
             'paid',
             'overdue',
             'scheduled',
-            'canceled'
+            'canceled',
+            'partial'
         );
     END IF;
 END $$;
