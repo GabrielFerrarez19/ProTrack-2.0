@@ -56,7 +56,8 @@ func (s *Service) NewPayment(ctx context.Context, companyId, userId uuid.UUID, r
 
 	reqAcc.Balance = req.AmountPaid
 
-	if err := s.accReceivableService.UpdateAccountReceivableBalanceTx(ctx, tx, companyId, req.CustomerID, userId, reqAcc); err != nil {
+	saleId, err := s.accReceivableService.UpdateAccountReceivableBalanceTx(ctx, tx, companyId, req.CustomerID, userId, reqAcc)
+	if err != nil {
 		return err
 	}
 
@@ -76,7 +77,7 @@ func (s *Service) NewPayment(ctx context.Context, companyId, userId uuid.UUID, r
 	reqPH.CustomerID = req.CustomerID
 	reqPH.Notes = req.Notes
 	reqPH.PaymentMethodID = req.PaymentMethodID
-	reqPH.SaleID = req.SaleID
+	reqPH.SaleID = saleId
 	reqPH.UserID = userId
 
 	if err := s.paymentHistoryService.CreatePaymentHistoryTx(ctx, tx, reqPH); err != nil {

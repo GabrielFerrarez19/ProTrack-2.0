@@ -295,13 +295,14 @@ func (q *Queries) ListOverdueReceivables(ctx context.Context, companyID pgtype.U
 	return items, nil
 }
 
-const updateAccountReceivableBalance = `-- name: UpdateAccountReceivableBalance :exec
+const updateAccountReceivableBalance = `-- name: UpdateAccountReceivableBalance :one
 UPDATE accounts_receivable
 SET balance = $1,
     status = $2,
     updated_at = CURRENT_TIMESTAMP,
     updated_by = $3
 WHERE id = $4
+RETURNING sale_id
 `
 
 type UpdateAccountReceivableBalanceParams struct {
@@ -311,12 +312,14 @@ type UpdateAccountReceivableBalanceParams struct {
 	ID        pgtype.UUID    `json:"id"`
 }
 
-func (q *Queries) UpdateAccountReceivableBalance(ctx context.Context, arg UpdateAccountReceivableBalanceParams) error {
-	_, err := q.db.Exec(ctx, updateAccountReceivableBalance,
+func (q *Queries) UpdateAccountReceivableBalance(ctx context.Context, arg UpdateAccountReceivableBalanceParams) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, updateAccountReceivableBalance,
 		arg.Balance,
 		arg.Status,
 		arg.UpdatedBy,
 		arg.ID,
 	)
-	return err
+	var sale_id pgtype.UUID
+	err := row.Scan(&sale_id)
+	return sale_id, err
 }

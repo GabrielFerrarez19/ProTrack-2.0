@@ -18,7 +18,7 @@ type RepositoryInterface interface {
 	GetPendingReceivablesByCustomer(ctx context.Context, arg db.GetPendingReceivablesByCustomerParams) ([]db.AccountsReceivable, error)
 	GetReceivablesBySale(ctx context.Context, saleId pgtype.UUID) ([]db.AccountsReceivable, error)
 	ListOverdueReceivables(ctx context.Context, companyId pgtype.UUID) ([]db.ListOverdueReceivablesRow, error)
-	UpdateAccountReceivableBalance(ctx context.Context, arg db.UpdateAccountReceivableBalanceParams) error
+	UpdateAccountReceivableBalance(ctx context.Context, arg db.UpdateAccountReceivableBalanceParams) (pgtype.UUID, error)
 	GetTotalOpenAmountByCompany(ctx context.Context, companyId pgtype.UUID) (db.GetTotalOpenAmountByCompanyRow, error)
 	GetTotalOverdueAmountByCompany(ctx context.Context, companyId pgtype.UUID) (db.GetTotalOverdueAmountByCompanyRow, error)
 	WithTx(tx db.DBTX) *repository.Repository
@@ -224,16 +224,18 @@ func (s *Service) ListOverdueReceivables(ctx context.Context, companyId uuid.UUI
 	return response, nil
 }
 
-func (s *Service) UpdateAccountReceivableBalance(ctx context.Context, companyId, customerId, userId uuid.UUID, req domain.UpdateAccountReceivableBalanceRequest) error {
+func (s *Service) UpdateAccountReceivableBalance(ctx context.Context, companyId, customerId, userId uuid.UUID, req domain.UpdateAccountReceivableBalanceRequest) (uuid.UUID, error) {
 	accounts, err := s.repo.GetPendingReceivablesByCustomer(ctx, db.GetPendingReceivablesByCustomerParams{
 		CustomerID: pgconv.ParseUUIDToPgType(customerId),
 		CompanyID:  pgconv.ParseUUIDToPgType(companyId),
 	})
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 
 	remaining := req.Balance
+
+	var saleID uuid.UUID
 
 	for _, account := range accounts {
 		if remaining <= 0 {
@@ -256,21 +258,24 @@ func (s *Service) UpdateAccountReceivableBalance(ctx context.Context, companyId,
 			newStatus = "partial"
 		}
 
-		if err := s.repo.UpdateAccountReceivableBalance(ctx, db.UpdateAccountReceivableBalanceParams{
+		saleIdPg, err := s.repo.UpdateAccountReceivableBalance(ctx, db.UpdateAccountReceivableBalanceParams{
 			Balance:   pgconv.Float64ToPgNumeric(newBalance),
 			Status:    newStatus,
 			UpdatedBy: pgconv.ParseUUIDToPgType(userId),
 			ID:        account.ID,
-		}); err != nil {
-			return err
+		})
+		if err != nil {
+			return uuid.Nil, err
 		}
+
+		saleID = pgconv.PgUUIDToUUID(saleIdPg)
 
 		remaining -= amountToApply
 	}
-	return nil
+	return saleID, nil
 }
 
-func (s *Service) UpdateAccountReceivableBalanceTx(ctx context.Context, tx db.DBTX, companyId, customerId, userId uuid.UUID, req domain.UpdateAccountReceivableBalanceRequest) error {
+func (s *Service) UpdateAccountReceivableBalanceTx(ctx context.Context, tx db.DBTX, companyId, customerId, userId uuid.UUID, req domain.UpdateAccountReceivableBalanceRequest) (uuid.UUID, error) {
 	repoTx := db.New(tx)
 
 	accounts, err := repoTx.GetPendingReceivablesByCustomer(ctx, db.GetPendingReceivablesByCustomerParams{
@@ -278,8 +283,10 @@ func (s *Service) UpdateAccountReceivableBalanceTx(ctx context.Context, tx db.DB
 		CompanyID:  pgconv.ParseUUIDToPgType(companyId),
 	})
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
+
+	var saleID uuid.UUID
 
 	remaining := req.Balance
 
@@ -304,18 +311,20 @@ func (s *Service) UpdateAccountReceivableBalanceTx(ctx context.Context, tx db.DB
 			newStatus = "partial"
 		}
 
-		if err := repoTx.UpdateAccountReceivableBalance(ctx, db.UpdateAccountReceivableBalanceParams{
+		saleIdPg, err := repoTx.UpdateAccountReceivableBalance(ctx, db.UpdateAccountReceivableBalanceParams{
 			Balance:   pgconv.Float64ToPgNumeric(newBalance),
 			Status:    newStatus,
 			UpdatedBy: pgconv.ParseUUIDToPgType(userId),
 			ID:        account.ID,
-		}); err != nil {
-			return err
+		})
+		if err != nil {
+			return uuid.Nil, err
 		}
+		saleID = pgconv.PgUUIDToUUID(saleIdPg)
 
 		remaining -= amountToApply
 	}
-	return nil
+	return saleID, nil
 }
 
 func (s *Service) GetTotalOpenAmountByCompany(ctx context.Context, companyId uuid.UUID) (float64, error) {
