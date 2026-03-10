@@ -188,7 +188,8 @@ CREATE TABLE IF NOT EXISTS sales (
     discount_amount NUMERIC(10, 2) DEFAULT 0.00,
     subtotal NUMERIC(10, 2) NOT NULL,
     total_amount NUMERIC(10, 2) NOT NULL,
-    -- Regras de Negócio
+    down_payment NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
+    installments_count INTEGER NOT NULL DEFAULT 1,
     due_days INT DEFAULT NULL,
     payment_method payment_method_enum DEFAULT 'cash',
     status account_status_enum DEFAULT 'pending',

@@ -11,6 +11,7 @@ import (
 	paymentHistoryDomain "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/payment_history/domain"
 	paymentHistoryService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/payment_history/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/payments/domain"
+	saleService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/service"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -20,6 +21,7 @@ type Service struct {
 	paymentHistoryService *paymentHistoryService.Service
 	accReceivableService  *accReceivableService.Service
 	customersService      *customerService.Service
+	saleService           *saleService.Service
 }
 
 func NewService(
@@ -27,12 +29,14 @@ func NewService(
 	paymentHistoryService *paymentHistoryService.Service,
 	accReceivableService *accReceivableService.Service,
 	customersService *customerService.Service,
+	saleService *saleService.Service,
 ) *Service {
 	return &Service{
 		pool:                  pool,
 		paymentHistoryService: paymentHistoryService,
 		accReceivableService:  accReceivableService,
 		customersService:      customersService,
+		saleService:           saleService,
 	}
 }
 
@@ -43,23 +47,69 @@ func (s *Service) NewPayment(ctx context.Context, companyId, userId uuid.UUID, r
 	}
 	defer tx.Rollback(ctx)
 
-	balanceCustomer, err := s.customersService.GetCustomerByIdTx(ctx, tx, req.CustomerID)
+	customer, err := s.customersService.GetCustomerByIdTx(ctx, tx, req.CustomerID)
 	if err != nil {
 		return err
 	}
 
-	if balanceCustomer.BalanceDue < req.AmountPaid {
+	if customer.BalanceDue < req.AmountPaid {
 		return errors.New("The amount entered is greater than the outstanding balance.")
 	}
 
-	var reqAcc accReceivableDomain.UpdateAccountReceivableBalanceRequest
-
-	reqAcc.Balance = req.AmountPaid
+	reqAcc := accReceivableDomain.UpdateAccountReceivableBalanceRequest{
+		Balance: req.AmountPaid,
+	}
 
 	saleId, err := s.accReceivableService.UpdateAccountReceivableBalanceTx(ctx, tx, companyId, req.CustomerID, userId, reqAcc)
 	if err != nil {
 		return err
 	}
+
+	accounts, err := s.accReceivableService.GetReceivablesBySale(ctx, saleId)
+	if err == nil && len(accounts) > 0 {
+		paidCount := 0
+		for _, acc := range accounts {
+			if acc.Balance <= 0 {
+				paidCount++
+			}
+		}
+
+		var status string
+
+		if paidCount == len(accounts) {
+			status = "paid"
+		} else if paidCount > 0 {
+			status = "partial"
+		} else {
+			status = "pending"
+		}
+
+		if err := s.saleService.UpdateSaleStatusTx(ctx, tx, saleId, companyId, userId, status); err != nil {
+			return err
+		}
+	}
+
+	// paidCount := 0
+	// totalCount := len(accounts)
+
+	// for _, account := range accounts {
+	// 	if account.Balance <= 0 {
+	// 		paidCount++
+	// 	}
+	// }
+
+	// var status string
+	// if paidCount == totalCount && totalCount > 0 {
+	// 	status = "paid"
+	// } else if paidCount > 0 {
+	// 	status = "partial"
+	// } else {
+	// 	status = "pending"
+	// }
+
+	// if err := s.saleService.UpdateSaleStatusTx(ctx, tx, saleId, companyId, saleId, status); err != nil {
+	// 	return err
+	// }
 
 	var reqCustomer customerDomain.UpdateBalanceDueCustomerRequest
 

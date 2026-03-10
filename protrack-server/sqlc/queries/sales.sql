@@ -6,6 +6,8 @@ INSERT INTO sales (
         discount_amount,
         subtotal,
         total_amount,
+        installments_count,
+        down_payment,
         due_days,
         payment_method,
         created_by,
@@ -21,7 +23,9 @@ VALUES (
         $6,
         $7,
         $8,
-        $9
+        $9,
+        $10,
+        $11
     )
 RETURNING id;
 -- name: ListSales :many

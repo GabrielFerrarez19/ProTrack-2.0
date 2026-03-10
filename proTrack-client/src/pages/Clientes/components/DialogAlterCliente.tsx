@@ -40,6 +40,11 @@ import {
   GetPendingReceivablesByCustomer,
   GetReceivablesBySale,
 } from "@/services/accountsReceivable";
+import { CreatePayment } from "@/services/payments";
+import {
+  ListPaymentMethodsIsActive,
+  type PaymentMethodResponse,
+} from "@/services/paymentMethods";
 
 interface DialogAlterClienteProps {
   setOpen: (value: boolean) => void;
@@ -78,6 +83,13 @@ export function DialogAlterCliente({
   >({});
   const [vendaExpandidaId, setVendaExpandidaId] = useState<string | null>(null);
   const [loadingVendas, setLoadingVendas] = useState(false);
+  const [metodosPagamento, setMetodosPagamento] = useState<
+    PaymentMethodResponse[]
+  >([]);
+  const [loadingMetodos, setLoadingMetodos] = useState(false);
+  const [paymentMethodId, setPaymentMethodId] = useState<string>("");
+  const [notesPagamento, setNotesPagamento] = useState<string>("");
+  const [submittingPagamento, setSubmittingPagamento] = useState(false);
 
   // Preenche o formulário com dados do cliente
   useEffect(() => {
@@ -169,6 +181,26 @@ export function DialogAlterCliente({
     void carregarVendasParceladas();
   }, [cliente]);
 
+  // Carregar métodos de pagamento ativos ao abrir o diálogo
+  useEffect(() => {
+    const carregarMetodos = async () => {
+      try {
+        setLoadingMetodos(true);
+        const list = await ListPaymentMethodsIsActive();
+        setMetodosPagamento(list);
+        if (list.length > 0 && !paymentMethodId) {
+          setPaymentMethodId(list[0].id);
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Não foi possível carregar os métodos de pagamento.");
+      } finally {
+        setLoadingMetodos(false);
+      }
+    };
+    void carregarMetodos();
+  }, []);
+
   const sexoSelecionado = watch("sexo");
   const estadoCivilSelecionado = watch("estadoCivil");
   const [valorPago, setValorPago] = useState<number>(0);
@@ -203,8 +235,6 @@ export function DialogAlterCliente({
     }
   }, [cliente]);
 
-  console.log("valor a pagar", cliente.balance_due);
-
   // Envio do formulário
   /*   const onSubmit = async (data: ClienteFormData) => {
     if (!cliente.id) {
@@ -230,12 +260,42 @@ export function DialogAlterCliente({
       return;
     }
 
-    toast.success("Pagamento registrado com sucesso!");
-    setValorPago(0);
-    if (onClienteUpdated) onClienteUpdated();
-  };
+    const saldoDevido = Number(cliente.balance_due ?? 0);
+    if (valorPago > saldoDevido) {
+      toast.error(
+        "O valor informado é maior que o saldo devedor do cliente.",
+      );
+      return;
+    }
 
-  console.log();
+    if (!paymentMethodId) {
+      toast.error("Selecione a forma de pagamento.");
+      return;
+    }
+
+    try {
+      setSubmittingPagamento(true);
+      await CreatePayment({
+        customer_id: cliente.id,
+        payment_method_id: paymentMethodId,
+        amount_paid: valorPago,
+        notes: notesPagamento.trim(),
+      });
+      toast.success("Pagamento registrado com sucesso!");
+      setValorPago(0);
+      setNotesPagamento("");
+      if (onClienteUpdated) onClienteUpdated();
+    } catch (error: unknown) {
+      const msg =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { error?: string } } }).response
+              ?.data?.error
+          : null;
+      toast.error(msg ?? "Erro ao registrar pagamento. Tente novamente.");
+    } finally {
+      setSubmittingPagamento(false);
+    }
+  };
 
   return (
     <DialogContent
@@ -371,7 +431,7 @@ export function DialogAlterCliente({
           )}
         </Table>
 
-        {/* Resumo de Vendas */}
+        {/* Resumo de Vendas e formulário de pagamento */}
         <div className="flex flex-col gap-4">
           <ResumoVendas
             valorAPagar={valorAPagar}
@@ -379,13 +439,50 @@ export function DialogAlterCliente({
             setValorPago={setValorPago}
             setTotalRestantePai={setTotalRestante} // pega o total restante
           />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="formaPagamento">Forma de pagamento *</Label>
+              <Select
+                value={paymentMethodId}
+                onValueChange={setPaymentMethodId}
+                disabled={loadingMetodos}
+              >
+                <SelectTrigger id="formaPagamento">
+                  <SelectValue placeholder="Selecione a forma de pagamento" />
+                </SelectTrigger>
+                <SelectContent>
+                  {metodosPagamento.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {loadingMetodos && (
+                <span className="text-sm text-muted-foreground">
+                  Carregando...
+                </span>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="observacoesPagamento">Observações</Label>
+              <Input
+                id="observacoesPagamento"
+                value={notesPagamento}
+                onChange={(e) => setNotesPagamento(e.target.value)}
+                placeholder="Opcional"
+              />
+            </div>
+          </div>
           <Button
             type="button"
             onClick={onRegistrarPagamento}
             className="bg-blue-500 text-white h-11 px-8 hover:bg-blue-600 cursor-pointer"
-            disabled={valorPago <= 0}
+            disabled={
+              valorPago <= 0 || !paymentMethodId || submittingPagamento
+            }
           >
-            Registrar Pagamento
+            {submittingPagamento ? "Registrando..." : "Registrar Pagamento"}
           </Button>
         </div>
       </CardContent>

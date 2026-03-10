@@ -26,7 +26,7 @@ func NewHandler(service *service.Service, jwtManager *jwt.JWTManager, blacklist 
 }
 
 func (h *Handler) CreatePaymentMethod(c *gin.Context) {
-	companyIdAny, exists := c.Get("sub")
+	companyIdAny, exists := c.Get("company_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id is null"})
 		return
@@ -70,7 +70,7 @@ func (h *Handler) GetPaymentMethodById(c *gin.Context) {
 }
 
 func (h *Handler) ListPaymentMethod(c *gin.Context) {
-	companyIdAny, exists := c.Get("sub")
+	companyIdAny, exists := c.Get("company_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id is null"})
 		return
@@ -88,7 +88,7 @@ func (h *Handler) ListPaymentMethod(c *gin.Context) {
 }
 
 func (h *Handler) ListPaymentMethodIsActive(c *gin.Context) {
-	companyIdAny, exists := c.Get("sub")
+	companyIdAny, exists := c.Get("company_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id is null"})
 		return
