@@ -32,12 +32,12 @@ func NewService(repo *repository.Repository) *Service {
 	}
 }
 
-func (s *Service) CreateProductCategory(ctx context.Context, req domain.CreateProductCategoryRequest) (domain.ProductCategoryResponse, error) {
+func (s *Service) CreateProductCategory(ctx context.Context, userId, companyId uuid.UUID, req domain.CreateProductCategoryRequest) (domain.ProductCategoryResponse, error) {
 	category, err := s.repo.CreateProductsCategories(ctx, db.CreateProductCategoryParams{
-		CompanyID: pgconv.ParseUUIDToPgType(req.CompanyID),
+		CompanyID: pgconv.ParseUUIDToPgType(companyId),
 		Name:      req.Name,
 		Color:     pgconv.ParseStringToPgType(req.Color),
-		CreatedBy: pgconv.ParseUUIDToPgType(req.CreatedBy),
+		CreatedBy: pgconv.ParseUUIDToPgType(userId),
 	})
 	if err != nil {
 		return domain.ProductCategoryResponse{}, err

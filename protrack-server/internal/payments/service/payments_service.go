@@ -65,8 +65,27 @@ func (s *Service) NewPayment(ctx context.Context, companyId, userId uuid.UUID, r
 		return err
 	}
 
-	accounts, err := s.accReceivableService.GetReceivablesBySale(ctx, saleId)
+	accounts, err := s.accReceivableService.GetReceivablesBySaleTx(ctx, tx, saleId)
+
 	if err == nil && len(accounts) > 0 {
+		var totalRemaining float64 = 0
+		for _, acc := range accounts {
+			totalRemaining += acc.Balance
+		}
+
+		var status string
+
+		if totalRemaining <= 0 {
+			status = "paid"
+		} else {
+			status = "partial"
+		}
+
+		if err := s.saleService.UpdateSaleStatusTx(ctx, tx, saleId, companyId, userId, status); err != nil {
+			return err
+		}
+	}
+	/* if err == nil && len(accounts) > 0 {
 		paidCount := 0
 		for _, acc := range accounts {
 			if acc.Balance <= 0 {
@@ -87,7 +106,7 @@ func (s *Service) NewPayment(ctx context.Context, companyId, userId uuid.UUID, r
 		if err := s.saleService.UpdateSaleStatusTx(ctx, tx, saleId, companyId, userId, status); err != nil {
 			return err
 		}
-	}
+	} */
 
 	// paidCount := 0
 	// totalCount := len(accounts)
