@@ -29,17 +29,19 @@ func NewHandler(service *service.Service, jwtManager *jwt.JWTManager, blacklist 
 func (h *Handler) CreateProductCategory(c *gin.Context) {
 	companyIdAny, exists := c.Get("company_id")
 	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "company_id null"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
 
 	companyId := companyIdAny.(uuid.UUID)
 
-	userIdStr := c.GetString("sub")
-	if userIdStr == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization required"})
+	userIdAny, exists := c.Get("sub")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
+
+	userIdStr := userIdAny.(string)
 
 	userId, err := uuid.Parse(userIdStr)
 	if err != nil {
@@ -49,15 +51,12 @@ func (h *Handler) CreateProductCategory(c *gin.Context) {
 
 	var req domain.CreateProductCategoryRequest
 
-	req.CompanyID = companyId
-	req.CreatedBy = userId
-
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	category, err := h.service.CreateProductCategory(c.Request.Context(), req)
+	category, err := h.service.CreateProductCategory(c.Request.Context(), userId, companyId, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
