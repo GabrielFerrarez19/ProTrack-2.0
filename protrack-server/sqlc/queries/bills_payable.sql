@@ -70,3 +70,27 @@ SET status = 'scheduled',
     updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
     AND company_id = $2;
+-- name: GetBillsPayableSummary :one
+SELECT COUNT(*)::INT as total_quantity,
+    COALESCE(
+        SUM(amount) FILTER (
+            WHERE status = 'pending'
+        ),
+        0
+    )::NUMERIC(12, 2) as total_to_pay,
+    COALESCE(
+        SUM(amount) FILTER (
+            WHERE status = 'pending'
+                AND due_date < CURRENT_DATE
+        ),
+        0
+    )::NUMERIC(12, 2) as total_overdue,
+    COALESCE(
+        SUM(amount) FILTER (
+            WHERE status = 'pending'
+                AND scheduled_date IS NOT NULL
+        ),
+        0
+    )::NUMERIC(12, 2) as total_scheduled
+FROM bills_payable
+WHERE company_id = $1;

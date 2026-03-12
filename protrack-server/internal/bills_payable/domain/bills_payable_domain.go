@@ -96,6 +96,14 @@ type ScheduleBillRequest struct {
 	ScheduledDate string    `json:"scheduled_date"`
 }
 
+type GetBillsPayableSummaryResponse struct {
+	TotalQuantity  int32   `json:"total_quantity"`
+	TotalToPay     float64 `json:"total_to_pay"`
+	TotalOverdue   float64 `json:"total_overdue"`
+	TotalScheduled float64 `json:"total_scheduled"`
+	GeneralStatus  string  `json:"general_status"`
+}
+
 func ApplyUpdateBillPayableParams(req UpdateBillPayableRequest, arg *db.UpdateBillPayableParams) {
 	if req.VendorID != uuid.Nil {
 		arg.VendorID = pgconv.ParseUUIDToPgType(req.VendorID)

@@ -42,6 +42,7 @@ type Querier interface {
 	GetBillCategoriesById(ctx context.Context, id pgtype.UUID) (BillCategory, error)
 	GetBillsById(ctx context.Context, arg GetBillsByIdParams) (BillsPayable, error)
 	GetBillsByStatus(ctx context.Context, arg GetBillsByStatusParams) ([]BillsPayable, error)
+	GetBillsPayableSummary(ctx context.Context, companyID pgtype.UUID) (GetBillsPayableSummaryRow, error)
 	GetCompanyByDocument(ctx context.Context, document pgtype.Text) (Company, error)
 	GetCompanyByID(ctx context.Context, id pgtype.UUID) (Company, error)
 	GetCostTotalStock(ctx context.Context, companyID pgtype.UUID) (float64, error)
