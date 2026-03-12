@@ -138,6 +138,51 @@ func (q *Queries) GetBillsByStatus(ctx context.Context, arg GetBillsByStatusPara
 	return items, nil
 }
 
+const getBillsPayableSummary = `-- name: GetBillsPayableSummary :one
+SELECT COUNT(*)::INT as total_quantity,
+    COALESCE(
+        SUM(amount) FILTER (
+            WHERE status = 'pending'
+        ),
+        0
+    )::NUMERIC(12, 2) as total_to_pay,
+    COALESCE(
+        SUM(amount) FILTER (
+            WHERE status = 'pending'
+                AND due_date < CURRENT_DATE
+        ),
+        0
+    )::NUMERIC(12, 2) as total_overdue,
+    COALESCE(
+        SUM(amount) FILTER (
+            WHERE status = 'pending'
+                AND scheduled_date IS NOT NULL
+        ),
+        0
+    )::NUMERIC(12, 2) as total_scheduled
+FROM bills_payable
+WHERE company_id = $1
+`
+
+type GetBillsPayableSummaryRow struct {
+	TotalQuantity  int32          `json:"total_quantity"`
+	TotalToPay     pgtype.Numeric `json:"total_to_pay"`
+	TotalOverdue   pgtype.Numeric `json:"total_overdue"`
+	TotalScheduled pgtype.Numeric `json:"total_scheduled"`
+}
+
+func (q *Queries) GetBillsPayableSummary(ctx context.Context, companyID pgtype.UUID) (GetBillsPayableSummaryRow, error) {
+	row := q.db.QueryRow(ctx, getBillsPayableSummary, companyID)
+	var i GetBillsPayableSummaryRow
+	err := row.Scan(
+		&i.TotalQuantity,
+		&i.TotalToPay,
+		&i.TotalOverdue,
+		&i.TotalScheduled,
+	)
+	return i, err
+}
+
 const getOverdueBills = `-- name: GetOverdueBills :many
 SELECT id, company_id, vendor_id, category_id, payment_method_id, amount, due_date, status, description, scheduled_date, payment_date, amount_paid, notes, created_at, updated_at
 FROM bills_payable
