@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS bills_payable (
     CONSTRAINT fk_bills_company FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
     CONSTRAINT fk_bills_vendor FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE
     SET NULL,
-        CONSTRAINT fk_bills_category FOREIGN KEY (category_id) REFERENCES product_categories(id) ON DELETE
+        CONSTRAINT fk_bills_category FOREIGN KEY (category_id) REFERENCES bill_categories(id) ON DELETE
     SET NULL,
         CONSTRAINT fk_bills_payment_method FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id) ON DELETE
     SET NULL

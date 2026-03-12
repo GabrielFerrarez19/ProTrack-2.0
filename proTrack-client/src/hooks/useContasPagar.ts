@@ -163,7 +163,7 @@ export const useContasPagar = () => {
 
         await createBillPayable({
           vendor_id: contaData.fornecedor_id,
-          category_id: contaData.categoria_id,
+          category_id: contaData.categoria_id, // id (UUID) da categoria de bill_categories
           payment_method_id: contaData.forma_pagamento,
           amount: contaData.valor,
           due_date: contaData.data_vencimento,

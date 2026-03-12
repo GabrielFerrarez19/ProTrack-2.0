@@ -31,6 +31,6 @@ CREATE TABLE IF NOT EXISTS accounts_receivable (
     CONSTRAINT fk_receivable_sale FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE
 );
 -- Índices para performance em relatórios e buscas de cobrança
-CREATE INDEX idx_receivable_customer ON accounts_receivable(customer_id);
-CREATE INDEX idx_receivable_status ON accounts_receivable(status);
-CREATE INDEX idx_receivable_due_date ON accounts_receivable(due_date);
+CREATE INDEX IF NOT EXISTS idx_receivable_customer ON accounts_receivable(customer_id);
+CREATE INDEX IF NOT EXISTS idx_receivable_status ON accounts_receivable(status);
+CREATE INDEX IF NOT EXISTS idx_receivable_due_date ON accounts_receivable(due_date);
