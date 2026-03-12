@@ -146,15 +146,17 @@ export function Router() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="cadastrocontaspagar"
-          element={
-            <ProtectedRoute requiredRoute="/cadastrocontaspagar">
-              <CadastroContasPagar />
-            </ProtectedRoute>
-          }
-        />
       </Route>
+
+      {/* Cadastro de contas a pagar sem sidebar (fora do DefaultLayout) */}
+      <Route
+        path="/cadastrocontaspagar"
+        element={
+          <ProtectedRoute requiredRoute="/cadastrocontaspagar">
+            <CadastroContasPagar />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Rotas de configurações com layout próprio */}
       <Route

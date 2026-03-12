@@ -214,7 +214,6 @@ export interface ContasPagarFormData {
   status: "pendente" | "pago" | "vencido" | "agendado";
   categoria_id: string;
   descricao: string;
-  data_agendamento: string;
   valor_pago: string; // idem ao valor, pode ser number se preferir
   forma_pagamento: string;
   observacoes: string;
