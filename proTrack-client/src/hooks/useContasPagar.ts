@@ -151,14 +151,18 @@ export const useContasPagar = () => {
         setLoading(true);
         setError(null);
 
-        if (!contaData.categoria_id || !contaData.forma_pagamento) {
+        if (
+          !contaData.fornecedor_id ||
+          !contaData.categoria_id ||
+          !contaData.forma_pagamento
+        ) {
           throw new Error(
-            "Categoria e forma de pagamento são obrigatórias para cadastrar a conta.",
+            "Fornecedor, categoria e forma de pagamento são obrigatórios.",
           );
         }
 
         await createBillPayable({
-          // vendor_id opcional por enquanto (não há seleção de fornecedor cadastrado)
+          vendor_id: contaData.fornecedor_id,
           category_id: contaData.categoria_id,
           payment_method_id: contaData.forma_pagamento,
           amount: contaData.valor,

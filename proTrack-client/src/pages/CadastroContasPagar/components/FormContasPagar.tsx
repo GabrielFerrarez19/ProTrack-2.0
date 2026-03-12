@@ -15,6 +15,7 @@ interface FormContasPagarProps {
   handleInputChange: (field: string, value: string) => void;
   categorias: { id: string; nome: string }[];
   formasPagamento: { id: string; name: string }[];
+  fornecedores: { id: string; name: string }[];
 }
 
 export default function FormContasPagar({
@@ -22,7 +23,14 @@ export default function FormContasPagar({
   handleInputChange,
   categorias,
   formasPagamento,
+  fornecedores,
 }: FormContasPagarProps) {
+  const handleFornecedorChange = (value: string) => {
+    handleInputChange("fornecedor_id", value);
+    const selected = fornecedores.find((f) => f.id === value);
+    handleInputChange("fornecedor_nome", selected?.name ?? "");
+  };
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -31,15 +39,22 @@ export default function FormContasPagar({
           <Label htmlFor="fornecedor">
             Fornecedor <span className="text-destructive">*</span>
           </Label>
-          <Input
-            id="fornecedor"
-            placeholder="Nome do fornecedor"
-            value={formData.fornecedor_nome}
-            onChange={(e) =>
-              handleInputChange("fornecedor_nome", e.target.value)
-            }
+          <Select
+            value={formData.fornecedor_id}
+            onValueChange={handleFornecedorChange}
             required
-          />
+          >
+            <SelectTrigger id="fornecedor">
+              <SelectValue placeholder="Selecione o fornecedor" />
+            </SelectTrigger>
+            <SelectContent>
+              {fornecedores.map((fornecedor) => (
+                <SelectItem key={fornecedor.id} value={fornecedor.id}>
+                  {fornecedor.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Valor */}
