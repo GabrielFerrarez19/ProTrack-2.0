@@ -5,6 +5,7 @@ import { GraficosPrincipais } from "./components/GraficosPrincipais";
 import { RelatorioConfig } from "./components/RelatorioConfig";
 import { useDashboard } from "../../hooks/useDashboard";
 import { Header } from "../../components/header";
+import { PageLoading } from "@/components/PageLoading";
 
 export function RelatoriosFinanceiros() {
   const [tipoRelatorio, setTipoRelatorio] = useState("lucro-produto");
@@ -24,7 +25,8 @@ export function RelatoriosFinanceiros() {
 
   const { dados, loading, error } = useDashboard();
 
-  if (loading) return <p className="p-6">Carregando dados financeiros...</p>;
+  if (loading)
+    return <PageLoading message="Carregando dados financeiros..." />;
   if (error) return <p className="p-6 text-red-600">{error}</p>;
 
   // ---------- RENDER ----------

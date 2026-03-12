@@ -8,11 +8,13 @@ import { DistribuicaoVendasChart } from "./components/DistribuicaoVendasChart";
 import { TopProdutosChart } from "./components/TopProdutosChart";
 import { ValorEstoqueCard } from "./components/ValorEstoqueCard";
 import { Header } from "../../components/header";
+import { PageLoading } from "@/components/PageLoading";
 
 export function DashboardFinanceiro() {
   const { dados, loading, error } = useDashboard();
 
-  if (loading) return <p className="p-6">Carregando dados financeiros...</p>;
+  if (loading)
+    return <PageLoading message="Carregando dados financeiros..." />;
   if (error) return <p className="p-6 text-red-600">{error}</p>;
 
   return (

@@ -7,6 +7,7 @@ import { useVendasList } from "../../hooks/useVendasList";
 // Componentes
 import { VendasTable } from "./components/VendasTable";
 import { SearchFilter } from "./components/SearchFilter";
+import { PageLoading } from "@/components/PageLoading";
 
 export function TotalVendas() {
   const { vendas, loading, error, reload } = useVendasList();
@@ -37,7 +38,7 @@ export function TotalVendas() {
       <SearchFilter searchTerm={searchTerm} onChange={setSearchTerm} />
 
       {loading ? (
-        <p>Carregando vendas...</p>
+        <PageLoading message="Carregando vendas..." />
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : filteredVendas.length === 0 ? (

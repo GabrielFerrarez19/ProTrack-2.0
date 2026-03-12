@@ -14,6 +14,7 @@ import { Badge } from "../../../components/ui/badge";
 import { Shield, Building, Clock } from "lucide-react";
 // Removido import User não utilizado
 import { useAuth } from "../../../hooks/useAuth";
+import { PageLoading } from "@/components/PageLoading";
 
 type AvatarCardProps = {
   getStatusColor: (status: string) => string;
@@ -29,7 +30,12 @@ export function AvatarCard({
   const { user, isLoading, error } = useAuth();
 
   if (isLoading) {
-    return <div>Carregando...</div>;
+    return (
+      <PageLoading
+        message="Carregando usuário..."
+        fullHeight={false}
+      />
+    );
   }
 
   if (error) {

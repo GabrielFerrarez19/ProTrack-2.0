@@ -9,6 +9,7 @@ import { FiltrosContas } from "./components/FiltrosContas";
 import { ResumoCards } from "./components/ResumoCards";
 import { TabelaContas } from "./components/TabelaContas";
 import { Header } from "../../components/header";
+import { PageLoading } from "@/components/PageLoading";
 
 import { useContasReceber } from "@/hooks/useContasReceber";
 
@@ -18,7 +19,8 @@ export function ContasReceber() {
 
   const { dados, loading, error } = useContasReceber();
 
-  if (loading) return <p className="p-6">Carregando dados financeiros...</p>;
+  if (loading)
+    return <PageLoading message="Carregando dados financeiros..." />;
 
   if (error) return <p className="p-6 text-red-600">{error}</p>;
 

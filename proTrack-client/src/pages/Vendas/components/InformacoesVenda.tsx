@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "../../../components/ui/card";
 import { ClienteSelect } from "./clienteSelect";
+import { PageLoading } from "@/components/PageLoading";
 
 import type { Control } from "react-hook-form";
 import type { VendaForm } from "../../../schemas/schemaVendas";
@@ -25,7 +26,13 @@ type InformacoesVendaProps = {
 export function InformacoesVenda({ control }: InformacoesVendaProps) {
   const { clientes, loading, error } = useClientes();
 
-  if (loading) return <div>Carregando clientes...</div>;
+  if (loading)
+    return (
+      <PageLoading
+        message="Carregando clientes..."
+        fullHeight={false}
+      />
+    );
   if (error) return <div>{error}</div>;
 
   return (

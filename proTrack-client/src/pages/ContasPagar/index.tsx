@@ -16,6 +16,7 @@ import { Plus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Header } from "../../components/header";
+import { PageLoading } from "@/components/PageLoading";
 
 export function ContasPagar() {
   const {
@@ -178,14 +179,9 @@ export function ContasPagar() {
         </CardContent>
       </Card>
 
-      {/* Estado de carregamento */}
+      {/* Estado de carregamento geral */}
       {(loading || loadingVencidas) && (
-        <div className="flex justify-center items-center py-8">
-          <div className="flex items-center gap-2">
-            <RefreshCw className="h-5 w-5 animate-spin" />
-            <span className="text-muted-foreground">Carregando...</span>
-          </div>
-        </div>
+        <PageLoading message="Carregando dados de contas a pagar..." fullHeight={false} />
       )}
     </div>
   );

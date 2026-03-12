@@ -8,6 +8,7 @@ import { useProdutos } from "../../hooks/useProdutos";
 import { Header } from "../../components/header";
 import { ProductTable } from "./Components/ProductTable";
 import { SearchBar } from "./Components/SearchFilter";
+import { PageLoading } from "@/components/PageLoading";
 
 export function Estoque() {
   const { products, loading, error, reload } = useProdutos();
@@ -22,7 +23,7 @@ export function Estoque() {
     );
   });
 
-  if (loading) return <p className="p-6">Carregando produtos...</p>;
+  if (loading) return <PageLoading message="Carregando produtos..." />;
   if (error) return <p className="p-6 text-red-600">{error}</p>;
 
   return (

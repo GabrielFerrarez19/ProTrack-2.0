@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AvatarCard } from "./components/AvatarCard";
 import { ProfileFormCard } from "./components/ProfileFormCard";
 import { Header } from "../../components/header";
+import { PageLoading } from "@/components/PageLoading";
 import { useAuth } from "../../hooks/useAuth";
 import { perfilSchema, type PerfilFormData } from "../../schemas/schemaUsers";
 import { departamentos, getRoleLabel } from "../../utils/functions";
@@ -89,12 +90,7 @@ export function ConfigUsers() {
           title="Configurações de Usuário"
           text="Carregando suas informações..."
         />
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando dados do usuário...</p>
-          </div>
-        </div>
+        <PageLoading message="Carregando dados do usuário..." />
       </div>
     );
   }
