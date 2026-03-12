@@ -37,9 +37,9 @@ func NewService(repo *repository.Repository, pool *pgxpool.Pool) *Service {
 	}
 }
 
-func (s *Service) CreateBillPayable(ctx context.Context, req domain.CreateBillPayableRequest) error {
+func (s *Service) CreateBillPayable(ctx context.Context, companyId uuid.UUID, req domain.CreateBillPayableRequest) error {
 	return s.repo.CreateBillsPayable(ctx, db.CreateBillPayableParams{
-		CompanyID:       pgconv.ParseUUIDToPgType(req.CompanyID),
+		CompanyID:       pgconv.ParseUUIDToPgType(companyId),
 		VendorID:        pgconv.ParseUUIDToPgType(req.VendorID),
 		CategoryID:      pgconv.ParseUUIDToPgType(req.CategoryID),
 		PaymentMethodID: pgconv.ParseUUIDToPgType(req.PaymentMethodID),

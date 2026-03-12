@@ -41,9 +41,7 @@ func (h *Handler) CreateBillPayable(c *gin.Context) {
 		return
 	}
 
-	req.CompanyID = companyId
-
-	if err := h.service.CreateBillPayable(c.Request.Context(), req); err != nil {
+	if err := h.service.CreateBillPayable(c.Request.Context(), companyId, req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

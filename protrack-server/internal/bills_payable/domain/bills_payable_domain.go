@@ -9,7 +9,6 @@ import (
 )
 
 type CreateBillPayableRequest struct {
-	CompanyID       uuid.UUID `json:"company_id"`
 	VendorID        uuid.UUID `json:"vendor_id"`
 	CategoryID      uuid.UUID `json:"category_id"`
 	PaymentMethodID uuid.UUID `json:"payment_method_id"`

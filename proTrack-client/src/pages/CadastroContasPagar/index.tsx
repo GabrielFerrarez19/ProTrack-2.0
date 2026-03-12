@@ -13,12 +13,14 @@ import { Header } from "../../components/header";
 import { useContasPagar } from "../../hooks/useContasPagar";
 import { listBillCategories } from "../../services/billCategories";
 import { ListPaymentMethodsIsActive } from "../../services/paymentMethods";
+import { listVendorsIsActive } from "../../services/vendors";
 
 export function CadastroContasPagar() {
   const navigate = useNavigate();
   const { criarConta } = useContasPagar();
 
   const [formData, setFormData] = useState({
+    fornecedor_id: "",
     fornecedor_nome: "",
     valor: "",
     data_vencimento: "",
@@ -36,13 +38,17 @@ export function CadastroContasPagar() {
   const [formasPagamento, setFormasPagamento] = useState<
     { id: string; name: string }[]
   >([]);
+  const [fornecedores, setFornecedores] = useState<
+    { id: string; name: string }[]
+  >([]);
 
   useEffect(() => {
     async function loadAuxiliares() {
       try {
-        const [billCats, paymentMethods] = await Promise.all([
+        const [billCats, paymentMethods, vendors] = await Promise.all([
           listBillCategories(),
           ListPaymentMethodsIsActive(),
+          listVendorsIsActive(),
         ]);
 
         setCategorias(
@@ -56,6 +62,13 @@ export function CadastroContasPagar() {
           paymentMethods.map((m) => ({
             id: m.id,
             name: m.name,
+          })),
+        );
+
+        setFornecedores(
+          vendors.map((v) => ({
+            id: v.id,
+            name: v.name,
           })),
         );
       } catch (e) {
@@ -76,16 +89,15 @@ export function CadastroContasPagar() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (
-      !formData.fornecedor_nome ||
+      !formData.fornecedor_id ||
       !formData.valor ||
       !formData.data_vencimento ||
       !formData.categoria_id
     ) {
       return;
     }
-    // Por enquanto o fornecedor ainda é apenas nome; o hook validar�
-    // que é necessário um fornecedor_id real para integrar completamente.
     criarConta({
+      fornecedor_id: formData.fornecedor_id,
       fornecedor_nome: formData.fornecedor_nome,
       valor: Number(formData.valor),
       data_vencimento: formData.data_vencimento,
@@ -119,6 +131,7 @@ export function CadastroContasPagar() {
                 handleInputChange={handleInputChange}
                 categorias={categorias}
                 formasPagamento={formasPagamento}
+                fornecedores={fornecedores}
               />
               <FormActions handleCancel={handleCancel} />
             </form>
