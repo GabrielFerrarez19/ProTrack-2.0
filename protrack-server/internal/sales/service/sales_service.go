@@ -36,6 +36,8 @@ type RepositoryInterface interface {
 	GetSaleByIdWhatsapp(ctx context.Context, id pgtype.UUID) (db.GetSaleByIdWhatsappRow, error)
 	UpdateOverdueSalesAndAccounts(ctx context.Context) ([]db.UpdateOverdueSalesAndAccountsGlobalRow, error)
 	GetSaleByIdJust(ctx context.Context, saleId pgtype.UUID) (db.GetSaleByIdJustRow, error)
+	ContSalesPendingAndOverdue(ctx context.Context, companyId pgtype.UUID) (int64, error)
+	ListSalesWithInstallments(ctx context.Context, companyID pgtype.UUID) ([]db.ListSalesWithInstallmentsRow, error)
 	WithTx(tx db.DBTX) *repository.Repository
 }
 
@@ -393,4 +395,91 @@ func (s *Service) UpdateOverdueSales(ctx context.Context) error {
 	}
 
 	return tx.Commit(ctx)
+}
+
+func (s *Service) ContSalesPendingAndOverdue(ctx context.Context, companyId uuid.UUID) (int64, error) {
+	return s.repo.ContSalesPendingAndOverdue(ctx, pgconv.ParseUUIDToPgType(companyId))
+}
+
+func (s *Service) ListSalesWithInstallments(ctx context.Context, companyId uuid.UUID) ([]domain.ListSalesWithInstallmentsResponse, error) {
+	rows, err := s.repo.ListSalesWithInstallments(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return []domain.ListSalesWithInstallmentsResponse{}, err
+	}
+
+	var response []domain.ListSalesWithInstallmentsResponse
+
+	salesMap := make(map[uuid.UUID]*domain.ListSalesWithInstallmentsResponse)
+	var orderedIds []uuid.UUID
+
+	for _, row := range rows {
+		saleId := pgconv.PgUUIDToUUID(row.SaleID)
+
+		if _, exists := salesMap[saleId]; !exists {
+
+			salesMap[saleId] = &domain.ListSalesWithInstallmentsResponse{
+				Sale: domain.ListSalesResponse{
+					SaleID:                 saleId,
+					SaleAt:                 pgconv.PgTimestamptzToTime(row.SaleAt),
+					Subtotal:               pgconv.PgNumericToFloat64(row.Subtotal),
+					DiscountAmount:         pgconv.PgNumericToFloat64(row.DiscountAmount),
+					TotalAmount:            pgconv.PgNumericToFloat64(row.TotalAmount),
+					InstallmentsCount:      row.InstallmentsCount,
+					PaymentMethod:          row.PaymentMethod,
+					SaleStatus:             row.SaleStatus,
+					CustomerID:             pgconv.PgUUIDToUUID(row.CustomerID),
+					CustomerName:           row.CustomerName,
+					InstallmentTotalAmount: float64(row.InstallmentsCount),
+				},
+				Products:      []domain.ListProductResponse{},
+				AccReceivable: []domain.ListAccReceivableResponse{},
+			}
+			orderedIds = append(orderedIds, saleId)
+		}
+		itemId := pgconv.PgUUIDToUUID(row.SaleItemID)
+		isProductNew := true
+
+		for _, p := range salesMap[saleId].Products {
+			if p.SaleItemID == itemId {
+				isProductNew = false
+				break
+			}
+		}
+		if isProductNew && row.ProductID.Valid {
+			salesMap[saleId].Products = append(salesMap[saleId].Products, domain.ListProductResponse{
+				SaleItemID:   pgconv.PgUUIDToUUID(row.SaleItemID),
+				ProductID:    pgconv.PgUUIDToUUID(row.ProductID),
+				Quantity:     row.Quantity,
+				UnitPrice:    pgconv.PgNumericToFloat64(row.UnitPrice),
+				ItemDiscount: pgconv.PgNumericToFloat64(row.ItemDiscount),
+				ProductName:  row.ProductName,
+			})
+		}
+
+		instId := pgconv.PgUUIDToUUID(row.InstallmentID)
+		isInstNew := true
+
+		for _, i := range salesMap[saleId].AccReceivable {
+			if i.InstallmentID == instId {
+				isInstNew = false
+				break
+			}
+		}
+		if isInstNew && row.InstallmentID.Valid {
+			salesMap[saleId].AccReceivable = append(salesMap[saleId].AccReceivable, domain.ListAccReceivableResponse{
+				InstallmentID:      pgconv.PgUUIDToUUID(row.InstallmentID),
+				InstallmentBalance: pgconv.PgNumericToFloat64(row.InstallmentBalance),
+				DueDate:            pgconv.PgDateToString(row.DueDate),
+				InstallmentNumber:  pgconv.PgInt4ToInt(row.InstallmentNumber),
+				InstallmentStatus:  pgconv.ParsePgTextToString(row.InstallmentStatus),
+			})
+		}
+
+	}
+
+	for _, id := range orderedIds {
+		response = append(response, *salesMap[id])
+	}
+
+	return response, nil
 }

@@ -18,5 +18,7 @@ func (h *Handler) RegisterRoute(r *gin.RouterGroup) {
 		sales.GET("/total-amount", h.GetTotalAmountSummary)
 		sales.GET("/total-pending", h.GetTotalAmountIsPending)
 		sales.GET("/total-overdue", h.GetTotalAmountIsOverdue)
+		sales.GET("/count/pending-overdue", h.ContSalesPendingAndOverdue)
+		sales.GET("/completed", h.ListSalesWithInstallments)
 	}
 }
