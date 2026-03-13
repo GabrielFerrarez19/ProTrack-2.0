@@ -9,6 +9,7 @@ import type { User } from "@/@types/types.api";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageLoading } from "@/components/PageLoading";
 
 import UserDialog from "./components/UserDialog";
 import UserFilters from "./components/UserFilters";
@@ -217,9 +218,9 @@ export default function GerenciarUsuarios() {
 
       <Card>
         {isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="text-muted-foreground">Carregando usuários...</div>
-          </div>
+          <PageLoading
+            message="Carregando usu?rios..."
+          />
         ) : error ? (
           <div className="flex items-center justify-center py-8">
             <div className="text-red-500">

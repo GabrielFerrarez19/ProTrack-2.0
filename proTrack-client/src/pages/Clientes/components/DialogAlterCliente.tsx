@@ -336,7 +336,12 @@ export function DialogAlterCliente({
             <TableBody>
               {loadingVendas && (
                 <TableRow>
-                  <TableCell colSpan={6}>Carregando vendas...</TableCell>
+                  <TableCell colSpan={6}>
+                    <div className="flex items-center justify-center gap-2 py-2 text-muted-foreground text-sm">
+                      <span className="inline-block h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      <span>Carregando vendas...</span>
+                    </div>
+                  </TableCell>
                 </TableRow>
               )}
 
@@ -460,7 +465,7 @@ export function DialogAlterCliente({
               </Select>
               {loadingMetodos && (
                 <span className="text-sm text-muted-foreground">
-                  Carregando...
+                  Carregando métodos de pagamento...
                 </span>
               )}
             </div>

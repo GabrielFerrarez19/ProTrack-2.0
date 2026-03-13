@@ -8,6 +8,7 @@ import { useClientes } from "../../hooks/useClientes";
 import { Header } from "../../components/header";
 import { ClientTable } from "./components/ClientTable";
 import { SearchBar } from "./components/SearchFilter";
+import { PageLoading } from "@/components/PageLoading";
 
 export function Cliente() {
   const { clientes, loading, error, reload } = useClientes();
@@ -28,7 +29,8 @@ export function Cliente() {
     );
   });
 
-  if (loading) return <p className="p-6">Carregando clientes...</p>;
+  if (loading)
+    return <PageLoading message="Carregando clientes..." />;
   if (error) return <p className="p-6 text-red-600">{error}</p>;
 
   return (

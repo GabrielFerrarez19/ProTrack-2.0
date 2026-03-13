@@ -12,6 +12,7 @@ import { GraficoFluxo } from "./components/GraficoFluxo";
 import { ResumoCards } from "./components/ResumoCards";
 import { Header } from "@/components/header";
 import { useFluxoCaixa } from "../../hooks/useFluxoCaixa";
+import { PageLoading } from "@/components/PageLoading";
 
 export function FluxoCaixa() {
   const [periodo, setPeriodo] = useState<
@@ -74,9 +75,7 @@ export function FluxoCaixa() {
       </div>
 
       {loading && (
-        <div className="flex justify-center items-center p-8">
-          <div className="text-lg">Carregando dados de fluxo de caixa...</div>
-        </div>
+        <PageLoading message="Carregando dados de fluxo de caixa..." fullHeight={false} />
       )}
 
       {error && (

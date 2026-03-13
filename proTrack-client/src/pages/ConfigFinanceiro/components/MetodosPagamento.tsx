@@ -55,7 +55,12 @@ export function MetodosPagamento({
             <CreditCard className="h-5 w-5" /> Métodos de Pagamento
           </CardTitle>
         </CardHeader>
-        <CardContent>Carregando métodos de pagamento...</CardContent>
+        <CardContent>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="inline-block h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <span>Carregando métodos de pagamento...</span>
+          </div>
+        </CardContent>
       </Card>
     );
   }
