@@ -16,5 +16,6 @@ func (h *Handler) RegisterRoute(r *gin.RouterGroup) {
 		billsPayable.PUT("/pay/:id", h.PayBill)
 		billsPayable.PUT("/schedule/:id", h.ScheduleBill)
 		billsPayable.PUT("/:id", h.UpdateBillPayable)
+		billsPayable.GET("/summary", h.GetBillsPayableSummary)
 	}
 }

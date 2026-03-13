@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import type { ContasReceber, DashboardDados } from "../@types/types.api";
-import {
-  GetTotalAmountIsPending,
-  GetTotalAmountSummary,
-  PercentageSales,
-} from "@/services/sales";
-import { GetCostTotalStock, GetTopProducts } from "@/services/product";
+import type { ContasReceber } from "../@types/types.api";
+import { GetTotalPendingAndOverdue } from "@/services/sales";
 
 const emptyDados: ContasReceber = {
   totalContas: 0,
@@ -20,8 +15,14 @@ export const useContasReceber = () => {
 
   const loadDados = useCallback(async () => {
     try {
+      setLoading(true);
+      const { total_pending, total_overdue } =
+        await GetTotalPendingAndOverdue();
+
       setDados((prev) => ({
         ...prev,
+        totalReceber: total_pending ?? 0,
+        contasVencidas: total_overdue ?? 0,
       }));
     } catch {
       setError("Erro ao buscar dados");
@@ -34,6 +35,5 @@ export const useContasReceber = () => {
     loadDados();
   }, [loadDados]);
 
-  console.log(dados);
   return { dados, loading, error };
 };

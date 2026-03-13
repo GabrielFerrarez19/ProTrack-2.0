@@ -6,6 +6,8 @@ INSERT INTO sales (
         discount_amount,
         subtotal,
         total_amount,
+        installments_count,
+        down_payment,
         due_days,
         down_payment,
         payment_method,

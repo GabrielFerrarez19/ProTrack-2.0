@@ -22,6 +22,7 @@ type RepositoryInterface interface {
 	UpdateBillPayable(ctx context.Context, arg db.UpdateBillPayableParams) error
 	GetBillsById(ctx context.Context, arg db.GetBillsByIdParams) (db.BillsPayable, error)
 	ScheduleBill(ctx context.Context, arg db.ScheduleBillParams) error
+	GetBillsPayableSummary(ctx context.Context, companyId pgtype.UUID) (db.GetBillsPayableSummaryRow, error)
 }
 
 type Service struct {
@@ -36,9 +37,9 @@ func NewService(repo *repository.Repository, pool *pgxpool.Pool) *Service {
 	}
 }
 
-func (s *Service) CreateBillPayable(ctx context.Context, req domain.CreateBillPayableRequest) error {
+func (s *Service) CreateBillPayable(ctx context.Context, companyId uuid.UUID, req domain.CreateBillPayableRequest) error {
 	return s.repo.CreateBillsPayable(ctx, db.CreateBillPayableParams{
-		CompanyID:       pgconv.ParseUUIDToPgType(req.CompanyID),
+		CompanyID:       pgconv.ParseUUIDToPgType(companyId),
 		VendorID:        pgconv.ParseUUIDToPgType(req.VendorID),
 		CategoryID:      pgconv.ParseUUIDToPgType(req.CategoryID),
 		PaymentMethodID: pgconv.ParseUUIDToPgType(req.PaymentMethodID),
@@ -251,4 +252,31 @@ func (s *Service) ScheduleBill(ctx context.Context, req domain.ScheduleBillReque
 		CompanyID:     pgconv.ParseUUIDToPgType(req.CompanyID),
 		ScheduledDate: pgconv.StringToPgDate(req.ScheduledDate),
 	})
+}
+
+func (s *Service) GetBillsPayableSummary(ctx context.Context, companyId uuid.UUID) (domain.GetBillsPayableSummaryResponse, error) {
+	billsSummary, err := s.repo.GetBillsPayableSummary(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return domain.GetBillsPayableSummaryResponse{}, err
+	}
+
+	totalOverdue := pgconv.PgNumericToFloat64(billsSummary.TotalOverdue)
+
+	var status string
+
+	if totalOverdue <= 0 {
+		status = "ok"
+	} else if totalOverdue > 0 && totalOverdue < float64(billsSummary.TotalQuantity) {
+		status = "pending"
+	} else {
+		status = "all pending"
+	}
+
+	return domain.GetBillsPayableSummaryResponse{
+		TotalQuantity:  billsSummary.TotalQuantity,
+		TotalToPay:     pgconv.PgNumericToFloat64(billsSummary.TotalToPay),
+		TotalOverdue:   pgconv.PgNumericToFloat64(billsSummary.TotalOverdue),
+		TotalScheduled: pgconv.PgNumericToFloat64(billsSummary.TotalScheduled),
+		GeneralStatus:  status,
+	}, nil
 }

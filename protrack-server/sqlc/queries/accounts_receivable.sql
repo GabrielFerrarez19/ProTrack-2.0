@@ -20,13 +20,14 @@ WHERE customer_id = $1
     AND status IN ('pending', 'partial')
     AND deleted_at IS NULL
 ORDER BY due_date ASC;
--- name: UpdateAccountReceivableBalance :exec
+-- name: UpdateAccountReceivableBalance :one
 UPDATE accounts_receivable
 SET balance = $1,
     status = $2,
     updated_at = CURRENT_TIMESTAMP,
     updated_by = $3
-WHERE id = $4;
+WHERE id = $4
+RETURNING sale_id;
 -- name: GetCustomerDebtSummary :one
 SELECT COUNT(id)::int AS total_count,
     COALESCE(SUM(balance), 0)::numeric AS total_balance,
@@ -54,3 +55,23 @@ SELECT *
 FROM accounts_receivable
 WHERE sale_id = $1
 ORDER BY installment_number ASC;
+-- name: GetTotalOpenAmountByCompany :one
+SELECT company_id,
+    SUM(balance)::NUMERIC(10, 2) as total_open
+FROM accounts_receivable
+WHERE company_id = $1
+    AND status IN ('pending', 'overdue')
+    AND deleted_at IS NULL
+GROUP BY company_id;
+-- name: GetTotalOverdueAmountByCompany :one
+SELECT company_id,
+    COALESCE(SUM(balance), 0)::NUMERIC(10, 2) as total_overdue
+FROM accounts_receivable
+WHERE company_id = $1
+    AND (
+        status = 'overdue'
+        OR due_date < CURRENT_DATE
+    )
+    AND status != 'paid'
+    AND deleted_at IS NULL
+GROUP BY company_id;

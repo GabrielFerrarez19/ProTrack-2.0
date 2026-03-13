@@ -173,6 +173,54 @@ func (q *Queries) GetReceivablesBySale(ctx context.Context, saleID pgtype.UUID) 
 	return items, nil
 }
 
+const getTotalOpenAmountByCompany = `-- name: GetTotalOpenAmountByCompany :one
+SELECT company_id,
+    SUM(balance)::NUMERIC(10, 2) as total_open
+FROM accounts_receivable
+WHERE company_id = $1
+    AND status IN ('pending', 'overdue')
+    AND deleted_at IS NULL
+GROUP BY company_id
+`
+
+type GetTotalOpenAmountByCompanyRow struct {
+	CompanyID pgtype.UUID    `json:"company_id"`
+	TotalOpen pgtype.Numeric `json:"total_open"`
+}
+
+func (q *Queries) GetTotalOpenAmountByCompany(ctx context.Context, companyID pgtype.UUID) (GetTotalOpenAmountByCompanyRow, error) {
+	row := q.db.QueryRow(ctx, getTotalOpenAmountByCompany, companyID)
+	var i GetTotalOpenAmountByCompanyRow
+	err := row.Scan(&i.CompanyID, &i.TotalOpen)
+	return i, err
+}
+
+const getTotalOverdueAmountByCompany = `-- name: GetTotalOverdueAmountByCompany :one
+SELECT company_id,
+    COALESCE(SUM(balance), 0)::NUMERIC(10, 2) as total_overdue
+FROM accounts_receivable
+WHERE company_id = $1
+    AND (
+        status = 'overdue'
+        OR due_date < CURRENT_DATE
+    )
+    AND status != 'paid'
+    AND deleted_at IS NULL
+GROUP BY company_id
+`
+
+type GetTotalOverdueAmountByCompanyRow struct {
+	CompanyID    pgtype.UUID    `json:"company_id"`
+	TotalOverdue pgtype.Numeric `json:"total_overdue"`
+}
+
+func (q *Queries) GetTotalOverdueAmountByCompany(ctx context.Context, companyID pgtype.UUID) (GetTotalOverdueAmountByCompanyRow, error) {
+	row := q.db.QueryRow(ctx, getTotalOverdueAmountByCompany, companyID)
+	var i GetTotalOverdueAmountByCompanyRow
+	err := row.Scan(&i.CompanyID, &i.TotalOverdue)
+	return i, err
+}
+
 const listOverdueReceivables = `-- name: ListOverdueReceivables :many
 SELECT ar.id, ar.company_id, ar.customer_id, ar.sale_id, ar.total_amount, ar.balance, ar.due_date, ar.installment_number, ar.total_installments, ar.status, ar.created_at, ar.created_by, ar.updated_at, ar.updated_by, ar.deleted_at,
     c.full_name as customer_name,
@@ -247,13 +295,14 @@ func (q *Queries) ListOverdueReceivables(ctx context.Context, companyID pgtype.U
 	return items, nil
 }
 
-const updateAccountReceivableBalance = `-- name: UpdateAccountReceivableBalance :exec
+const updateAccountReceivableBalance = `-- name: UpdateAccountReceivableBalance :one
 UPDATE accounts_receivable
 SET balance = $1,
     status = $2,
     updated_at = CURRENT_TIMESTAMP,
     updated_by = $3
 WHERE id = $4
+RETURNING sale_id
 `
 
 type UpdateAccountReceivableBalanceParams struct {
@@ -263,12 +312,14 @@ type UpdateAccountReceivableBalanceParams struct {
 	ID        pgtype.UUID    `json:"id"`
 }
 
-func (q *Queries) UpdateAccountReceivableBalance(ctx context.Context, arg UpdateAccountReceivableBalanceParams) error {
-	_, err := q.db.Exec(ctx, updateAccountReceivableBalance,
+func (q *Queries) UpdateAccountReceivableBalance(ctx context.Context, arg UpdateAccountReceivableBalanceParams) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, updateAccountReceivableBalance,
 		arg.Balance,
 		arg.Status,
 		arg.UpdatedBy,
 		arg.ID,
 	)
-	return err
+	var sale_id pgtype.UUID
+	err := row.Scan(&sale_id)
+	return sale_id, err
 }

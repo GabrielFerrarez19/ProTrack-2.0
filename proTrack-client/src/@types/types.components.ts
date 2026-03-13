@@ -208,14 +208,14 @@ export interface RelatorioResponse {
 }
 
 export interface ContasPagarFormData {
+  fornecedor_id: string;
   fornecedor_nome: string;
-  valor: string; // pode ser string (do input) ou number, depende de como vai salvar
+  valor: string;
   data_vencimento: string;
   status: "pendente" | "pago" | "vencido" | "agendado";
   categoria_id: string;
   descricao: string;
-  data_agendamento: string;
-  valor_pago: string; // idem ao valor, pode ser number se preferir
+  valor_pago: string;
   forma_pagamento: string;
   observacoes: string;
 }

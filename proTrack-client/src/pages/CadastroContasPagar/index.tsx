@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -10,40 +10,74 @@ import FormContasPagar from "./components/FormContasPagar";
 import FormActions from "./components/FormActions";
 import type { ContasPagarFormData } from "../../@types/types.components";
 import { Header } from "../../components/header";
+import { useContasPagar } from "../../hooks/useContasPagar";
+import { listBillCategories } from "../../services/billCategories";
+import { ListPaymentMethodsIsActive } from "../../services/paymentMethods";
+import { listVendorsIsActive } from "../../services/vendors";
 
 export function CadastroContasPagar() {
   const navigate = useNavigate();
+  const { criarConta } = useContasPagar();
 
   const [formData, setFormData] = useState({
+    fornecedor_id: "",
     fornecedor_nome: "",
     valor: "",
     data_vencimento: "",
     status: "pendente",
     categoria_id: "",
     descricao: "",
-    data_agendamento: "",
     valor_pago: "",
     forma_pagamento: "",
     observacoes: "",
   });
 
-  const categorias = [
-    "Mercadoria",
-    "Utilidades",
-    "Tecnologia",
-    "Financeiro",
-    "Outros",
-  ];
-  const statusOptions = ["pendente", "pago", "vencido", "agendado"];
-  const formasPagamento = [
-    "Dinheiro",
-    "PIX",
-    "Cartão de Débito",
-    "Cartão de Crédito",
-    "Transferência",
-    "Boleto",
-    "Cheque",
-  ];
+  const [categorias, setCategorias] = useState<
+    { id: string; nome: string }[]
+  >([]);
+  const [formasPagamento, setFormasPagamento] = useState<
+    { id: string; name: string }[]
+  >([]);
+  const [fornecedores, setFornecedores] = useState<
+    { id: string; name: string }[]
+  >([]);
+
+  useEffect(() => {
+    async function loadAuxiliares() {
+      try {
+        const [billCats, paymentMethods, vendors] = await Promise.all([
+          listBillCategories(),
+          ListPaymentMethodsIsActive(),
+          listVendorsIsActive(),
+        ]);
+
+        setCategorias(
+          billCats.map((c) => ({
+            id: c.id,
+            nome: c.name,
+          })),
+        );
+
+        setFormasPagamento(
+          paymentMethods.map((m) => ({
+            id: m.id,
+            name: m.name,
+          })),
+        );
+
+        setFornecedores(
+          vendors.map((v) => ({
+            id: v.id,
+            name: v.name,
+          })),
+        );
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    loadAuxiliares();
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
@@ -55,13 +89,23 @@ export function CadastroContasPagar() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (
-      !formData.fornecedor_nome ||
+      !formData.fornecedor_id ||
       !formData.valor ||
       !formData.data_vencimento ||
       !formData.categoria_id
     ) {
       return;
     }
+    criarConta({
+      fornecedor_id: formData.fornecedor_id,
+      fornecedor_nome: formData.fornecedor_nome,
+      valor: Number(formData.valor),
+      data_vencimento: formData.data_vencimento,
+      categoria_id: formData.categoria_id,
+      descricao: formData.descricao,
+      forma_pagamento: formData.forma_pagamento,
+      observacoes: formData.observacoes,
+    });
     navigate("/contasPagar");
   };
 
@@ -86,8 +130,8 @@ export function CadastroContasPagar() {
                 formData={formData as ContasPagarFormData}
                 handleInputChange={handleInputChange}
                 categorias={categorias}
-                statusOptions={statusOptions}
                 formasPagamento={formasPagamento}
+                fornecedores={fornecedores}
               />
               <FormActions handleCancel={handleCancel} />
             </form>

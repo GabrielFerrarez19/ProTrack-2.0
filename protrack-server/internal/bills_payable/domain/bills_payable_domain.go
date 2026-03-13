@@ -9,7 +9,6 @@ import (
 )
 
 type CreateBillPayableRequest struct {
-	CompanyID       uuid.UUID `json:"company_id"`
 	VendorID        uuid.UUID `json:"vendor_id"`
 	CategoryID      uuid.UUID `json:"category_id"`
 	PaymentMethodID uuid.UUID `json:"payment_method_id"`
@@ -94,6 +93,14 @@ type ScheduleBillRequest struct {
 	ID            uuid.UUID `json:"id"`
 	CompanyID     uuid.UUID `json:"company_id"`
 	ScheduledDate string    `json:"scheduled_date"`
+}
+
+type GetBillsPayableSummaryResponse struct {
+	TotalQuantity  int32   `json:"total_quantity"`
+	TotalToPay     float64 `json:"total_to_pay"`
+	TotalOverdue   float64 `json:"total_overdue"`
+	TotalScheduled float64 `json:"total_scheduled"`
+	GeneralStatus  string  `json:"general_status"`
 }
 
 func ApplyUpdateBillPayableParams(req UpdateBillPayableRequest, arg *db.UpdateBillPayableParams) {

@@ -13,6 +13,7 @@ type Config struct {
 	DBUser     string
 	DBPassword string
 	DBName     string
+	DBSSLMode  string
 
 	ApiPort string
 
@@ -37,6 +38,7 @@ func LoadConfig() (*Config, error) {
 		DBUser:       getEnv("DB_USER"),
 		DBPassword:   getEnv("DB_PASSWORD"),
 		DBName:       getEnv("DB_NAME"),
+		DBSSLMode:    getEnv("DB_SSLMODE"),
 		ApiPort:      getEnv("API_PORT"),
 		SecretKey:    getEnv("JWT_SECRET"),
 		EvolutionApi: getEnv("EVOLUTION_API"),

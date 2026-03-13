@@ -407,3 +407,24 @@ func (q *Queries) UpdateCustomer(ctx context.Context, arg UpdateCustomerParams) 
 	)
 	return err
 }
+
+const updateCustomerBalance = `-- name: UpdateCustomerBalance :exec
+UPDATE customers
+SET balance_due = $2,
+    -- Atribui o valor final calculado no Go
+    updated_by = $3,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = $1
+    AND deleted_at IS NULL
+`
+
+type UpdateCustomerBalanceParams struct {
+	ID         pgtype.UUID    `json:"id"`
+	BalanceDue pgtype.Numeric `json:"balance_due"`
+	UpdatedBy  pgtype.UUID    `json:"updated_by"`
+}
+
+func (q *Queries) UpdateCustomerBalance(ctx context.Context, arg UpdateCustomerBalanceParams) error {
+	_, err := q.db.Exec(ctx, updateCustomerBalance, arg.ID, arg.BalanceDue, arg.UpdatedBy)
+	return err
+}

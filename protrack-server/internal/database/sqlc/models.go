@@ -189,10 +189,10 @@ type Sale struct {
 	DiscountAmount    pgtype.Numeric     `json:"discount_amount"`
 	Subtotal          pgtype.Numeric     `json:"subtotal"`
 	TotalAmount       pgtype.Numeric     `json:"total_amount"`
-	DueDays           pgtype.Int4        `json:"due_days"`
 	DownPayment       pgtype.Numeric     `json:"down_payment"`
-	PaymentMethod     interface{}        `json:"payment_method"`
 	InstallmentsCount int32              `json:"installments_count"`
+	DueDays           pgtype.Int4        `json:"due_days"`
+	PaymentMethod     interface{}        `json:"payment_method"`
 	Status            interface{}        `json:"status"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 	CreatedBy         pgtype.UUID        `json:"created_by"`

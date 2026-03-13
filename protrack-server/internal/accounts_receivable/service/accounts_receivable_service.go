@@ -18,7 +18,9 @@ type RepositoryInterface interface {
 	GetPendingReceivablesByCustomer(ctx context.Context, arg db.GetPendingReceivablesByCustomerParams) ([]db.AccountsReceivable, error)
 	GetReceivablesBySale(ctx context.Context, saleId pgtype.UUID) ([]db.AccountsReceivable, error)
 	ListOverdueReceivables(ctx context.Context, companyId pgtype.UUID) ([]db.ListOverdueReceivablesRow, error)
-	UpdateAccountReceivableBalance(ctx context.Context, arg db.UpdateAccountReceivableBalanceParams) error
+	UpdateAccountReceivableBalance(ctx context.Context, arg db.UpdateAccountReceivableBalanceParams) (pgtype.UUID, error)
+	GetTotalOpenAmountByCompany(ctx context.Context, companyId pgtype.UUID) (db.GetTotalOpenAmountByCompanyRow, error)
+	GetTotalOverdueAmountByCompany(ctx context.Context, companyId pgtype.UUID) (db.GetTotalOverdueAmountByCompanyRow, error)
 	WithTx(tx db.DBTX) *repository.Repository
 }
 
@@ -156,6 +158,39 @@ func (s *Service) GetReceivablesBySale(ctx context.Context, saleId uuid.UUID) ([
 	return response, nil
 }
 
+func (s *Service) GetReceivablesBySaleTx(ctx context.Context, tx db.DBTX, saleId uuid.UUID) ([]domain.AccountsReceivableResponse, error) {
+	repoTx := db.New(tx)
+
+	accounts, err := repoTx.GetReceivablesBySale(ctx, pgconv.ParseUUIDToPgType(saleId))
+	if err != nil {
+		return []domain.AccountsReceivableResponse{}, err
+	}
+
+	var response []domain.AccountsReceivableResponse
+
+	for _, account := range accounts {
+		response = append(response, domain.AccountsReceivableResponse{
+			ID:                pgconv.PgUUIDToUUID(account.ID),
+			CompanyID:         pgconv.PgUUIDToUUID(account.CompanyID),
+			CustomerID:        pgconv.PgUUIDToUUID(account.CustomerID),
+			SaleID:            pgconv.PgUUIDToUUID(account.SaleID),
+			TotalAmount:       pgconv.PgNumericToFloat64(account.TotalAmount),
+			Balance:           pgconv.PgNumericToFloat64(account.Balance),
+			DueDate:           pgconv.PgDateToString(account.DueDate),
+			InstallmentNumber: int64(pgconv.PgInt4ToInt(account.InstallmentNumber)),
+			TotalInstallments: int64(pgconv.PgInt4ToInt(account.TotalInstallments)),
+			Status:            account.Status,
+			CreatedAt:         pgconv.PgTimestamptzToTime(account.CreatedAt),
+			CreatedBy:         pgconv.PgUUIDToUUID(account.CreatedBy),
+			UpdatedAt:         pgconv.PgTimestamptzToTime(account.UpdatedAt),
+			UpdatedBy:         pgconv.PgUUIDToUUID(account.UpdatedBy),
+			DeletedAt:         pgconv.PgTimestamptzToTime(account.DeletedAt),
+		})
+	}
+
+	return response, nil
+}
+
 func (s *Service) ListOverdueReceivablesTx(ctx context.Context, tx db.DBTX, companyId uuid.UUID) ([]domain.ListOverdueReceivablesRow, error) {
 	repoTx := s.repo.WithTx(tx)
 
@@ -224,14 +259,69 @@ func (s *Service) ListOverdueReceivables(ctx context.Context, companyId uuid.UUI
 	return response, nil
 }
 
-func (s *Service) UpdateAccountReceivableBalance(ctx context.Context, tx db.DBTX, companyId, customerId, userId uuid.UUID, req domain.UpdateAccountReceivableBalanceRequest) error {
+func (s *Service) UpdateAccountReceivableBalance(ctx context.Context, companyId, customerId, userId uuid.UUID, req domain.UpdateAccountReceivableBalanceRequest) (uuid.UUID, error) {
 	accounts, err := s.repo.GetPendingReceivablesByCustomer(ctx, db.GetPendingReceivablesByCustomerParams{
 		CustomerID: pgconv.ParseUUIDToPgType(customerId),
 		CompanyID:  pgconv.ParseUUIDToPgType(companyId),
 	})
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
+
+	remaining := req.Balance
+
+	var saleID uuid.UUID
+
+	for _, account := range accounts {
+		if remaining <= 0 {
+			break
+		}
+
+		currentAccountBalance := pgconv.PgNumericToFloat64(account.Balance)
+
+		var amountToApply float64
+		var newBalance float64
+		var newStatus string
+
+		if remaining >= currentAccountBalance {
+			amountToApply = currentAccountBalance
+			newBalance = 0
+			newStatus = "paid"
+		} else {
+			amountToApply = remaining
+			newBalance = currentAccountBalance - remaining
+			newStatus = "partial"
+		}
+
+		saleIdPg, err := s.repo.UpdateAccountReceivableBalance(ctx, db.UpdateAccountReceivableBalanceParams{
+			Balance:   pgconv.Float64ToPgNumeric(newBalance),
+			Status:    newStatus,
+			UpdatedBy: pgconv.ParseUUIDToPgType(userId),
+			ID:        account.ID,
+		})
+		if err != nil {
+			return uuid.Nil, err
+		}
+
+		saleID = pgconv.PgUUIDToUUID(saleIdPg)
+
+		remaining -= amountToApply
+	}
+	return saleID, nil
+}
+
+func (s *Service) UpdateAccountReceivableBalanceTx(ctx context.Context, tx db.DBTX, companyId, customerId, userId uuid.UUID, req domain.UpdateAccountReceivableBalanceRequest) (uuid.UUID, error) {
+	repoTx := db.New(tx)
+
+	accounts, err := repoTx.GetPendingReceivablesByCustomer(ctx, db.GetPendingReceivablesByCustomerParams{
+		CustomerID: pgconv.ParseUUIDToPgType(customerId),
+		CompanyID:  pgconv.ParseUUIDToPgType(companyId),
+	})
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	var saleID uuid.UUID
 
 	remaining := req.Balance
 
@@ -256,16 +346,36 @@ func (s *Service) UpdateAccountReceivableBalance(ctx context.Context, tx db.DBTX
 			newStatus = "partial"
 		}
 
-		if err := s.repo.UpdateAccountReceivableBalance(ctx, db.UpdateAccountReceivableBalanceParams{
+		saleIdPg, err := repoTx.UpdateAccountReceivableBalance(ctx, db.UpdateAccountReceivableBalanceParams{
 			Balance:   pgconv.Float64ToPgNumeric(newBalance),
 			Status:    newStatus,
 			UpdatedBy: pgconv.ParseUUIDToPgType(userId),
 			ID:        account.ID,
-		}); err != nil {
-			return err
+		})
+		if err != nil {
+			return uuid.Nil, err
 		}
+		saleID = pgconv.PgUUIDToUUID(saleIdPg)
 
 		remaining -= amountToApply
 	}
-	return nil
+	return saleID, nil
+}
+
+func (s *Service) GetTotalOpenAmountByCompany(ctx context.Context, companyId uuid.UUID) (float64, error) {
+	total, err := s.repo.GetTotalOpenAmountByCompany(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return 0, err
+	}
+
+	return pgconv.PgNumericToFloat64(total.TotalOpen), nil
+}
+
+func (s *Service) GetTotalOverdueAmountByCompany(ctx context.Context, companyId uuid.UUID) (float64, error) {
+	total, err := s.repo.GetTotalOverdueAmountByCompany(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return 0, err
+	}
+
+	return pgconv.PgNumericToFloat64(total.TotalOverdue), nil
 }

@@ -8,36 +8,19 @@ import {
 import { FiltrosContas } from "./components/FiltrosContas";
 import { ResumoCards } from "./components/ResumoCards";
 import { TabelaContas } from "./components/TabelaContas";
-import { useDashboard } from "../../hooks/useDashboard";
-import { useVendasVencidas } from "../../hooks/useVendasVencidas";
 import { Header } from "../../components/header";
 
-// IMPORT DOS COMPONENTES SEPARADOS
-import { StatusMonitoramento } from "./components/StatusMonitoramento";
-/* import { CardMonitoramento } from "./components/CardMonitoramento"; */
+import { useContasReceber } from "@/hooks/useContasReceber";
 
 export function ContasReceber() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
 
-  const { dados, loading, error } = useDashboard();
-  const {
-    vendas,
-    totalVencidas,
-    loadingVencidas,
-    errorVencidas,
-    monitoramentoExecutado,
-    executarMonitoramento,
-    reload,
-  } = useVendasVencidas();
+  const { dados, loading, error } = useContasReceber();
 
-  console.log("vendasIndex", vendas);
+  if (loading) return <p className="p-6">Carregando dados financeiros...</p>;
 
-  if (loading || loadingVencidas)
-    return <p className="p-6">Carregando dados financeiros...</p>;
-
-  if (error || errorVencidas)
-    return <p className="p-6 text-red-600">{error || errorVencidas}</p>;
+  if (error) return <p className="p-6 text-red-600">{error}</p>;
 
   return (
     <div className="p-6 space-y-6">
@@ -46,19 +29,12 @@ export function ContasReceber() {
           title="Contas a Receber!"
           text="Gerencie os valores a receber de clientes."
         />
-
-        {/* Status do Monitoramento */}
-        <StatusMonitoramento
-          monitoramentoExecutado={monitoramentoExecutado}
-          executarMonitoramento={executarMonitoramento}
-          reload={reload}
-        />
       </div>
 
       {/* Card de Monitoramento */}
       {/* <CardMonitoramento monitoramentoExecutado={monitoramentoExecutado} /> */}
 
-      <ResumoCards totalVencidas={totalVencidas} dados={dados} />
+      <ResumoCards dados={dados} />
 
       <FiltrosContas
         searchTerm={searchTerm}
@@ -72,7 +48,7 @@ export function ContasReceber() {
           <CardTitle>Lista de Contas a Receber</CardTitle>
         </CardHeader>
         <CardContent>
-          <TabelaContas vendas={vendas} />
+          <TabelaContas vendas={[]} />
         </CardContent>
       </Card>
     </div>

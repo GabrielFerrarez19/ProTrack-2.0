@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/accounts_receivable/domain"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/accounts_receivable/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/cache"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/adapters/jwt"
@@ -102,4 +103,70 @@ func (h *Handler) ListOverdueReceivables(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"accounts_receivable": accounts})
+}
+
+func (h *Handler) GetTotalOpenAmountByCompany(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	total, err := h.service.GetTotalOpenAmountByCompany(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"total_open": total})
+}
+
+func (h *Handler) GetTotalOverdueAmountByCompany(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	total, err := h.service.GetTotalOverdueAmountByCompany(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"total_overdue": total})
+}
+
+func (h *Handler) GetTotalPendingAndOverdue(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "company_id is null"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	var response domain.GetTotalPendingAndOverdueResponse
+
+	totalOverdue, err := h.service.GetTotalOverdueAmountByCompany(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	totalPending, err := h.service.GetTotalOpenAmountByCompany(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	response.TotalOverdue = totalOverdue
+
+	response.TotalPending = totalPending
+
+	c.JSON(http.StatusOK, gin.H{"totals": response})
 }

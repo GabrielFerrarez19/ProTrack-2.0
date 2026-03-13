@@ -24,10 +24,8 @@ type ProductCategory struct {
 }
 
 type CreateProductCategoryRequest struct {
-	CompanyID uuid.UUID `json:"company_id"`
-	Name      string    `json:"name"`
-	Color     string    `json:"color"`
-	CreatedBy uuid.UUID `json:"created_by"`
+	Name  string `json:"name"`
+	Color string `json:"color"`
 }
 
 type DeleteProductCategoryRequest struct {

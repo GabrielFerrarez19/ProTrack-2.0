@@ -15,12 +15,13 @@ type DB struct {
 
 func NewConnect(cfg *config.Config) (*DB, error) {
 	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		cfg.DBHost,
 		cfg.DBPort,
 		cfg.DBUser,
 		cfg.DBPassword,
 		cfg.DBName,
+		cfg.DBSSLMode,
 	)
 
 	config, err := pgxpool.ParseConfig(dsn)

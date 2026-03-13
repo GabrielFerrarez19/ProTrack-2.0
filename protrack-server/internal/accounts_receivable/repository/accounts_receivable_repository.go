@@ -47,6 +47,14 @@ func (r *Repository) ListOverdueReceivables(ctx context.Context, companyId pgtyp
 	return r.queries().ListOverdueReceivables(ctx, companyId)
 }
 
-func (r *Repository) UpdateAccountReceivableBalance(ctx context.Context, arg db.UpdateAccountReceivableBalanceParams) error {
+func (r *Repository) UpdateAccountReceivableBalance(ctx context.Context, arg db.UpdateAccountReceivableBalanceParams) (pgtype.UUID, error) {
 	return r.queries().UpdateAccountReceivableBalance(ctx, arg)
+}
+
+func (r *Repository) GetTotalOpenAmountByCompany(ctx context.Context, companyId pgtype.UUID) (db.GetTotalOpenAmountByCompanyRow, error) {
+	return r.queries().GetTotalOpenAmountByCompany(ctx, companyId)
+}
+
+func (r *Repository) GetTotalOverdueAmountByCompany(ctx context.Context, companyId pgtype.UUID) (db.GetTotalOverdueAmountByCompanyRow, error) {
+	return r.queries().GetTotalOverdueAmountByCompany(ctx, companyId)
 }

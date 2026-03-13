@@ -44,6 +44,20 @@ func (s *Service) CreatePaymentHistory(ctx context.Context, req domain.CreatePay
 	})
 }
 
+func (s *Service) CreatePaymentHistoryTx(ctx context.Context, tx db.DBTX, req domain.CreatePaymentHistoryRequest) error {
+	repoTx := db.New(tx)
+
+	return repoTx.CreatePaymentHistory(ctx, db.CreatePaymentHistoryParams{
+		CompanyID:       pgconv.ParseUUIDToPgType(req.CompanyID),
+		CustomerID:      pgconv.ParseUUIDToPgType(req.CustomerID),
+		SaleID:          pgconv.ParseUUIDToPgType(req.SaleID),
+		PaymentMethodID: pgconv.ParseUUIDToPgType(req.PaymentMethodID),
+		UserID:          pgconv.ParseUUIDToPgType(req.UserID),
+		AmountPaid:      pgconv.Float64ToPgNumeric(req.AmountPaid),
+		Notes:           pgconv.ParseStringToPgText(req.Notes),
+	})
+}
+
 func (s *Service) GetPaymentsByCustomer(ctx context.Context, req domain.GetPaymentsByCustomerRequest) ([]domain.PaymentHistoryResponse, error) {
 	paymentsHistory, err := s.repo.GetPaymentsByCustomer(ctx, db.GetPaymentsByCustomerParams{
 		CompanyID:  pgconv.ParseUUIDToPgType(req.CompanyID),

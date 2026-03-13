@@ -86,7 +86,7 @@ export function AccountsTable({
     try {
       const valorPago = prompt(
         `Valor pago para ${conta.fornecedor_nome}:`,
-        conta.valor.toString()
+        conta.valor.toString(),
       );
       if (!valorPago) return;
 
@@ -96,7 +96,7 @@ export function AccountsTable({
       const resultado = await marcarComoPaga(
         conta.id,
         Number(valorPago),
-        formaPagamento
+        formaPagamento,
       );
       if (resultado) {
         toast.success("Conta marcada como paga com sucesso!");
@@ -110,7 +110,7 @@ export function AccountsTable({
   const handleExcluir = async (conta: AccountsTableProps["contas"][0]) => {
     // Usar toast para confirmação (alternativa ao confirm nativo)
     const confirmacao = window.confirm(
-      `Tem certeza que deseja excluir a conta de ${conta.fornecedor_nome}?`
+      `Tem certeza que deseja excluir a conta de ${conta.fornecedor_nome}?`,
     );
 
     if (!confirmacao) {
@@ -212,11 +212,6 @@ export function AccountsTable({
                     <div className="font-bold text-sm">
                       {formatarMoeda(conta.valor)}
                     </div>
-                    {conta.valor_pago && (
-                      <div className="text-xs text-green-600">
-                        Pago: {formatarMoeda(conta.valor_pago)}
-                      </div>
-                    )}
                   </div>
                 </TableCell>
                 <TableCell>

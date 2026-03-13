@@ -13,17 +13,24 @@ import type { ContasPagarFormData } from "../../../@types/types.components";
 interface FormContasPagarProps {
   formData: ContasPagarFormData;
   handleInputChange: (field: string, value: string) => void;
-  categorias: string[];
-  statusOptions: string[];
-  formasPagamento: string[];
+  categorias: { id: string; nome: string }[];
+  formasPagamento: { id: string; name: string }[];
+  fornecedores: { id: string; name: string }[];
 }
 
 export default function FormContasPagar({
   formData,
   handleInputChange,
   categorias,
-  statusOptions,
+  formasPagamento,
+  fornecedores,
 }: FormContasPagarProps) {
+  const handleFornecedorChange = (value: string) => {
+    handleInputChange("fornecedor_id", value);
+    const selected = fornecedores.find((f) => f.id === value);
+    handleInputChange("fornecedor_nome", selected?.name ?? "");
+  };
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -32,15 +39,22 @@ export default function FormContasPagar({
           <Label htmlFor="fornecedor">
             Fornecedor <span className="text-destructive">*</span>
           </Label>
-          <Input
-            id="fornecedor"
-            placeholder="Nome do fornecedor"
-            value={formData.fornecedor_nome}
-            onChange={(e) =>
-              handleInputChange("fornecedor_nome", e.target.value)
-            }
+          <Select
+            value={formData.fornecedor_id}
+            onValueChange={handleFornecedorChange}
             required
-          />
+          >
+            <SelectTrigger id="fornecedor">
+              <SelectValue placeholder="Selecione o fornecedor" />
+            </SelectTrigger>
+            <SelectContent>
+              {fornecedores.map((fornecedor) => (
+                <SelectItem key={fornecedor.id} value={fornecedor.id}>
+                  {fornecedor.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Valor */}
@@ -90,49 +104,32 @@ export default function FormContasPagar({
             </SelectTrigger>
             <SelectContent>
               {categorias.map((categoria) => (
-                <SelectItem key={categoria} value={categoria}>
-                  {categoria}
+                <SelectItem key={categoria.id} value={categoria.id}>
+                  {categoria.nome}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        {/* Status */}
+        {/* Forma de pagamento */}
         <div className="space-y-2">
-          <Label htmlFor="status">
-            Status <span className="text-destructive">*</span>
-          </Label>
+          <Label htmlFor="formaPagamento">Forma de Pagamento</Label>
           <Select
-            value={formData.status.toLowerCase()}
-            onValueChange={(value) => handleInputChange("status", value)}
-            required
-            disabled
+            value={formData.forma_pagamento}
+            onValueChange={(value) => handleInputChange("forma_pagamento", value)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Selecione o status" />
+              <SelectValue placeholder="Selecione a forma de pagamento" />
             </SelectTrigger>
             <SelectContent>
-              {statusOptions.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
+              {formasPagamento.map((forma) => (
+                <SelectItem key={forma.id} value={forma.id}>
+                  {forma.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </div>
-
-        {/* Data de agendamento */}
-        <div className="space-y-2">
-          <Label htmlFor="dataAgendamento">Data de Agendamento</Label>
-          <Input
-            id="dataAgendamento"
-            type="date"
-            value={formData.data_agendamento}
-            onChange={(e) =>
-              handleInputChange("data_agendamento", e.target.value)
-            }
-          />
         </div>
       </div>
 

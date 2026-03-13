@@ -41,9 +41,7 @@ func (h *Handler) CreateBillPayable(c *gin.Context) {
 		return
 	}
 
-	req.CompanyID = companyId
-
-	if err := h.service.CreateBillPayable(c.Request.Context(), req); err != nil {
+	if err := h.service.CreateBillPayable(c.Request.Context(), companyId, req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -250,4 +248,22 @@ func (h *Handler) UpdateBillPayable(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func (h *Handler) GetBillsPayableSummary(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	billsSummary, err := h.service.GetBillsPayableSummary(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"bills_summary": billsSummary})
 }
