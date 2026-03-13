@@ -329,7 +329,7 @@ func (h *Handler) ContSalesPendingAndOverdue(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"cont_sales": count})
 }
 
-func (h *Handler) ListSalesWithInstallments(c *gin.Context) {
+func (h *Handler) ListSalesWithDetails(c *gin.Context) {
 	companyIdAny, exists := c.Get("company_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
@@ -338,7 +338,25 @@ func (h *Handler) ListSalesWithInstallments(c *gin.Context) {
 
 	companyId := companyIdAny.(uuid.UUID)
 
-	sales, err := h.service.ListSalesWithInstallments(c.Request.Context(), companyId)
+	sales, err := h.service.ListSalesWithDetails(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"sales_completed": sales})
+}
+
+func (h *Handler) ListSalesWithDetailsPendingOverdue(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	sales, err := h.service.ListSalesWithDetailsPendingOverdue(c.Request.Context(), companyId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

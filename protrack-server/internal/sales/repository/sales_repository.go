@@ -96,6 +96,10 @@ func (r *Repository) ContSalesPendingAndOverdue(ctx context.Context, companyId p
 	return r.queries().ContSalesPendingAndOverdue(ctx, companyId)
 }
 
-func (r *Repository) ListSalesWithInstallments(ctx context.Context, companyID pgtype.UUID) ([]db.ListSalesWithInstallmentsRow, error) {
-	return r.queries().ListSalesWithInstallments(ctx, companyID)
+func (r *Repository) ListSalesWithDetails(ctx context.Context, companyID pgtype.UUID) ([]db.ListSalesWithDetailsRow, error) {
+	return r.queries().ListSalesWithDetails(ctx, companyID)
+}
+
+func (r *Repository) ListSalesWithDetailsPendingOverdue(ctx context.Context, companyID pgtype.UUID) ([]db.ListSalesWithDetailsPendingOverdueRow, error) {
+	return r.queries().ListSalesWithDetailsPendingOverdue(ctx, companyID)
 }

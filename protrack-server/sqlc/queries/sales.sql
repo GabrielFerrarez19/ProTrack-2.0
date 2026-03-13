@@ -9,9 +9,7 @@ INSERT INTO sales (
         installments_count,
         down_payment,
         due_days,
-        down_payment,
         payment_method,
-        installments_count,
         created_by,
         status
     )
@@ -167,7 +165,7 @@ FROM sales
 WHERE company_id = $1
     AND status IN ('pending', 'overdue')
     AND deleted_at IS NULL;
--- name: ListSalesWithInstallments :many
+-- name: ListSalesWithDetails :many
 SELECT -- Dados da venda
     s.id AS sale_id,
     s.sale_at,
@@ -201,6 +199,44 @@ FROM sales s
     LEFT JOIN accounts_receivable ar ON s.id = ar.sale_id
 WHERE s.company_id = $1 -- id da empresa
     AND s.deleted_at IS NULL
+ORDER BY s.sale_at DESC,
+    si.id,
+    ar.installment_number;
+-- name: ListSalesWithDetailsPendingOverdue :many
+SELECT -- Dados da venda
+    s.id AS sale_id,
+    s.sale_at,
+    s.subtotal,
+    s.discount_amount,
+    s.total_amount,
+    s.installments_count,
+    s.payment_method,
+    s.status AS sale_status,
+    -- Dados do cliente
+    c.id AS customer_id,
+    c.full_name AS customer_name,
+    -- Dados dos produtos (itens da venda)
+    si.id AS sale_item_id,
+    si.product_id,
+    si.quantity,
+    si.unit_price,
+    si.discount AS item_discount,
+    p.name AS product_name,
+    -- Parcelas (accounts_receivable)
+    ar.id AS installment_id,
+    ar.total_amount AS installment_total_amount,
+    ar.balance AS installment_balance,
+    ar.due_date,
+    ar.installment_number,
+    ar.status AS installment_status
+FROM sales s
+    INNER JOIN customers c ON s.customer_id = c.id
+    INNER JOIN sale_items si ON s.id = si.sale_id
+    INNER JOIN products p ON si.product_id = p.id
+    LEFT JOIN accounts_receivable ar ON s.id = ar.sale_id
+WHERE s.company_id = $1 -- id da empresa
+    AND s.deleted_at IS NULL
+    AND s.status IN ('pending', 'overdue')
 ORDER BY s.sale_at DESC,
     si.id,
     ar.installment_number;
