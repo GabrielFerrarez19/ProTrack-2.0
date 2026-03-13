@@ -191,7 +191,9 @@ CREATE TABLE IF NOT EXISTS sales (
     down_payment NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
     installments_count INTEGER NOT NULL DEFAULT 1,
     due_days INT DEFAULT NULL,
+    down_payment NUMERIC(10, 2) DEFAULT 0.00,
     payment_method payment_method_enum DEFAULT 'cash',
+    installments_count INT NOT NULL DEFAULT 1,
     status account_status_enum DEFAULT 'pending',
     -- Auditoria (Traceability) usando TIMESTAMPTZ
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

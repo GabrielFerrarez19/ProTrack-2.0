@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	ContSalesPendingAndOverdue(ctx context.Context, companyID pgtype.UUID) (int64, error)
 	CountCustomers(ctx context.Context, companyID pgtype.UUID) (int64, error)
 	CountProducts(ctx context.Context, companyID pgtype.UUID) (int64, error)
 	CountSales(ctx context.Context, companyID pgtype.UUID) (int64, error)
@@ -90,6 +91,7 @@ type Querier interface {
 	ListProductsByCompany(ctx context.Context, companyID pgtype.UUID) ([]ListProductsByCompanyRow, error)
 	ListSales(ctx context.Context, companyID pgtype.UUID) ([]ListSalesRow, error)
 	ListSalesByCompanyAndStatus(ctx context.Context, arg ListSalesByCompanyAndStatusParams) ([]ListSalesByCompanyAndStatusRow, error)
+	ListSalesWithInstallments(ctx context.Context, companyID pgtype.UUID) ([]ListSalesWithInstallmentsRow, error)
 	ListUsers(ctx context.Context) ([]User, error)
 	ListVendors(ctx context.Context, companyID pgtype.UUID) ([]Vendor, error)
 	ListVendorsIsActive(ctx context.Context, companyID pgtype.UUID) ([]Vendor, error)

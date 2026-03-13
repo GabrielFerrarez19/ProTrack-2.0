@@ -47,16 +47,12 @@ func (h *Handler) CreateSale(c *gin.Context) {
 
 	var req domain.CreateSaleRequest
 
-	req.CompanyID = companyId
-
-	req.CreatedBy = userId
-
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	id, err := h.service.CreateSale(c.Request.Context(), req)
+	id, err := h.service.CreateSale(c.Request.Context(), userId, companyId, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -313,4 +309,40 @@ func (h *Handler) GetTotalAmountIsOverdue(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"total_overdue": total})
+}
+
+func (h *Handler) ContSalesPendingAndOverdue(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	count, err := h.service.ContSalesPendingAndOverdue(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"cont_sales": count})
+}
+
+func (h *Handler) ListSalesWithInstallments(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	sales, err := h.service.ListSalesWithInstallments(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"sales_completed": sales})
 }

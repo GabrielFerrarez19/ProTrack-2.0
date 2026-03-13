@@ -11,6 +11,21 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const contSalesPendingAndOverdue = `-- name: ContSalesPendingAndOverdue :one
+SELECT COUNT(*)
+FROM sales
+WHERE company_id = $1
+    AND status IN ('pending', 'overdue')
+    AND deleted_at IS NULL
+`
+
+func (q *Queries) ContSalesPendingAndOverdue(ctx context.Context, companyID pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, contSalesPendingAndOverdue, companyID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countSales = `-- name: CountSales :one
 SELECT COUNT(*)
 FROM sales
@@ -36,7 +51,9 @@ INSERT INTO sales (
         installments_count,
         down_payment,
         due_days,
+        down_payment,
         payment_method,
+        installments_count,
         created_by,
         status
     )
@@ -63,10 +80,10 @@ type CreateSaleParams struct {
 	DiscountAmount    pgtype.Numeric `json:"discount_amount"`
 	Subtotal          pgtype.Numeric `json:"subtotal"`
 	TotalAmount       pgtype.Numeric `json:"total_amount"`
-	InstallmentsCount int32          `json:"installments_count"`
-	DownPayment       pgtype.Numeric `json:"down_payment"`
 	DueDays           pgtype.Int4    `json:"due_days"`
 	PaymentMethod     interface{}    `json:"payment_method"`
+	InstallmentsCount int32          `json:"installments_count"`
+	DownPayment       pgtype.Numeric `json:"down_payment"`
 	CreatedBy         pgtype.UUID    `json:"created_by"`
 	Status            interface{}    `json:"status"`
 }
@@ -81,7 +98,9 @@ func (q *Queries) CreateSale(ctx context.Context, arg CreateSaleParams) (pgtype.
 		arg.InstallmentsCount,
 		arg.DownPayment,
 		arg.DueDays,
+		arg.DownPayment,
 		arg.PaymentMethod,
+		arg.InstallmentsCount,
 		arg.CreatedBy,
 		arg.Status,
 	)
@@ -159,7 +178,9 @@ func (q *Queries) GetSaleById(ctx context.Context, arg GetSaleByIdParams) (GetSa
 		&i.DownPayment,
 		&i.InstallmentsCount,
 		&i.DueDays,
+		&i.DownPayment,
 		&i.PaymentMethod,
+		&i.InstallmentsCount,
 		&i.Status,
 		&i.CreatedAt,
 		&i.CreatedBy,
@@ -275,7 +296,9 @@ func (q *Queries) GetSaleByIdWhatsapp(ctx context.Context, id pgtype.UUID) (GetS
 		&i.DownPayment,
 		&i.InstallmentsCount,
 		&i.DueDays,
+		&i.DownPayment,
 		&i.PaymentMethod,
+		&i.InstallmentsCount,
 		&i.Status,
 		&i.CreatedAt,
 		&i.CreatedBy,
@@ -488,6 +511,113 @@ func (q *Queries) ListSalesByCompanyAndStatus(ctx context.Context, arg ListSales
 			&i.Discount,
 			&i.ProductName,
 			&i.CustomerName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listSalesWithInstallments = `-- name: ListSalesWithInstallments :many
+SELECT -- Dados da venda
+    s.id AS sale_id,
+    s.sale_at,
+    s.subtotal,
+    s.discount_amount,
+    s.total_amount,
+    s.installments_count,
+    s.payment_method,
+    s.status AS sale_status,
+    -- Dados do cliente
+    c.id AS customer_id,
+    c.full_name AS customer_name,
+    -- Dados dos produtos (itens da venda)
+    si.id AS sale_item_id,
+    si.product_id,
+    si.quantity,
+    si.unit_price,
+    si.discount AS item_discount,
+    p.name AS product_name,
+    -- Parcelas (accounts_receivable)
+    ar.id AS installment_id,
+    ar.total_amount AS installment_total_amount,
+    ar.balance AS installment_balance,
+    ar.due_date,
+    ar.installment_number,
+    ar.status AS installment_status
+FROM sales s
+    INNER JOIN customers c ON s.customer_id = c.id
+    INNER JOIN sale_items si ON s.id = si.sale_id
+    INNER JOIN products p ON si.product_id = p.id
+    LEFT JOIN accounts_receivable ar ON s.id = ar.sale_id
+WHERE s.company_id = $1 -- id da empresa
+    AND s.deleted_at IS NULL
+ORDER BY s.sale_at DESC,
+    si.id,
+    ar.installment_number
+`
+
+type ListSalesWithInstallmentsRow struct {
+	SaleID                 pgtype.UUID        `json:"sale_id"`
+	SaleAt                 pgtype.Timestamptz `json:"sale_at"`
+	Subtotal               pgtype.Numeric     `json:"subtotal"`
+	DiscountAmount         pgtype.Numeric     `json:"discount_amount"`
+	TotalAmount            pgtype.Numeric     `json:"total_amount"`
+	InstallmentsCount      int32              `json:"installments_count"`
+	PaymentMethod          interface{}        `json:"payment_method"`
+	SaleStatus             interface{}        `json:"sale_status"`
+	CustomerID             pgtype.UUID        `json:"customer_id"`
+	CustomerName           string             `json:"customer_name"`
+	SaleItemID             pgtype.UUID        `json:"sale_item_id"`
+	ProductID              pgtype.UUID        `json:"product_id"`
+	Quantity               int32              `json:"quantity"`
+	UnitPrice              pgtype.Numeric     `json:"unit_price"`
+	ItemDiscount           pgtype.Numeric     `json:"item_discount"`
+	ProductName            string             `json:"product_name"`
+	InstallmentID          pgtype.UUID        `json:"installment_id"`
+	InstallmentTotalAmount pgtype.Numeric     `json:"installment_total_amount"`
+	InstallmentBalance     pgtype.Numeric     `json:"installment_balance"`
+	DueDate                pgtype.Date        `json:"due_date"`
+	InstallmentNumber      pgtype.Int4        `json:"installment_number"`
+	InstallmentStatus      pgtype.Text        `json:"installment_status"`
+}
+
+func (q *Queries) ListSalesWithInstallments(ctx context.Context, companyID pgtype.UUID) ([]ListSalesWithInstallmentsRow, error) {
+	rows, err := q.db.Query(ctx, listSalesWithInstallments, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListSalesWithInstallmentsRow{}
+	for rows.Next() {
+		var i ListSalesWithInstallmentsRow
+		if err := rows.Scan(
+			&i.SaleID,
+			&i.SaleAt,
+			&i.Subtotal,
+			&i.DiscountAmount,
+			&i.TotalAmount,
+			&i.InstallmentsCount,
+			&i.PaymentMethod,
+			&i.SaleStatus,
+			&i.CustomerID,
+			&i.CustomerName,
+			&i.SaleItemID,
+			&i.ProductID,
+			&i.Quantity,
+			&i.UnitPrice,
+			&i.ItemDiscount,
+			&i.ProductName,
+			&i.InstallmentID,
+			&i.InstallmentTotalAmount,
+			&i.InstallmentBalance,
+			&i.DueDate,
+			&i.InstallmentNumber,
+			&i.InstallmentStatus,
 		); err != nil {
 			return nil, err
 		}

@@ -17,6 +17,10 @@ func NewRepository(db db.DBTX) *Repository {
 	}
 }
 
+func (r *Repository) queries() *db.Queries {
+	return db.New(r.db)
+}
+
 func (r *Repository) WithTx(tx db.DBTX) *Repository {
 	return &Repository{
 		db: tx,
@@ -86,4 +90,12 @@ func (r *Repository) UpdateOverdueSalesAndAccounts(ctx context.Context) ([]db.Up
 func (r *Repository) GetSaleByIdJust(ctx context.Context, saleId pgtype.UUID) (db.GetSaleByIdJustRow, error) {
 	q := db.New(r.db)
 	return q.GetSaleByIdJust(ctx, saleId)
+}
+
+func (r *Repository) ContSalesPendingAndOverdue(ctx context.Context, companyId pgtype.UUID) (int64, error) {
+	return r.queries().ContSalesPendingAndOverdue(ctx, companyId)
+}
+
+func (r *Repository) ListSalesWithInstallments(ctx context.Context, companyID pgtype.UUID) ([]db.ListSalesWithInstallmentsRow, error) {
+	return r.queries().ListSalesWithInstallments(ctx, companyID)
 }
