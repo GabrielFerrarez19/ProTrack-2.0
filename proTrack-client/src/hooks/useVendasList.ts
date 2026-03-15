@@ -1,16 +1,16 @@
 import { useState, useCallback, useEffect } from "react";
-import { ListSales } from "@/services/sales";
-import type { ListSalesByCompanyResponse } from "@/@types/sales";
+import { ListSalesWithDetails } from "@/services/sales";
+import type { SaleWithDetails } from "@/@types/sales";
 
 export const useVendasList = () => {
-  const [vendas, setVendas] = useState<ListSalesByCompanyResponse[]>([]);
+  const [vendas, setVendas] = useState<SaleWithDetails[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadVendas = useCallback(async () => {
     try {
       setLoading(true);
-      const sales = await ListSales();
+      const sales = await ListSalesWithDetails();
       setVendas(sales);
     } catch {
       setVendas([]);

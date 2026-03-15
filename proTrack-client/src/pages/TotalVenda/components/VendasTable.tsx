@@ -11,67 +11,58 @@ import { Badge } from "../../../components/ui/badge";
 import { Dialog } from "../../../components/ui/dialog";
 import { Button } from "../../../components/ui/button";
 import { DialogAlterVenda } from "./DialogAlter";
+import { DialogDetalhesVenda } from "./DialogDetalhesVenda";
 import { formatCurrency, formatStatus } from "../../../utils/functions";
-import type { ListSalesByCompanyResponse, VendaAgrupada } from "@/@types/sales";
+import type { SaleWithDetails, VendaAgrupada } from "@/@types/sales";
+import { Eye } from "lucide-react";
 
 // Cores fixas para cada coluna
 const totalColor = "bg-blue-100 text-blue-800";
 const descontoColor = "bg-yellow-100 text-yellow-800";
 const totalComDescontoColor = "bg-green-100 text-green-800";
 
-function groupSalesBySaleId(
-  rows: ListSalesByCompanyResponse[],
-): VendaAgrupada[] {
-  const map = new Map<string, VendaAgrupada>();
-  for (const row of rows) {
-    const id = String(row.sale_id);
-    if (!map.has(id)) {
-      map.set(id, {
-        sale_id: row.sale_id,
-        total_amount: row.total_amount,
-        discount_amount: row.discount_amount,
-        status: String(row.status ?? ""),
-        sale_date: row.sale_date,
-        customer_name: row.customer_name,
-        itens: [],
-      });
-    }
-    map.get(id)!.itens.push({
-      item_id: row.item_id,
-      product_id: row.product_id,
-      quantity: row.quantity,
-      unit_price: row.unit_price,
-      discount: row.discount,
-      product_name: row.product_name,
-    });
-  }
-  return Array.from(map.values());
+function saleWithDetailsToVendaAgrupada(v: SaleWithDetails): VendaAgrupada {
+  const { sale, products } = v;
+  return {
+    sale_id: sale.sale_id,
+    total_amount: sale.total_amount,
+    discount_amount: sale.discount_amount,
+    status: String(sale.sale_status ?? ""),
+    sale_date: sale.sale_at,
+    customer_name: sale.customer_name,
+    itens: products.map((p) => ({
+      item_id: p.sale_item_id,
+      product_id: p.product_id,
+      quantity: p.quantity,
+      unit_price: p.unit_price,
+      discount: p.item_discount,
+      product_name: p.product_name,
+    })),
+  };
 }
 
 interface VendasTableProps {
-  vendas: ListSalesByCompanyResponse[];
+  vendas: SaleWithDetails[];
   onVendaUpdated?: () => void;
 }
 
 export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
-  const [selectedVenda, setSelectedVenda] = useState<VendaAgrupada | null>(
-    null,
-  );
+  const [selectedVenda, setSelectedVenda] = useState<VendaAgrupada | null>(null);
+  const [selectedVendaDetalhes, setSelectedVendaDetalhes] = useState<SaleWithDetails | null>(null);
   const [open, setOpen] = useState(false);
+  const [openDetalhes, setOpenDetalhes] = useState(false);
 
   // Estados de paginação
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const vendasAgrupadas = useMemo(() => groupSalesBySaleId(vendas), [vendas]);
-
-  // Cálculos de paginação
-  const totalPages = Math.ceil(vendasAgrupadas.length / itemsPerPage);
+  // Cálculos de paginação (cada item já é uma venda completa)
+  const totalPages = Math.ceil(vendas.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentVendas = useMemo(() => {
-    return vendasAgrupadas.slice(startIndex, endIndex);
-  }, [vendasAgrupadas, startIndex, endIndex]);
+    return vendas.slice(startIndex, endIndex);
+  }, [vendas, startIndex, endIndex]);
 
   // Funções de navegação
   const goToPage = (page: number) => {
@@ -92,6 +83,17 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
       setSelectedVenda(null);
       if (onVendaUpdated) onVendaUpdated();
     }
+  };
+
+  const handleOpenDetalhes = (e: React.MouseEvent, venda: SaleWithDetails) => {
+    e.stopPropagation();
+    setSelectedVendaDetalhes(venda);
+    setOpenDetalhes(true);
+  };
+
+  const handleOpenEditar = (venda: SaleWithDetails) => {
+    setSelectedVenda(saleWithDetailsToVendaAgrupada(venda));
+    setOpen(true);
   };
 
   return (
@@ -117,39 +119,39 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
             <TableHead className="text-gray-700 font-semibold">
               Status
             </TableHead>
+            <TableHead className="text-gray-700 font-semibold w-[100px]">
+              Ações
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {currentVendas.map((venda) => {
+            const s = venda.sale;
             const desconto =
-              Number(venda.total_amount ?? 0) -
-              Number(venda.discount_amount ?? 0);
+              Number(s.total_amount ?? 0) - Number(s.discount_amount ?? 0);
             const statusFormatted = formatStatus(
-              venda.status as "pendente" | "pago" | "cancelado" | "aprazo",
+              s.sale_status as "pendente" | "pago" | "cancelado" | "aprazo",
             );
 
             return (
               <TableRow
-                key={venda.sale_id}
+                key={s.sale_id}
                 className="hover:bg-gray-200 cursor-pointer"
-                onClick={() => {
-                  setSelectedVenda(venda);
-                  setOpen(true);
-                }}
+                onClick={() => handleOpenEditar(venda)}
               >
-                <TableCell className="font-medium">{venda.sale_id}</TableCell>
-                <TableCell>{venda.customer_name}</TableCell>
+                <TableCell className="font-medium">{s.sale_id}</TableCell>
+                <TableCell>{s.customer_name}</TableCell>
                 <TableCell>
-                  {new Date(venda.sale_date).toLocaleDateString()}
+                  {new Date(s.sale_at).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
                   <Badge className={totalColor}>
-                    R$ {formatCurrency(Number(venda.total_amount ?? 0))}
+                    R$ {formatCurrency(Number(s.total_amount ?? 0))}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <Badge className={descontoColor}>
-                    R$ {formatCurrency(Number(venda.discount_amount ?? 0))}
+                    R$ {formatCurrency(Number(s.discount_amount ?? 0))}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -161,6 +163,19 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
                   <Badge className={statusFormatted.color}>
                     {statusFormatted.text}
                   </Badge>
+                </TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="cursor-pointer gap-1"
+                    onClick={(e) => handleOpenDetalhes(e, venda)}
+                    title="Ver parcelas e produtos"
+                  >
+                    <Eye className="h-4 w-4" />
+                    Ver detalhes
+                  </Button>
                 </TableCell>
               </TableRow>
             );
@@ -174,8 +189,8 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
           <div className="flex items-center text-sm text-gray-700">
             <span>
               Mostrando {startIndex + 1} a{" "}
-              {Math.min(endIndex, vendasAgrupadas.length)} de{" "}
-              {vendasAgrupadas.length} vendas
+              {Math.min(endIndex, vendas.length)} de{" "}
+              {vendas.length} vendas
             </span>
           </div>
 
@@ -225,6 +240,15 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
             setOpen={setOpen}
             venda={selectedVenda}
             onVendaUpdated={onVendaUpdated}
+          />
+        )}
+      </Dialog>
+
+      <Dialog open={openDetalhes} onOpenChange={setOpenDetalhes}>
+        {selectedVendaDetalhes && (
+          <DialogDetalhesVenda
+            venda={selectedVendaDetalhes}
+            setOpen={setOpenDetalhes}
           />
         )}
       </Dialog>
