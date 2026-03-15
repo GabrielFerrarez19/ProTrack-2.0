@@ -54,3 +54,41 @@ export interface TotalAmountSummary {
   current_month_st: number;
   last_month_st: number;
 }
+
+// Resposta da rota GET /sales/complete (ListSalesWithDetails)
+export interface ListSaleResponse {
+  sale_id: string;
+  sale_at: string;
+  subtotal: number;
+  discount_amount: number;
+  total_amount: number;
+  installments_count: number;
+  payment_method: string;
+  sale_status: string;
+  customer_id: string;
+  customer_name: string;
+  installment_total_amount: number;
+}
+
+export interface ListProductResponse {
+  sale_item_id: string;
+  product_id: string;
+  quantity: number;
+  unit_price: number;
+  item_discount: number;
+  product_name: string;
+}
+
+export interface ListInstallmentResponse {
+  installment_id: string;
+  installment_balance: number;
+  due_date: string;
+  installment_number: number;
+  installment_status: string;
+}
+
+export interface SaleWithDetails {
+  sale: ListSaleResponse;
+  products: ListProductResponse[];
+  installment: ListInstallmentResponse[];
+}

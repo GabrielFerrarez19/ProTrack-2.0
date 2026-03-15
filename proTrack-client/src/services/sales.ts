@@ -2,6 +2,7 @@ import { api } from "./api";
 import type {
   ListSalesByCompanyResponse,
   SaleRequest,
+  SaleWithDetails,
   TotalAmountSummary,
 } from "@/@types/sales";
 
@@ -24,6 +25,22 @@ export async function ListSales(): Promise<ListSalesByCompanyResponse[]> {
   return response.data.sales;
 }
 
+export async function ListSalesWithDetails(): Promise<SaleWithDetails[]> {
+  const response = await api.get<{ sales_completed: SaleWithDetails[] }>(
+    "/sales/complete",
+  );
+  return response.data.sales_completed ?? [];
+}
+
+export async function ListSalesWithDetailsPendingOverdue(): Promise<
+  SaleWithDetails[]
+> {
+  const response = await api.get<{ sales_completed: SaleWithDetails[] }>(
+    "/sales/complete/pending-overdue",
+  );
+  return response.data.sales_completed ?? [];
+}
+
 export async function UpdateSaleStatus(
   saleId: string,
   status: string,
@@ -34,6 +51,13 @@ export async function UpdateSaleStatus(
 export async function CountSales(): Promise<number> {
   const response = await api.get<ListSalesResponse>("/sales/count");
   return response.data.count;
+}
+
+export async function CountSalesPendingOverdue(): Promise<number> {
+  const response = await api.get<{ cont_sales: number }>(
+    "/sales/count/pending-overdue",
+  );
+  return response.data.cont_sales ?? 0;
 }
 
 export async function PercentageSales(): Promise<number> {

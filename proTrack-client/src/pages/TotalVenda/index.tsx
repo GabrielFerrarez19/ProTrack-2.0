@@ -13,17 +13,17 @@ export function TotalVendas() {
   const { vendas, loading, error, reload } = useVendasList();
   const [searchTerm, setSearchTerm] = useState("");
 
-  console.log("PaginaVendas", vendas);
 
-  // Filtrar vendas baseado no termo de busca
+  // Filtrar vendas baseado no termo de busca (dados em venda.sale)
   const filteredVendas = (vendas ?? []).filter((venda) => {
+    const s = venda.sale;
     const searchLower = searchTerm.toLowerCase();
     return (
-      venda.sale_id.toString().includes(searchLower) ||
-      venda.customer_name?.toLowerCase().includes(searchLower) ||
-      new Date(venda.sale_date).toLocaleDateString().includes(searchLower) ||
-      venda.total_amount?.toString().includes(searchLower) ||
-      venda.status?.toLowerCase().includes(searchLower)
+      String(s.sale_id).toLowerCase().includes(searchLower) ||
+      s.customer_name?.toLowerCase().includes(searchLower) ||
+      new Date(s.sale_at).toLocaleDateString().includes(searchLower) ||
+      String(s.total_amount).includes(searchLower) ||
+      String(s.sale_status).toLowerCase().includes(searchLower)
     );
   });
 

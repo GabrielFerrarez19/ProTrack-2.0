@@ -17,7 +17,26 @@ export function ContasReceber() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
 
-  const { dados, loading, error } = useContasReceber();
+  const { dados, vendas, loading, error, reload } = useContasReceber();
+
+  const filteredVendas = vendas.filter((v) => {
+    const s = v.sale;
+    const matchSearch =
+      !searchTerm ||
+      String(s.sale_id).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      v.products.some((p) =>
+        p.product_name?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    if (!matchSearch) return false;
+    if (statusFilter === "todos") return true;
+    const statusLower = String(s.sale_status).toLowerCase();
+    if (statusFilter === "vencido")
+      return v.installment.some(
+        (i) => String(i.installment_status).toLowerCase() === "overdue"
+      );
+    return statusLower === statusFilter;
+  });
 
   if (loading)
     return <PageLoading message="Carregando dados financeiros..." />;
@@ -50,7 +69,7 @@ export function ContasReceber() {
           <CardTitle>Lista de Contas a Receber</CardTitle>
         </CardHeader>
         <CardContent>
-          <TabelaContas vendas={[]} />
+          <TabelaContas vendas={filteredVendas} onVendaUpdated={reload} />
         </CardContent>
       </Card>
     </div>

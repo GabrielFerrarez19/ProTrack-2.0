@@ -40,7 +40,7 @@ export function ResumoCards({ dados }: Props) {
         </CardContent>
       </Card>
 
-      {/* Total de Contas */}
+      {/* Total de Contas (vendas pendentes/vencidas) */}
       <Card className="bg-green-100 border-green-200 shadow-sm">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
@@ -49,6 +49,9 @@ export function ResumoCards({ dados }: Props) {
               <h3 className="text-2xl font-bold text-gray-900">
                 {dados.totalContas ?? 0}
               </h3>
+              <p className="text-xs text-gray-500 mt-1">
+                Vendas pendentes/vencidas
+              </p>
             </div>
             <Calendar className="h-8 w-8 text-green-500" />
           </div>
