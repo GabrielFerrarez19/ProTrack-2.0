@@ -13,5 +13,6 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 		methods.GET("/", h.ListPaymentMethod)
 		methods.GET("/is-active", h.ListPaymentMethodIsActive)
 		methods.PUT("/:id", h.TogglePaymentMethodActive)
+		methods.GET("/stats", h.GetPaymentMethodsStats)
 	}
 }

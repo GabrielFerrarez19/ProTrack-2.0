@@ -40,3 +40,7 @@ func (r *Repository) ListPaymentMethodIsActive(ctx context.Context, companyId pg
 func (r *Repository) TogglePaymentMethodActive(ctx context.Context, arg db.TogglePaymentMethodActiveParams) error {
 	return r.queries().TogglePaymentMethodActive(ctx, arg)
 }
+
+func (r *Repository) GetPaymentMethodsStats(ctx context.Context, companyId pgtype.UUID) ([]db.GetPaymentMethodsStatsRow, error) {
+	return r.queries().GetPaymentMethodsStats(ctx, companyId)
+}

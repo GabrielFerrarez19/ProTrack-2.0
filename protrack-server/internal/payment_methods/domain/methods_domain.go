@@ -26,3 +26,8 @@ type TogglePaymentMethodActiveRequest struct {
 	ID       uuid.UUID `json:"id"`
 	IsActive bool      `json:"is_active"`
 }
+
+type GetPaymentMethodsStatsResponse struct {
+	PaymentMethod    string  `json:"payment_method"`
+	PercentageMethod float64 `json:"percentage_method"`
+}

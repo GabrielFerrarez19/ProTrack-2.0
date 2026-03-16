@@ -52,6 +52,43 @@ func (q *Queries) GetPaymentMethodByID(ctx context.Context, id pgtype.UUID) (Pay
 	return i, err
 }
 
+const getPaymentMethodsStats = `-- name: GetPaymentMethodsStats :many
+SELECT payment_method,
+    COUNT(*) as total_sales,
+    SUM(total_amount)::NUMERIC(15, 2) as total_revenue
+FROM sales
+WHERE company_id = $1
+    AND deleted_at IS NULL
+GROUP BY payment_method
+ORDER BY total_sales DESC
+`
+
+type GetPaymentMethodsStatsRow struct {
+	PaymentMethod interface{}    `json:"payment_method"`
+	TotalSales    int64          `json:"total_sales"`
+	TotalRevenue  pgtype.Numeric `json:"total_revenue"`
+}
+
+func (q *Queries) GetPaymentMethodsStats(ctx context.Context, companyID pgtype.UUID) ([]GetPaymentMethodsStatsRow, error) {
+	rows, err := q.db.Query(ctx, getPaymentMethodsStats, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetPaymentMethodsStatsRow{}
+	for rows.Next() {
+		var i GetPaymentMethodsStatsRow
+		if err := rows.Scan(&i.PaymentMethod, &i.TotalSales, &i.TotalRevenue); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listPaymentMethod = `-- name: ListPaymentMethod :many
 SELECT id, company_id, name, type, is_active, created_at, updated_at
 FROM payment_methods

@@ -54,6 +54,7 @@ type Querier interface {
 	GetDepartmentById(ctx context.Context, id pgtype.UUID) (Department, error)
 	GetOverdueBills(ctx context.Context, companyID pgtype.UUID) ([]BillsPayable, error)
 	GetPaymentMethodByID(ctx context.Context, id pgtype.UUID) (PaymentMethod, error)
+	GetPaymentMethodsStats(ctx context.Context, companyID pgtype.UUID) ([]GetPaymentMethodsStatsRow, error)
 	GetPaymentsByCustomer(ctx context.Context, arg GetPaymentsByCustomerParams) ([]PaymentHistory, error)
 	GetPaymentsBySale(ctx context.Context, arg GetPaymentsBySaleParams) ([]PaymentHistory, error)
 	GetPendingReceivablesByCustomer(ctx context.Context, arg GetPendingReceivablesByCustomerParams) ([]AccountsReceivable, error)
