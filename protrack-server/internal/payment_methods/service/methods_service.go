@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"math"
 
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
@@ -18,6 +19,7 @@ type RepositoryInterface interface {
 	ListPaymentMethod(ctx context.Context, companyId pgtype.UUID) ([]db.PaymentMethod, error)
 	ListPaymentMethodIsActive(ctx context.Context, companyId pgtype.UUID) ([]db.PaymentMethod, error)
 	TogglePaymentMethodActive(ctx context.Context, arg db.TogglePaymentMethodActiveParams) error
+	GetPaymentMethodsStats(ctx context.Context, companyId pgtype.UUID) ([]db.GetPaymentMethodsStatsRow, error)
 }
 
 type Service struct {
@@ -108,4 +110,34 @@ func (s *Service) TogglePaymentMethodActive(ctx context.Context, id uuid.UUID, r
 		ID:       pgconv.ParseUUIDToPgType(id),
 		IsActive: req.IsActive,
 	})
+}
+
+func (s *Service) GetPaymentMethodsStats(ctx context.Context, companyId uuid.UUID) ([]domain.GetPaymentMethodsStatsResponse, error) {
+	paymentMethods, err := s.repo.GetPaymentMethodsStats(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return []domain.GetPaymentMethodsStatsResponse{}, err
+	}
+
+	var totalSalesAllMethods int64
+	for _, pm := range paymentMethods {
+		totalSalesAllMethods += pm.TotalSales
+	}
+
+	var response []domain.GetPaymentMethodsStatsResponse
+
+	for _, pm := range paymentMethods {
+		var percentage float64
+
+		if totalSalesAllMethods > 0 {
+			percentage = (float64(pm.TotalSales) / float64(totalSalesAllMethods)) * 100
+		}
+
+		percentage = math.Round(percentage*100) / 100
+
+		response = append(response, domain.GetPaymentMethodsStatsResponse{
+			PaymentMethod:    pm.PaymentMethod.(string),
+			PercentageMethod: percentage,
+		})
+	}
+	return response, nil
 }
