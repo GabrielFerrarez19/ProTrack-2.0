@@ -54,3 +54,14 @@ type PaymentHistoryResponse struct {
 	PaymentDate     time.Time `json:"payment_date"`
 	Notes           string    `json:"notes"`
 }
+
+type GetPaymentsHistoryReportResponse struct {
+	ID                uuid.UUID `json:"id" excel:"ID do Pagamento"`
+	AmountPaid        float64   `json:"amount_paid" excel:"Valor Pago"`
+	PaymentDate       time.Time `json:"payment_date" excel:"Data do Pagamento"`
+	Notes             string    `json:"notes" excel:"Observações"`
+	CustomerName      string    `json:"customer_name" excel:"Nome do Cliente"`
+	UserName          string    `json:"user_name" excel:"Operador"`
+	PaymentMethodName string    `json:"payment_method_name" excel:"Método de Pagamento"`
+	SaleID            uuid.UUID `json:"sale_id" excel:"ID da Venda"`
+}

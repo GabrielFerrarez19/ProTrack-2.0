@@ -103,3 +103,7 @@ func (r *Repository) ListSalesWithDetails(ctx context.Context, companyID pgtype.
 func (r *Repository) ListSalesWithDetailsPendingOverdue(ctx context.Context, companyID pgtype.UUID) ([]db.ListSalesWithDetailsPendingOverdueRow, error) {
 	return r.queries().ListSalesWithDetailsPendingOverdue(ctx, companyID)
 }
+
+func (r *Repository) GetPendingSalesDetailedReport(ctx context.Context, arg db.GetPendingSalesDetailedReportParams) ([]db.GetPendingSalesDetailedReportRow, error) {
+	return r.queries().GetPendingSalesDetailedReport(ctx, arg)
+}

@@ -124,6 +124,121 @@ func (q *Queries) DeleteSale(ctx context.Context, arg DeleteSaleParams) error {
 	return err
 }
 
+const getPendingSalesDetailedReport = `-- name: GetPendingSalesDetailedReport :many
+SELECT -- Dados da venda
+    s.id AS sale_id,
+    s.sale_at,
+    s.subtotal,
+    s.discount_amount,
+    s.total_amount,
+    s.installments_count,
+    s.payment_method,
+    s.status AS sale_status,
+    -- Dados do cliente
+    c.id AS customer_id,
+    c.full_name AS customer_name,
+    -- Dados dos produtos (itens da venda)
+    si.id AS sale_item_id,
+    si.product_id,
+    si.quantity,
+    si.unit_price,
+    si.discount AS item_discount,
+    p.name AS product_name,
+    -- Parcelas (accounts_receivable)
+    ar.id AS installment_id,
+    ar.total_amount AS installment_total_amount,
+    ar.balance AS installment_balance,
+    ar.due_date,
+    ar.installment_number,
+    ar.status AS installment_status
+FROM sales s
+    INNER JOIN customers c ON s.customer_id = c.id
+    INNER JOIN sale_items si ON s.id = si.sale_id
+    INNER JOIN products p ON si.product_id = p.id
+    LEFT JOIN accounts_receivable ar ON s.id = ar.sale_id
+WHERE s.company_id = $1
+    AND s.deleted_at IS NULL
+    AND s.status IN ('pending', 'overdue') -- Filtro de intervalo de datas (Inclusivo)
+    AND s.sale_at BETWEEN $2 AND $3
+ORDER BY s.sale_at DESC,
+    si.id,
+    ar.installment_number
+`
+
+type GetPendingSalesDetailedReportParams struct {
+	CompanyID pgtype.UUID        `json:"company_id"`
+	SaleAt    pgtype.Timestamptz `json:"sale_at"`
+	SaleAt_2  pgtype.Timestamptz `json:"sale_at_2"`
+}
+
+type GetPendingSalesDetailedReportRow struct {
+	SaleID                 pgtype.UUID        `json:"sale_id"`
+	SaleAt                 pgtype.Timestamptz `json:"sale_at"`
+	Subtotal               pgtype.Numeric     `json:"subtotal"`
+	DiscountAmount         pgtype.Numeric     `json:"discount_amount"`
+	TotalAmount            pgtype.Numeric     `json:"total_amount"`
+	InstallmentsCount      int32              `json:"installments_count"`
+	PaymentMethod          interface{}        `json:"payment_method"`
+	SaleStatus             interface{}        `json:"sale_status"`
+	CustomerID             pgtype.UUID        `json:"customer_id"`
+	CustomerName           string             `json:"customer_name"`
+	SaleItemID             pgtype.UUID        `json:"sale_item_id"`
+	ProductID              pgtype.UUID        `json:"product_id"`
+	Quantity               int32              `json:"quantity"`
+	UnitPrice              pgtype.Numeric     `json:"unit_price"`
+	ItemDiscount           pgtype.Numeric     `json:"item_discount"`
+	ProductName            string             `json:"product_name"`
+	InstallmentID          pgtype.UUID        `json:"installment_id"`
+	InstallmentTotalAmount pgtype.Numeric     `json:"installment_total_amount"`
+	InstallmentBalance     pgtype.Numeric     `json:"installment_balance"`
+	DueDate                pgtype.Date        `json:"due_date"`
+	InstallmentNumber      pgtype.Int4        `json:"installment_number"`
+	InstallmentStatus      pgtype.Text        `json:"installment_status"`
+}
+
+func (q *Queries) GetPendingSalesDetailedReport(ctx context.Context, arg GetPendingSalesDetailedReportParams) ([]GetPendingSalesDetailedReportRow, error) {
+	rows, err := q.db.Query(ctx, getPendingSalesDetailedReport, arg.CompanyID, arg.SaleAt, arg.SaleAt_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetPendingSalesDetailedReportRow{}
+	for rows.Next() {
+		var i GetPendingSalesDetailedReportRow
+		if err := rows.Scan(
+			&i.SaleID,
+			&i.SaleAt,
+			&i.Subtotal,
+			&i.DiscountAmount,
+			&i.TotalAmount,
+			&i.InstallmentsCount,
+			&i.PaymentMethod,
+			&i.SaleStatus,
+			&i.CustomerID,
+			&i.CustomerName,
+			&i.SaleItemID,
+			&i.ProductID,
+			&i.Quantity,
+			&i.UnitPrice,
+			&i.ItemDiscount,
+			&i.ProductName,
+			&i.InstallmentID,
+			&i.InstallmentTotalAmount,
+			&i.InstallmentBalance,
+			&i.DueDate,
+			&i.InstallmentNumber,
+			&i.InstallmentStatus,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getSaleById = `-- name: GetSaleById :one
 SELECT s.id, s.customer_id, s.company_id, s.sale_at, s.discount_amount, s.subtotal, s.total_amount, s.down_payment, s.installments_count, s.due_days, s.payment_method, s.status, s.created_at, s.created_by, s.updated_at, s.updated_by, s.deleted_at, s.deleted_by,
     c.full_name as customer_name

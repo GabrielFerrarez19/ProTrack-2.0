@@ -48,6 +48,8 @@ import (
 	productsCategoriesHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/handler"
 	productsCategoriesRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/repository"
 	productsCategoriesService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/service"
+	reportsHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/reports/handler"
+	reportsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/reports/service"
 	saleItemsHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sale_items/handler"
 	saleItemsRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sale_items/repository"
 	saleItemsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sale_items/service"
@@ -145,6 +147,7 @@ func main() {
 	billsPayableService := billsPayableService.NewService(billsPayableRepository, db.Pool)
 	paymentHistoryService := paymentHistoryService.NewService(paymentHistoryRepository, db.Pool)
 	paymentsService := paymentsService.NewService(db.Pool, paymentHistoryService, accountsReceivableService, customersService, salesService)
+	reportsService := reportsService.NewService(salesService, paymentHistoryService)
 
 	usersHandler := usersHandler.NewHandler(usersService, jwtManager, blacklist)
 	companiesHandler := companiesHandler.NewHandler(companiesService, jwtManager, blacklist)
@@ -162,7 +165,7 @@ func main() {
 	paymentHistoryHandler := paymentHistoryHandler.NewHandler(paymentHistoryService, jwtManager, blacklist)
 	accountsReceivableHandler := accountsReceivableHandler.NewHandler(accountsReceivableService, jwtManager, blacklist)
 	paymentsHandler := paymentsHandler.NewHandler(paymentsService, jwtManager, blacklist)
-
+	reportsHandler := reportsHandler.NewHandler(reportsService, jwtManager, blacklist)
 	api := r.Group("/api/v1")
 	usersHandler.RegisterRoutes(api)
 	companiesHandler.RegisterRoutes(api)
@@ -180,6 +183,7 @@ func main() {
 	paymentHistoryHandler.RegisterRoute(api)
 	accountsReceivableHandler.RegisterRoute(api)
 	paymentsHandler.RegisterRoute(api)
+	reportsHandler.RegisterRoutes(api)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})

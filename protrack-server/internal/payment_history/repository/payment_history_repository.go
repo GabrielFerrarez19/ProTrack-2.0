@@ -40,3 +40,7 @@ func (r *Repository) GetTotalReceivedByPeriod(ctx context.Context, arg db.GetTot
 func (r *Repository) ListPaymentHistory(ctx context.Context, companyId pgtype.UUID) ([]db.ListPaymentHistoryRow, error) {
 	return r.queries().ListPaymentHistory(ctx, companyId)
 }
+
+func (r *Repository) GetPaymentsHistoryReport(ctx context.Context, arg db.GetPaymentsHistoryReportParams) ([]db.GetPaymentsHistoryReportRow, error) {
+	return r.queries().GetPaymentsHistoryReport(ctx, arg)
+}

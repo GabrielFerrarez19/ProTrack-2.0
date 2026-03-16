@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
@@ -18,6 +19,7 @@ type RepositoryInterface interface {
 	GetPaymentsBySale(ctx context.Context, arg db.GetPaymentsBySaleParams) ([]db.PaymentHistory, error)
 	GetTotalReceivedByPeriod(ctx context.Context, arg db.GetTotalReceivedByPeriodParams) (pgtype.Numeric, error)
 	ListPaymentHistory(ctx context.Context, companyId pgtype.UUID) ([]db.ListPaymentHistoryRow, error)
+	GetPaymentsHistoryReport(ctx context.Context, arg db.GetPaymentsHistoryReportParams) ([]db.GetPaymentsHistoryReportRow, error)
 }
 
 type Service struct {
@@ -137,6 +139,34 @@ func (s *Service) ListPaymentHistory(ctx context.Context, companyId uuid.UUID) (
 
 	for _, paymentHistory := range paymentsHistory {
 		response = append(response, domain.ListPaymentHistoryRow{
+			ID:                pgconv.PgUUIDToUUID(paymentHistory.ID),
+			AmountPaid:        pgconv.PgNumericToFloat64(paymentHistory.AmountPaid),
+			PaymentDate:       pgconv.PgTimestamptzToTime(paymentHistory.PaymentDate),
+			Notes:             pgconv.ParsePgTextToString(paymentHistory.Notes),
+			CustomerName:      paymentHistory.CustomerName,
+			UserName:          paymentHistory.UserName,
+			PaymentMethodName: pgconv.ParsePgTextToString(paymentHistory.PaymentMethodName),
+			SaleID:            pgconv.PgUUIDToUUID(paymentHistory.SaleID),
+		})
+	}
+
+	return response, nil
+}
+
+func (s *Service) GetPaymentsHistoryReport(ctx context.Context, companyId uuid.UUID, startDate time.Time, endDate time.Time) ([]domain.GetPaymentsHistoryReportResponse, error) {
+	paymentsHistory, err := s.repo.GetPaymentsHistoryReport(ctx, db.GetPaymentsHistoryReportParams{
+		CompanyID:     pgconv.ParseUUIDToPgType(companyId),
+		PaymentDate:   pgconv.TimeToPgTimestamptz(startDate),
+		PaymentDate_2: pgconv.TimeToPgTimestamptz(endDate),
+	})
+	if err != nil {
+		return []domain.GetPaymentsHistoryReportResponse{}, err
+	}
+
+	var response []domain.GetPaymentsHistoryReportResponse
+
+	for _, paymentHistory := range paymentsHistory {
+		response = append(response, domain.GetPaymentsHistoryReportResponse{
 			ID:                pgconv.PgUUIDToUUID(paymentHistory.ID),
 			AmountPaid:        pgconv.PgNumericToFloat64(paymentHistory.AmountPaid),
 			PaymentDate:       pgconv.PgTimestamptzToTime(paymentHistory.PaymentDate),

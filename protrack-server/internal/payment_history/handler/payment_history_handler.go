@@ -186,3 +186,51 @@ func (h *Handler) ListPaymentHistory(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"payments_history": paymentsHistory})
 }
+
+// func (h *Handler) ExportExcel(c *gin.Context) {
+// 	companyIdAny, exists := c.Get("company_id")
+// 	if !exists {
+// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+// 		return
+// 	}
+
+// 	companyId := companyIdAny.(uuid.UUID)
+
+// 	history, err := h.service.ListPaymentHistory(context.Background(), companyId)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao buscar dados"})
+// 		return
+// 	}
+
+// 	headers := []string{
+// 		"Data do Pagamento",
+// 		"Cliente",
+// 		"Valor Pago",
+// 		"Método",
+// 		"Recebido por",
+// 		"Observações",
+// 		"ID da Venda",
+// 	}
+
+// 	var rows [][]any
+// 	for _, p := range history {
+// 		rows = append(rows, []any{
+// 			p.PaymentDate.Format("02/01/2006 15:04"),
+// 			p.CustomerName,
+// 			p.AmountPaid,
+// 			p.PaymentMethodName,
+// 			p.UserName,
+// 			p.Notes,
+// 			p.SaleID.String(),
+// 		})
+// 	}
+
+// 	fileName := fmt.Sprintf("historico_pagamentos_%s.xlsx", time.Now().Format("2006-01-02"))
+// 	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
+// 	c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+// 	err = reports.GenerateExcel(c.Writer, "Histórico de Pagamentos", headers, rows)
+// 	if err != nil {
+// 		return
+// 	}
+// }
