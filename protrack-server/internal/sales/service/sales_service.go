@@ -39,6 +39,7 @@ type RepositoryInterface interface {
 	ContSalesPendingAndOverdue(ctx context.Context, companyId pgtype.UUID) (int64, error)
 	ListSalesWithDetails(ctx context.Context, companyID pgtype.UUID) ([]db.ListSalesWithDetailsRow, error)
 	ListSalesWithDetailsPendingOverdue(ctx context.Context, companyID pgtype.UUID) ([]db.ListSalesWithDetailsPendingOverdueRow, error)
+	GetPendingSalesDetailedReport(ctx context.Context, arg db.GetPendingSalesDetailedReportParams) ([]db.GetPendingSalesDetailedReportRow, error)
 	WithTx(tx db.DBTX) *repository.Repository
 }
 
@@ -639,5 +640,46 @@ func (s *Service) ListSalesWithDetailsPendingOverdue(ctx context.Context, compan
 		response = append(response, *salesMap[id])
 	}
 
+	return response, nil
+}
+
+func (s *Service) GetPendingSalesDetailedReport(ctx context.Context, companyId uuid.UUID, saleAt time.Time, saleAt2 time.Time) ([]domain.GetPendingSalesDetailedReportResponse, error) {
+	report, err := s.repo.GetPendingSalesDetailedReport(ctx, db.GetPendingSalesDetailedReportParams{
+		CompanyID: pgconv.ParseUUIDToPgType(companyId),
+		SaleAt:    pgconv.TimeToPgTimestamptz(saleAt),
+		SaleAt_2:  pgconv.TimeToPgTimestamptz(saleAt2),
+	})
+	if err != nil {
+		return []domain.GetPendingSalesDetailedReportResponse{}, err
+	}
+
+	var response []domain.GetPendingSalesDetailedReportResponse
+
+	for _, row := range report {
+		response = append(response, domain.GetPendingSalesDetailedReportResponse{
+			SaleID:                 pgconv.PgUUIDToUUID(row.SaleID),
+			SaleAt:                 pgconv.PgTimestamptzToTime(row.SaleAt),
+			Subtotal:               pgconv.PgNumericToFloat64(row.Subtotal),
+			DiscountAmount:         pgconv.PgNumericToFloat64(row.DiscountAmount),
+			TotalAmount:            pgconv.PgNumericToFloat64(row.TotalAmount),
+			InstallmentsCount:      row.InstallmentsCount,
+			PaymentMethod:          row.PaymentMethod,
+			SaleStatus:             row.SaleStatus,
+			CustomerID:             pgconv.PgUUIDToUUID(row.CustomerID),
+			CustomerName:           row.CustomerName,
+			SaleItemID:             pgconv.PgUUIDToUUID(row.SaleItemID),
+			ProductID:              pgconv.PgUUIDToUUID(row.ProductID),
+			Quantity:               row.Quantity,
+			UnitPrice:              pgconv.PgNumericToFloat64(row.UnitPrice),
+			ItemDiscount:           pgconv.PgNumericToFloat64(row.ItemDiscount),
+			ProductName:            row.ProductName,
+			InstallmentID:          pgconv.PgUUIDToUUID(row.InstallmentID),
+			InstallmentTotalAmount: pgconv.PgNumericToFloat64(row.InstallmentTotalAmount),
+			InstallmentBalance:     pgconv.PgNumericToFloat64(row.InstallmentBalance),
+			DueDate:                pgconv.PgDateToString(row.DueDate),
+			InstallmentNumber:      pgconv.PgInt4ToInt(row.InstallmentNumber),
+			InstallmentStatus:      pgconv.ParsePgTextToString(row.InstallmentStatus),
+		})
+	}
 	return response, nil
 }

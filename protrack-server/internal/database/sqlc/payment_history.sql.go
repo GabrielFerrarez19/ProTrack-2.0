@@ -133,6 +133,70 @@ func (q *Queries) GetPaymentsBySale(ctx context.Context, arg GetPaymentsBySalePa
 	return items, nil
 }
 
+const getPaymentsHistoryReport = `-- name: GetPaymentsHistoryReport :many
+SELECT ph.id,
+    ph.amount_paid,
+    ph.payment_date,
+    ph.notes,
+    c.full_name as customer_name,
+    u.name as user_name,
+    pm.name as payment_method_name,
+    ph.sale_id
+FROM payment_history ph
+    INNER JOIN customers c ON ph.customer_id = c.id
+    INNER JOIN users u ON ph.user_id = u.id
+    LEFT JOIN payment_methods pm ON ph.payment_method_id = pm.id
+WHERE ph.company_id = $1
+    AND ph.payment_date BETWEEN $2 AND $3
+ORDER BY ph.payment_date DESC
+`
+
+type GetPaymentsHistoryReportParams struct {
+	CompanyID     pgtype.UUID        `json:"company_id"`
+	PaymentDate   pgtype.Timestamptz `json:"payment_date"`
+	PaymentDate_2 pgtype.Timestamptz `json:"payment_date_2"`
+}
+
+type GetPaymentsHistoryReportRow struct {
+	ID                pgtype.UUID        `json:"id"`
+	AmountPaid        pgtype.Numeric     `json:"amount_paid"`
+	PaymentDate       pgtype.Timestamptz `json:"payment_date"`
+	Notes             pgtype.Text        `json:"notes"`
+	CustomerName      string             `json:"customer_name"`
+	UserName          string             `json:"user_name"`
+	PaymentMethodName pgtype.Text        `json:"payment_method_name"`
+	SaleID            pgtype.UUID        `json:"sale_id"`
+}
+
+func (q *Queries) GetPaymentsHistoryReport(ctx context.Context, arg GetPaymentsHistoryReportParams) ([]GetPaymentsHistoryReportRow, error) {
+	rows, err := q.db.Query(ctx, getPaymentsHistoryReport, arg.CompanyID, arg.PaymentDate, arg.PaymentDate_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetPaymentsHistoryReportRow{}
+	for rows.Next() {
+		var i GetPaymentsHistoryReportRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.AmountPaid,
+			&i.PaymentDate,
+			&i.Notes,
+			&i.CustomerName,
+			&i.UserName,
+			&i.PaymentMethodName,
+			&i.SaleID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getTotalReceivedByPeriod = `-- name: GetTotalReceivedByPeriod :one
 SELECT COALESCE(SUM(amount_paid), 0)::DECIMAL(12, 2) as total
 FROM payment_history
