@@ -7,20 +7,25 @@ import (
 	"time"
 
 	paymentHistoryService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/payment_history/service"
+	productService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/service"
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/reports"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/reports/domain"
 	saleService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/service"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 type Service struct {
 	saleService           *saleService.Service
 	paymentHistoryService *paymentHistoryService.Service
+	productService        *productService.Service
 }
 
-func NewService(saleService *saleService.Service, paymentHistoryService *paymentHistoryService.Service) *Service {
+func NewService(saleService *saleService.Service, paymentHistoryService *paymentHistoryService.Service, productService *productService.Service) *Service {
 	return &Service{
 		saleService:           saleService,
 		paymentHistoryService: paymentHistoryService,
+		productService:        productService,
 	}
 }
 
@@ -77,6 +82,8 @@ func (s *Service) GenerateReports(ctx context.Context, reportType string, compan
 				row.InstallmentStatus,
 			})
 		}
+
+		rows = reports.AddRow(rows, "total sale:", 1)
 		fileName = fmt.Sprintf("sales_%s.xlsx", At.Format("02-01-2006"))
 		response = domain.ReportResponse{
 			Headers:  headers,
@@ -90,16 +97,37 @@ func (s *Service) GenerateReports(ctx context.Context, reportType string, compan
 			return domain.ReportResponse{}, err
 		}
 
-		header, row := domain.MapStructToReport(history)
+		headers, rows = domain.MapStructToReport(history)
+
+		rows = reports.AddRow(rows, "TOTAL PAYMENTS:", 0)
 
 		fileName = fmt.Sprintf("paymentHistory_%s.xlsx", At.Format("02-01-2006"))
 
 		return domain.ReportResponse{
-			Headers:  header,
-			Rows:     row,
+			Headers:  headers,
+			Rows:     rows,
 			FileName: fileName,
 		}, nil
 
+	case string(domain.ReportInventory):
+		inventory, err := s.productService.GetInventoryReport(ctx, companyId, At, At2)
+		if err != nil {
+			return domain.ReportResponse{}, err
+		}
+
+		log.Info().Int("quantidade_registros", len(inventory)).Msg("Dados do banco")
+
+		headers, rows = domain.MapStructToReport(inventory)
+
+		rows = reports.AddRow(rows, "TOTAL STOCK:", 4)
+
+		fileName = fmt.Sprintf("inventory_%s.xlsx", time.Now().Format("02-01-2006"))
+
+		return domain.ReportResponse{
+			Headers:  headers,
+			Rows:     rows,
+			FileName: fileName,
+		}, nil
 	}
 
 	return domain.ReportResponse{}, errors.New("relatório não encontrado")

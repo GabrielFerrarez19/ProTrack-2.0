@@ -150,6 +150,69 @@ func (q *Queries) GetCostTotalStock(ctx context.Context, companyID pgtype.UUID) 
 	return total_stock_value, err
 }
 
+const getInventoryReport = `-- name: GetInventoryReport :many
+SELECT p.name,
+    c.name AS category_name,
+    p.quantity,
+    p.sale_price,
+    (p.quantity * p.sale_price)::NUMERIC(10, 2) AS total_value,
+    p.cost_price,
+    p.barcode,
+    p.created_at
+FROM products p
+    LEFT JOIN product_categories c ON p.category_id = c.id
+WHERE p.company_id = $1
+    AND p.created_at BETWEEN $2 AND $3
+    AND p.deleted_at IS NULL
+ORDER BY p.name ASC
+`
+
+type GetInventoryReportParams struct {
+	CompanyID   pgtype.UUID        `json:"company_id"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	CreatedAt_2 pgtype.Timestamptz `json:"created_at_2"`
+}
+
+type GetInventoryReportRow struct {
+	Name         string             `json:"name"`
+	CategoryName pgtype.Text        `json:"category_name"`
+	Quantity     int32              `json:"quantity"`
+	SalePrice    pgtype.Numeric     `json:"sale_price"`
+	TotalValue   pgtype.Numeric     `json:"total_value"`
+	CostPrice    pgtype.Numeric     `json:"cost_price"`
+	Barcode      pgtype.Text        `json:"barcode"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) GetInventoryReport(ctx context.Context, arg GetInventoryReportParams) ([]GetInventoryReportRow, error) {
+	rows, err := q.db.Query(ctx, getInventoryReport, arg.CompanyID, arg.CreatedAt, arg.CreatedAt_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetInventoryReportRow{}
+	for rows.Next() {
+		var i GetInventoryReportRow
+		if err := rows.Scan(
+			&i.Name,
+			&i.CategoryName,
+			&i.Quantity,
+			&i.SalePrice,
+			&i.TotalValue,
+			&i.CostPrice,
+			&i.Barcode,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getProductByBarcode = `-- name: GetProductByBarcode :one
 SELECT id, company_id, category_id, name, description, barcode, quantity, size, cost_price, sale_price, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at
 FROM products

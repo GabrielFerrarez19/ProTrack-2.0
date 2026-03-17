@@ -74,3 +74,7 @@ func (r *Repository) GetCostTotalStock(ctx context.Context, companyId pgtype.UUI
 func (r *Repository) GetTop5BestSellingProducts(ctx context.Context, companyId pgtype.UUID) ([]db.GetTop5BestSellingProductsRow, error) {
 	return r.queries().GetTop5BestSellingProducts(ctx, companyId)
 }
+
+func (r *Repository) GetInventoryReport(ctx context.Context, arg db.GetInventoryReportParams) ([]db.GetInventoryReportRow, error) {
+	return r.queries().GetInventoryReport(ctx, arg)
+}

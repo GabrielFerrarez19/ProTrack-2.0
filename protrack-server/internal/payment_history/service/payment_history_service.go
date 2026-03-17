@@ -167,14 +167,12 @@ func (s *Service) GetPaymentsHistoryReport(ctx context.Context, companyId uuid.U
 
 	for _, paymentHistory := range paymentsHistory {
 		response = append(response, domain.GetPaymentsHistoryReportResponse{
-			ID:                pgconv.PgUUIDToUUID(paymentHistory.ID),
 			AmountPaid:        pgconv.PgNumericToFloat64(paymentHistory.AmountPaid),
 			PaymentDate:       pgconv.PgTimestamptzToTime(paymentHistory.PaymentDate),
 			Notes:             pgconv.ParsePgTextToString(paymentHistory.Notes),
 			CustomerName:      paymentHistory.CustomerName,
 			UserName:          paymentHistory.UserName,
 			PaymentMethodName: pgconv.ParsePgTextToString(paymentHistory.PaymentMethodName),
-			SaleID:            pgconv.PgUUIDToUUID(paymentHistory.SaleID),
 		})
 	}
 
