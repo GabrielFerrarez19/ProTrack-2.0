@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
@@ -25,6 +26,7 @@ type RepositoryInterface interface {
 	GetProductsPerformanceSummary(ctx context.Context, companyId pgtype.UUID) (db.GetProductsPerformanceSummaryRow, error)
 	GetCostTotalStock(ctx context.Context, companyId pgtype.UUID) (float64, error)
 	GetTop5BestSellingProducts(ctx context.Context, companyId pgtype.UUID) ([]db.GetTop5BestSellingProductsRow, error)
+	GetInventoryReport(ctx context.Context, arg db.GetInventoryReportParams) ([]db.GetInventoryReportRow, error)
 }
 
 type Service struct {
@@ -303,6 +305,34 @@ func (s *Service) GetTop5BestSellingProducts(ctx context.Context, companyId uuid
 			ID:                pgconv.PgUUIDToUUID(product.ID),
 			Name:              product.Name,
 			TotalQuantitySold: product.TotalQuantitySold,
+		})
+	}
+
+	return response, nil
+}
+
+func (s *Service) GetInventoryReport(ctx context.Context, companyId uuid.UUID, startAt time.Time, startAt_2 time.Time) ([]domain.GetInventoryReportResponse, error) {
+	inventory, err := s.repo.GetInventoryReport(ctx, db.GetInventoryReportParams{
+		CompanyID:   pgconv.ParseUUIDToPgType(companyId),
+		CreatedAt:   pgconv.TimeToPgTimestamptz(startAt),
+		CreatedAt_2: pgconv.TimeToPgTimestamptz(startAt_2),
+	})
+	if err != nil {
+		return []domain.GetInventoryReportResponse{}, err
+	}
+
+	var response []domain.GetInventoryReportResponse
+
+	for _, product := range inventory {
+		response = append(response, domain.GetInventoryReportResponse{
+			Name:         product.Name,
+			CategoryName: pgconv.ParsePgTextToString(product.CategoryName),
+			Quantity:     product.Quantity,
+			SalePrice:    pgconv.PgNumericToFloat64(product.SalePrice),
+			TotalValue:   pgconv.PgNumericToFloat64(product.TotalValue),
+			CostPrice:    pgconv.PgNumericToFloat64(product.CostPrice),
+			Barcode:      pgconv.ParsePgTextToString(product.Barcode),
+			CreatedAt:    pgconv.PgTimestamptzToTime(product.CreatedAt),
 		})
 	}
 

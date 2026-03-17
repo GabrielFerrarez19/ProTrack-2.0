@@ -55,3 +55,72 @@ func GenerateExcel(w io.Writer, sheetName string, headers []string, rows [][]any
 
 	return f.Write(w)
 }
+
+func AddRow(rows [][]any, label string, colIndices ...int) [][]any {
+	if len(rows) == 0 {
+		return rows
+	}
+
+	numCols := len(rows[0])
+	totalRow := make([]any, numCols)
+
+	targetCol := numCols - 1
+
+	sums := make(map[int]float64)
+	for _, idx := range colIndices {
+		sums[idx] = 0
+	}
+
+	for _, row := range rows {
+		for _, idx := range colIndices {
+			if idx < len(row) {
+				if val, ok := row[idx].(float64); ok {
+					sums[idx] += val
+				} else if val, ok := row[idx].(int); ok {
+					sums[idx] += float64(val)
+				}
+			}
+		}
+	}
+
+	for idx, sum := range sums {
+		if idx < len(totalRow) {
+			totalRow[targetCol] = sum
+		}
+	}
+
+	totalRow[targetCol-1] = label
+
+	return append(rows, totalRow)
+}
+
+// func AddRow(rows [][]any, label string, colIndices ...int) [][]any {
+// 	if len(rows) == 0 {
+// 		return rows
+// 	}
+
+// 	numCols := len(rows[0])
+// 	totalRow := make([]any, numCols)
+
+// 	targetCol := numCols - 1
+
+// 	var sum float64
+
+// 	for _, row := range rows {
+// 		if targetCol < len(row) {
+// 			switch v := row[targetCol].(type) {
+// 			case float64:
+// 				sum += v
+// 			case int32:
+// 				sum += float64(v)
+// 			case int:
+// 				sum += float64(v)
+// 			}
+// 		}
+// 	}
+
+// 	totalRow[targetCol] = sum
+// 	totalRow[targetCol-1] = label
+
+// 	return append(rows, totalRow)
+// }

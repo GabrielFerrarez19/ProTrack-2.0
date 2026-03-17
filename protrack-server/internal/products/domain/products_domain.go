@@ -113,6 +113,17 @@ type GetTop5BestSellingProductsRow struct {
 	TotalQuantitySold int32     `json:"total_quantity_sold"`
 }
 
+type GetInventoryReportResponse struct {
+	Name         string    `json:"name" excel:"Nome do Produto"`
+	CategoryName string    `json:"category_name" excel:"Categoria"`
+	Quantity     int32     `json:"quantity" excel:"Quantidade"`
+	SalePrice    float64   `json:"sale_price" excel:"Preço de Venda"`
+	TotalValue   float64   `json:"total_value" excel:"Valor Total em Estoque"`
+	CostPrice    float64   `json:"cost_price" excel:"Preço de Custo"`
+	Barcode      string    `json:"barcode" excel:"Código de Barras"`
+	CreatedAt    time.Time `json:"created_at" excel:"Data de Cadastro"`
+}
+
 func ApplyUpdateProductCategoryParams(
 	req UpdateProductRequest,
 	arg *db.UpdateProductParams,

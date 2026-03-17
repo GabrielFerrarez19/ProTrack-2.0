@@ -48,6 +48,12 @@ func (h *Handler) GenerateReports(c *gin.Context) {
 		return
 	}
 
+	log.Info().
+		Str("file", report.FileName).
+		Int("headers_count", len(report.Headers)).
+		Int("rows_count", len(report.Rows)).
+		Msg("Relatório gerado com sucesso pelo service")
+
 	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", report.FileName))
 	c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 

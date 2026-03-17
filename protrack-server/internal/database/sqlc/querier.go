@@ -52,6 +52,7 @@ type Querier interface {
 	GetCustomerDebtSummary(ctx context.Context, customerID pgtype.UUID) (GetCustomerDebtSummaryRow, error)
 	GetCustomersPerformanceSummary(ctx context.Context, companyID pgtype.UUID) (GetCustomersPerformanceSummaryRow, error)
 	GetDepartmentById(ctx context.Context, id pgtype.UUID) (Department, error)
+	GetInventoryReport(ctx context.Context, arg GetInventoryReportParams) ([]GetInventoryReportRow, error)
 	GetOverdueBills(ctx context.Context, companyID pgtype.UUID) ([]BillsPayable, error)
 	GetPaymentMethodByID(ctx context.Context, id pgtype.UUID) (PaymentMethod, error)
 	GetPaymentMethodsStats(ctx context.Context, companyID pgtype.UUID) ([]GetPaymentMethodsStatsRow, error)

@@ -113,3 +113,18 @@ GROUP BY p.id,
     p.name
 ORDER BY total_quantity_sold DESC
 LIMIT 5;
+-- name: GetInventoryReport :many
+SELECT p.name,
+    c.name AS category_name,
+    p.quantity,
+    p.sale_price,
+    (p.quantity * p.sale_price)::NUMERIC(10, 2) AS total_value,
+    p.cost_price,
+    p.barcode,
+    p.created_at
+FROM products p
+    LEFT JOIN product_categories c ON p.category_id = c.id
+WHERE p.company_id = $1
+    AND p.created_at BETWEEN $2 AND $3
+    AND p.deleted_at IS NULL
+ORDER BY p.name ASC;
