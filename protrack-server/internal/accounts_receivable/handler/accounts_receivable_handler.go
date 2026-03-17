@@ -9,6 +9,7 @@ import (
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/adapters/jwt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 type Handler struct {
@@ -116,6 +117,7 @@ func (h *Handler) GetTotalOpenAmountByCompany(c *gin.Context) {
 
 	total, err := h.service.GetTotalOpenAmountByCompany(c.Request.Context(), companyId)
 	if err != nil {
+		log.Error().Err(err).Msg("Erro na rota GetTotalOpenAmountByCompany")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

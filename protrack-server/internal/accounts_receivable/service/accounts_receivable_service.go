@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/accounts_receivable/domain"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/accounts_receivable/repository"
@@ -364,6 +366,9 @@ func (s *Service) UpdateAccountReceivableBalanceTx(ctx context.Context, tx db.DB
 
 func (s *Service) GetTotalOpenAmountByCompany(ctx context.Context, companyId uuid.UUID) (float64, error) {
 	total, err := s.repo.GetTotalOpenAmountByCompany(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, nil
+	}
 	if err != nil {
 		return 0, err
 	}
