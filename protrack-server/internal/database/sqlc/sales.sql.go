@@ -639,6 +639,7 @@ SELECT -- Dados da venda
     s.installments_count,
     s.payment_method,
     s.status AS sale_status,
+    s.down_payment,
     -- Dados do cliente
     c.id AS customer_id,
     c.full_name AS customer_name,
@@ -677,6 +678,7 @@ type ListSalesWithDetailsRow struct {
 	InstallmentsCount      int32              `json:"installments_count"`
 	PaymentMethod          interface{}        `json:"payment_method"`
 	SaleStatus             interface{}        `json:"sale_status"`
+	DownPayment            pgtype.Numeric     `json:"down_payment"`
 	CustomerID             pgtype.UUID        `json:"customer_id"`
 	CustomerName           string             `json:"customer_name"`
 	SaleItemID             pgtype.UUID        `json:"sale_item_id"`
@@ -711,6 +713,7 @@ func (q *Queries) ListSalesWithDetails(ctx context.Context, companyID pgtype.UUI
 			&i.InstallmentsCount,
 			&i.PaymentMethod,
 			&i.SaleStatus,
+			&i.DownPayment,
 			&i.CustomerID,
 			&i.CustomerName,
 			&i.SaleItemID,
@@ -746,6 +749,7 @@ SELECT -- Dados da venda
     s.installments_count,
     s.payment_method,
     s.status AS sale_status,
+    s.down_payment,
     -- Dados do cliente
     c.id AS customer_id,
     c.full_name AS customer_name,
@@ -785,6 +789,7 @@ type ListSalesWithDetailsPendingOverdueRow struct {
 	InstallmentsCount      int32              `json:"installments_count"`
 	PaymentMethod          interface{}        `json:"payment_method"`
 	SaleStatus             interface{}        `json:"sale_status"`
+	DownPayment            pgtype.Numeric     `json:"down_payment"`
 	CustomerID             pgtype.UUID        `json:"customer_id"`
 	CustomerName           string             `json:"customer_name"`
 	SaleItemID             pgtype.UUID        `json:"sale_item_id"`
@@ -819,6 +824,7 @@ func (q *Queries) ListSalesWithDetailsPendingOverdue(ctx context.Context, compan
 			&i.InstallmentsCount,
 			&i.PaymentMethod,
 			&i.SaleStatus,
+			&i.DownPayment,
 			&i.CustomerID,
 			&i.CustomerName,
 			&i.SaleItemID,

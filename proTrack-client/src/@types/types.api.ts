@@ -213,6 +213,17 @@ export interface DashboardDados {
   percentage: number | null;
   custoTotalEstoque: number | null;
   Top5Products: Top5Products[];
+
+  // Relatórios Financeiros (campos opcionais — nem todo endpoint retorna tudo)
+  distribuicaoMargemLucro?: DistribuicaoMargemLucroResponse;
+  valorInvestidoPorCategoria?: ValorInvestidoPorCategoriaResponse;
+  margemTotal?: MargemLucroTotalResponse;
+  financeiro?: TotalAPagarResponse;
+  estoque?: TotalEstoqueResponse;
+  evolucaoLucroMensal?:
+    | { evolucao: { mes: string; lucro_mensal: number }[] }[]
+    | { mes: string; lucro_mensal: number }[];
+  melhorMargem?: { produtos: { nome: string; lucro_unitario: number; margem_lucro: number }[] };
 }
 
 export interface ContasReceber {

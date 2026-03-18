@@ -35,11 +35,16 @@ export interface ListSalesByCompanyResponse {
 
 export interface VendaAgrupada {
   sale_id: string;
+  subtotal?: number;
   total_amount: number;
   discount_amount: number;
   status: string;
   sale_date: string | Date;
   customer_name: string;
+  payment_method?: string;
+  installments_count?: number;
+  installment_total_amount?: number;
+  down_payments?: number;
   itens: {
     item_id: string;
     product_id: string;
@@ -63,11 +68,12 @@ export interface ListSaleResponse {
   discount_amount: number;
   total_amount: number;
   installments_count: number;
-  payment_method: string;
-  sale_status: string;
+  payment_method: string | null;
+  sale_status: string | null;
   customer_id: string;
   customer_name: string;
   installment_total_amount: number;
+  down_payments: number;
 }
 
 export interface ListProductResponse {
