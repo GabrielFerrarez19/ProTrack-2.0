@@ -131,6 +131,7 @@ type ListSalesResponse struct {
 	CustomerID             uuid.UUID   `json:"customer_id"`
 	CustomerName           string      `json:"customer_name"`
 	InstallmentTotalAmount float64     `json:"installment_total_amount"`
+	DownPayment            float64     `json:"down_payments"`
 }
 
 type ListProductResponse struct {

@@ -25,11 +25,16 @@ function saleWithDetailsToVendaAgrupada(v: SaleWithDetails): VendaAgrupada {
   const { sale, products } = v;
   return {
     sale_id: sale.sale_id,
+    subtotal: sale.subtotal,
     total_amount: sale.total_amount,
     discount_amount: sale.discount_amount,
     status: String(sale.sale_status ?? ""),
     sale_date: sale.sale_at,
     customer_name: sale.customer_name,
+    payment_method: sale.payment_method ?? undefined,
+    installments_count: sale.installments_count,
+    installment_total_amount: sale.installment_total_amount,
+    down_payments: sale.down_payments,
     itens: products.map((p) => ({
       item_id: p.sale_item_id,
       product_id: p.product_id,
@@ -108,6 +113,12 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
               Cliente
             </TableHead>
             <TableHead className="text-gray-700 font-semibold">Data</TableHead>
+            <TableHead className="text-gray-700 font-semibold">
+              Pagamento
+            </TableHead>
+            <TableHead className="text-gray-700 font-semibold">
+              Parcelas
+            </TableHead>
             <TableHead className="text-gray-700 font-semibold">Total</TableHead>
 
             <TableHead className="text-gray-700 font-semibold">
@@ -143,6 +154,20 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
                 <TableCell>{s.customer_name}</TableCell>
                 <TableCell>
                   {new Date(s.sale_at).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  {s.payment_method ? (
+                    <Badge variant="outline">{String(s.payment_method)}</Badge>
+                  ) : (
+                    "—"
+                  )}
+                </TableCell>
+                <TableCell>
+                  {s.installments_count ? (
+                    <Badge variant="outline">{s.installments_count}x</Badge>
+                  ) : (
+                    "—"
+                  )}
                 </TableCell>
                 <TableCell>
                   <Badge className={totalColor}>

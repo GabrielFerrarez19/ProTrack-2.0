@@ -175,6 +175,7 @@ SELECT -- Dados da venda
     s.installments_count,
     s.payment_method,
     s.status AS sale_status,
+    s.down_payment,
     -- Dados do cliente
     c.id AS customer_id,
     c.full_name AS customer_name,
@@ -212,6 +213,7 @@ SELECT -- Dados da venda
     s.installments_count,
     s.payment_method,
     s.status AS sale_status,
+    s.down_payment,
     -- Dados do cliente
     c.id AS customer_id,
     c.full_name AS customer_name,
