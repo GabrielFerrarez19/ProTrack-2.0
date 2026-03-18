@@ -378,6 +378,9 @@ func (s *Service) GetTotalOpenAmountByCompany(ctx context.Context, companyId uui
 
 func (s *Service) GetTotalOverdueAmountByCompany(ctx context.Context, companyId uuid.UUID) (float64, error) {
 	total, err := s.repo.GetTotalOverdueAmountByCompany(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, nil
+	}
 	if err != nil {
 		return 0, err
 	}
