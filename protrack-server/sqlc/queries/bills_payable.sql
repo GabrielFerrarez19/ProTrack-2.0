@@ -74,21 +74,21 @@ WHERE id = $1
 SELECT COUNT(*)::INT as total_quantity,
     COALESCE(
         SUM(amount) FILTER (
-            WHERE status = 'pending'
+            WHERE status IN ('pending', 'overdue')
         ),
         0
     )::NUMERIC(12, 2) as total_to_pay,
     COALESCE(
         SUM(amount) FILTER (
-            WHERE status = 'pending'
-                AND due_date < CURRENT_DATE
+            WHERE due_date < CURRENT_DATE
+                AND status != 'paid'
         ),
         0
     )::NUMERIC(12, 2) as total_overdue,
     COALESCE(
         SUM(amount) FILTER (
-            WHERE status = 'pending'
-                AND scheduled_date IS NOT NULL
+            WHERE scheduled_date IS NOT NULL
+                AND status != 'paid'
         ),
         0
     )::NUMERIC(12, 2) as total_scheduled

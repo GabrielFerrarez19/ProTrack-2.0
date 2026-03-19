@@ -142,21 +142,21 @@ const getBillsPayableSummary = `-- name: GetBillsPayableSummary :one
 SELECT COUNT(*)::INT as total_quantity,
     COALESCE(
         SUM(amount) FILTER (
-            WHERE status = 'pending'
+            WHERE status IN ('pending', 'overdue')
         ),
         0
     )::NUMERIC(12, 2) as total_to_pay,
     COALESCE(
         SUM(amount) FILTER (
-            WHERE status = 'pending'
-                AND due_date < CURRENT_DATE
+            WHERE due_date < CURRENT_DATE
+                AND status != 'paid'
         ),
         0
     )::NUMERIC(12, 2) as total_overdue,
     COALESCE(
         SUM(amount) FILTER (
-            WHERE status = 'pending'
-                AND scheduled_date IS NOT NULL
+            WHERE scheduled_date IS NOT NULL
+                AND status != 'paid'
         ),
         0
     )::NUMERIC(12, 2) as total_scheduled
@@ -400,7 +400,6 @@ UPDATE bills_payable
 SET status = 'overdue'
 WHERE status = 'pending'
     AND due_date::DATE < CURRENT_DATE
-RETURNING id
 `
 
 func (q *Queries) UpdateOverdueBillsPayable(ctx context.Context) error {
