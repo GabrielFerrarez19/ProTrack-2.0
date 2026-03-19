@@ -116,6 +116,7 @@ type Querier interface {
 	UpdateCustomerBalance(ctx context.Context, arg UpdateCustomerBalanceParams) error
 	UpdateDepartment(ctx context.Context, arg UpdateDepartmentParams) (Department, error)
 	UpdateLastLogin(ctx context.Context, id pgtype.UUID) error
+	UpdateOverdueBillsPayable(ctx context.Context) error
 	UpdateOverdueSalesAndAccountsGlobal(ctx context.Context) ([]UpdateOverdueSalesAndAccountsGlobalRow, error)
 	UpdatePasswordHash(ctx context.Context, arg UpdatePasswordHashParams) error
 	UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error)

@@ -190,6 +190,7 @@ func main() {
 	})
 
 	worker.StartOverdueMonitor(salesService)
+	worker.StartBillPayableOverdueMonitor(billsPayableService)
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.ApiPort,

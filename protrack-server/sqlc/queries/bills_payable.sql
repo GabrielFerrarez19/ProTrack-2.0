@@ -94,3 +94,8 @@ SELECT COUNT(*)::INT as total_quantity,
     )::NUMERIC(12, 2) as total_scheduled
 FROM bills_payable
 WHERE company_id = $1;
+-- name: UpdateOverdueBillsPayable :exec
+UPDATE bills_payable
+SET status = 'overdue'
+WHERE status = 'pending'
+    AND due_date::DATE < CURRENT_DATE;
