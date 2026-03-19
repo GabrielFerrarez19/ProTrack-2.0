@@ -171,6 +171,10 @@ func (s *Service) CreateSale(ctx context.Context, userId, companyId uuid.UUID, r
 	for _, itemReq := range req.Items {
 		itemReq.SaleID = pgconv.PgUUIDToUUID(id)
 
+		percentageItem := (itemReq.UnitPrice / req.TotalAmount) * 100
+
+		itemReq.Discount = req.DiscountAmount * (percentageItem / 100)
+
 		if err := s.saleItemsService.CreateSaleItemInTx(ctx, tx, saleItemDomain.CreateSaleItemRequest(itemReq), companyId); err != nil {
 			return uuid.Nil, err
 		}
