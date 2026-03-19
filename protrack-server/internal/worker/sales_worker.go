@@ -34,7 +34,7 @@ func StartOverdueMonitor(saleService *service.Service) {
 			}
 		}
 
-		log.Info().Msg("Serviço de Monitoramento ProTrack iniciado")
+		log.Info().Msg("Serviço de Monitoramento vendas iniciado")
 		runUpdate()
 
 		for range ticker.C {

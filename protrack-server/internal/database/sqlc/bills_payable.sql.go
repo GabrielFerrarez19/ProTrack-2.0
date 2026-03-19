@@ -394,3 +394,16 @@ func (q *Queries) UpdateBillPayable(ctx context.Context, arg UpdateBillPayablePa
 	)
 	return err
 }
+
+const updateOverdueBillsPayable = `-- name: UpdateOverdueBillsPayable :exec
+UPDATE bills_payable
+SET status = 'overdue'
+WHERE status = 'pending'
+    AND due_date::DATE < CURRENT_DATE
+RETURNING id
+`
+
+func (q *Queries) UpdateOverdueBillsPayable(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, updateOverdueBillsPayable)
+	return err
+}
