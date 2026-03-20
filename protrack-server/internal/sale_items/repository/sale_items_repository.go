@@ -42,3 +42,13 @@ func (r *Repository) ListItemsFromPendingSale(ctx context.Context, saleID pgtype
 	q := db.New(r.db)
 	return q.ListItemsFromPendingSale(ctx, saleID)
 }
+
+func (r *Repository) ListItemsByCompany(ctx context.Context, companyId pgtype.UUID) ([]db.ListItemsByCompanyRow, error) {
+	q := db.New(r.db)
+	return q.ListItemsByCompany(ctx, companyId)
+}
+
+func (r *Repository) ListItemsByDate(ctx context.Context, arg db.ListItemsByDateParams) ([]db.ListItemsByDateRow, error) {
+	q := db.New(r.db)
+	return q.ListItemsByDate(ctx, arg)
+}

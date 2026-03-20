@@ -61,6 +61,116 @@ func (q *Queries) DeleteSaleItem(ctx context.Context, id pgtype.UUID) error {
 	return err
 }
 
+const listItemsByCompany = `-- name: ListItemsByCompany :many
+SELECT si.id,
+    si.sale_id,
+    si.product_id,
+    si.quantity,
+    si.unit_price,
+    si.discount,
+    p.name as product_name
+FROM sale_items si
+    INNER JOIN sales s ON si.sale_id = s.id
+    INNER JOIN products p ON si.product_id = p.id
+WHERE s.company_id = $1
+`
+
+type ListItemsByCompanyRow struct {
+	ID          pgtype.UUID    `json:"id"`
+	SaleID      pgtype.UUID    `json:"sale_id"`
+	ProductID   pgtype.UUID    `json:"product_id"`
+	Quantity    int32          `json:"quantity"`
+	UnitPrice   pgtype.Numeric `json:"unit_price"`
+	Discount    pgtype.Numeric `json:"discount"`
+	ProductName string         `json:"product_name"`
+}
+
+func (q *Queries) ListItemsByCompany(ctx context.Context, companyID pgtype.UUID) ([]ListItemsByCompanyRow, error) {
+	rows, err := q.db.Query(ctx, listItemsByCompany, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListItemsByCompanyRow{}
+	for rows.Next() {
+		var i ListItemsByCompanyRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.SaleID,
+			&i.ProductID,
+			&i.Quantity,
+			&i.UnitPrice,
+			&i.Discount,
+			&i.ProductName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listItemsByDate = `-- name: ListItemsByDate :many
+SELECT si.id,
+    si.sale_id,
+    si.product_id,
+    si.quantity,
+    si.unit_price,
+    si.discount,
+    p.name as product_name
+FROM sale_items si
+    INNER JOIN sales s ON si.sale_id = s.id
+    INNER JOIN products p ON si.product_id = p.id
+WHERE s.company_id = $1 -- Compara apenas o Mês e o Ano, ignorando o dia e a hora
+    AND DATE_TRUNC('month', s.created_at) = DATE_TRUNC('month', $2::timestamptz)
+`
+
+type ListItemsByDateParams struct {
+	CompanyID pgtype.UUID        `json:"company_id"`
+	Column2   pgtype.Timestamptz `json:"column_2"`
+}
+
+type ListItemsByDateRow struct {
+	ID          pgtype.UUID    `json:"id"`
+	SaleID      pgtype.UUID    `json:"sale_id"`
+	ProductID   pgtype.UUID    `json:"product_id"`
+	Quantity    int32          `json:"quantity"`
+	UnitPrice   pgtype.Numeric `json:"unit_price"`
+	Discount    pgtype.Numeric `json:"discount"`
+	ProductName string         `json:"product_name"`
+}
+
+func (q *Queries) ListItemsByDate(ctx context.Context, arg ListItemsByDateParams) ([]ListItemsByDateRow, error) {
+	rows, err := q.db.Query(ctx, listItemsByDate, arg.CompanyID, arg.Column2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListItemsByDateRow{}
+	for rows.Next() {
+		var i ListItemsByDateRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.SaleID,
+			&i.ProductID,
+			&i.Quantity,
+			&i.UnitPrice,
+			&i.Discount,
+			&i.ProductName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listItemsFromPendingSale = `-- name: ListItemsFromPendingSale :many
 SELECT si.id,
     si.sale_id,

@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
+	"math"
+	"sort"
 	"time"
 
 	accountsReceivableDomain "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/accounts_receivable/domain"
@@ -11,6 +13,8 @@ import (
 	customerDomain "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/customers/domain"
 	customerService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/customers/service"
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
+	productService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/service"
+	productCategoriesService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products_categories/service"
 	saleItemDomain "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sale_items/domain"
 	saleItemsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sale_items/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/sales/domain"
@@ -49,6 +53,8 @@ type Service struct {
 	saleItemsService          *saleItemsService.Service
 	customerService           *customerService.Service
 	accountsReceivableService *accountsReceivableService.Service
+	productService            *productService.Service
+	productCategoriesService  *productCategoriesService.Service
 	whatsApp                  *whatsapp.Whatsapp
 }
 
@@ -58,6 +64,8 @@ func NewService(
 	saleItemsService *saleItemsService.Service,
 	customerService *customerService.Service,
 	accountsReceivableService *accountsReceivableService.Service,
+	productService *productService.Service,
+	productCategoriesService *productCategoriesService.Service,
 	whatsApp *whatsapp.Whatsapp,
 ) *Service {
 	return &Service{
@@ -66,6 +74,8 @@ func NewService(
 		saleItemsService:          saleItemsService,
 		customerService:           customerService,
 		accountsReceivableService: accountsReceivableService,
+		productService:            productService,
+		productCategoriesService:  productCategoriesService,
 		whatsApp:                  whatsApp,
 	}
 }
@@ -687,5 +697,187 @@ func (s *Service) GetPendingSalesDetailedReport(ctx context.Context, companyId u
 			InstallmentStatus:      pgconv.ParsePgTextToString(row.InstallmentStatus),
 		})
 	}
+	return response, nil
+}
+
+func (s *Service) GetRealProfitItem(ctx context.Context, companyId uuid.UUID) (float64, error) {
+	productItems, err := s.saleItemsService.ListItemsByCompany(ctx, companyId)
+	if err != nil {
+		return 0, err
+	}
+
+	var totalCost float64
+	var totalNetSales float64
+
+	for _, pi := range productItems {
+		product, err := s.productService.GetProductById(ctx, pi.ProductID)
+		if err != nil {
+			return 0, err
+		}
+
+		totalNetSales += (pi.UnitPrice - pi.Discount) * float64(pi.Quantity)
+
+		totalCost += product.CostPrice * float64(pi.Quantity)
+	}
+
+	if totalNetSales <= 0 {
+		return 0, nil
+	}
+
+	profitMargin := ((totalNetSales - totalCost) / totalNetSales) * 100
+
+	return profitMargin, nil
+}
+
+func (s *Service) GetTop5RealProfitItem(ctx context.Context, companyId uuid.UUID) ([]domain.GetTop5RealProfitItemResponse, error) {
+	products, err := s.productService.ListProductsByCompany(ctx, companyId)
+	if err != nil {
+		return []domain.GetTop5RealProfitItemResponse{}, err
+	}
+
+	productItems, err := s.saleItemsService.ListItemsByCompany(ctx, companyId)
+	if err != nil {
+		return []domain.GetTop5RealProfitItemResponse{}, err
+	}
+
+	var response []domain.GetTop5RealProfitItemResponse
+
+	for _, product := range products {
+		var totalCost float64
+		var totalNetSales float32
+		found := false
+
+		for _, item := range productItems {
+			if item.ProductID == product.ID {
+				totalNetSales += (float32(item.UnitPrice) - float32(item.Discount))
+				totalCost += product.CostPrice * float64(item.Quantity)
+				found = true
+			}
+		}
+
+		if found && totalNetSales > 0 {
+			margin := ((totalNetSales - float32(totalCost)) / totalNetSales) * 100
+			response = append(response, domain.GetTop5RealProfitItemResponse{
+				ProductsName:      product.Name,
+				ProductRealProfit: float64(margin),
+				TotalSale:         float64(totalNetSales),
+			})
+		}
+	}
+
+	sort.Slice(response, func(i, j int) bool {
+		return response[i].ProductRealProfit > response[j].ProductRealProfit
+	})
+
+	limit := 5
+
+	if len(response) < 5 {
+		limit = (len(response))
+	}
+
+	return response[:limit], nil
+}
+
+func (s *Service) GetPerformanceMonth(ctx context.Context, companyId uuid.UUID) ([]domain.GetPerformanceMonthResponse, error) {
+	dataBase := time.Now()
+
+	var response []domain.GetPerformanceMonthResponse
+
+	for i := 0; i <= 6; i++ {
+		startMount := time.Date(dataBase.Year(), dataBase.Month()-time.Month(i), 1, 0, 0, 0, 0, dataBase.Location())
+
+		productItems, err := s.saleItemsService.ListItemsByDate(ctx, companyId, startMount)
+		if err != nil {
+			return []domain.GetPerformanceMonthResponse{}, err
+		}
+
+		var totalCost float64
+		var totalNetSales float64
+
+		for _, pi := range productItems {
+			product, err := s.productService.GetProductById(ctx, pi.ProductID)
+			if err != nil {
+				return []domain.GetPerformanceMonthResponse{}, err
+			}
+
+			totalNetSales += (pi.UnitPrice - pi.Discount) * float64(pi.Quantity)
+
+			totalCost += product.CostPrice * float64(pi.Quantity)
+		}
+
+		var profitMargin float64
+		if totalNetSales > 0 {
+			profitMargin = ((totalNetSales - totalCost) / totalNetSales) * 100
+		}
+
+		response = append(response, domain.GetPerformanceMonthResponse{
+			Mount:      startMount.Format("01/2006"),
+			RealProfit: math.Round(profitMargin*100) / 100,
+			TotalSale:  totalNetSales,
+		})
+
+	}
+
+	return response, nil
+}
+
+func (s *Service) GetTotalInvestmentCategory(ctx context.Context, companyId uuid.UUID) ([]domain.GetTotalInvestmentCategoryResponse, error) {
+	categories, err := s.productCategoriesService.ListProductCategoryByCompanyId(ctx, companyId)
+	if err != nil {
+		return []domain.GetTotalInvestmentCategoryResponse{}, err
+	}
+
+	productItems, err := s.saleItemsService.ListItemsByCompany(ctx, companyId)
+	if err != nil {
+		return []domain.GetTotalInvestmentCategoryResponse{}, err
+	}
+
+	var response []domain.GetTotalInvestmentCategoryResponse
+
+	for _, category := range categories {
+		var totalInvestment float64
+		products, err := s.productService.ListProductsByCategoryId(ctx, category.ID, companyId)
+		if err != nil {
+			return []domain.GetTotalInvestmentCategoryResponse{}, err
+		}
+		var catQuantity int
+		var finalStock int
+
+		for _, product := range products {
+
+			var soldQuantity int
+
+			soldQuantity += int(product.Quantity)
+			finalStock += int(product.Quantity)
+
+			for _, item := range productItems {
+				if item.ProductID == product.ID {
+					soldQuantity += int(item.Quantity)
+				}
+			}
+
+			totalInvestment += product.CostPrice * float64(soldQuantity)
+
+			catQuantity += soldQuantity
+		}
+
+		mediaStock := (catQuantity + finalStock) / 2
+
+		var stockTurnover float64
+		log.Info().Int("catQuantity", catQuantity)
+		log.Info().Int("mediaStock", mediaStock)
+		if catQuantity > 0 {
+			stockTurnover = float64(catQuantity) / float64(mediaStock)
+		}
+
+		response = append(response, domain.GetTotalInvestmentCategoryResponse{
+			CategoryName:    category.Name,
+			TotalInvestment: totalInvestment,
+			Amount:          int(catQuantity),
+			StockTurnover:   stockTurnover,
+		})
+
+	}
+
 	return response, nil
 }

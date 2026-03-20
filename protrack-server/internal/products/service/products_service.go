@@ -133,10 +133,10 @@ func (s *Service) GetProductById(ctx context.Context, id uuid.UUID) (domain.Prod
 	}, nil
 }
 
-func (s *Service) ListProductsByCategoryId(ctx context.Context, req domain.ListProductsByCategoryIdRequest) ([]domain.ProductResponse, error) {
+func (s *Service) ListProductsByCategoryId(ctx context.Context, categoryId, companyID uuid.UUID) ([]domain.ProductResponse, error) {
 	products, err := s.repo.ListProductsByCategoryId(ctx, db.ListProductsByCategoryIdParams{
-		CategoryID: pgconv.ParseUUIDToPgType(req.CategoryID),
-		CompanyID:  pgconv.ParseUUIDToPgType(req.CompanyID),
+		CategoryID: pgconv.ParseUUIDToPgType(categoryId),
+		CompanyID:  pgconv.ParseUUIDToPgType(companyID),
 	})
 	if err != nil {
 		return []domain.ProductResponse{}, err

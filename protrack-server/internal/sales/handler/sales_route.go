@@ -21,5 +21,9 @@ func (h *Handler) RegisterRoute(r *gin.RouterGroup) {
 		sales.GET("/count/pending-overdue", h.ContSalesPendingAndOverdue)
 		sales.GET("/complete", h.ListSalesWithDetails)
 		sales.GET("/complete/pending-overdue", h.ListSalesWithDetailsPendingOverdue)
+		sales.GET("/real-profit", h.GetRealProfitItem)
+		sales.GET("/top5-products", h.GetTop5RealProfitItem)
+		sales.GET("/performance-mounts", h.GetPerformanceMonth)
+		sales.GET("/investment-categories", h.GetTotalInvestmentCategory)
 	}
 }

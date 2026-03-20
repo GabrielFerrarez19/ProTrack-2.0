@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"time"
 
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
@@ -19,6 +20,8 @@ type RepositoryInterface interface {
 	DeleteItemsBySale(ctx context.Context, saleId pgtype.UUID) error
 	DeleteSaleItem(ctx context.Context, id pgtype.UUID) error
 	ListItemsFromPendingSale(ctx context.Context, saleID pgtype.UUID) ([]db.ListItemsFromPendingSaleRow, error)
+	ListItemsByCompany(ctx context.Context, companyId pgtype.UUID) ([]db.ListItemsByCompanyRow, error)
+	ListItemsByDate(ctx context.Context, arg db.ListItemsByDateParams) ([]db.ListItemsByDateRow, error)
 	WithTx(tx db.DBTX) *repository.Repository
 }
 
@@ -105,6 +108,55 @@ func (s *Service) ListItemsFromPendingSale(ctx context.Context, saleId uuid.UUID
 
 	for _, item := range items {
 		response = append(response, domain.ListItemsFromPendingSaleRow{
+			ID:          pgconv.PgUUIDToUUID(item.ID),
+			SaleID:      pgconv.PgUUIDToUUID(item.SaleID),
+			ProductID:   pgconv.PgUUIDToUUID(item.ProductID),
+			Quantity:    item.Quantity,
+			UnitPrice:   pgconv.PgNumericToFloat64(item.UnitPrice),
+			Discount:    pgconv.PgNumericToFloat64(item.Discount),
+			ProductName: item.ProductName,
+		})
+	}
+
+	return response, nil
+}
+
+func (s *Service) ListItemsByCompany(ctx context.Context, companyId uuid.UUID) ([]domain.ListItemsByCompanyResponse, error) {
+	items, err := s.repo.ListItemsByCompany(ctx, pgconv.ParseUUIDToPgType(companyId))
+	if err != nil {
+		return []domain.ListItemsByCompanyResponse{}, err
+	}
+
+	var response []domain.ListItemsByCompanyResponse
+
+	for _, item := range items {
+		response = append(response, domain.ListItemsByCompanyResponse{
+			ID:          pgconv.PgUUIDToUUID(item.ID),
+			SaleID:      pgconv.PgUUIDToUUID(item.SaleID),
+			ProductID:   pgconv.PgUUIDToUUID(item.ProductID),
+			Quantity:    item.Quantity,
+			UnitPrice:   pgconv.PgNumericToFloat64(item.UnitPrice),
+			Discount:    pgconv.PgNumericToFloat64(item.Discount),
+			ProductName: item.ProductName,
+		})
+	}
+
+	return response, nil
+}
+
+func (s *Service) ListItemsByDate(ctx context.Context, companyId uuid.UUID, date time.Time) ([]domain.ListItemsByDateResponse, error) {
+	items, err := s.repo.ListItemsByDate(ctx, db.ListItemsByDateParams{
+		CompanyID: pgconv.ParseUUIDToPgType(companyId),
+		Column2:   pgconv.TimeToPgTimestamptz(date),
+	})
+	if err != nil {
+		return []domain.ListItemsByDateResponse{}, err
+	}
+
+	var response []domain.ListItemsByDateResponse
+
+	for _, item := range items {
+		response = append(response, domain.ListItemsByDateResponse{
 			ID:          pgconv.PgUUIDToUUID(item.ID),
 			SaleID:      pgconv.PgUUIDToUUID(item.SaleID),
 			ProductID:   pgconv.PgUUIDToUUID(item.ProductID),

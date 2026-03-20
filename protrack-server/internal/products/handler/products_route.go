@@ -11,7 +11,7 @@ func (h *Handler) RegisterRoute(r *gin.RouterGroup) {
 		product.POST("", h.CreateProduct)
 		product.DELETE("/:id", h.DeleteProduct)
 		product.GET("/barcode/:barcode", h.GetProductByBarcode)
-		product.GET("/category", h.ListProductsByCategoryId)
+		product.GET("/category/:categoryId", h.ListProductsByCategoryId)
 		product.GET("/company", h.ListProductsByCompany)
 		product.GET("/count", h.CountProducts)
 		product.GET("/percentage", h.GetProductsPerformanceSummary)
