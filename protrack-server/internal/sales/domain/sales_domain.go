@@ -183,6 +183,25 @@ type GetPendingSalesDetailedReportResponse struct {
 	InstallmentStatus      string      `json:"installment_status"`
 }
 
+type GetTop5RealProfitItemResponse struct {
+	ProductsName      string  `json:"product_name"`
+	ProductRealProfit float64 `json:"product_real_profit"`
+	TotalSale         float64 `json:"total_sale"`
+}
+
+type GetPerformanceMonthResponse struct {
+	Mount      string  `json:"mount"`
+	RealProfit float64 `json:"real_profit"`
+	TotalSale  float64 `json:"total_sale"`
+}
+
+type GetTotalInvestmentCategoryResponse struct {
+	CategoryName    string  `json:"category_name"`
+	TotalInvestment float64 `json:"total_investment"`
+	Amount          int     `json:"amount"`
+	StockTurnover   float64 `json:"stock_turnover"`
+}
+
 func ValidateCreateSaleRequest(req CreateSaleRequest) error {
 	if req.CustomerID == uuid.Nil {
 		return errors.New("customer_id is required")

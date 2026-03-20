@@ -126,16 +126,11 @@ func (h *Handler) ListProductsByCategoryId(c *gin.Context) {
 
 	companyId := companyIdAny.(uuid.UUID)
 
-	var req domain.ListProductsByCategoryIdRequest
+	categoryIdStr := c.Param("categoryId")
 
-	if err := c.ShouldBindQuery(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	categoryId, err := uuid.Parse(categoryIdStr)
 
-	req.CompanyID = companyId
-
-	products, err := h.service.ListProductsByCategoryId(c.Request.Context(), req)
+	products, err := h.service.ListProductsByCategoryId(c.Request.Context(), categoryId, companyId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
