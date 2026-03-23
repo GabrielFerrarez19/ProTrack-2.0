@@ -128,6 +128,37 @@ func (s *Service) GenerateReports(ctx context.Context, reportType string, compan
 			Rows:     rows,
 			FileName: fileName,
 		}, nil
+	case string(domain.ReportProfitProduct):
+		products, err := s.saleService.ProfitMarginProducts(ctx, companyId, At, At2)
+		if err != nil {
+			return domain.ReportResponse{}, err
+		}
+
+		log.Info().Interface("product", products).Msg("product")
+		headers, rows = domain.MapStructToReport(products)
+
+		fileName = fmt.Sprintf("profit_products_%s.xlsx", time.Now().Format("02-01-2006"))
+
+		return domain.ReportResponse{
+			Headers:  headers,
+			Rows:     rows,
+			FileName: fileName,
+		}, err
+	case string(domain.ReportProfitCategory):
+		categories, err := s.saleService.ProfitMarginCategoryId(ctx, companyId, At, At2)
+		if err != nil {
+			return domain.ReportResponse{}, err
+		}
+
+		headers, rows := domain.MapStructToReport(categories)
+
+		fileName = fmt.Sprintf("profit_category_%s.xlsx", time.Now().Format("02-01-2006"))
+
+		return domain.ReportResponse{
+			Headers:  headers,
+			Rows:     rows,
+			FileName: fileName,
+		}, nil
 	}
 
 	return domain.ReportResponse{}, errors.New("relatório não encontrado")

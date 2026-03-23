@@ -78,3 +78,11 @@ func (r *Repository) GetTop5BestSellingProducts(ctx context.Context, companyId p
 func (r *Repository) GetInventoryReport(ctx context.Context, arg db.GetInventoryReportParams) ([]db.GetInventoryReportRow, error) {
 	return r.queries().GetInventoryReport(ctx, arg)
 }
+
+func (r *Repository) ListProductsByDate(ctx context.Context, arg db.ListProductsByDateParams) ([]db.ListProductsByDateRow, error) {
+	return r.queries().ListProductsByDate(ctx, arg)
+}
+
+func (r *Repository) ListProductBuCategoryIdAndDate(ctx context.Context, arg db.ListProductsByCategoryAndDateParams) ([]db.ListProductsByCategoryAndDateRow, error) {
+	return r.queries().ListProductsByCategoryAndDate(ctx, arg)
+}

@@ -347,6 +347,66 @@ func (q *Queries) GetTop5BestSellingProducts(ctx context.Context, companyID pgty
 	return items, nil
 }
 
+const listProductsByCategoryAndDate = `-- name: ListProductsByCategoryAndDate :many
+SELECT p.id,
+    p.name,
+    p.cost_price,
+    p.quantity,
+    p.category_id,
+    p.created_at,
+    c.name AS category_name
+FROM products p
+    INNER JOIN product_categories c ON p.category_id = c.id
+WHERE p.category_id = $1
+    AND p.deleted_at IS NULL
+    AND p.created_at >= $2
+    AND p.created_at <= $3
+`
+
+type ListProductsByCategoryAndDateParams struct {
+	CategoryID  pgtype.UUID        `json:"category_id"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	CreatedAt_2 pgtype.Timestamptz `json:"created_at_2"`
+}
+
+type ListProductsByCategoryAndDateRow struct {
+	ID           pgtype.UUID        `json:"id"`
+	Name         string             `json:"name"`
+	CostPrice    pgtype.Numeric     `json:"cost_price"`
+	Quantity     int32              `json:"quantity"`
+	CategoryID   pgtype.UUID        `json:"category_id"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	CategoryName string             `json:"category_name"`
+}
+
+func (q *Queries) ListProductsByCategoryAndDate(ctx context.Context, arg ListProductsByCategoryAndDateParams) ([]ListProductsByCategoryAndDateRow, error) {
+	rows, err := q.db.Query(ctx, listProductsByCategoryAndDate, arg.CategoryID, arg.CreatedAt, arg.CreatedAt_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListProductsByCategoryAndDateRow{}
+	for rows.Next() {
+		var i ListProductsByCategoryAndDateRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CostPrice,
+			&i.Quantity,
+			&i.CategoryID,
+			&i.CreatedAt,
+			&i.CategoryName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listProductsByCategoryId = `-- name: ListProductsByCategoryId :many
 SELECT id, company_id, category_id, name, description, barcode, quantity, size, cost_price, sale_price, created_by, updated_by, deleted_by, created_at, updated_at, deleted_at
 FROM products
@@ -452,6 +512,66 @@ func (q *Queries) ListProductsByCompany(ctx context.Context, companyID pgtype.UU
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
+			&i.CategoryName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listProductsByDate = `-- name: ListProductsByDate :many
+SELECT p.id,
+    p.name,
+    p.cost_price,
+    p.quantity,
+    p.category_id,
+    p.created_at,
+    c.name AS category_name
+FROM products p
+    INNER JOIN product_categories c ON p.category_id = c.id
+WHERE p.company_id = $1
+    AND p.deleted_at IS NULL
+    AND p.created_at >= $2
+    AND p.created_at <= $3
+`
+
+type ListProductsByDateParams struct {
+	CompanyID   pgtype.UUID        `json:"company_id"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	CreatedAt_2 pgtype.Timestamptz `json:"created_at_2"`
+}
+
+type ListProductsByDateRow struct {
+	ID           pgtype.UUID        `json:"id"`
+	Name         string             `json:"name"`
+	CostPrice    pgtype.Numeric     `json:"cost_price"`
+	Quantity     int32              `json:"quantity"`
+	CategoryID   pgtype.UUID        `json:"category_id"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	CategoryName string             `json:"category_name"`
+}
+
+func (q *Queries) ListProductsByDate(ctx context.Context, arg ListProductsByDateParams) ([]ListProductsByDateRow, error) {
+	rows, err := q.db.Query(ctx, listProductsByDate, arg.CompanyID, arg.CreatedAt, arg.CreatedAt_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListProductsByDateRow{}
+	for rows.Next() {
+		var i ListProductsByDateRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CostPrice,
+			&i.Quantity,
+			&i.CategoryID,
+			&i.CreatedAt,
 			&i.CategoryName,
 		); err != nil {
 			return nil, err

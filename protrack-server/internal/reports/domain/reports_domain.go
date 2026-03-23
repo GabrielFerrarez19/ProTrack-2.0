@@ -10,9 +10,11 @@ import (
 type ReportType string
 
 const (
-	ReportSales     ReportType = "sales"
-	ReportPayments  ReportType = "payments"
-	ReportInventory ReportType = "products"
+	ReportSales          ReportType = "sales"
+	ReportPayments       ReportType = "payments"
+	ReportInventory      ReportType = "products"
+	ReportProfitProduct  ReportType = "profit_product"
+	ReportProfitCategory ReportType = "profit_category"
 )
 
 type ReportRequest struct {
