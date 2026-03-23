@@ -13,6 +13,31 @@ interface ListSalesResponse {
   total_open: number;
   total_overdue: number;
   total_amount: TotalAmountSummary;
+  real_profit: number;
+}
+
+export interface Top5RealProfitItem {
+  product_name: string;
+  product_real_profit: number;
+  total_sale: number;
+}
+
+export interface PerformanceMonthItem {
+  mount: string;
+  real_profit: number;
+  total_sale: number;
+}
+
+export interface InvestmentCategoryItem {
+  category_name: string;
+  total_investment: number;
+  amount: number;
+  stock_turnover: number;
+}
+
+export interface MarginDistributionItem {
+  label: string;
+  count: number;
 }
 
 export async function CreateSale(data: SaleRequest): Promise<string> {
@@ -82,6 +107,41 @@ export async function GetTotalOverdue(): Promise<number> {
     "/accounts-receivable/total-overdue",
   );
   return response.data.total_overdue ?? 0;
+}
+
+export async function GetRealProfit(): Promise<number> {
+  const response = await api.get<ListSalesResponse>("/sales/real-profit");
+  return response.data.real_profit ?? 0;
+}
+
+export async function GetTop5RealProfitItem(): Promise<Top5RealProfitItem[]> {
+  const response = await api.get<{ top5_products: Top5RealProfitItem[] }>(
+    "/sales/top5-products",
+  );
+  return response.data.top5_products ?? [];
+}
+
+export async function GetPerformanceMonth(): Promise<PerformanceMonthItem[]> {
+  const response = await api.get<{ performance: PerformanceMonthItem[] }>(
+    "/sales/performance-mounts",
+  );
+  return response.data.performance ?? [];
+}
+
+export async function GetTotalInvestmentCategory(): Promise<
+  InvestmentCategoryItem[]
+> {
+  const response = await api.get<{
+    investment_category: InvestmentCategoryItem[];
+  }>("/sales/investment-categories");
+  return response.data.investment_category ?? [];
+}
+
+export async function GetMarginDistribution(): Promise<MarginDistributionItem[]> {
+  const response = await api.get<{ margin_distribution: MarginDistributionItem[] }>(
+    "/sales/margin-distribution",
+  );
+  return response.data.margin_distribution ?? [];
 }
 
 export interface TotalPendingAndOverdueResponse {
