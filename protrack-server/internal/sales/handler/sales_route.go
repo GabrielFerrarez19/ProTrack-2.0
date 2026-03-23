@@ -25,5 +25,6 @@ func (h *Handler) RegisterRoute(r *gin.RouterGroup) {
 		sales.GET("/top5-products", h.GetTop5RealProfitItem)
 		sales.GET("/performance-mounts", h.GetPerformanceMonth)
 		sales.GET("/investment-categories", h.GetTotalInvestmentCategory)
+		sales.GET("/margin-distribution", h.MarginDistribution)
 	}
 }

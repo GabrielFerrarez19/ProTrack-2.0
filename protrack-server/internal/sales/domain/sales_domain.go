@@ -202,6 +202,11 @@ type GetTotalInvestmentCategoryResponse struct {
 	StockTurnover   float64 `json:"stock_turnover"`
 }
 
+type MarginDistributionResponse struct {
+	Label string `json:"label"`
+	Count int    `json:"count"`
+}
+
 func ValidateCreateSaleRequest(req CreateSaleRequest) error {
 	if req.CustomerID == uuid.Nil {
 		return errors.New("customer_id is required")
