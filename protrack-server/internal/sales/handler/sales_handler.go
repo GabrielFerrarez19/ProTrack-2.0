@@ -436,3 +436,21 @@ func (h *Handler) GetTotalInvestmentCategory(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"investment_category": investmentCategory})
 }
+
+func (h *Handler) MarginDistribution(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	distribution, err := h.service.MarginDistribution(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"margin_distribution": distribution})
+}

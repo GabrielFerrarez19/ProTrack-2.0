@@ -881,3 +881,56 @@ func (s *Service) GetTotalInvestmentCategory(ctx context.Context, companyId uuid
 
 	return response, nil
 }
+
+func (s *Service) MarginDistribution(ctx context.Context, companyId uuid.UUID) ([]domain.MarginDistributionResponse, error) {
+	products, err := s.productService.ListProductsByCompany(ctx, companyId)
+	if err != nil {
+		return []domain.MarginDistributionResponse{}, err
+	}
+
+	productItems, err := s.saleItemsService.ListItemsByCompany(ctx, companyId)
+	if err != nil {
+		return []domain.MarginDistributionResponse{}, err
+	}
+
+	var countBaixa, countMedia10_20, countMedia20_30, countMedia30_40, countAlta int
+
+	for _, product := range products {
+		var totalCost float64
+		var totalNetSales float32
+		found := false
+
+		for _, item := range productItems {
+			if item.ProductID == product.ID {
+				totalNetSales += (float32(item.UnitPrice) - float32(item.Discount))
+				totalCost += product.CostPrice * float64(item.Quantity)
+				found = true
+			}
+		}
+
+		if found && totalNetSales > 0 {
+			margin := ((totalNetSales - float32(totalCost)) / totalNetSales) * 100
+			if margin < 10 {
+				countBaixa++
+			} else if margin >= 10 && margin <= 20 {
+				countMedia10_20++
+			} else if margin >= 20 && margin <= 30 {
+				countMedia20_30++
+			} else if margin >= 30 && margin <= 40 {
+				countMedia30_40++
+			} else {
+				countAlta++
+			}
+		}
+	}
+
+	response := []domain.MarginDistributionResponse{
+		{Label: "0% - 10%", Count: countBaixa},
+		{Label: "10% - 20%", Count: countMedia10_20},
+		{Label: "20% - 30%", Count: countMedia20_30},
+		{Label: "30% - 40%", Count: countMedia30_40},
+		{Label: "40%+", Count: countAlta},
+	}
+
+	return response, nil
+}
