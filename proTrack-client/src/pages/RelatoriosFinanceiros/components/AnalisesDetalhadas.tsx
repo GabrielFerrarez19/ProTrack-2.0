@@ -68,8 +68,7 @@ export function AnalisesDetalhadas({ dados }: AnalisesDetalhadasProps) {
                   style={{ backgroundColor: cores[index % cores.length] }}
                 />
                 <span className="text-sm text-muted-foreground">
-                  {item.faixa}: {item.qtd} produtos (
-                  {item.percentual.toFixed(1)}%)
+                  {item.faixa}: {item.qtd} produtos
                 </span>
               </div>
             ))}

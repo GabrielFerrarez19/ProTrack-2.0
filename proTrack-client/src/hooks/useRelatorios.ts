@@ -6,6 +6,7 @@ import type {
   RelatorioLucroPeriodo,
   RelatorioEstoqueInvestimento,
 } from "../@types/types.api";
+import { GetRealProfit } from "@/services/sales";
 
 const emptyRelatorioCompleto: RelatorioCompleto = {
   periodo: { inicio: "", fim: "" },
@@ -30,13 +31,30 @@ export const useRelatorios = () => {
   const [error, setError] = useState<string | null>(null);
 
   const gerarRelatorioPorTipo = async (
-    _tipo: string,
+    tipo: string,
     _dataInicio?: string,
     _dataFim?: string,
   ) => {
     setLoading(true);
-    setLoading(false);
-    return [];
+    setError(null);
+
+    try {
+      switch (tipo) {
+        case "lucro-produto": {
+          const realProfit = await GetRealProfit();
+          return [{ indicador: "Margem de Lucro Real", valor: realProfit }];
+        }
+        default:
+          return [];
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Erro ao gerar relatório";
+      setError(message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const gerarRelatorioCompleto = async (
