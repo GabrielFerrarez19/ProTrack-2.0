@@ -27,6 +27,8 @@ type RepositoryInterface interface {
 	GetCostTotalStock(ctx context.Context, companyId pgtype.UUID) (float64, error)
 	GetTop5BestSellingProducts(ctx context.Context, companyId pgtype.UUID) ([]db.GetTop5BestSellingProductsRow, error)
 	GetInventoryReport(ctx context.Context, arg db.GetInventoryReportParams) ([]db.GetInventoryReportRow, error)
+	ListProductsByDate(ctx context.Context, arg db.ListProductsByDateParams) ([]db.ListProductsByDateRow, error)
+	ListProductBuCategoryIdAndDate(ctx context.Context, arg db.ListProductsByCategoryAndDateParams) ([]db.ListProductsByCategoryAndDateRow, error)
 }
 
 type Service struct {
@@ -333,6 +335,60 @@ func (s *Service) GetInventoryReport(ctx context.Context, companyId uuid.UUID, s
 			CostPrice:    pgconv.PgNumericToFloat64(product.CostPrice),
 			Barcode:      pgconv.ParsePgTextToString(product.Barcode),
 			CreatedAt:    pgconv.PgTimestamptzToTime(product.CreatedAt),
+		})
+	}
+
+	return response, nil
+}
+
+func (s *Service) ListProductsByDate(ctx context.Context, companyId uuid.UUID, startAt time.Time, startAt_2 time.Time) ([]domain.ListProductsByDateResponse, error) {
+	products, err := s.repo.ListProductsByDate(ctx, db.ListProductsByDateParams{
+		CompanyID:   pgconv.ParseUUIDToPgType(companyId),
+		CreatedAt:   pgconv.TimeToPgTimestamptz(startAt),
+		CreatedAt_2: pgconv.TimeToPgTimestamptz(startAt_2),
+	})
+	if err != nil {
+		return []domain.ListProductsByDateResponse{}, err
+	}
+
+	var response []domain.ListProductsByDateResponse
+
+	for _, product := range products {
+		response = append(response, domain.ListProductsByDateResponse{
+			ID:           pgconv.PgUUIDToUUID(product.ID),
+			CategoryID:   pgconv.PgUUIDToUUID(product.CategoryID),
+			Name:         product.Name,
+			Quantity:     product.Quantity,
+			CostPrice:    pgconv.PgNumericToFloat64(product.CostPrice),
+			CreatedAt:    pgconv.PgTimestamptzToTime(product.CreatedAt),
+			CategoryName: product.CategoryName,
+		})
+	}
+
+	return response, nil
+}
+
+func (s *Service) ListProductBuCategoryIdAndDate(ctx context.Context, categoryId uuid.UUID, startAt time.Time, startAt_2 time.Time) ([]domain.ListProductsByCategoryAndDateResponse, error) {
+	products, err := s.repo.ListProductBuCategoryIdAndDate(ctx, db.ListProductsByCategoryAndDateParams{
+		CategoryID:  pgconv.ParseUUIDToPgType(categoryId),
+		CreatedAt:   pgconv.TimeToPgTimestamptz(startAt),
+		CreatedAt_2: pgconv.TimeToPgTimestamptz(startAt_2),
+	})
+	if err != nil {
+		return []domain.ListProductsByCategoryAndDateResponse{}, err
+	}
+
+	var response []domain.ListProductsByCategoryAndDateResponse
+
+	for _, product := range products {
+		response = append(response, domain.ListProductsByCategoryAndDateResponse{
+			ID:           pgconv.PgUUIDToUUID(product.ID),
+			Name:         product.Name,
+			CostPrice:    pgconv.PgNumericToFloat64(product.CostPrice),
+			Quantity:     product.Quantity,
+			CategoryID:   pgconv.PgUUIDToUUID(product.CategoryID),
+			CreatedAt:    pgconv.PgTimestamptzToTime(product.CreatedAt),
+			CategoryName: product.CategoryName,
 		})
 	}
 

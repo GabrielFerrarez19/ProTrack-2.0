@@ -934,3 +934,99 @@ func (s *Service) MarginDistribution(ctx context.Context, companyId uuid.UUID) (
 
 	return response, nil
 }
+
+func (s *Service) ProfitMarginProducts(ctx context.Context, companyId uuid.UUID, startAt, startAt_2 time.Time) ([]domain.ProfitMarginProductsResponse, error) {
+	log.Info().Time("startAt", startAt).Msg("startAt")
+	log.Info().Time("startAt_2", startAt_2).Msg("startAt_2")
+	products, err := s.productService.ListProductsByDate(ctx, companyId, startAt, startAt_2)
+	if err != nil {
+		return []domain.ProfitMarginProductsResponse{}, err
+	}
+
+	log.Info().Interface("product", products).Msg("product")
+
+	productItems, err := s.saleItemsService.ListItemsByCompany(ctx, companyId)
+	if err != nil {
+		return []domain.ProfitMarginProductsResponse{}, err
+	}
+
+	var response []domain.ProfitMarginProductsResponse
+
+	for _, product := range products {
+		var totalCost float64
+		var totalNetSales float64
+		var salePrice float64
+		found := false
+
+		for _, item := range productItems {
+			if item.ProductID == product.ID {
+				totalNetSales += (float64(item.UnitPrice) - float64(item.Discount))
+				totalCost += product.CostPrice * float64(item.Quantity)
+				salePrice = item.UnitPrice
+				found = true
+			}
+		}
+
+		if found && totalNetSales > 0 {
+			margin := ((totalNetSales - float64(totalCost)) / totalNetSales) * 100
+			response = append(response, domain.ProfitMarginProductsResponse{
+				Name:      product.Name,
+				CostPrice: product.CostPrice,
+				SalePrice: salePrice,
+				Profit:    margin,
+			})
+		}
+	}
+
+	return response, nil
+}
+
+func (s *Service) ProfitMarginCategoryId(ctx context.Context, companyId uuid.UUID, startAt, startAt_2 time.Time) ([]domain.ProfitMarginCategoryResponse, error) {
+	categoroies, err := s.productCategoriesService.ListProductCategoryByCompanyId(ctx, companyId)
+	if err != nil {
+		return []domain.ProfitMarginCategoryResponse{}, err
+	}
+
+	var response []domain.ProfitMarginCategoryResponse
+
+	for _, category := range categoroies {
+		var totalCost float64
+		var totalSale float64
+		products, err := s.productService.ListProductBuCategoryIdAndDate(ctx, category.ID, startAt, startAt_2)
+		if err != nil {
+			return []domain.ProfitMarginCategoryResponse{}, err
+		}
+
+		productItems, err := s.saleItemsService.ListItemsByCompany(ctx, companyId)
+		if err != nil {
+			return []domain.ProfitMarginCategoryResponse{}, err
+		}
+
+		for _, product := range products {
+			var soldQuantity int
+
+			soldQuantity += int(product.Quantity)
+
+			for _, item := range productItems {
+				if item.ProductID == product.ID {
+					soldQuantity += int(item.Quantity)
+					totalSale += item.UnitPrice * float64(item.Quantity)
+				}
+			}
+
+			totalCost += product.CostPrice * float64(soldQuantity)
+
+		}
+
+		profit := ((totalSale - totalCost) / totalSale) * 100
+
+		response = append(response, domain.ProfitMarginCategoryResponse{
+			Name:      category.Name,
+			TotalCost: totalCost,
+			TotalSale: totalSale,
+			Profit:    profit,
+		})
+	}
+
+	return response, nil
+}

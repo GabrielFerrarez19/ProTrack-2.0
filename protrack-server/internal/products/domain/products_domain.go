@@ -124,6 +124,36 @@ type GetInventoryReportResponse struct {
 	CreatedAt    time.Time `json:"created_at" excel:"Data de Cadastro"`
 }
 
+type ListProductsByDateResponse struct {
+	ID           uuid.UUID `json:"id"`
+	CompanyID    uuid.UUID `json:"company_id"`
+	CategoryID   uuid.UUID `json:"category_id"`
+	Name         string    `json:"name"`
+	Description  string    `json:"description"`
+	Barcode      string    `json:"barcode"`
+	Quantity     int32     `json:"quantity"`
+	Size         string    `json:"size"`
+	CostPrice    float64   `json:"cost_price"`
+	SalePrice    float64   `json:"sale_price"`
+	CreatedBy    uuid.UUID `json:"created_by"`
+	UpdatedBy    uuid.UUID `json:"updated_by"`
+	DeletedBy    uuid.UUID `json:"deleted_by"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	DeletedAt    time.Time `json:"deleted_at"`
+	CategoryName string    `json:"category_name"`
+}
+
+type ListProductsByCategoryAndDateResponse struct {
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	CostPrice    float64   `json:"cost_price"`
+	Quantity     int32     `json:"quantity"`
+	CategoryID   uuid.UUID `json:"category_id"`
+	CreatedAt    time.Time `json:"created_at"`
+	CategoryName string    `json:"category_name"`
+}
+
 func ApplyUpdateProductCategoryParams(
 	req UpdateProductRequest,
 	arg *db.UpdateProductParams,

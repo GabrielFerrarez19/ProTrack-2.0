@@ -128,3 +128,31 @@ WHERE p.company_id = $1
     AND p.created_at BETWEEN $2 AND $3
     AND p.deleted_at IS NULL
 ORDER BY p.name ASC;
+-- name: ListProductsByDate :many
+SELECT p.id,
+    p.name,
+    p.cost_price,
+    p.quantity,
+    p.category_id,
+    p.created_at,
+    c.name AS category_name
+FROM products p
+    INNER JOIN product_categories c ON p.category_id = c.id
+WHERE p.company_id = $1
+    AND p.deleted_at IS NULL
+    AND p.created_at >= $2
+    AND p.created_at <= $3;
+-- name: ListProductsByCategoryAndDate :many
+SELECT p.id,
+    p.name,
+    p.cost_price,
+    p.quantity,
+    p.category_id,
+    p.created_at,
+    c.name AS category_name
+FROM products p
+    INNER JOIN product_categories c ON p.category_id = c.id
+WHERE p.category_id = $1
+    AND p.deleted_at IS NULL
+    AND p.created_at >= $2
+    AND p.created_at <= $3;
