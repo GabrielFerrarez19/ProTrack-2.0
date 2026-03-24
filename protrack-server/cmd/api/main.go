@@ -13,6 +13,7 @@ import (
 	accountsReceivableService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/accounts_receivable/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/cache"
 	redis_connection "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/redis"
+	analyticsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/analytics/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/adapters/jwt"
 	authHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/handler"
 	authService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/service"
@@ -147,7 +148,8 @@ func main() {
 	billsPayableService := billsPayableService.NewService(billsPayableRepository, db.Pool)
 	paymentHistoryService := paymentHistoryService.NewService(paymentHistoryRepository, db.Pool)
 	paymentsService := paymentsService.NewService(db.Pool, paymentHistoryService, accountsReceivableService, customersService, salesService)
-	reportsService := reportsService.NewService(salesService, paymentHistoryService, productsService)
+	analyticsService := analyticsService.NewService(productsService, saleItemsService)
+	reportsService := reportsService.NewService(salesService, analyticsService, paymentHistoryService, productsService)
 
 	usersHandler := usersHandler.NewHandler(usersService, jwtManager, blacklist)
 	companiesHandler := companiesHandler.NewHandler(companiesService, jwtManager, blacklist)
