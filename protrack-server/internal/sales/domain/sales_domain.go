@@ -158,31 +158,6 @@ type ListSalesWithInstallmentsResponse struct {
 	AccReceivable []ListAccReceivableResponse `json:"installment"`
 }
 
-type GetPendingSalesDetailedReportResponse struct {
-	SaleID                 uuid.UUID   `json:"sale_id"`
-	SaleAt                 time.Time   `json:"sale_at"`
-	Subtotal               float64     `json:"subtotal"`
-	DiscountAmount         float64     `json:"discount_amount"`
-	TotalAmount            float64     `json:"total_amount"`
-	InstallmentsCount      int32       `json:"installments_count"`
-	PaymentMethod          interface{} `json:"payment_method"`
-	SaleStatus             interface{} `json:"sale_status"`
-	CustomerID             uuid.UUID   `json:"customer_id"`
-	CustomerName           string      `json:"customer_name"`
-	SaleItemID             uuid.UUID   `json:"sale_item_id"`
-	ProductID              uuid.UUID   `json:"product_id"`
-	Quantity               int32       `json:"quantity"`
-	UnitPrice              float64     `json:"unit_price"`
-	ItemDiscount           float64     `json:"item_discount"`
-	ProductName            string      `json:"product_name"`
-	InstallmentID          uuid.UUID   `json:"installment_id"`
-	InstallmentTotalAmount float64     `json:"installment_total_amount"`
-	InstallmentBalance     float64     `json:"installment_balance"`
-	DueDate                string      `json:"due_date"`
-	InstallmentNumber      int         `json:"installment_number"`
-	InstallmentStatus      string      `json:"installment_status"`
-}
-
 type GetTop5RealProfitItemResponse struct {
 	ProductsName      string  `json:"product_name"`
 	ProductRealProfit float64 `json:"product_real_profit"`
@@ -207,18 +182,29 @@ type MarginDistributionResponse struct {
 	Count int    `json:"count"`
 }
 
-type ProfitMarginProductsResponse struct {
-	Name      string  `json:"name" excel:"name"`
-	CostPrice float64 `json:"cost_price" excel:"cost_price"`
-	SalePrice float64 `json:"sale_price" excel:"sale_price"`
-	Profit    float64 `json:"profit" excel:"profit"`
-}
-
-type ProfitMarginCategoryResponse struct {
-	Name      string  `json:"name" excel:"name"`
-	TotalCost float64 `json:"total_cost" excel:"total_cost"`
-	TotalSale float64 `json:"total_price" excel:"total_price"`
-	Profit    float64 `json:"profit" excel:"profit"`
+type GetPendingSalesDetailedReportResponse struct {
+	SaleID                 uuid.UUID   `json:"sale_id"`
+	SaleAt                 time.Time   `json:"sale_at"`
+	Subtotal               float64     `json:"subtotal"`
+	DiscountAmount         float64     `json:"discount_amount"`
+	TotalAmount            float64     `json:"total_amount"`
+	InstallmentsCount      int32       `json:"installments_count"`
+	PaymentMethod          interface{} `json:"payment_method"`
+	SaleStatus             interface{} `json:"sale_status"`
+	CustomerID             uuid.UUID   `json:"customer_id"`
+	CustomerName           string      `json:"customer_name"`
+	SaleItemID             uuid.UUID   `json:"sale_item_id"`
+	ProductID              uuid.UUID   `json:"product_id"`
+	Quantity               int32       `json:"quantity"`
+	UnitPrice              float64     `json:"unit_price"`
+	ItemDiscount           float64     `json:"item_discount"`
+	ProductName            string      `json:"product_name"`
+	InstallmentID          uuid.UUID   `json:"installment_id"`
+	InstallmentTotalAmount float64     `json:"installment_total_amount"`
+	InstallmentBalance     float64     `json:"installment_balance"`
+	DueDate                string      `json:"due_date"`
+	InstallmentNumber      int         `json:"installment_number"`
+	InstallmentStatus      string      `json:"installment_status"`
 }
 
 func ValidateCreateSaleRequest(req CreateSaleRequest) error {

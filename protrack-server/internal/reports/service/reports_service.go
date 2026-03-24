@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	analyticsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/analytics/service"
 	paymentHistoryService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/payment_history/service"
 	productService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/products/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/reports"
@@ -17,13 +18,15 @@ import (
 
 type Service struct {
 	saleService           *saleService.Service
+	analyticsService      *analyticsService.Service
 	paymentHistoryService *paymentHistoryService.Service
 	productService        *productService.Service
 }
 
-func NewService(saleService *saleService.Service, paymentHistoryService *paymentHistoryService.Service, productService *productService.Service) *Service {
+func NewService(saleService *saleService.Service, analyticsService *analyticsService.Service, paymentHistoryService *paymentHistoryService.Service, productService *productService.Service) *Service {
 	return &Service{
 		saleService:           saleService,
+		analyticsService:      analyticsService,
 		paymentHistoryService: paymentHistoryService,
 		productService:        productService,
 	}
@@ -129,7 +132,7 @@ func (s *Service) GenerateReports(ctx context.Context, reportType string, compan
 			FileName: fileName,
 		}, nil
 	case string(domain.ReportProfitProduct):
-		products, err := s.saleService.ProfitMarginProducts(ctx, companyId, At, At2)
+		products, err := s.analyticsService.ProfitMarginProducts(ctx, companyId, At, At2)
 		if err != nil {
 			return domain.ReportResponse{}, err
 		}
@@ -145,7 +148,7 @@ func (s *Service) GenerateReports(ctx context.Context, reportType string, compan
 			FileName: fileName,
 		}, err
 	case string(domain.ReportProfitCategory):
-		categories, err := s.saleService.ProfitMarginCategoryId(ctx, companyId, At, At2)
+		categories, err := s.analyticsService.ProfitMarginCategoryId(ctx, companyId, At, At2)
 		if err != nil {
 			return domain.ReportResponse{}, err
 		}

@@ -659,47 +659,6 @@ func (s *Service) ListSalesWithDetailsPendingOverdue(ctx context.Context, compan
 	return response, nil
 }
 
-func (s *Service) GetPendingSalesDetailedReport(ctx context.Context, companyId uuid.UUID, saleAt time.Time, saleAt2 time.Time) ([]domain.GetPendingSalesDetailedReportResponse, error) {
-	report, err := s.repo.GetPendingSalesDetailedReport(ctx, db.GetPendingSalesDetailedReportParams{
-		CompanyID: pgconv.ParseUUIDToPgType(companyId),
-		SaleAt:    pgconv.TimeToPgTimestamptz(saleAt),
-		SaleAt_2:  pgconv.TimeToPgTimestamptz(saleAt2),
-	})
-	if err != nil {
-		return []domain.GetPendingSalesDetailedReportResponse{}, err
-	}
-
-	var response []domain.GetPendingSalesDetailedReportResponse
-
-	for _, row := range report {
-		response = append(response, domain.GetPendingSalesDetailedReportResponse{
-			SaleID:                 pgconv.PgUUIDToUUID(row.SaleID),
-			SaleAt:                 pgconv.PgTimestamptzToTime(row.SaleAt),
-			Subtotal:               pgconv.PgNumericToFloat64(row.Subtotal),
-			DiscountAmount:         pgconv.PgNumericToFloat64(row.DiscountAmount),
-			TotalAmount:            pgconv.PgNumericToFloat64(row.TotalAmount),
-			InstallmentsCount:      row.InstallmentsCount,
-			PaymentMethod:          row.PaymentMethod,
-			SaleStatus:             row.SaleStatus,
-			CustomerID:             pgconv.PgUUIDToUUID(row.CustomerID),
-			CustomerName:           row.CustomerName,
-			SaleItemID:             pgconv.PgUUIDToUUID(row.SaleItemID),
-			ProductID:              pgconv.PgUUIDToUUID(row.ProductID),
-			Quantity:               row.Quantity,
-			UnitPrice:              pgconv.PgNumericToFloat64(row.UnitPrice),
-			ItemDiscount:           pgconv.PgNumericToFloat64(row.ItemDiscount),
-			ProductName:            row.ProductName,
-			InstallmentID:          pgconv.PgUUIDToUUID(row.InstallmentID),
-			InstallmentTotalAmount: pgconv.PgNumericToFloat64(row.InstallmentTotalAmount),
-			InstallmentBalance:     pgconv.PgNumericToFloat64(row.InstallmentBalance),
-			DueDate:                pgconv.PgDateToString(row.DueDate),
-			InstallmentNumber:      pgconv.PgInt4ToInt(row.InstallmentNumber),
-			InstallmentStatus:      pgconv.ParsePgTextToString(row.InstallmentStatus),
-		})
-	}
-	return response, nil
-}
-
 func (s *Service) GetRealProfitItem(ctx context.Context, companyId uuid.UUID) (float64, error) {
 	productItems, err := s.saleItemsService.ListItemsByCompany(ctx, companyId)
 	if err != nil {
@@ -935,98 +894,43 @@ func (s *Service) MarginDistribution(ctx context.Context, companyId uuid.UUID) (
 	return response, nil
 }
 
-func (s *Service) ProfitMarginProducts(ctx context.Context, companyId uuid.UUID, startAt, startAt_2 time.Time) ([]domain.ProfitMarginProductsResponse, error) {
-	log.Info().Time("startAt", startAt).Msg("startAt")
-	log.Info().Time("startAt_2", startAt_2).Msg("startAt_2")
-	products, err := s.productService.ListProductsByDate(ctx, companyId, startAt, startAt_2)
+func (s *Service) GetPendingSalesDetailedReport(ctx context.Context, companyId uuid.UUID, saleAt time.Time, saleAt2 time.Time) ([]domain.GetPendingSalesDetailedReportResponse, error) {
+	report, err := s.repo.GetPendingSalesDetailedReport(ctx, db.GetPendingSalesDetailedReportParams{
+		CompanyID: pgconv.ParseUUIDToPgType(companyId),
+		SaleAt:    pgconv.TimeToPgTimestamptz(saleAt),
+		SaleAt_2:  pgconv.TimeToPgTimestamptz(saleAt2),
+	})
 	if err != nil {
-		return []domain.ProfitMarginProductsResponse{}, err
+		return []domain.GetPendingSalesDetailedReportResponse{}, err
 	}
 
-	log.Info().Interface("product", products).Msg("product")
+	var response []domain.GetPendingSalesDetailedReportResponse
 
-	productItems, err := s.saleItemsService.ListItemsByCompany(ctx, companyId)
-	if err != nil {
-		return []domain.ProfitMarginProductsResponse{}, err
-	}
-
-	var response []domain.ProfitMarginProductsResponse
-
-	for _, product := range products {
-		var totalCost float64
-		var totalNetSales float64
-		var salePrice float64
-		found := false
-
-		for _, item := range productItems {
-			if item.ProductID == product.ID {
-				totalNetSales += (float64(item.UnitPrice) - float64(item.Discount))
-				totalCost += product.CostPrice * float64(item.Quantity)
-				salePrice = item.UnitPrice
-				found = true
-			}
-		}
-
-		if found && totalNetSales > 0 {
-			margin := ((totalNetSales - float64(totalCost)) / totalNetSales) * 100
-			response = append(response, domain.ProfitMarginProductsResponse{
-				Name:      product.Name,
-				CostPrice: product.CostPrice,
-				SalePrice: salePrice,
-				Profit:    margin,
-			})
-		}
-	}
-
-	return response, nil
-}
-
-func (s *Service) ProfitMarginCategoryId(ctx context.Context, companyId uuid.UUID, startAt, startAt_2 time.Time) ([]domain.ProfitMarginCategoryResponse, error) {
-	categoroies, err := s.productCategoriesService.ListProductCategoryByCompanyId(ctx, companyId)
-	if err != nil {
-		return []domain.ProfitMarginCategoryResponse{}, err
-	}
-
-	var response []domain.ProfitMarginCategoryResponse
-
-	for _, category := range categoroies {
-		var totalCost float64
-		var totalSale float64
-		products, err := s.productService.ListProductBuCategoryIdAndDate(ctx, category.ID, startAt, startAt_2)
-		if err != nil {
-			return []domain.ProfitMarginCategoryResponse{}, err
-		}
-
-		productItems, err := s.saleItemsService.ListItemsByCompany(ctx, companyId)
-		if err != nil {
-			return []domain.ProfitMarginCategoryResponse{}, err
-		}
-
-		for _, product := range products {
-			var soldQuantity int
-
-			soldQuantity += int(product.Quantity)
-
-			for _, item := range productItems {
-				if item.ProductID == product.ID {
-					soldQuantity += int(item.Quantity)
-					totalSale += item.UnitPrice * float64(item.Quantity)
-				}
-			}
-
-			totalCost += product.CostPrice * float64(soldQuantity)
-
-		}
-
-		profit := ((totalSale - totalCost) / totalSale) * 100
-
-		response = append(response, domain.ProfitMarginCategoryResponse{
-			Name:      category.Name,
-			TotalCost: totalCost,
-			TotalSale: totalSale,
-			Profit:    profit,
+	for _, row := range report {
+		response = append(response, domain.GetPendingSalesDetailedReportResponse{
+			SaleID:                 pgconv.PgUUIDToUUID(row.SaleID),
+			SaleAt:                 pgconv.PgTimestamptzToTime(row.SaleAt),
+			Subtotal:               pgconv.PgNumericToFloat64(row.Subtotal),
+			DiscountAmount:         pgconv.PgNumericToFloat64(row.DiscountAmount),
+			TotalAmount:            pgconv.PgNumericToFloat64(row.TotalAmount),
+			InstallmentsCount:      row.InstallmentsCount,
+			PaymentMethod:          row.PaymentMethod,
+			SaleStatus:             row.SaleStatus,
+			CustomerID:             pgconv.PgUUIDToUUID(row.CustomerID),
+			CustomerName:           row.CustomerName,
+			SaleItemID:             pgconv.PgUUIDToUUID(row.SaleItemID),
+			ProductID:              pgconv.PgUUIDToUUID(row.ProductID),
+			Quantity:               row.Quantity,
+			UnitPrice:              pgconv.PgNumericToFloat64(row.UnitPrice),
+			ItemDiscount:           pgconv.PgNumericToFloat64(row.ItemDiscount),
+			ProductName:            row.ProductName,
+			InstallmentID:          pgconv.PgUUIDToUUID(row.InstallmentID),
+			InstallmentTotalAmount: pgconv.PgNumericToFloat64(row.InstallmentTotalAmount),
+			InstallmentBalance:     pgconv.PgNumericToFloat64(row.InstallmentBalance),
+			DueDate:                pgconv.PgDateToString(row.DueDate),
+			InstallmentNumber:      pgconv.PgInt4ToInt(row.InstallmentNumber),
+			InstallmentStatus:      pgconv.ParsePgTextToString(row.InstallmentStatus),
 		})
 	}
-
 	return response, nil
 }
