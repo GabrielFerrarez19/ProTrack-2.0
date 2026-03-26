@@ -3,7 +3,6 @@ import { useAuth } from "./useAuth";
 // Definição das permissões por rota
 export const ROUTE_PERMISSIONS = {
   // Rotas básicas - todos os usuários autenticados
-  "/status": ["ADMIN", "financeiro", "vendedor", "operador"],
   "/cadastroprodutos": ["ADMIN", "operador"],
   "/cadastrodeclientes": ["ADMIN", "operador"],
   "/produtos": ["ADMIN", "financeiro", "vendedor", "operador"],

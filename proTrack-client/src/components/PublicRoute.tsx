@@ -19,7 +19,7 @@ export const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/status" replace />;
+    return <Navigate to="/financeiro" replace />;
   }
 
   return <>{children}</>;
