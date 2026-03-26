@@ -1,7 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { Login } from "./pages/Login";
 import { ConfirmacaoEmail } from "./pages/ConfirmacaoEmail";
-import { Status } from "./pages/Status";
 import { RedefinirSenha } from "./pages/RedefirirSenha";
 import { DefaultLayout } from "./layout/DefaultLayout/Index";
 import { CadProduct } from "./pages/CadProduct";
@@ -69,7 +68,14 @@ export function Router() {
           </ProtectedRoute>
         }
       >
-        <Route path="status" element={<Status />} />
+        <Route
+          index
+          element={
+            <ProtectedRoute requiredRoute="/financeiro">
+              <DashboardFinanceiro />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="cadastroprodutos"
           element={

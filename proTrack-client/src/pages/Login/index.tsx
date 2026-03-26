@@ -38,7 +38,7 @@ export function Login() {
       localStorage.setItem("has_company", String(response.has_company));
       setHasCompany(response.has_company);
 
-      navigate("/status");
+      navigate("/financeiro");
     } catch {
       setError("Email ou senha inválidos");
     } finally {

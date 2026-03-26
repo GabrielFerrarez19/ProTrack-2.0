@@ -35,7 +35,7 @@ export function Sidebar({ children }: SidebarProps) {
     <aside className="h-screen sidebar relative z-1 flex flex-col overflow-hidden">
       <nav className="h-full min-h-0 flex flex-col bg-white border-r shadow-sm">
         {/* Header */}
-        <div className="p-4 pb-2 flex justify-between items-center">
+        <div className="p-3 pb-1 flex justify-between items-center">
           <img
             src={img}
             className={`overflow-hidden transition-all ${
@@ -45,7 +45,7 @@ export function Sidebar({ children }: SidebarProps) {
           />
           <button
             onClick={() => setExpanded((curr) => !curr)}
-            className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer"
+            className="p-1 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer"
           >
             {expanded ? <ChevronFirst /> : <ChevronLast />}
           </button>
@@ -53,19 +53,19 @@ export function Sidebar({ children }: SidebarProps) {
 
         {/* Items - min-h-0 permite scroll no flex; overflow-y-auto habilita rolagem */}
         <SidebarContext.Provider value={{ expanded }}>
-          <ul className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-3 py-2">
+          <ul className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-2 py-1">
             {children}
           </ul>
         </SidebarContext.Provider>
 
         {/* Footer */}
-        <div className="border-t flex p-3 relative">
+        <div className="border-t flex p-2.5 relative">
           <img
             src={`https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${encodeURIComponent(
               user?.name || "User",
             )}`}
             alt="Avatar"
-            className="w-10 h-10 rounded-md"
+            className="w-9 h-9 rounded-md"
           />
           <div
             className={`flex justify-between items-center overflow-hidden transition-all ${
