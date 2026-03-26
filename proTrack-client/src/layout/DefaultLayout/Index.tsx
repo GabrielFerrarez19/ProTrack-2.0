@@ -1,9 +1,9 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "../../components/Sidebar/Sidebar";
+import { useSidebar } from "../../components/Sidebar/SidebarContext";
 import {
   ShoppingCart,
   Calculator,
-  ChartPie,
   PackagePlus,
   PackageSearch,
   UserPlus,
@@ -16,6 +16,20 @@ import {
 } from "lucide-react";
 import { SidebarItem } from "../../components/Sidebar/SidebarItem";
 
+function SidebarSectionLabel({ text }: { text: string }) {
+  const { expanded } = useSidebar();
+
+  if (!expanded) {
+    return <li className="my-1 border-t border-gray-100" />;
+  }
+
+  return (
+    <li className="px-3 pt-2 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+      {text}
+    </li>
+  );
+}
+
 export function DefaultLayout() {
   const location = useLocation();
   const currentPath = location.pathname;
@@ -23,96 +37,89 @@ export function DefaultLayout() {
   return (
     <div className="flex h-screen">
       <Sidebar>
-        {/* 📊 Visão Geral */}
+        <SidebarSectionLabel text="Visão Geral" />
         <SidebarItem
-          icon={<ChartPie size={20} />}
-          text="Status"
-          router="/status"
-          active={currentPath === "/status"}
+          icon={<Calculator size={18} />}
+          text="Dashboard Financeiro"
+          router="/financeiro"
+          active={currentPath === "/financeiro" || currentPath === "/"}
+          requiredRoles={["admin", "financeiro"]}
         />
 
-        {/* 🗂️ Cadastros */}
+        <SidebarSectionLabel text="Gestão" />
         <SidebarItem
-          icon={<PackagePlus size={20} />}
-          text="Novo Produto"
-          router="/cadastroprodutos"
-          active={currentPath === "/cadastroprodutos"}
-          requiredRoles={["admin", "operador"]}
-        />
-        <SidebarItem
-          icon={<UserPlus size={20} />}
-          text="Novo Cliente"
-          router="/cadastrodeclientes"
-          active={currentPath === "/cadastrodeclientes"}
-          requiredRoles={["admin", "operador"]}
-        />
-
-        {/* 📦 Gestão */}
-        <SidebarItem
-          icon={<PackageSearch size={20} />}
+          icon={<PackageSearch size={18} />}
           text="Produtos"
           router="/produtos"
           active={currentPath === "/produtos"}
         />
         <SidebarItem
-          icon={<UserSearch size={20} />}
+          icon={<UserSearch size={18} />}
           text="Clientes"
           router="/clientes"
           active={currentPath === "/clientes"}
         />
 
-        {/* 🛒 Vendas */}
+        <SidebarSectionLabel text="Vendas" />
         <SidebarItem
-          icon={<Store size={20} />}
+          icon={<Store size={18} />}
           text="Nova Venda"
           router="/venda"
           active={currentPath === "/venda"}
           requiredRoles={["admin", "vendedor"]}
         />
         <SidebarItem
-          icon={<ShoppingCart size={20} />}
+          icon={<ShoppingCart size={18} />}
           text="Histórico de Vendas"
           router="/totalVendas"
           active={currentPath === "/totalVendas"}
           requiredRoles={["admin", "financeiro", "vendedor"]}
         />
 
-        {/* 💰 Financeiro */}
+        <SidebarSectionLabel text="Financeiro" />
         <SidebarItem
-          icon={<Calculator size={20} />}
-          text="Financeiro"
-          router="/financeiro"
-          active={currentPath === "/financeiro"}
-          requiredRoles={["admin", "financeiro"]}
-        />
-        <SidebarItem
-          icon={<BanknoteArrowUp size={20} />}
+          icon={<BanknoteArrowUp size={18} />}
           text="Contas a Pagar"
           router="/contasPagar"
           active={currentPath === "/contasPagar"}
           requiredRoles={["admin", "financeiro"]}
         />
         <SidebarItem
-          icon={<BanknoteArrowDown size={20} />}
+          icon={<BanknoteArrowDown size={18} />}
           text="Contas a Receber"
           router="/contasReceber"
           active={currentPath === "/contasReceber"}
           requiredRoles={["admin", "financeiro"]}
         />
         <SidebarItem
-          icon={<TrendingUp size={20} />}
+          icon={<TrendingUp size={18} />}
           text="Fluxo de Caixa"
           router="/flucoCaixa"
           active={currentPath === "/flucoCaixa"}
           requiredRoles={["admin", "financeiro"]}
         />
         <SidebarItem
-          icon={<BarChart3 size={20} />}
+          icon={<BarChart3 size={18} />}
           text="Relatórios"
           router="/relatorio"
-          alert
           active={currentPath === "/relatorio"}
           requiredRoles={["admin", "financeiro"]}
+        />
+
+        <SidebarSectionLabel text="Cadastros" />
+        <SidebarItem
+          icon={<PackagePlus size={18} />}
+          text="Novo Produto"
+          router="/cadastroprodutos"
+          active={currentPath === "/cadastroprodutos"}
+          requiredRoles={["admin", "operador"]}
+        />
+        <SidebarItem
+          icon={<UserPlus size={18} />}
+          text="Novo Cliente"
+          router="/cadastrodeclientes"
+          active={currentPath === "/cadastrodeclientes"}
+          requiredRoles={["admin", "operador"]}
         />
       </Sidebar>
 

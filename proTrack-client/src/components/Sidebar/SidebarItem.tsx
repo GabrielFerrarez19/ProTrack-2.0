@@ -63,7 +63,7 @@ export function SidebarItem({
     return (
       <li
         className={`
-          relative flex items-center w-auto h-10 py-2 px-3 my-1
+          relative flex items-center w-auto h-9 py-1.5 px-3 my-0.5
           font-medium rounded-md cursor-pointer
           transition-colors group
           ${
@@ -83,7 +83,7 @@ export function SidebarItem({
   return (
     <li
       className={`
-        relative flex items-center py-2 px-3 my-1
+        relative flex items-center py-1.5 px-3 my-0.5
         font-medium rounded-md cursor-pointer
         transition-colors group
         ${
