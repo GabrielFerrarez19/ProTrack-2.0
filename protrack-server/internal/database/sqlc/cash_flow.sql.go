@@ -11,6 +11,90 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getCashInFlowByCategory = `-- name: GetCashInFlowByCategory :many
+SELECT pc.name AS category_name,
+    COALESCE(SUM(si.unit_price * si.quantity), 0)::FLOAT AS total_amount,
+    COUNT(DISTINCT s.id) AS sales_count
+FROM product_categories pc
+    LEFT JOIN products p ON p.category_id = pc.id
+    AND p.company_id = $1
+    LEFT JOIN sale_items si ON si.product_id = p.id
+    LEFT JOIN sales s ON s.id = si.sale_id
+    AND s.company_id = $1
+    AND s.status = 'paid'
+WHERE pc.company_id = $1
+    AND pc.status = 'ACTIVE'
+GROUP BY pc.name
+ORDER BY total_amount DESC
+`
+
+type GetCashInFlowByCategoryRow struct {
+	CategoryName string  `json:"category_name"`
+	TotalAmount  float64 `json:"total_amount"`
+	SalesCount   int64   `json:"sales_count"`
+}
+
+func (q *Queries) GetCashInFlowByCategory(ctx context.Context, companyID pgtype.UUID) ([]GetCashInFlowByCategoryRow, error) {
+	rows, err := q.db.Query(ctx, getCashInFlowByCategory, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCashInFlowByCategoryRow{}
+	for rows.Next() {
+		var i GetCashInFlowByCategoryRow
+		if err := rows.Scan(&i.CategoryName, &i.TotalAmount, &i.SalesCount); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCashOutFlowByCategory = `-- name: GetCashOutFlowByCategory :many
+SELECT bc.name AS category_name,
+    COALESCE(SUM(COALESCE(b.amount_paid, b.amount)), 0)::FLOAT AS total_amount,
+    COUNT(DISTINCT b.id) AS bills_count
+FROM bill_categories bc
+    LEFT JOIN bills_payable b ON b.category_id = bc.id
+    AND b.company_id = $1
+    AND b.status = 'paid'
+WHERE bc.company_id = $1
+    AND bc.is_active = TRUE
+    AND bc.deleted_at IS NULL
+GROUP BY bc.name
+ORDER BY total_amount DESC
+`
+
+type GetCashOutFlowByCategoryRow struct {
+	CategoryName string  `json:"category_name"`
+	TotalAmount  float64 `json:"total_amount"`
+	BillsCount   int64   `json:"bills_count"`
+}
+
+func (q *Queries) GetCashOutFlowByCategory(ctx context.Context, companyID pgtype.UUID) ([]GetCashOutFlowByCategoryRow, error) {
+	rows, err := q.db.Query(ctx, getCashOutFlowByCategory, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCashOutFlowByCategoryRow{}
+	for rows.Next() {
+		var i GetCashOutFlowByCategoryRow
+		if err := rows.Scan(&i.CategoryName, &i.TotalAmount, &i.BillsCount); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getTotalInflowByPeriod = `-- name: GetTotalInflowByPeriod :one
 SELECT COALESCE(SUM(total_amount), 0)::FLOAT AS total_inflow
 FROM sales
