@@ -4,6 +4,7 @@ import (
 	"context"
 
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Repository struct {
@@ -32,4 +33,12 @@ func (r *Repository) GetTotalInflowByPeriod(ctx context.Context, arg db.GetTotal
 
 func (r *Repository) GetTotalOutflowByPeriod(ctx context.Context, arg db.GetTotalOutflowByPeriodParams) (float64, error) {
 	return r.queries().GetTotalOutflowByPeriod(ctx, arg)
+}
+
+func (r *Repository) GetCashInFlowByCategory(ctx context.Context, companyId pgtype.UUID) ([]db.GetCashInFlowByCategoryRow, error) {
+	return r.queries().GetCashInFlowByCategory(ctx, companyId)
+}
+
+func (r *Repository) GetCashOutFlowByCategory(ctx context.Context, companyId pgtype.UUID) ([]db.GetCashOutFlowByCategoryRow, error) {
+	return r.queries().GetCashOutFlowByCategory(ctx, companyId)
 }

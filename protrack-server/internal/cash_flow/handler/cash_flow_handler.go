@@ -49,3 +49,75 @@ func (h *Handler) CashFlowSummary(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"cash_flow_summary": summary})
 }
+
+func (h *Handler) GetCashFlowHistoryProjections(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	cashFlow, err := h.service.GetCashFlowHistoryProjections(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"cash_flow_history": cashFlow})
+}
+
+func (h *Handler) GetCashInFlowByCategory(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	cashFlowCategories, err := h.service.GetCashInFlowByCategory(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"cash_inflow_categories": cashFlowCategories})
+}
+
+func (h *Handler) GetCashOutFlowByCategory(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	cashFlowCategories, err := h.service.GetCashOutFlowByCategory(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"cash_outflow_categories": cashFlowCategories})
+}
+
+func (h *Handler) GetCashFlowPeriod(c *gin.Context) {
+	companyIdAny, exists := c.Get("company_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	companyId := companyIdAny.(uuid.UUID)
+
+	cashFlowMonth, err := h.service.GetCashFlowPeriod(c.Request.Context(), companyId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"cash_flow_month": cashFlowMonth})
+}
