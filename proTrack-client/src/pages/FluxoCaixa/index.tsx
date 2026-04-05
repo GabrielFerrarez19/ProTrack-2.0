@@ -13,12 +13,12 @@ import { ResumoCards } from "./components/ResumoCards";
 import { Header } from "@/components/header";
 import { useFluxoCaixa } from "../../hooks/useFluxoCaixa";
 import { PageLoading } from "@/components/PageLoading";
+import type { PeriodoResumoFluxo } from "@/services/flowcash";
 
 export function FluxoCaixa() {
-  const { dados, loading, error, refetch } = useFluxoCaixa();
-  const [tipoVisualizacao, setTipoVisualizacao] = useState<
-    "diario" | "semanal" | "mensal"
-  >("mensal");
+  const [periodoResumo, setPeriodoResumo] =
+    useState<PeriodoResumoFluxo>("30dias");
+  const { dados, loading, error, refetch } = useFluxoCaixa(periodoResumo);
 
   const dadosExibicao = dados;
 
@@ -30,7 +30,12 @@ export function FluxoCaixa() {
           text="Visualize entradas, saídas e projeções financeiras"
         />
         <div className="flex gap-3">
-          <Select>
+          <Select
+            value={periodoResumo}
+            onValueChange={(value: PeriodoResumoFluxo) =>
+              setPeriodoResumo(value)
+            }
+          >
             <SelectTrigger className="w-[140px] bg-slate-100 border-slate-300">
               <SelectValue placeholder="Período" />
             </SelectTrigger>
@@ -39,21 +44,6 @@ export function FluxoCaixa() {
               <SelectItem value="30dias">30 dias</SelectItem>
               <SelectItem value="90dias">90 dias</SelectItem>
               <SelectItem value="1ano">1 ano</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select
-            value={tipoVisualizacao}
-            onValueChange={(value: "diario" | "semanal" | "mensal") =>
-              setTipoVisualizacao(value)
-            }
-          >
-            <SelectTrigger className="w-[140px] bg-slate-100 border-slate-300">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="diario">Diário</SelectItem>
-              <SelectItem value="semanal">Semanal</SelectItem>
-              <SelectItem value="mensal">Mensal</SelectItem>
             </SelectContent>
           </Select>
         </div>

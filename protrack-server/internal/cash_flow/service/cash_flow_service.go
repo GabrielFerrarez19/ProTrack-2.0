@@ -44,8 +44,8 @@ func (s *Service) CashFlowSummary(ctx context.Context, companyId uuid.UUID, star
 
 	totalOutFlow, err := s.repo.GetTotalOutflowByPeriod(ctx, db.GetTotalOutflowByPeriodParams{
 		CompanyID:     pgconv.ParseUUIDToPgType(companyId),
-		PaymentDate:   pgconv.StringToPgDate(startAt.GoString()),
-		PaymentDate_2: pgconv.StringToPgDate(endAt.GoString()),
+		PaymentDate:   pgconv.ToPgDate(startAt),
+		PaymentDate_2: pgconv.ToPgDate(endAt),
 	})
 	if err != nil {
 		return domain.CashFlowSummaryResponse{}, err

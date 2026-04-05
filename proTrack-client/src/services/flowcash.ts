@@ -22,6 +22,31 @@ export function getCurrentMonthRange(): { startAt: string; endAt: string } {
   return { startAt, endAt };
 }
 
+/** Opções do select de período da rota GET /cash-flow/summary. */
+export type PeriodoResumoFluxo = "7dias" | "30dias" | "90dias" | "1ano";
+
+const DIAS_POR_PERIODO: Record<PeriodoResumoFluxo, number> = {
+  "7dias": 7,
+  "30dias": 30,
+  "90dias": 90,
+  "1ano": 365,
+};
+
+const MS_POR_DIA = 24 * 60 * 60 * 1000;
+
+/**
+ * `endAt` = data/hora atual; `startAt` = mesma data/hora menos N dias.
+ * Usado em `getCashFlowSummary`.
+ */
+export function getSummaryPeriodRange(
+  periodo: PeriodoResumoFluxo,
+): { startAt: string; endAt: string } {
+  const endAt = new Date();
+  const dias = DIAS_POR_PERIODO[periodo];
+  const startAt = new Date(endAt.getTime() - dias * MS_POR_DIA);
+  return { startAt: startAt.toISOString(), endAt: endAt.toISOString() };
+}
+
 export async function getCashFlowSummary(
   startAt: string,
   endAt: string,

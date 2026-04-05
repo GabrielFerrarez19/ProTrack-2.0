@@ -1,6 +1,7 @@
 import {
   fetchAllCashFlowData,
-  getCurrentMonthRange,
+  getSummaryPeriodRange,
+  type PeriodoResumoFluxo,
 } from "@/services/flowcash";
 import type { CashFlowHistoryProjection } from "@/@types/flowcash";
 import { useCallback, useEffect, useState } from "react";
@@ -33,7 +34,7 @@ export interface FluxoCaixaDados {
     projecao_30_dias: number;
     crescimento_percentual: number;
   };
-  /** Série histórica para o gráfico (mais antigo → mais recente). */
+  /** Série histórica para o gráfico (mesma ordem da API). */
   historico: FluxoCaixaChartPoint[];
   projecao: FluxoCaixaChartPoint[];
   categorias: {
@@ -55,8 +56,7 @@ function periodLabelPt(mount: string): string {
 function mapHistoryToChart(
   history: CashFlowHistoryProjection[],
 ): FluxoCaixaChartPoint[] {
-  const ordered = [...history].reverse();
-  return ordered.map((h) => ({
+  return history.map((h) => ({
     data: h.date,
     saldo: h.accumulated_balance,
     entradas: h.total_inflow,
@@ -74,7 +74,7 @@ function crescimentoVsMesAnterior(
   return ((atual - anterior) / Math.abs(anterior)) * 100;
 }
 
-export const useFluxoCaixa = () => {
+export const useFluxoCaixa = (periodoResumo: PeriodoResumoFluxo) => {
   const [dados, setDados] = useState<FluxoCaixaDados | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +82,7 @@ export const useFluxoCaixa = () => {
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const range = getCurrentMonthRange();
+    const range = getSummaryPeriodRange(periodoResumo);
     try {
       const {
         summary,
@@ -137,7 +137,7 @@ export const useFluxoCaixa = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [periodoResumo]);
 
   useEffect(() => {
     void load();
