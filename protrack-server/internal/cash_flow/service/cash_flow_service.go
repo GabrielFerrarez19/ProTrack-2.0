@@ -83,8 +83,8 @@ func (s *Service) GetCashFlowHistoryProjections(ctx context.Context, companyId u
 
 		totalOutFlow, err := s.repo.GetTotalOutflowByPeriod(ctx, db.GetTotalOutflowByPeriodParams{
 			CompanyID:     pgconv.ParseUUIDToPgType(companyId),
-			PaymentDate:   pgconv.StringToPgDate(startAt.GoString()),
-			PaymentDate_2: pgconv.StringToPgDate(endAt.GoString()),
+			PaymentDate:   pgconv.ToPgDate(startAt),
+			PaymentDate_2: pgconv.ToPgDate(endAt),
 		})
 		if err != nil {
 			return []domain.GetCashFlowHistoryProjectionsResponse{}, err
@@ -125,12 +125,15 @@ func (s *Service) GetCashInFlowByCategory(ctx context.Context, companyId uuid.UU
 			totalPercentage = (cash.TotalAmount / totalInFlow) * 100
 		}
 
+		if cash.TotalAmount > 0 {
+
 		response = append(response, domain.GetCashInFlowByCategoryResponse{
 			NameCategory:     cash.CategoryName,
 			TotalInFlow:      cash.TotalAmount,
 			PercentageInFlow: totalPercentage,
 		})
 
+	}
 	}
 
 	return response, nil
@@ -152,13 +155,20 @@ func (s *Service) GetCashOutFlowByCategory(ctx context.Context, companyId uuid.U
 
 	var totalPercentage float64
 	for _, cash := range cashOutFlow {
+		
+		if totalOutFlow > 0 {
 		totalPercentage = (cash.TotalAmount / totalOutFlow) * 100
+		}
 
-		response = append(response, domain.GetCashOutFlowByCategoryResponse{
-			NameCategory:     cash.CategoryName,
-			TotalOutFlow:     cash.TotalAmount,
-			PercentageInFlow: totalPercentage,
-		})
+		if cash.TotalAmount > 0 {
+			response = append(response, domain.GetCashOutFlowByCategoryResponse{
+				NameCategory:     cash.CategoryName,
+				TotalOutFlow:     cash.TotalAmount,
+				PercentageInFlow: totalPercentage,
+			})
+		}
+
+		
 	}
 
 	return response, nil
