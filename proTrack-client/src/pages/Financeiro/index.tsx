@@ -9,12 +9,28 @@ import { TopProdutosChart } from "./components/TopProdutosChart";
 import { ValorEstoqueCard } from "./components/ValorEstoqueCard";
 import { Header } from "../../components/header";
 import { PageLoading } from "@/components/PageLoading";
+import { CompanyRegistrationModal } from "@/components/DioalogCompanyRegistration";
+import { useAuth } from "@/hooks/useAuth";
+import { useState, useEffect } from "react";
 
 export function DashboardFinanceiro() {
   const { dados, loading, error } = useDashboard();
+  const { hasCompany, setHasCompany } = useAuth();
+  const [openModal, setOpenModal] = useState(false);
 
-  if (loading)
-    return <PageLoading message="Carregando dados financeiros..." />;
+  useEffect(() => {
+    if (!hasCompany) {
+      setOpenModal(true);
+    }
+  }, [hasCompany]);
+
+  const handleRegistrationComplete = () => {
+    setHasCompany(true);
+    localStorage.setItem("has_company", "true");
+    setOpenModal(false);
+  };
+
+  if (loading) return <PageLoading message="Carregando dados financeiros..." />;
   if (error) return <p className="p-6 text-red-600">{error}</p>;
 
   return (
@@ -41,6 +57,11 @@ export function DashboardFinanceiro() {
         <ValorEstoqueCard dados={dados} />
         <ContasPagarCard />
       </div>
+
+      <CompanyRegistrationModal
+        open={openModal}
+        onComplete={handleRegistrationComplete}
+      />
     </div>
   );
 }
