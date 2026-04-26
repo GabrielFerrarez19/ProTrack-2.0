@@ -147,7 +147,7 @@ export function DialogAlterVenda({
         {/* Valores */}
         <div>
           <h4 className="text-sm font-medium mb-3">Resumo Financeiro</h4>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-5">
             <div className="rounded-lg border p-3 text-center">
               <p className="text-xs text-muted-foreground">Subtotal</p>
               <p className="text-sm font-semibold">
@@ -157,7 +157,7 @@ export function DialogAlterVenda({
             <div className="rounded-lg border p-3 text-center">
               <p className="text-xs text-muted-foreground">Desconto</p>
               <p className="text-sm font-semibold text-destructive">
-                - R$ {formatCurrency(Number(venda.discount_amount ?? 0))}
+                -{venda.discount_amount}%
               </p>
             </div>
             <div className="rounded-lg border p-3 text-center">
@@ -168,16 +168,10 @@ export function DialogAlterVenda({
                   : `R$ ${formatCurrency(Number(entradaVenda))}`}
               </p>
             </div>
-            <div className="rounded-lg border p-3 text-center">
-              <p className="text-xs text-muted-foreground">Total</p>
-              <p className="text-sm font-semibold">
-                R$ {formatCurrency(Number(venda.total_amount ?? 0))}
-              </p>
-            </div>
             <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-center">
               <p className="text-xs text-muted-foreground">Total c/ Desconto</p>
               <p className="text-sm font-bold text-primary">
-                R$ {formatCurrency(totalComDesconto)}
+                R$ {formatCurrency(venda.total_amount)}
               </p>
             </div>
           </div>
@@ -220,7 +214,8 @@ export function DialogAlterVenda({
         </div>
 
         {/* Parcelas */}
-        {(venda.installments_count || venda.installment_total_amount) && (
+
+        {venda.installments_count !== 0 && (
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label className="text-muted-foreground text-xs">
@@ -235,8 +230,8 @@ export function DialogAlterVenda({
                 Total Parcelado
               </Label>
               <p className="text-sm font-medium">
-                {venda.installment_total_amount != null
-                  ? `R$ ${formatCurrency(Number(totalComDesconto / venda.installment_total_amount))}`
+                {venda.down_payments != null
+                  ? `R$ ${formatCurrency(Number(venda.total_amount - venda.down_payments))}`
                   : "—"}
               </p>
             </div>
@@ -291,11 +286,16 @@ export function DialogAlterVenda({
         </div>
       </div>
 
-      <DialogFooter className="gap-2 sm:gap-0">
+      <DialogFooter className="gap-2 sm:gap-3">
         <Button variant="outline" onClick={() => setOpen(false)}>
           Cancelar
         </Button>
-        <Button onClick={onSalvar}>Salvar Alterações</Button>
+        <Button
+          onClick={onSalvar}
+          className="cursor-pointer text-primary-foreground font-medium  h-9 shadow-soft bg-gradient-to-r from-[#628DFD] to-[#6F31FF] hover:from-[#7A9BFD] hover:to-[#B597F9] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Salvar Alterações
+        </Button>
       </DialogFooter>
     </DialogContent>
   );
