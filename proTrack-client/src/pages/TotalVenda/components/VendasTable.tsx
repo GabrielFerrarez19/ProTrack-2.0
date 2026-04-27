@@ -11,10 +11,8 @@ import { Badge } from "../../../components/ui/badge";
 import { Dialog } from "../../../components/ui/dialog";
 import { Button } from "../../../components/ui/button";
 import { DialogAlterVenda } from "./DialogAlter";
-import { DialogDetalhesVenda } from "./DialogDetalhesVenda";
 import { formatCurrency, formatStatus } from "../../../utils/functions";
 import type { SaleWithDetails, VendaAgrupada } from "@/@types/sales";
-import { Eye } from "lucide-react";
 
 // Cores fixas para cada coluna
 const totalColor = "bg-blue-100 text-blue-800";
@@ -52,10 +50,10 @@ interface VendasTableProps {
 }
 
 export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
-  const [selectedVenda, setSelectedVenda] = useState<VendaAgrupada | null>(null);
-  const [selectedVendaDetalhes, setSelectedVendaDetalhes] = useState<SaleWithDetails | null>(null);
+  const [selectedVenda, setSelectedVenda] = useState<VendaAgrupada | null>(
+    null,
+  );
   const [open, setOpen] = useState(false);
-  const [openDetalhes, setOpenDetalhes] = useState(false);
 
   // Estados de paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -88,12 +86,6 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
       setSelectedVenda(null);
       if (onVendaUpdated) onVendaUpdated();
     }
-  };
-
-  const handleOpenDetalhes = (e: React.MouseEvent, venda: SaleWithDetails) => {
-    e.stopPropagation();
-    setSelectedVendaDetalhes(venda);
-    setOpenDetalhes(true);
   };
 
   const handleOpenEditar = (venda: SaleWithDetails) => {
@@ -130,16 +122,11 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
             <TableHead className="text-gray-700 font-semibold">
               Status
             </TableHead>
-            <TableHead className="text-gray-700 font-semibold w-[100px]">
-              Ações
-            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {currentVendas.map((venda) => {
             const s = venda.sale;
-            const desconto =
-              Number(s.total_amount ?? 0) - Number(s.discount_amount ?? 0);
             const statusFormatted = formatStatus(
               s.sale_status as "pendente" | "pago" | "cancelado" | "aprazo",
             );
@@ -171,36 +158,21 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
                 </TableCell>
                 <TableCell>
                   <Badge className={totalColor}>
-                    R$ {formatCurrency(Number(s.total_amount ?? 0))}
+                    R$ {formatCurrency(Number(s.subtotal ?? 0))}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge className={descontoColor}>
-                    R$ {formatCurrency(Number(s.discount_amount ?? 0))}
-                  </Badge>
+                  <Badge className={descontoColor}>{s.discount_amount}%</Badge>
                 </TableCell>
                 <TableCell>
                   <Badge className={totalComDescontoColor}>
-                    R$ {formatCurrency(desconto)}
+                    R$ {s.total_amount}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <Badge className={statusFormatted.color}>
                     {statusFormatted.text}
                   </Badge>
-                </TableCell>
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="cursor-pointer gap-1"
-                    onClick={(e) => handleOpenDetalhes(e, venda)}
-                    title="Ver parcelas e produtos"
-                  >
-                    <Eye className="h-4 w-4" />
-                    Ver detalhes
-                  </Button>
                 </TableCell>
               </TableRow>
             );
@@ -213,9 +185,8 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
         <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t">
           <div className="flex items-center text-sm text-gray-700">
             <span>
-              Mostrando {startIndex + 1} a{" "}
-              {Math.min(endIndex, vendas.length)} de{" "}
-              {vendas.length} vendas
+              Mostrando {startIndex + 1} a {Math.min(endIndex, vendas.length)}{" "}
+              de {vendas.length} vendas
             </span>
           </div>
 
@@ -265,15 +236,6 @@ export function VendasTable({ vendas, onVendaUpdated }: VendasTableProps) {
             setOpen={setOpen}
             venda={selectedVenda}
             onVendaUpdated={onVendaUpdated}
-          />
-        )}
-      </Dialog>
-
-      <Dialog open={openDetalhes} onOpenChange={setOpenDetalhes}>
-        {selectedVendaDetalhes && (
-          <DialogDetalhesVenda
-            venda={selectedVendaDetalhes}
-            setOpen={setOpenDetalhes}
           />
         )}
       </Dialog>

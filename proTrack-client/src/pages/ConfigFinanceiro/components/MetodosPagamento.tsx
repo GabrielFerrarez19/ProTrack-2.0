@@ -8,6 +8,7 @@ import {
 } from "../../../components/ui/card";
 import { Switch } from "../../../components/ui/switch";
 import { CreditCard } from "lucide-react";
+import { usePaymentMethods } from "@/hooks/usePaymentMethods";
 interface Props {
   metodosPagamento: MetodoPagamento[];
   setMetodosPagamento: React.Dispatch<React.SetStateAction<MetodoPagamento[]>>;
@@ -17,11 +18,24 @@ export function MetodosPagamento({
   metodosPagamento,
   setMetodosPagamento,
 }: Props) {
-  useEffect(() => {
-    setMetodosPagamento([]);
-  }, [setMetodosPagamento]);
+  const { paymentMethods, loading, error } = usePaymentMethods();
 
-  const handleToggleMetodo = async (id: string, ativo: boolean) => {
+  // Sincroniza os dados vindos da API com o estado do componente pai
+  useEffect(() => {
+    if (paymentMethods.length > 0) {
+      // Mapeia o tipo da API para o tipo esperado pelo seu componente pai (MetodoPagamento)
+      const formatados = paymentMethods.map((m) => ({
+        id: m.id,
+        nome: m.name,
+        tipo: m.type,
+        ativo: m.is_active, // ou o valor que vier da API
+      }));
+      setMetodosPagamento(formatados as any); // Use o cast necessário se os tipos forem levemente diferentes
+    }
+  }, [paymentMethods, setMetodosPagamento]);
+
+  const handleToggleMetodo = (id: string, ativo: boolean) => {
+    // Atualiza o estado no componente pai
     setMetodosPagamento((metodos) =>
       metodos.map((m) => (m.id === id ? { ...m, ativo } : m)),
     );
@@ -47,7 +61,7 @@ export function MetodosPagamento({
   console.log("metodosPagamento", metodosPagamento);
 
   // Se não houver métodos carregados ainda
-  if (!metodosPagamento || metodosPagamento.length === 0) {
+  if (loading) {
     return (
       <Card>
         <CardHeader>
@@ -65,6 +79,25 @@ export function MetodosPagamento({
     );
   }
 
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5" /> Métodos de Pagamento
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="font-bold text-red-500">
+              Erro ao carregar metodos de pagamento
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -74,24 +107,24 @@ export function MetodosPagamento({
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {metodosPagamento.map((metodo) => (
+          {paymentMethods.map((metodo) => (
             <div
               key={metodo.id}
               className="flex items-center justify-between p-4 rounded-lg border"
             >
               <div className="flex items-center gap-3">
                 <span className="text-2xl">
-                  {getTipoMetodoIcon(metodo.tipo)}
+                  {getTipoMetodoIcon(metodo.type)}
                 </span>
                 <div>
-                  <p className="font-medium text-foreground">{metodo.nome}</p>
+                  <p className="font-medium text-foreground">{metodo.name}</p>
                   <p className="text-sm text-muted-foreground capitalize">
-                    {metodo.tipo}
+                    {metodo.type}
                   </p>
                 </div>
               </div>
               <Switch
-                checked={metodo.ativo}
+                checked={metodo.is_active}
                 onCheckedChange={(checked) =>
                   handleToggleMetodo(metodo.id, checked)
                 }

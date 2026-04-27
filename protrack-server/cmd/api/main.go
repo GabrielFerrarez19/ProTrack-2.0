@@ -86,14 +86,23 @@ func main() {
 			"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS",
 		},
 		AllowHeaders: []string{
-			"Origin", "Content-Type", "Authorization", "Access-Control-Allow-Origin",
+			"Origin", "Content-Type", "Authorization","Accept",
 		},
 		ExposeHeaders: []string{
 			"Content-Length",
 		},
 		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
+		MaxAge: 0,
 	}))
+
+	r.HandleMethodNotAllowed = true
+	r.Use(func(c *gin.Context) {
+		if c.Request.Method == http.MethodOptions {
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+		c.Next()
+	})
 
 	logger.InitLogger("development")
 
@@ -183,7 +192,7 @@ func main() {
 	productsHandler.RegisterRoute(api)
 	authHandler.RegisterRoute(api)
 	customersHandler.RegisterRoute(api)
-	salesHandler.RegisterRoute(api)
+	salesHandler.RegisterRoutes(api)
 	saleItemsHandler.RegisterRoute(api)
 	paymentMethodsHandler.RegisterRoutes(api)
 	vendorsHandler.RegisterRoute(api)

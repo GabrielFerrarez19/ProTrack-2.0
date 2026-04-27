@@ -9,10 +9,12 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	methods := r.Group("/payment-methods").Use(middleware.AuthMiddleware(h.jwtManager, h.blacklist))
 	{
 		methods.POST("", h.CreatePaymentMethod)
-		methods.GET("/:id", h.GetPaymentMethodById)
-		methods.GET("/", h.ListPaymentMethod)
-		methods.GET("/is-active", h.ListPaymentMethodIsActive)
-		methods.PUT("/:id", h.TogglePaymentMethodActive)
-		methods.GET("/stats", h.GetPaymentMethodsStats)
+        methods.GET("", h.ListPaymentMethod)
+
+        methods.GET("/is-active", h.ListPaymentMethodIsActive)
+        methods.GET("/stats", h.GetPaymentMethodsStats)
+
+        methods.GET("/:id", h.GetPaymentMethodById)
+        methods.PUT("/:id", h.TogglePaymentMethodActive)
 	}
 }

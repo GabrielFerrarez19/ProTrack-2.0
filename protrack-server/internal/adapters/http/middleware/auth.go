@@ -13,6 +13,12 @@ import (
 
 func AuthMiddleware(jwtManager *jwt.JWTManager, blacklist *cache.TokenBlacklist) gin.HandlerFunc {
 	return func(c *gin.Context) {
+
+		if c.Request.Method == http.MethodOptions {
+			c.Next()
+			return
+		}
+
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
