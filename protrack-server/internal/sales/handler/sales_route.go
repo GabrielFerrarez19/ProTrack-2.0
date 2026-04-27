@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (h *Handler) RegisterRoute(r *gin.RouterGroup) {
+func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	sales := r.Group("/sales").Use(middleware.AuthMiddleware(h.jwtManager, h.blacklist))
 	{
 		sales.POST("", h.CreateSale)
