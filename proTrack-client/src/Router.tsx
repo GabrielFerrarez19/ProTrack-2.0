@@ -26,6 +26,7 @@ import { NotFound } from "./pages/NotFound";
 import { Seguranca } from "./pages/ConfigSeguranca";
 import { Aparencia } from "./pages/ConfigAparencia";
 import { Index } from "./pages/Index";
+import ConfiguracoesSistema from "./pages/ConfigSistema";
 
 export function Router() {
   return (
@@ -218,6 +219,14 @@ export function Router() {
           element={
             <ProtectedRoute requiredRoute="/config/aparencia">
               <Aparencia />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="sistema"
+          element={
+            <ProtectedRoute requiredRoute="/config/aparencia">
+              <ConfiguracoesSistema />
             </ProtectedRoute>
           }
         />
