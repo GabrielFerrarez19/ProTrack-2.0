@@ -67,6 +67,8 @@ import (
 	vendorsRepository "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/vendors/repository"
 	vendorsService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/vendors/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/whatsapp"
+	whatsappHandler "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/whatsapp/handler"
+	whatsappService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/whatsapp/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/worker"
 	"github.com/gin-contrib/cors"
 
@@ -164,6 +166,7 @@ func main() {
 	paymentsService := paymentsService.NewService(db.Pool, paymentHistoryService, accountsReceivableService, customersService, salesService)
 	analyticsService := analyticsService.NewService(productsService, saleItemsService)
 	reportsService := reportsService.NewService(salesService, analyticsService, paymentHistoryService, productsService)
+	whatsappService := whatsappService.NewService(cfg)
 
 	cashFlowHandler := cashFlowHandler.NewHandler(cashFlowService, jwtManager, blacklist)
 	usersHandler := usersHandler.NewHandler(usersService, jwtManager, blacklist)
@@ -183,6 +186,7 @@ func main() {
 	accountsReceivableHandler := accountsReceivableHandler.NewHandler(accountsReceivableService, jwtManager, blacklist)
 	paymentsHandler := paymentsHandler.NewHandler(paymentsService, jwtManager, blacklist)
 	reportsHandler := reportsHandler.NewHandler(reportsService, jwtManager, blacklist)
+	whatsappHandler := whatsappHandler.NewHandler(whatsappService, jwtManager, blacklist)
 
 	api := r.Group("/api/v1")
 	usersHandler.RegisterRoutes(api)
@@ -203,6 +207,7 @@ func main() {
 	paymentsHandler.RegisterRoute(api)
 	reportsHandler.RegisterRoutes(api)
 	cashFlowHandler.RegisterRoute(api)
+	whatsappHandler.RegisterRoute(api)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
