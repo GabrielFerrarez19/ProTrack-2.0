@@ -26,8 +26,8 @@ func NewWhatsapp(cfg *config.Config) *Whatsapp {
 	}
 }
 
-func (w *Whatsapp) SendWhatsAppMessage(targetNumber string, messageContent string) error {
-	apiURL := w.cfg.EvolutionApi
+func (w *Whatsapp) SendWhatsAppMessage(targetNumber string, messageContent string, instanceName string) error {
+	apiURL := fmt.Sprintf("%s/message/sendText/%s", w.cfg.EvolutionApiUrl, instanceName)
 	apiKey := w.cfg.EvolutionKey
 
 	client := &http.Client{}

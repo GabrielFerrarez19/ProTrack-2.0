@@ -7,22 +7,27 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
+	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/companies/service"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/config"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/whatsapp/domain"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 
 
 type Service struct {
 	cfg *config.Config
+	companiesService *service.Service
 }
 
 
-func NewService(cfg *config.Config) *Service {
+func NewService(cfg *config.Config, companiesService *service.Service) *Service {
 	return &Service{
 		cfg: cfg,
+		companiesService: companiesService,
 	}
 }
 
@@ -30,16 +35,23 @@ func NewService(cfg *config.Config) *Service {
 
 func (s *Service) CreateInstance(ctx context.Context, req domain.CreateInstanceRequest,companyID uuid.UUID) (string, error) {
 	url := fmt.Sprintf("%s/instance/create", s.cfg.EvolutionApiUrl)
+
+	company, err := s.companiesService.GetCompanyByID(ctx, companyID)
+	if err != nil {
+		return "", fmt.Errorf("failed to retrieve company: %w", err)
+	}
+
+	instanceName := fmt.Sprintf("%s-%s", company.Name, companyID.String())
 	
-
-
-
 	payload := map[string]any{
-		"instance_name": req.InstanceName,
+		"instanceName": instanceName,
 		"integration":   req.Integration,
 		"token":         companyID.String(),
-		"qr_code":       req.QrCode,
+		"qrcode":       req.QrCode,
 	}
+
+
+	log.Info().Str("url", url).Interface("payload", payload).Msg("Enviando solicitação para criar instância no Evolution API")
 
 	jsonPayload, _ := json.Marshal(payload)
 
@@ -63,11 +75,48 @@ func (s *Service) CreateInstance(ctx context.Context, req domain.CreateInstanceR
 		return "", fmt.Errorf("failed to create instance: %s", body)
 	}
 
-	var result domain.EvolutionResponse
+	var result domain.EvolutionCreateResponse
 
 	if err := json.Unmarshal(body, &result); err != nil {
 		return "", err
 	}
+
+
+	connectUrl := fmt.Sprintf("%s/instance/connect/%s", s.cfg.EvolutionApiUrl, instanceName)
+	var qrCode string
 	
-	return result.QRCode.Base64, nil
+	for i := 0; i < 5; i++ {
+		time.Sleep(5 * time.Second)
+
+		reqConnect, err := http.NewRequestWithContext(ctx, "GET", connectUrl, nil)
+		if err != nil {
+			return "", err
+		}
+		reqConnect.Header.Set("apikey",  s.cfg.EvolutionKey)
+
+		resConnect, err := client.Do(reqConnect)
+		if err != nil {
+			log.Warn().Err(err).Msg("Erro ao conectar à Evolution API, tentando novamente...")
+			continue
+		}
+		defer resConnect.Body.Close()
+
+		bodyConnect, _ := io.ReadAll(resConnect.Body)
+		if resConnect.StatusCode != http.StatusOK {
+			log.Warn().Str("response", string(bodyConnect)).Msg("Resposta inesperada da Evolution API, tentando novamente...")
+			continue
+		}
+
+		var resultConnect domain.EvolutionConnectResponse
+		if err := json.Unmarshal(bodyConnect, &resultConnect); err != nil {
+			log.Warn().Err(err).Msg("Erro ao decodificar resposta da Evolution API, tentando novamente...")
+			continue
+		}
+		
+		qrCode = resultConnect.Code
+		break
+	}
+	
+	
+	return qrCode, nil
 }

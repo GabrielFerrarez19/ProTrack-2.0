@@ -34,8 +34,6 @@ func (h *Handler) CreateInstance(c *gin.Context) {
 
 	companyId := companyIdAny.(uuid.UUID)
 
-
-
 	var req domain.CreateInstanceRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {

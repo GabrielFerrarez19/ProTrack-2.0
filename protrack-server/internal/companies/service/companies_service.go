@@ -174,6 +174,41 @@ func (s *Service) GetCompanyByID(ctx context.Context, id uuid.UUID) (domain.Comp
 	}, nil
 }
 
+func (s *Service) GetCompanyByIDTx(ctx context.Context, tx db.DBTX,id uuid.UUID) (domain.CompanyResponse, error) {
+	repoTx := db.New(tx)
+	
+	company, err := repoTx.GetCompanyByID(ctx, pgconv.ParseUUIDToPgType(id))
+	if err != nil {
+		return domain.CompanyResponse{}, err
+	}
+
+	return domain.CompanyResponse{
+		ID:                  pgconv.PgUUIDToUUID(company.ID),
+		Name:                company.Name,
+		TradeName:           pgconv.ParsePgTextToString(company.TradeName),
+		Document:            pgconv.ParsePgTextToString(company.Document),
+		DocumentType:        pgconv.ParsePgTextToString(company.DocumentType),
+		Email:               pgconv.ParsePgTextToString(company.Email),
+		Phone:               pgconv.ParsePgTextToString(company.Phone),
+		Website:             pgconv.ParsePgTextToString(company.Website),
+		AddressStreet:       pgconv.ParsePgTextToString(company.AddressStreet),
+		AddressNumber:       pgconv.ParsePgTextToString(company.AddressNumber),
+		AddressComplement:   pgconv.ParsePgTextToString(company.AddressComplement),
+		AddressNeighborhood: pgconv.ParsePgTextToString(company.AddressNeighborhood),
+		AddressCity:         pgconv.ParsePgTextToString(company.AddressCity),
+		AddressState:        pgconv.ParsePgTextToString(company.AddressState),
+		AddressZipcode:      pgconv.ParsePgTextToString(company.AddressZipcode),
+		AddressCountry:      pgconv.ParsePgTextToString(company.AddressCountry),
+		Status:              company.Status,
+		CreatedBy:           pgconv.PgUUIDToUUID(company.CreatedBy),
+		UpdatedBy:           pgconv.PgUUIDToUUID(company.UpdatedBy),
+		DeletedBy:           pgconv.PgUUIDToUUID(company.DeletedBy),
+		CreatedAt:           pgconv.PgTimestamptzToTime(company.CreatedAt),
+		UpdatedAt:           pgconv.PgTimestamptzToTime(company.UpdatedAt),
+		DeletedAt:           pgconv.PgTimestamptzToTime(company.DeletedAt),
+	}, nil
+}
+
 func (s *Service) ListCompanies(ctx context.Context) ([]domain.CompanyResponse, error) {
 	companies, err := s.repo.ListCompanies(ctx)
 	if err != nil {

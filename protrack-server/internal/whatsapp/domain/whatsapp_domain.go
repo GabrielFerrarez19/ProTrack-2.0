@@ -1,7 +1,7 @@
 package domain
 
 
-type EvolutionResponse struct {
+type EvolutionCreateResponse struct {
     Instance struct {
         InstanceName string `json:"instanceName"`
         Status       string `json:"status"`
@@ -13,7 +13,10 @@ type EvolutionResponse struct {
 }
 
 type CreateInstanceRequest struct {
-	InstanceName string `json:"instance_name"`
 	Integration string `json:"integration"`
 	QrCode bool `json:"qr_code"`
+}
+
+type EvolutionConnectResponse struct {
+    Code        string `json:"code"`
 }
