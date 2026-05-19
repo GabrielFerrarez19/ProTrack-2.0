@@ -450,7 +450,7 @@ func (s *Service) GetTotalAmountIsOverdue(ctx context.Context, req domain.GetTot
 	return total, nil
 }
 
-func (s *Service) UpdateOverdueSales(ctx context.Context, companyID uuid.UUID) error {
+func (s *Service) UpdateOverdueSales(ctx context.Context) error {
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -460,12 +460,7 @@ func (s *Service) UpdateOverdueSales(ctx context.Context, companyID uuid.UUID) e
 
 	repoTx := s.repo.WithTx(tx)
 
-	company, err := s.companiesService.GetCompanyByIDTx(ctx, tx, companyID)
-	if err != nil {
-		return fmt.Errorf("failed to retrieve company: %w", err)
-	}
-
-	instanceName := fmt.Sprintf("%s-%s", company.Name, companyID.String())
+	
 
 	response, err := repoTx.UpdateOverdueSalesAndAccounts(ctx)
 	if err != nil {
@@ -483,6 +478,13 @@ func (s *Service) UpdateOverdueSales(ctx context.Context, companyID uuid.UUID) e
 			log.Error().Err(err).Str("sale_id", data.SaleID.String()).Msg("Erro ao buscar venda para WhatsApp")
 			continue
 		}
+
+		company, err := s.companiesService.GetCompanyByIDTx(ctx, tx, pgconv.PgUUIDToUUID(data.CustomerID))
+		if err != nil {
+			return fmt.Errorf("failed to retrieve company: %w", err)
+		}
+
+		instanceName := fmt.Sprintf("%s-%s", company.Name, data.CustomerID.String())
 
 		msg := fmt.Sprintf("⚠️ *Aviso de Vencimento*\n\n"+
 			"Informamos que a sua parcela com vencimento no dia %d venceu hoje.\n"+
