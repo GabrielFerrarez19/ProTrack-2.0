@@ -75,7 +75,7 @@ func (w *Whatsapp) SendWhatsAppMessage(targetNumber string, messageContent strin
 			Int("status_code", resp.StatusCode).
 			Str("url", apiURL).
 			Msg("A Evolution API recusou a requisição")
-		return fmt.Errorf("erro na api: status %d", resp.StatusCode)
+		return fmt.Errorf("erro na api: status %d erro %d", resp.StatusCode, resp.Body)
 	}
 
 	log.Info().Msg("WhatsApp enviado com sucesso!")

@@ -479,12 +479,14 @@ func (s *Service) UpdateOverdueSales(ctx context.Context) error {
 			continue
 		}
 
-		company, err := s.companiesService.GetCompanyByIDTx(ctx, tx, pgconv.PgUUIDToUUID(data.CustomerID))
+		log.Info().Msgf("CompanyID %s", data.CompanyID)
+
+		company, err := s.companiesService.GetCompanyByIDTx(ctx, tx, pgconv.PgUUIDToUUID(data.CompanyID))
 		if err != nil {
 			return fmt.Errorf("failed to retrieve company: %w", err)
 		}
 
-		instanceName := fmt.Sprintf("%s-%s", company.Name, data.CustomerID.String())
+		instanceName := fmt.Sprintf("%s-%s", company.Name, data.CompanyID.String())
 
 		msg := fmt.Sprintf("⚠️ *Aviso de Vencimento*\n\n"+
 			"Informamos que a sua parcela com vencimento no dia %d venceu hoje.\n"+

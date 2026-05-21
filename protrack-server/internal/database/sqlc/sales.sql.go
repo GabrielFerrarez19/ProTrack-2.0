@@ -867,12 +867,13 @@ WHERE id IN (
     )
     AND status NOT IN ('paid', 'canceled')
 RETURNING id AS sale_id,
-    customer_id
+    customer_id, company_id
 `
 
 type UpdateOverdueSalesAndAccountsGlobalRow struct {
 	SaleID     pgtype.UUID `json:"sale_id"`
 	CustomerID pgtype.UUID `json:"customer_id"`
+	CompanyID  pgtype.UUID `json:"company_id"`
 }
 
 func (q *Queries) UpdateOverdueSalesAndAccountsGlobal(ctx context.Context) ([]UpdateOverdueSalesAndAccountsGlobalRow, error) {
@@ -884,7 +885,7 @@ func (q *Queries) UpdateOverdueSalesAndAccountsGlobal(ctx context.Context) ([]Up
 	items := []UpdateOverdueSalesAndAccountsGlobalRow{}
 	for rows.Next() {
 		var i UpdateOverdueSalesAndAccountsGlobalRow
-		if err := rows.Scan(&i.SaleID, &i.CustomerID); err != nil {
+		if err := rows.Scan(&i.SaleID, &i.CustomerID, &i.CompanyID); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
