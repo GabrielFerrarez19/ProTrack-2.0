@@ -145,7 +145,7 @@ WHERE id IN (
     )
     AND status NOT IN ('paid', 'canceled')
 RETURNING id AS sale_id,
-    customer_id;
+    customer_id, company_id;
 -- name: GetSaleByIdWhatsapp :one
 SELECT s.*,
     c.full_name as customer_name,

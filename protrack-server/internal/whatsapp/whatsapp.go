@@ -26,8 +26,8 @@ func NewWhatsapp(cfg *config.Config) *Whatsapp {
 	}
 }
 
-func (w *Whatsapp) SendWhatsAppMessage(targetNumber string, messageContent string) error {
-	apiURL := w.cfg.EvolutionApi
+func (w *Whatsapp) SendWhatsAppMessage(targetNumber string, messageContent string, instanceName string) error {
+	apiURL := fmt.Sprintf("%s/message/sendText/%s", w.cfg.EvolutionApiUrl, instanceName)
 	apiKey := w.cfg.EvolutionKey
 
 	client := &http.Client{}
@@ -75,7 +75,7 @@ func (w *Whatsapp) SendWhatsAppMessage(targetNumber string, messageContent strin
 			Int("status_code", resp.StatusCode).
 			Str("url", apiURL).
 			Msg("A Evolution API recusou a requisição")
-		return fmt.Errorf("erro na api: status %d", resp.StatusCode)
+		return fmt.Errorf("erro na api: status %d erro %d", resp.StatusCode, resp.Body)
 	}
 
 	log.Info().Msg("WhatsApp enviado com sucesso!")

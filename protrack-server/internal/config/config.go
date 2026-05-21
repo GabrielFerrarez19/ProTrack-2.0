@@ -26,6 +26,8 @@ type Config struct {
 	RedisPort string
 
 	Pepper string
+
+	EvolutionApiUrl string
 }
 
 func LoadConfig() (*Config, error) {
@@ -46,6 +48,7 @@ func LoadConfig() (*Config, error) {
 		RedisHost:    getEnv("REDIS_HOST"),
 		RedisPort:    getEnv("REDIS_PORT"),
 		Pepper:       getEnv("PEPPER"),
+		EvolutionApiUrl: getEnv("EVOLUTION_API_URL"),
 	}
 
 	return config, nil

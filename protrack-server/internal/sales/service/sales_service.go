@@ -10,6 +10,7 @@ import (
 	accountsReceivableDomain "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/accounts_receivable/domain"
 	accountsReceivableService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/accounts_receivable/service"
 	pgconv "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/pgtype"
+	companiesService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/companies/service"
 	customerDomain "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/customers/domain"
 	customerService "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/customers/service"
 	db "github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/database/sqlc"
@@ -55,6 +56,7 @@ type Service struct {
 	accountsReceivableService *accountsReceivableService.Service
 	productService            *productService.Service
 	productCategoriesService  *productCategoriesService.Service
+	companiesService *companiesService.Service
 	whatsApp                  *whatsapp.Whatsapp
 }
 
@@ -66,6 +68,7 @@ func NewService(
 	accountsReceivableService *accountsReceivableService.Service,
 	productService *productService.Service,
 	productCategoriesService *productCategoriesService.Service,
+	companiesService *companiesService.Service,
 	whatsApp *whatsapp.Whatsapp,
 ) *Service {
 	return &Service{
@@ -76,6 +79,7 @@ func NewService(
 		accountsReceivableService: accountsReceivableService,
 		productService:            productService,
 		productCategoriesService:  productCategoriesService,
+		companiesService:          companiesService,
 		whatsApp:                  whatsApp,
 	}
 }
@@ -456,6 +460,8 @@ func (s *Service) UpdateOverdueSales(ctx context.Context) error {
 
 	repoTx := s.repo.WithTx(tx)
 
+	
+
 	response, err := repoTx.UpdateOverdueSalesAndAccounts(ctx)
 	if err != nil {
 		return err
@@ -473,13 +479,22 @@ func (s *Service) UpdateOverdueSales(ctx context.Context) error {
 			continue
 		}
 
+		log.Info().Msgf("CompanyID %s", data.CompanyID)
+
+		company, err := s.companiesService.GetCompanyByIDTx(ctx, tx, pgconv.PgUUIDToUUID(data.CompanyID))
+		if err != nil {
+			return fmt.Errorf("failed to retrieve company: %w", err)
+		}
+
+		instanceName := fmt.Sprintf("%s-%s", company.Name, data.CompanyID.String())
+
 		msg := fmt.Sprintf("⚠️ *Aviso de Vencimento*\n\n"+
 			"Informamos que a sua parcela com vencimento no dia %d venceu hoje.\n"+
 			"Pedimos que entre em contato para realizar a regularização.", sale.DueDays.Int32)
 
 		targetNumber := customer.Whatsapp
 
-		if err := s.whatsApp.SendWhatsAppMessage(targetNumber, msg); err != nil {
+		if err := s.whatsApp.SendWhatsAppMessage(targetNumber, msg,instanceName); err != nil {
 			log.Error().Err(err).Str("sale_id", data.SaleID.String()).Msg("Erro ao enviar WhatsApp de vencimento")
 		}
 	}
