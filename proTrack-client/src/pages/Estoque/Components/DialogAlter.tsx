@@ -19,10 +19,12 @@ import {
   SelectItem,
 } from "../../../components/ui/select";
 
-import type { ProductRequest, ProductResponse } from "@/@types/product";
+import type { ProductResponse } from "@/@types/product";
 import type { ProductCategoryResponse } from "@/@types/product_categories";
 import { getProductCategories } from "@/services/product_categories";
 import { toast } from "sonner";
+import type { UpdateProductParams } from "@/@types/products";
+import { UpdateProduct } from "@/services/product";
 
 const tamanhos = ["PP", "P", "M", "G", "GG", "XG", "Único"];
 
@@ -34,63 +36,39 @@ interface DialogAlterProps {
 
 export function DialogAlter({
   product,
-  /*   setOpen,
-  onProductUpdated, */
+  setOpen,
+  onProductUpdated,
 }: DialogAlterProps) {
   const {
     register,
     reset,
     setValue,
     watch,
-    /* handleSubmit, */
+    handleSubmit,
     formState: { errors },
-  } = useForm<ProductRequest>();
+  } = useForm<UpdateProductParams>();
 
-  const precoCusto = watch("cost_price");
-  const precoVenda = watch("sale_price");
+  const precoCusto = watch("costPrice");
+  const precoVenda = watch("salePrice");
 
   useEffect(() => {
     if (product) {
       reset({
+        id: product.id,
         name: product.name,
         description: product.description || "",
-        category_id: product.category_id || "",
-        barcode: product.barcode || "",
+        categoryId: product.category_id || "",
+        Barcode: product.barcode || "",
         quantity: product.quantity ?? 0,
         size: product.size || "",
-        cost_price: product.cost_price ?? 0,
-        sale_price: product.sale_price ?? 0,
+        costPrice: product.cost_price ?? 0,
+        salePrice: product.sale_price ?? 0,
       });
     }
   }, [product, reset]);
 
-  /*   const onSubmit = async (data: ProductRequest) => {
-    try {
-      const updatedProduct: ProductResponse = {
-        id: product.id,
-        name: data.name,
-        description: data.description,
-        category_id: data.category_id,
-        barcode: data.barcode,
-        quantity: data.quantity,
-        size: data.size,
-        cost_price: data.cost_price,
-        sale_price: data.sale_price,
-      };
-
-      setOpen(false);
-      toast.success("Produto alterado com sucesso!");
-      if (onProductUpdated) onProductUpdated();
-    } catch (error: unknown) {
-      console.error("Erro ao atualizar produto:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Erro ao atualizar produto",
-      );
-    }
-  }; */
-
   const categoriaSelecionada =
-    watch("category_id") || product?.category_id || "";
+    watch("categoryId") || product?.category_id || "";
   const tamanhoSelecionado = watch("size");
   const [categories, setCategories] = useState<ProductCategoryResponse[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
@@ -110,6 +88,25 @@ export function DialogAlter({
     loadCategories();
   }, []);
 
+  const onSubmit = async (data: UpdateProductParams) => {
+    try {
+      await UpdateProduct(data, data.id);
+
+      setOpen(false);
+
+      onProductUpdated?.();
+
+      toast.success("Produto atualizado com sucesso!", {
+        style: { background: "#4ade80", color: "#065f46" }, // verde pastel
+      });
+    } catch (error) {
+      console.error("Erro ao cadastrar produto:", error);
+      toast.error("Erro ao atualizar produto", {
+        style: { background: "#f87171", color: "#7f1d1d" }, // vermelho pastel
+      });
+    }
+  };
+
   return (
     <DialogContent
       style={{
@@ -124,7 +121,7 @@ export function DialogAlter({
       </DialogHeader>
 
       <CardContent className="p-8">
-        <form /* onSubmit={handleSubmit(onSubmit)} */ className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-rows-1 gap-6">
             <div className="grid grid-cols-3 gap-6">
               <div className="space-y-2">
@@ -146,7 +143,7 @@ export function DialogAlter({
                 <Label htmlFor="codigoBarras">Código de Barras *</Label>
                 <Input
                   id="codigoBarras"
-                  {...register("barcode", { required: true })}
+                  {...register("Barcode", { required: true })}
                   placeholder="1234567890123"
                   className="h-11 bg-input border-border"
                 />
@@ -187,7 +184,7 @@ export function DialogAlter({
                 <Label htmlFor="categoria">Categoria *</Label>
                 <Select
                   value={categoriaSelecionada}
-                  onValueChange={(val) => setValue("category_id", val)}
+                  onValueChange={(val) => setValue("categoryId", val)}
                   disabled={isLoadingCategories}
                 >
                   <SelectTrigger className="h-11 bg-input border-border">
@@ -224,7 +221,7 @@ export function DialogAlter({
                   id="precoCusto"
                   type="number"
                   step="0.01"
-                  {...register("cost_price", { valueAsNumber: true })}
+                  {...register("costPrice", { valueAsNumber: true })}
                   placeholder="0,00"
                   min="0"
                   className="h-11 bg-input border-border"
@@ -237,7 +234,7 @@ export function DialogAlter({
                   id="precoVenda"
                   type="number"
                   step="0.01"
-                  {...register("sale_price", { valueAsNumber: true })}
+                  {...register("salePrice", { valueAsNumber: true })}
                   placeholder="0,00"
                   min="0"
                   className="h-11 bg-input border-border"
@@ -289,19 +286,6 @@ export function DialogAlter({
             <Button
               type="button"
               variant="outline"
-              onClick={() =>
-                product &&
-                reset({
-                  name: product.name,
-                  description: product.description || "",
-                  category_id: product.category_id || "",
-                  barcode: product.barcode || "",
-                  quantity: product.quantity ?? 0,
-                  size: product.size || "",
-                  cost_price: product.cost_price ?? 0,
-                  sale_price: product.sale_price ?? 0,
-                })
-              }
               className="border-border hover:bg-muted h-11 px-8"
             >
               Desfazer alterações
