@@ -4,6 +4,7 @@ import type {
   Top5Products,
 } from "@/@types/product";
 import { api } from "./api";
+import type { UpdateProductParams } from "@/@types/products";
 
 interface ProductResponseApi {
   products: ProductResponse[];
@@ -43,4 +44,12 @@ export async function GetCostTotalStock(): Promise<number> {
 export async function GetTopProducts(): Promise<Top5Products[]> {
   const response = await api.get<ProductResponseApi>("/product/top-products");
   return response.data.top_products;
+}
+
+export async function UpdateProduct(
+  params: UpdateProductParams,
+  id: string,
+): Promise<ProductResponse> {
+  const response = await api.put<ProductResponse>(`/product/${id}`, params);
+  return response.data;
 }
