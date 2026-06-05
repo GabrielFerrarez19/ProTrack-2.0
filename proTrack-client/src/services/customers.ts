@@ -1,4 +1,8 @@
-import type { CustomerRequest, CustomerResponse } from "@/@types/customers";
+import type {
+  CustomerRequest,
+  CustomerResponse,
+  UpdateCustomerParams,
+} from "@/@types/customers";
 import { api } from "./api";
 import { data } from "react-router-dom";
 
@@ -28,4 +32,9 @@ export async function PercentageCustomers(): Promise<number> {
     "/customers/percentage",
   );
   return response.data.percentage;
+}
+
+export async function UpdateCustomer(params: UpdateCustomerParams, id: string) {
+  const response = await api.put(`/customers/${id}`, params);
+  return response.data;
 }
