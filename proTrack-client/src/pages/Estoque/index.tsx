@@ -14,15 +14,6 @@ export function Estoque() {
   const { data: products, isLoading, error } = useProdutos();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredProducts = (products ?? []).filter((product) => {
-    const term = searchTerm.toLowerCase();
-    return (
-      product.name.toLowerCase().includes(term) ||
-      (product.barcode?.includes(searchTerm) ?? false) ||
-      (product.category_id?.toLowerCase().includes(term) ?? false)
-    );
-  });
-
   if (isLoading) return <PageLoading message="Carregando produtos..." />;
   if (error) return <p className="p-6 text-red-600">{error.message}</p>;
 
@@ -33,7 +24,7 @@ export function Estoque() {
         text="Aqui você pode cadastrar novos produtos no seu estoque"
       />
       <SearchBar searchTerm={searchTerm} onChange={setSearchTerm} />
-      <ProductTable products={filteredProducts} />
+      <ProductTable products={products ?? []} />
     </div>
   );
 }

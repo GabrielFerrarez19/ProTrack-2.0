@@ -11,27 +11,13 @@ import { SearchBar } from "./components/SearchFilter";
 import { PageLoading } from "@/components/PageLoading";
 
 export function Cliente() {
-  const { clientes, loading, error, reload } = useClientes();
+  const { data: clientes, isLoading, error } = useClientes();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredClientes = (clientes ?? []).filter((cliente) => {
-    const term = searchTerm.toLowerCase();
-    return (
-      cliente.full_name.toLowerCase().includes(term) ||
-      cliente.cpf.toLowerCase().includes(term) ||
-      cliente.email.toLowerCase().includes(term) ||
-      cliente.whatsapp?.toLowerCase().includes(term) ||
-      cliente.mobile_phone?.toLowerCase().includes(term) ||
-      cliente.home_phone?.toLowerCase().includes(term) ||
-      cliente.address_street?.toLowerCase().includes(term) ||
-      cliente.address_city?.toLowerCase().includes(term) ||
-      cliente.address_neighborhood?.toLowerCase().includes(term)
-    );
-  });
+  console.log("clientes", clientes);
 
-  if (loading)
-    return <PageLoading message="Carregando clientes..." />;
-  if (error) return <p className="p-6 text-red-600">{error}</p>;
+  if (isLoading) return <PageLoading message="Carregando clientes..." />;
+  if (error) return <p className="p-6 text-red-600">{error.message}</p>;
 
   return (
     <div className="p-6 space-y-6">
@@ -40,7 +26,7 @@ export function Cliente() {
         text="Aqui você pode visualizar todos os clientes cadastrados no sistema."
       />
       <SearchBar searchTerm={searchTerm} onChange={setSearchTerm} />
-      <ClientTable clientes={filteredClientes} onClienteUpdated={reload} />
+      <ClientTable clientes={clientes ?? []} />
     </div>
   );
 }

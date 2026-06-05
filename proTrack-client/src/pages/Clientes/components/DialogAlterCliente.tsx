@@ -18,7 +18,6 @@ import {
 } from "../../../components/ui/select";
 
 import { toast } from "sonner";
-import type { ClienteFormData } from "../../../@types/types.components";
 import {
   formatarDataParaInput,
   formatCurrency,
@@ -34,17 +33,20 @@ import {
 } from "../../../components/ui/table";
 import { ResumoVendas } from "./ResumoVendas";
 import { Badge } from "../../../components/ui/badge";
-import type { CustomerResponse } from "@/@types/customers";
+import type {
+  CustomerResponse,
+  Gender,
+  UpdateCustomerParams,
+} from "@/@types/customers";
 import type { AccountReceivable } from "@/@types/accountsReceivable";
 import {
   GetPendingReceivablesByCustomer,
   GetReceivablesBySale,
 } from "@/services/accountsReceivable";
 import { CreatePayment } from "@/services/payments";
-import {
-  ListPaymentMethodsIsActive,
-  type PaymentMethodResponse,
-} from "@/services/paymentMethods";
+import { ListPaymentMethodsIsActive } from "@/services/paymentMethods";
+import { UpdateCustomer } from "@/services/customers";
+import type { PaymentMethodResponse } from "@/@types/paymentMethods";
 
 interface DialogAlterClienteProps {
   setOpen: (value: boolean) => void;
@@ -53,18 +55,18 @@ interface DialogAlterClienteProps {
 }
 
 export function DialogAlterCliente({
-  /* setOpen, */
+  setOpen,
   cliente,
   onClienteUpdated,
 }: DialogAlterClienteProps) {
   const {
     register,
-    /* handleSubmit, */
+    handleSubmit,
     reset,
     setValue,
     watch,
     formState: { errors },
-  } = useForm<ClienteFormData>();
+  } = useForm<UpdateCustomerParams>();
 
   type VendaParceladaResumo = {
     saleId: string;
@@ -95,23 +97,22 @@ export function DialogAlterCliente({
   useEffect(() => {
     if (cliente) {
       reset({
-        id: parseInt(cliente.id),
-        nome: cliente.full_name,
-        dataNascimento: formatarDataParaInput(cliente.birth_date),
+        full_name: cliente.full_name,
+        birth_date: formatarDataParaInput(cliente.birth_date),
         cpf: cliente.cpf,
         rg: cliente.rg || "",
-        estadoCivil: cliente.marital_status || "",
-        sexo: cliente.gender || "",
-        telefoneCelular: cliente.mobile_phone || "",
-        telefoneWhatsapp: cliente.whatsapp || "",
-        telefoneResidencial: cliente.home_phone || "",
+        marital_status: cliente.marital_status || "",
+        gender: cliente.gender || "",
+        mobile_phone: cliente.mobile_phone || "",
+        whatsapp: cliente.whatsapp || "",
+        home_phone: cliente.home_phone || "",
         email: cliente.email,
-        cep: cliente.address_zipcode || "",
-        endereco: cliente.address_street || "",
-        numero: cliente.address_number || "",
-        complemento: cliente.address_complement || "",
-        bairro: cliente.address_neighborhood || "",
-        cidade: cliente.address_city || "",
+        address_zipcode: cliente.address_zipcode || "",
+        address_street: cliente.address_street || "",
+        address_number: cliente.address_number || "",
+        address_complement: cliente.address_complement || "",
+        address_neighborhood: cliente.address_neighborhood || "",
+        address_city: cliente.address_city || "",
       });
       setValorAPagar(cliente.balance_due ?? 0); // inicializa valor a pagar
     }
@@ -199,10 +200,10 @@ export function DialogAlterCliente({
       }
     };
     void carregarMetodos();
-  }, []);
+  }, [paymentMethodId]);
 
-  const sexoSelecionado = watch("sexo");
-  const estadoCivilSelecionado = watch("estadoCivil");
+  const sexoSelecionado = watch("gender");
+  const estadoCivilSelecionado = watch("marital_status");
   const [valorPago, setValorPago] = useState<number>(0);
   const [valorAPagar, setValorAPagar] = useState<number>(0);
   const [, setTotalRestante] = useState<number>(0); // estado usado apenas para receber valor do resumo
@@ -235,18 +236,22 @@ export function DialogAlterCliente({
     }
   }, [cliente]);
 
-  // Envio do formulário
-  /*   const onSubmit = async (data: ClienteFormData) => {
-    if (!cliente.id) {
-      toast.error("ID do cliente ausente!");
-      return;
-    }
+  const onSubmit = async (data: UpdateCustomerParams) => {
+    try {
+      await UpdateCustomer(data, cliente.id);
+      console.log("Form", cliente);
 
-    toast.success("Cliente alterado com sucesso!");
-    reset();
-    setOpen(false);
-    if (onClienteUpdated) onClienteUpdated();
-  }; */
+      toast.success("Cliente atualizado com sucesso!", {
+        style: { background: "#4ade80", color: "#065f46" }, // verde pastel
+      });
+      setOpen(false);
+    } catch (error) {
+      console.log("Erro ao atualizar cliente", error);
+      toast.error("Erro ao atualizar cliente", {
+        style: { background: "#f87171", color: "#7f1d1d" },
+      });
+    }
+  };
 
   // Função para registrar apenas o pagamento
   const onRegistrarPagamento = async () => {
@@ -262,9 +267,7 @@ export function DialogAlterCliente({
 
     const saldoDevido = Number(cliente.balance_due ?? 0);
     if (valorPago > saldoDevido) {
-      toast.error(
-        "O valor informado é maior que o saldo devedor do cliente.",
-      );
+      toast.error("O valor informado é maior que o saldo devedor do cliente.");
       return;
     }
 
@@ -356,7 +359,11 @@ export function DialogAlterCliente({
               {!loadingVendas &&
                 vendasParceladas.map((venda) => {
                   const statusFormatted = formatStatus(
-                    venda.status as "pendente" | "pago" | "cancelado" | "aprazo",
+                    venda.status as
+                      | "pendente"
+                      | "pago"
+                      | "cancelado"
+                      | "aprazo",
                   );
 
                   return (
@@ -415,7 +422,8 @@ export function DialogAlterCliente({
                                         ).toLocaleDateString()}
                                       </TableCell>
                                       <TableCell>
-                                        R$ {formatCurrency(parcela.total_amount)}
+                                        R${" "}
+                                        {formatCurrency(parcela.total_amount)}
                                       </TableCell>
                                       <TableCell>
                                         R$ {formatCurrency(parcela.balance)}
@@ -483,9 +491,7 @@ export function DialogAlterCliente({
             type="button"
             onClick={onRegistrarPagamento}
             className="bg-blue-500 text-white h-11 px-8 hover:bg-blue-600 cursor-pointer"
-            disabled={
-              valorPago <= 0 || !paymentMethodId || submittingPagamento
-            }
+            disabled={valorPago <= 0 || !paymentMethodId || submittingPagamento}
           >
             {submittingPagamento ? "Registrando..." : "Registrar Pagamento"}
           </Button>
@@ -494,7 +500,7 @@ export function DialogAlterCliente({
 
       {/* Formulário de Cliente */}
       <CardContent className="p-8">
-        <form /* onSubmit={handleSubmit(onSubmit)} */ className="space-y-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* Dados Pessoais */}
           <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <legend className="text-lg font-medium text-muted-foreground mb-2 col-span-full">
@@ -503,8 +509,8 @@ export function DialogAlterCliente({
 
             <div className="space-y-2 col-span-full">
               <Label htmlFor="nome">Nome completo *</Label>
-              <Input id="nome" {...register("nome", { required: true })} />
-              {errors.nome && (
+              <Input id="nome" {...register("full_name", { required: true })} />
+              {errors.full_name && (
                 <span className="text-red-500 text-sm">Nome é obrigatório</span>
               )}
             </div>
@@ -514,9 +520,9 @@ export function DialogAlterCliente({
               <Input
                 id="dataNascimento"
                 type="date"
-                {...register("dataNascimento", { required: true })}
+                {...register("birth_date", { required: true })}
               />
-              {errors.dataNascimento && (
+              {errors.birth_date && (
                 <span className="text-red-500 text-sm">Data é obrigatória</span>
               )}
             </div>
@@ -526,7 +532,7 @@ export function DialogAlterCliente({
                 <Label htmlFor="sexo">Sexo</Label>
                 <Select
                   value={sexoSelecionado}
-                  onValueChange={(val) => setValue("sexo", val)}
+                  onValueChange={(val) => setValue("gender", val as Gender)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
@@ -543,7 +549,7 @@ export function DialogAlterCliente({
                 <Label htmlFor="estadoCivil">Estado civil</Label>
                 <Select
                   value={estadoCivilSelecionado}
-                  onValueChange={(val) => setValue("estadoCivil", val)}
+                  onValueChange={(val) => setValue("marital_status", val)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
@@ -594,20 +600,17 @@ export function DialogAlterCliente({
 
             <div className="space-y-2">
               <Label htmlFor="telefoneCelular">Telefone celular</Label>
-              <Input id="telefoneCelular" {...register("telefoneCelular")} />
+              <Input id="telefoneCelular" {...register("mobile_phone")} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="telefoneWhatsapp">Telefone WhatsApp</Label>
-              <Input id="telefoneWhatsapp" {...register("telefoneWhatsapp")} />
+              <Input id="telefoneWhatsapp" {...register("whatsapp")} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="telefoneResidencial">Telefone residencial</Label>
-              <Input
-                id="telefoneResidencial"
-                {...register("telefoneResidencial")}
-              />
+              <Input id="telefoneResidencial" {...register("home_phone")} />
             </div>
           </fieldset>
 
@@ -619,32 +622,32 @@ export function DialogAlterCliente({
 
             <div className="space-y-2">
               <Label htmlFor="cep">CEP</Label>
-              <Input id="cep" {...register("cep")} />
+              <Input id="cep" {...register("address_zipcode")} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="endereco">Endereço</Label>
-              <Input id="endereco" {...register("endereco")} />
+              <Input id="endereco" {...register("address_street")} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="numero">Número</Label>
-              <Input id="numero" {...register("numero")} />
+              <Input id="numero" {...register("address_number")} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="complemento">Complemento</Label>
-              <Input id="complemento" {...register("complemento")} />
+              <Input id="complemento" {...register("address_complement")} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="bairro">Bairro</Label>
-              <Input id="bairro" {...register("bairro")} />
+              <Input id="bairro" {...register("address_neighborhood")} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="cidade">Cidade</Label>
-              <Input id="cidade" {...register("cidade")} />
+              <Input id="cidade" {...register("address_city")} />
             </div>
           </fieldset>
 

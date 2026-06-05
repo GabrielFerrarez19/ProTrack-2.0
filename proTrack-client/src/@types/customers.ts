@@ -1,3 +1,5 @@
+export type Gender = "MALE" | "FEMALE" | "OTHER" | "NOT_SAY";
+
 export interface CustomerRequest {
   company_id: string; // UUID da empresa
   full_name: string;
@@ -52,5 +54,24 @@ export interface CustomerResponse {
   deleted_at: string | null;
 }
 
-// Alinhado com o seu pacote enums em Go
-export type Gender = "MALE" | "FEMALE" | "OTHER" | "NOT_SAY";
+export interface UpdateCustomerParams {
+  full_name: string;
+  birth_date: string; // Formato YYYY-MM-DD
+  cpf: string;
+  rg: string;
+  marital_status: string;
+  gender: Gender; // 'MALE' | 'FEMALE' | 'OTHER' | 'NOT_SAY'
+  whatsapp: string;
+  mobile_phone: string;
+  home_phone: string;
+  email: string;
+  address_street: string;
+  address_number: string;
+  address_complement: string;
+  address_neighborhood: string;
+  address_city: string;
+  address_state: string;
+  address_zipcode: string;
+  address_country: string;
+  balance_due: number;
+}
