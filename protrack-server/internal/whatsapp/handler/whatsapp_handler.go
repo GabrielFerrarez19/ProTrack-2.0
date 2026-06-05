@@ -5,7 +5,6 @@ import (
 
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/adapters/cache"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/auth/adapters/jwt"
-	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/whatsapp/domain"
 	"github.com/GabrielFerrarez19/ProTrack-2.0/protrack-server/internal/whatsapp/service"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -34,15 +33,9 @@ func (h *Handler) CreateInstance(c *gin.Context) {
 
 	companyId := companyIdAny.(uuid.UUID)
 
-	var req domain.CreateInstanceRequest
+	
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-
-	}	
-
-	resp, err := h.service.CreateInstance(c.Request.Context(),req,companyId)
+	resp, err := h.service.CreateInstance(c.Request.Context(),companyId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
