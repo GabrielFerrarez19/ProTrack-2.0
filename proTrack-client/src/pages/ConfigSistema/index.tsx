@@ -25,6 +25,8 @@ import {
   Power,
   Info,
 } from "lucide-react";
+import { createInstance } from "@/services/whatsapp";
+import { QRCodeCanvas } from "qrcode.react";
 
 type WhatsAppStatus = "disconnected" | "connecting" | "connected";
 
@@ -32,18 +34,21 @@ export default function ConfiguracoesSistema() {
   const [status, setStatus] = useState<WhatsAppStatus>("disconnected");
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [sessionName, setSessionName] = useState("Principal");
   const [connectedAt, setConnectedAt] = useState<string | null>(null);
 
   // Simula geração do QR Code
-  const handleGenerateQR = () => {
-    setStatus("connecting");
-    // QR Code mockado (placeholder visual)
-    setQrCode(
-      `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=whatsapp-session-${Date.now()}`,
-    );
-    toast.info("QR Code gerado. Escaneie com seu WhatsApp.");
+  const handleGenerateQR = async () => {
+    try {
+      const response = await createInstance();
+      setQrCode(response.qr_code);
+      toast.info("QR Code gerado. Escaneie com seu WhatsApp.");
+    } catch (error) {
+      console.log("Erro ao gerar qrCode", error);
+      toast.error("Erro ao gerar qrCode");
+    }
   };
+
+  console.log(qrCode);
 
   const handleRefreshQR = () => {
     setQrCode(
@@ -133,16 +138,6 @@ export default function ConfiguracoesSistema() {
               {/* Configurações da Sessão */}
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="session">Nome da Sessão</Label>
-                  <Input
-                    id="session"
-                    value={sessionName}
-                    onChange={(e) => setSessionName(e.target.value)}
-                    placeholder="Ex: Principal, Vendas..."
-                    disabled={status !== "disconnected"}
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label htmlFor="phone">Número Conectado</Label>
                   <Input
                     id="phone"
@@ -179,9 +174,9 @@ export default function ConfiguracoesSistema() {
                 <div className="grid gap-6 md:grid-cols-[auto_1fr] items-start">
                   <div className="flex flex-col items-center gap-3">
                     <div className="p-3 bg-white rounded-xl border shadow-sm">
-                      <img
-                        src={qrCode}
-                        alt="QR Code WhatsApp"
+                      <QRCodeCanvas
+                        value={qrCode}
+                        level={"H"}
                         className="w-[260px] h-[260px]"
                       />
                     </div>

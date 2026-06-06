@@ -38,14 +38,14 @@ export function Vendas() {
   });
 
   const watchedProdutos = methods.watch("produtos");
-  const { products } = useProdutos();
+  const { data: products } = useProdutos();
   const { submitVenda, loading } = useVendas();
   const { companyID, user } = useAuth();
   const [totalGeral, setTotalGeral] = useState(0);
   const [totalComDesconto, setTotalComDesconto] = useState(0);
 
   const atualizarPrecoProduto = (index: number, produtoId: string) => {
-    const produto = products.find((p) => String(p.id) === produtoId);
+    const produto = products?.find((p) => String(p.id) === produtoId);
     if (produto) {
       methods.setValue(
         `produtos.${index}.precoUnitario`,
@@ -58,9 +58,12 @@ export function Vendas() {
 
   const onSubmit = async (data: VendaForm) => {
     if (!companyID || !user?.id) {
-      toast.error("Usuário ou empresa não identificados. Faça login novamente.", {
-        style: { background: "#f87171", color: "#7f1d1d" },
-      });
+      toast.error(
+        "Usuário ou empresa não identificados. Faça login novamente.",
+        {
+          style: { background: "#f87171", color: "#7f1d1d" },
+        },
+      );
       return;
     }
 
@@ -75,9 +78,7 @@ export function Vendas() {
           ? (data.diasVencimento ?? 1)
           : undefined,
       installments_count:
-        data.formaPagamento === "installments"
-          ? (data.parcelas ?? 1)
-          : 1,
+        data.formaPagamento === "installments" ? (data.parcelas ?? 1) : 1,
       status: data.status ?? "Pendente",
       prohibited: data.entrada ?? 0,
       items: data.produtos.map((p) => ({
@@ -149,7 +150,7 @@ export function Vendas() {
             remove={remove}
             control={methods.control}
             atualizarPrecoProduto={atualizarPrecoProduto}
-            produtos={products}
+            produtos={products ?? []}
           />
 
           <div className="flex justify-end space-x-4">

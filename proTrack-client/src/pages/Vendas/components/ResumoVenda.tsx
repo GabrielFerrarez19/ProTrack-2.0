@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import { Input } from "../../../components/ui/input";
 import {
@@ -169,13 +169,11 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
                       <SelectValue placeholder="Parcelas" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({ length: 12 }, (_, i) => i + 1).map(
-                        (n) => (
-                          <SelectItem key={n} value={n.toString()}>
-                            {n}x
-                          </SelectItem>
-                        ),
-                      )}
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
+                        <SelectItem key={n} value={n.toString()}>
+                          {n}x
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 )}
@@ -232,9 +230,7 @@ export function ResumoVenda({ produtos, onChangeResumo }: ResumoVendaProps) {
                     value={field.value ?? ""}
                     onChange={(e) => {
                       const v = e.target.value;
-                      field.onChange(
-                        v === "" ? 0 : Number.parseFloat(v) || 0,
-                      );
+                      field.onChange(v === "" ? 0 : Number.parseFloat(v) || 0);
                     }}
                   />
                 )}

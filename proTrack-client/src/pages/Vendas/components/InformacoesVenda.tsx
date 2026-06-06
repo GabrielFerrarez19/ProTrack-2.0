@@ -24,16 +24,11 @@ type InformacoesVendaProps = {
 };
 
 export function InformacoesVenda({ control }: InformacoesVendaProps) {
-  const { clientes, loading, error } = useClientes();
+  const { data: clientes, isLoading, error } = useClientes();
 
-  if (loading)
-    return (
-      <PageLoading
-        message="Carregando clientes..."
-        fullHeight={false}
-      />
-    );
-  if (error) return <div>{error}</div>;
+  if (isLoading)
+    return <PageLoading message="Carregando clientes..." fullHeight={false} />;
+  if (error) return <div>{error.message}</div>;
 
   return (
     <Card>
@@ -45,7 +40,7 @@ export function InformacoesVenda({ control }: InformacoesVendaProps) {
           <ClienteSelect
             control={control}
             name="clienteId"
-            clientes={clientes}
+            clientes={clientes ?? []}
             label="Cliente"
             placeholder="Selecione um cliente"
           />
