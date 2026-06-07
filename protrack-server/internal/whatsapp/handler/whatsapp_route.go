@@ -9,5 +9,6 @@ func (h *Handler) RegisterRoute(router *gin.RouterGroup) {
 	whatsappGroup := router.Group("/whatsapp").Use(middleware.AuthMiddleware(h.jwtManager, h.blacklist))
 	{
 		whatsappGroup.POST("/instance/create", h.CreateInstance)
+		whatsappGroup.GET("/instance/connectionState", h.ConnectionState)
 	}
 }

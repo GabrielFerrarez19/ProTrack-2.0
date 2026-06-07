@@ -120,3 +120,47 @@ func (s *Service) CreateInstance(ctx context.Context, companyID uuid.UUID) (stri
 
 	return qrCode, nil
 }
+
+func (s *Service) ConnectionState(ctx context.Context, companyID uuid.UUID) (domain.ConnectionStateResponse, error) {
+	company, err := s.companiesService.GetCompanyByID(ctx, companyID)
+	if err != nil {
+		return domain.ConnectionStateResponse{}, fmt.Errorf("failed to retrieve company: %w", err)
+	}
+
+	instanceName := fmt.Sprintf("%s-%s", company.Name, companyID.String())
+
+	url := fmt.Sprintf("%s/instance/connectionState/%s", s.cfg.EvolutionApiUrl, instanceName)
+
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return domain.ConnectionStateResponse{}, err
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("apikey", s.cfg.EvolutionKey)
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		return domain.ConnectionStateResponse{}, err
+	}
+	defer response.Body.Close()
+
+	body, _ := io.ReadAll(response.Body)
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
+		return domain.ConnectionStateResponse{}, fmt.Errorf("failed to connectionState instance: %s", body)
+	}
+
+	var result domain.ConnectionStateResponse
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		return domain.ConnectionStateResponse{}, err
+	}
+
+	return domain.ConnectionStateResponse{
+		Instance: domain.ConnectionStateRow{
+			InstanceName: result.Instance.InstanceName,
+			State:        result.Instance.State,
+		},
+	}, nil
+}
